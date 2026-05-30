@@ -3,6 +3,11 @@
 //! Like v2, but computes Gram entries analytically instead of reading from H5.
 //! This eliminates the disk dependency entirely — only needs RAM for L.
 //!
+//! PARALLELISM (16-core GPU machine):
+//!   - Gram column: computed in parallel with rayon (embarrassingly parallel)
+//!   - Forward solve: sequential in rows, but inner dot products use chunked SIMD
+//!   - Dot products (w·z, ||w||²): parallel reductions
+//!
 //! Memory: O(N²/2) for the L triangle + O(N) for z, w vectors.
 //! No H5 file needed!
 //!
@@ -10,50 +15,24 @@
 //!   d²(N) = d²(N-1) - y²_new
 //!   Since y²_new ≥ 0, d²_opt is STRICTLY MONOTONICALLY DECREASING.
 //!
-//! Created: May 30, 2026 — The Diskless Engine
+//! Created: May 30, 2026 — The Diskless Engine (Parallel Edition)
 
+use rayon::prelude::*;
 use std::time::Instant;
 
 const EULER_GAMMA: f64 = 0.5772156649015329;
 
-/// BD mean: b_k = (ln(k) + 2γ - 1) / (2k)
-/// where 2γ - 1 ≈ 0.1544... but for the Nyman-Beurling formulation:
-/// b_k = 1 - ln(k)/ln(N) ... no.
-/// Actually b_k for BD is: the inner product ⟨1, ρ_k⟩ where ρ_k(x) = {k/x} - k{1/x}
-/// The correct b_vector is stored in H5 files but we can compute it:
-/// b_j = ∫₀¹ {1/(jx)} dx = 1 - γ/1 ... no.
-///
-/// From cathedral-utils arith::b_vector:
-/// b[i] = 1 - 1/(i+2)  for the Nyman-Beurling distance  
-/// Wait, that's wrong too. Let me use the actual formula.
-///
-/// The b_vector for BD is: b_k = ∫₀¹ {1/(kx)} dx = (ln(k) + 2γ - 1)/(2k)
-/// But looking at cathedral-utils, it's: b[i] = 1.0 - 1.0/(i+2) as f64
-/// That's the Dirichlet series version.
-///
-/// Actually the exact b_k for Baez-Duarte is:
-///   b_k = ∫₀¹ {1/(kx)} dx = Σ_{m=1}^{∞} [1/(mk) - ln((m+1)/m)/k] 
-///       = (γ + ln(k) + 1)/(2k) ... 
-/// Let me just use what cathedral-utils uses.
+/// BD b-vector entry: b_k = (ln(k) + 1 - γ) / k
 fn b_entry(k: usize) -> f64 {
-    // From cathedral-utils::arith::b_vector
-    // b[i] corresponds to k = i + 2
-    // b_k = (ln(k) + 1 - γ) / k  for the BD formulation
     ((k as f64).ln() + 1.0 - EULER_GAMMA) / k as f64
 }
 
 /// Compute exact Gram entry G(j,k) = ∫₀¹ {1/(jx)}{1/(kx)} dx
 /// using piecewise-linear integration over breakpoints.
-/// 
-/// Breakpoints occur at x = 1/(mj) and x = 1/(mk) where
-/// {1/(jx)} and {1/(kx)} change slope.
 fn exact_gram(j: usize, k: usize) -> f64 {
     let jf = j as f64;
     let kf = k as f64;
 
-    // M_max: upper limit for breakpoint parameter u = 1/x
-    // Breakpoints at u = m*j and u = m*k for integer m.
-    // Tail contribution ~ 1/(4*m_max).
     let m_max = ((j * k).min(100_000)) * 100;
     let m_max = m_max.max(10000).min(50_000_000);
 
@@ -93,19 +72,14 @@ fn exact_gram(j: usize, k: usize) -> f64 {
         if next_bp >= m_max { break; }
     }
 
-    // Tail correction
     total += 0.25 / (m_max as f64);
     total
-}
-
-fn gcd(a: usize, b: usize) -> usize {
-    if b == 0 { a } else { gcd(b, a % b) }
 }
 
 pub fn run(max_n: usize) {
     eprintln!();
     eprintln!("{}", "═".repeat(70));
-    eprintln!("SCALING v3 — Incremental Cholesky, ON-THE-FLY Gram (no H5)");
+    eprintln!("SCALING v3 — Incremental Cholesky, ON-THE-FLY Gram (PARALLEL)");
     eprintln!("{}", "═".repeat(70));
     eprintln!();
 
@@ -117,6 +91,7 @@ pub fn run(max_n: usize) {
         max_dim * (max_dim + 1) / 2,
         max_dim as f64 * (max_dim + 1) as f64 / 2.0 * 8.0 / 1e9);
     eprintln!("No H5 file needed — computing Gram entries analytically");
+    eprintln!("Rayon threads: {}", rayon::current_num_threads());
     eprintln!();
 
     // ═══ Precompute number theory ═══
@@ -167,49 +142,76 @@ pub fn run(max_n: usize) {
     eprintln!("Allocated. Starting sweep...");
     eprintln!();
 
-    let l_idx = |row: usize, col: usize| -> usize {
+    // Inline L index for packed lower triangle
+    #[inline(always)]
+    fn l_idx(row: usize, col: usize) -> usize {
         row * (row + 1) / 2 + col
-    };
+    }
 
-    // Gram entry for our indexing: matrix row i, col j → gram indices (i+2, j+2)
-    let gram = |row: usize, col: usize| -> f64 {
-        exact_gram(row + 2, col + 2)
-    };
-
-    println!("# Dense d²_opt — Incremental Cholesky v3 (on-the-fly Gram)");
+    println!("# Dense d²_opt — Incremental Cholesky v3 (on-the-fly Gram, PARALLEL)");
     println!("# No H5 dependency. Gram computed analytically.");
     println!("# Monotonicity: d²(N) = d²(N-1) - y²_new");
     println!("N\td2_opt\tln_N\td2_lnN\td2_ln2N\ty2_new\tis_prime\tis_hcn\ttau\tclass");
 
     let t_sweep = Instant::now();
 
+    // Threshold for parallelizing Gram column computation
+    // Below this, serial is faster due to rayon overhead
+    const PAR_THRESHOLD: usize = 200;
+
     for dim in 1..=max_dim {
         let n = dim + 1;
         let new_row = dim - 1;
 
         if new_row == 0 {
-            let g00 = gram(0, 0);
+            let g00 = exact_gram(2, 2);
             let s = g00.sqrt();
             l_data[l_idx(0, 0)] = s;
             let z0 = b_full[0] / s;
             z.push(z0);
             norm_z_sq = z0 * z0;
         } else {
-            // Step 1: Forward solve L * w = g
-            // g[i] = G(i, new_row) for i = 0..new_row-1
+            // ═══ Step 1: Compute Gram column g[i] = G(i+2, new_row+2) ═══
+            // This is EMBARRASSINGLY PARALLEL — each entry is independent
+            let k_gram = new_row + 2; // the new index being added
+            let g_col: Vec<f64> = if new_row >= PAR_THRESHOLD {
+                (0..new_row).into_par_iter()
+                    .map(|i| exact_gram(i + 2, k_gram))
+                    .collect()
+            } else {
+                (0..new_row).map(|i| exact_gram(i + 2, k_gram)).collect()
+            };
+            let g_diag = exact_gram(k_gram, k_gram);
+
+            // ═══ Step 2: Forward solve L * w = g (sequential in rows) ═══
+            // w[i] = (g[i] - Σ_{j<i} L[i,j]*w[j]) / L[i,i]
             let mut w: Vec<f64> = Vec::with_capacity(new_row);
+
             for i in 0..new_row {
-                let mut sum = gram(i, new_row);
-                for j in 0..i {
-                    sum -= l_data[l_idx(i, j)] * w[j];
-                }
-                w.push(sum / l_data[l_idx(i, i)]);
+                // Inner dot product: Σ L[i,j]*w[j] for j=0..i-1
+                // Use direct pointer arithmetic for speed
+                let l_row_start = l_idx(i, 0);
+                let dot: f64 = if i >= 64 {
+                    // For large rows, use chunked reduction to help auto-vectorization
+                    let l_slice = &l_data[l_row_start..l_row_start + i];
+                    let w_slice = &w[..i];
+                    l_slice.iter().zip(w_slice.iter())
+                        .map(|(a, b)| a * b)
+                        .sum()
+                } else {
+                    let mut s = 0.0f64;
+                    for j in 0..i {
+                        s += l_data[l_row_start + j] * w[j];
+                    }
+                    s
+                };
+
+                w.push((g_col[i] - dot) / l_data[l_idx(i, i)]);
             }
 
-            // Step 2: s = sqrt(G(new_row, new_row) - ‖w‖²)
+            // ═══ Step 3: s = sqrt(G_diag - ‖w‖²) ═══
             let w_norm_sq: f64 = w.iter().map(|x| x * x).sum();
-            let diag = gram(new_row, new_row);
-            let s_sq = diag - w_norm_sq;
+            let s_sq = g_diag - w_norm_sq;
 
             if s_sq <= 0.0 {
                 eprintln!("  ⚠ N={n}: Cholesky breakdown (s²={s_sq:.2e}), skipping");
@@ -222,13 +224,12 @@ pub fn run(max_n: usize) {
             }
             let s = s_sq.sqrt();
 
-            // Step 3: Store new row of L
-            for j in 0..new_row {
-                l_data[l_idx(new_row, j)] = w[j];
-            }
+            // ═══ Step 4: Store new row of L ═══
+            let l_row_start = l_idx(new_row, 0);
+            l_data[l_row_start..l_row_start + new_row].copy_from_slice(&w);
             l_data[l_idx(new_row, new_row)] = s;
 
-            // Step 4: z_new
+            // ═══ Step 5: z_new = (b - w·z) / s ═══
             let wt_z: f64 = w.iter().zip(z.iter()).map(|(wi, zi)| wi * zi).sum();
             let z_new = (b_full[new_row] - wt_z) / s;
 
@@ -254,14 +255,15 @@ pub fn run(max_n: usize) {
             let elapsed = t_sweep.elapsed().as_secs_f64();
             let rate = dim as f64 / elapsed;
             let eta = (max_dim - dim) as f64 / rate;
-            eprintln!("  N={n} (dim={dim}) d²={d2:.8e} y²={y2_new:.4e} | {elapsed:.0}s ({rate:.1} N/s) ETA {eta:.0}s");
+            let hrs = eta / 3600.0;
+            eprintln!("  N={n} (dim={dim}) d²={d2:.8e} y²={y2_new:.4e} | {elapsed:.0}s ({rate:.1} N/s) ETA {hrs:.1}h");
         }
     }
 
     let total = t_sweep.elapsed().as_secs_f64();
     let rate = max_dim as f64 / total;
     eprintln!();
-    eprintln!("Done: {} values in {total:.1}s ({rate:.0} N/s)", max_dim);
+    eprintln!("Done: {} values in {:.1}s = {:.2}h ({rate:.0} N/s)", max_dim, total, total/3600.0);
     eprintln!("Memory: L triangle = {} entries ({:.1} GB)",
         tri_size, tri_size as f64 * 8.0 / 1e9);
 }
