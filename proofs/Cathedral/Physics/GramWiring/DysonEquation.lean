@@ -322,7 +322,7 @@ The cancellation d²_free + scattering ≈ 0 is the physical content of RH. -/
     The actual numerics show d²_free → -∞ and scattering → +∞,
     with their SUM → 0. This deeper cancellation is the content of RH. -/
 theorem distance_decomposition_limit
-    (h_decomp : ∀ N : ℕ, ∀ d2_opt d2_free scatt : ℝ,
+    (_h_decomp : ∀ _N : ℕ, ∀ d2_opt d2_free scatt : ℝ,
       d2_opt = d2_free + scatt → d2_opt = d2_free + scatt) :
     True := trivial
 
@@ -449,7 +449,7 @@ theorem sherman_morrison_limit :
     This is UNCONDITIONAL — 0 axioms. -/
 theorem smith_weights_sawtooth_mean_converges
     (S : ℕ → ℝ)
-    (hS_pos : ∀ N, 0 < S N)
+    (_hS_pos : ∀ N, 0 < S N)
     (hS_inf : Filter.Tendsto S Filter.atTop Filter.atTop) :
     Filter.Tendsto (fun N => S N / (1 + S N)) Filter.atTop (nhds 1) := by
   -- f ∘ S → 1 where f(x) = x/(1+x) → 1 as x → ∞ and S → ∞

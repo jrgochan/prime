@@ -79,6 +79,12 @@ fn main() {
         return;
     }
 
+    // Confinement mode — Strong coupling table from HPDF files
+    if let cli::Mode::Confinement { ref h5_dir } = config.mode {
+        modes::confinement::run(h5_dir);
+        return;
+    }
+
     eprintln!("🌀 Prime Harmonics Explorer");
     eprintln!("  Prime limit: {}", config.prime_limit);
 
@@ -119,5 +125,6 @@ fn main() {
         cli::Mode::Eta { .. } => unreachable!(),
         cli::Mode::Anomaly { .. } => unreachable!(),
         cli::Mode::Dyson { .. } => unreachable!(),
+        cli::Mode::Confinement { .. } => unreachable!(),
     }
 }

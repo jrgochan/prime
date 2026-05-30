@@ -221,14 +221,14 @@ range space. -/
     to the optimal BD weights. The anomaly bound ensures the
     perturbation is small. -/
 theorem conditional_rh_closure
-    (h_anomaly : ∃ C : ℝ, C > 0 ∧ ∀ N : ℕ, 10 ≤ N →
+    (_h_anomaly : ∃ C : ℝ, C > 0 ∧ ∀ N : ℕ, 10 ≤ N →
       ∀ v : Fin (N - 1) → ℝ,
       (∀ i : Fin (N - 1),
         v i = -(↑(ArithmeticFunction.moebius (i.val + 2)) : ℝ) *
           fejerTaper (i.val + 2) N) →
       |∑ i : Fin (N - 1), ∑ j : Fin (N - 1),
         v i * BasisPerturbation.anomalyEntry (i.val + 2) (j.val + 2) * v j| ≤ C)
-    (h_smith : ∀ B : ℝ, ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N →
+    (_h_smith : ∀ B : ℝ, ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N →
       B < SmithWitness.sigmaWitness N) :
     -- Then there exist sequences of weights whose BD distance → 0
     -- (placeholder — full wiring requires connecting to NB converse)

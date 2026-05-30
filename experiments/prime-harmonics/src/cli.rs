@@ -55,6 +55,8 @@ pub enum Mode {
     Anomaly { n_max: usize },
     /// Dyson mode — The Nuclear Option: d²_opt = d²_free + scattering
     Dyson { n_max: usize },
+    /// Confinement mode — Strong coupling table from HPDF .h5 files
+    Confinement { h5_dir: String },
 }
 
 /// Output format for sweep mode.
@@ -245,6 +247,16 @@ pub fn parse_args() -> Config {
                     100
                 };
                 mode = Mode::Dyson { n_max };
+            }
+            "--confinement" => {
+                i += 1;
+                let h5_dir = if i < args.len() && !args[i].starts_with('-') {
+                    args[i].clone()
+                } else {
+                    i -= 1; // no arg consumed
+                    "experiments/cache/hpdf".to_string()
+                };
+                mode = Mode::Confinement { h5_dir };
             }
             "--help" => {
                 print_help();

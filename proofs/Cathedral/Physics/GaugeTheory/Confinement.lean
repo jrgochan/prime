@@ -190,7 +190,7 @@ theorem confinement_identity {n : Type*} [DecidableEq n] [Fintype n]
     This formalizes that stripping the dominant eigenvalue reduces
     the operator norm by exactly |lambda_DC|. -/
 theorem rank_one_norm {n : Type*} [DecidableEq n] [Fintype n]
-    (u : n → ℝ) (c : ℝ) (h_unit : ‖u‖ = 1) :
+    (u : n → ℝ) (_c : ℝ) (_h_unit : ‖u‖ = 1) :
     -- The rank-1 matrix c * u * uᵀ has operator norm |c|
     True := by trivial  -- Placeholder for the full norm bound
 

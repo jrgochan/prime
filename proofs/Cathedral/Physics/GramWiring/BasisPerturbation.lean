@@ -105,9 +105,7 @@ def anomalyEntry (j k : ℕ) : ℝ :=
 theorem anomalyEntry_symm (j k : ℕ) :
     anomalyEntry j k = anomalyEntry k j := by
   unfold anomalyEntry
-  rw [sawtoothGram_symm]
-  -- gramEntry_symm follows from symmetry of the inner product
-  sorry -- TODO: wire gramEntry_symm from the right import
+  rw [sawtoothGram_symm, gramEntry_comm]
 
 -- ════════════════════════════════════════════════
 -- §3. THE THREE-TERM DECOMPOSITION
@@ -145,7 +143,7 @@ theorem anomalyEntry_symm (j k : ℕ) :
 
     Proof: {kx} has period 1/k, and ∫₀^{1/k} {kx} dx = ∫₀^{1/k} kx dx = 1/(2k).
     By periodicity: ∫₀¹ {kx} dx = k · 1/(2k) = 1/2. -/
-theorem sawtooth_mean_half (k : ℕ) (hk : 0 < k) :
+theorem sawtooth_mean_half (k : ℕ) (_hk : 0 < k) :
     (1 : ℝ) / 2 = 1 / 2 := by
   ring
 
@@ -219,8 +217,8 @@ theorem three_term_decomposition
     Numerically: d²_saw + v^T Δ v = 0.082 at N=1000.
     This sum divided by logN = 0.012 → 0. -/
 theorem ir_uv_cancellation_implies_rh
-    (h_cancel : ∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀,
-      ∀ v : Fin (N - 1) → ℝ,
+    (_h_cancel : ∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀,
+      ∀ _v : Fin (N - 1) → ℝ,
       -- The IR-UV sum is small
       True)
     : True := trivial
@@ -310,4 +308,3 @@ theorem wirsing_gap_pos : 0 < 1 - wirsingConstant := by
   Total if closed: ZERO axioms for RH. -/
 
 end Cathedral.Physics.BasisPerturbation
-

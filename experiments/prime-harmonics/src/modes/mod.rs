@@ -2,6 +2,7 @@
 
 pub mod anomaly;
 pub mod bench;
+pub mod confinement;
 pub mod democracy;
 pub mod dyson;
 pub mod eta;
