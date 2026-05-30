@@ -245,6 +245,47 @@ theorem matrix_dyson {n : Type*} [DecidableEq n] [Fintype n]
   exact Matrix.inv_eq_left_inv key
 
 -- ════════════════════════════════════════════════
+-- §4b. LIPPMANN-SCHWINGER EQUATION
+-- ════════════════════════════════════════════════
+
+/-! ### The Lippmann-Schwinger Equation (May 29, 2026)
+
+  From the Dyson equation G⁻¹ = R⁻¹ - R⁻¹ · Δ · G⁻¹, multiply by b:
+
+    v* = w* - R⁻¹ · Δ · v*
+
+  where:
+    v* = G⁻¹ b    (dressed vacuum = BD optimal weights)
+    w* = R⁻¹ b    (bare vacuum = Smith weights)
+    Δ  = G - R     (anomaly = scattering potential)
+
+  This is the INTEGRAL EQUATION of the prime number gas.
+  The dressed vacuum is the bare vacuum plus all scattering corrections.
+
+  Iterating gives the Born series (Neumann series):
+    v* = w* - R⁻¹Δw* + (R⁻¹Δ)²w* - ...
+       = Σₙ (-R⁻¹Δ)ⁿ w*
+
+  This converges iff the spectral radius ρ(R⁻¹Δ) < 1.
+  Understanding this convergence IS the Riemann Hypothesis. -/
+
+/-- **LIPPMANN-SCHWINGER**: The dressed vacuum satisfies the integral equation
+    v* = w* - B⁻¹ C v*, where A = B + C and v* = A⁻¹b, w* = B⁻¹b.
+
+    This follows directly from the matrix Dyson equation by right-multiplying by b. -/
+theorem lippmann_schwinger {n : Type*} [DecidableEq n] [Fintype n]
+    (A B C : Matrix n n ℝ) (b : n → ℝ)
+    (hA : IsUnit A.det)
+    (hB : IsUnit B.det)
+    (h_decomp : A = B + C) :
+    A⁻¹.mulVec b = B⁻¹.mulVec b - (B⁻¹ * C * A⁻¹).mulVec b := by
+  have h := matrix_dyson A B C hA hB h_decomp
+  -- congr_arg gives: A⁻¹.mulVec b = (B⁻¹ - B⁻¹ * C * A⁻¹).mulVec b
+  have h2 : A⁻¹.mulVec b = (B⁻¹ - B⁻¹ * C * A⁻¹).mulVec b :=
+    congr_arg (·.mulVec b) h
+  rw [h2, Matrix.sub_mulVec]
+
+-- ════════════════════════════════════════════════
 -- §5. CONNECTING TO THE NB DISTANCE
 -- ════════════════════════════════════════════════
 
