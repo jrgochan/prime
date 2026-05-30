@@ -13,4 +13,5 @@ pub mod hunt;
 pub mod mirror;
 pub mod portrait;
 pub mod scaling;
+pub mod scaling_v2;
 pub mod sweep;

@@ -91,6 +91,12 @@ fn main() {
         return;
     }
 
+    // Scaling v2 — Incremental Cholesky (O(N²) per step)
+    if let cli::Mode::ScalingV2 { ref h5_dir, max_n } = config.mode {
+        modes::scaling_v2::run(h5_dir, max_n);
+        return;
+    }
+
     eprintln!("🌀 Prime Harmonics Explorer");
     eprintln!("  Prime limit: {}", config.prime_limit);
 
@@ -133,5 +139,6 @@ fn main() {
         cli::Mode::Dyson { .. } => unreachable!(),
         cli::Mode::Confinement { .. } => unreachable!(),
         cli::Mode::Scaling { .. } => unreachable!(),
+        cli::Mode::ScalingV2 { .. } => unreachable!(),
     }
 }

@@ -59,6 +59,8 @@ pub enum Mode {
     Confinement { h5_dir: String },
     /// Scaling mode — Dense d²_opt sweep from HPDF for every integer N
     Scaling { h5_dir: String, max_n: usize },
+    /// Scaling v2 — Incremental Cholesky O(N²) per step
+    ScalingV2 { h5_dir: String, max_n: usize },
 }
 
 /// Output format for sweep mode.
@@ -276,6 +278,23 @@ pub fn parse_args() -> Config {
                     "experiments/cache/hpdf".to_string()
                 };
                 mode = Mode::Scaling { h5_dir, max_n };
+            }
+            "--scaling-v2" => {
+                i += 1;
+                let max_n: usize = if i < args.len() && !args[i].starts_with('-') {
+                    args[i].parse().expect("Expected number for --scaling-v2")
+                } else {
+                    i -= 1;
+                    5000
+                };
+                i += 1;
+                let h5_dir = if i < args.len() && !args[i].starts_with('-') {
+                    args[i].clone()
+                } else {
+                    i -= 1;
+                    "experiments/cache/hpdf".to_string()
+                };
+                mode = Mode::ScalingV2 { h5_dir, max_n };
             }
             "--help" => {
                 print_help();
