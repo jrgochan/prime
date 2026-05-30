@@ -195,6 +195,50 @@ theorem rank_one_norm {n : Type*} [DecidableEq n] [Fintype n]
     True := by trivial  -- Placeholder for the full norm bound
 
 -- ════════════════════════════════════════════════════════════════
+-- §5. SCALING CONJECTURE: d²_opt ~ C/log(N)
+-- ════════════════════════════════════════════════════════════════
+
+/-! ### The Scaling Conjecture
+
+  The confinement table (May 30, 2026) shows d²_opt decreasing with N:
+
+    d²_opt(50) ≈ 0.0439
+    d²_opt(100) ≈ 0.0431
+    d²_opt(2520) ≈ 0.04118
+
+  If d²_opt(N) ~ C/log(N) for some constant C, then d²_opt → 0
+  and RH follows from the NB converse. The scaling rate determines
+  how fast the Nyman-Beurling approximation converges.
+
+  This section provides the logical bridge: any positive decreasing
+  sequence bounded by C/f(N) with f→∞ converges to zero. -/
+
+/-- **SCALING BRIDGE**: If d²(N) ≤ C/f(N) and f→∞, then d²→0.
+    This reduces the RH problem to establishing a RATE of decay. -/
+theorem scaling_implies_convergence
+    (d2 : ℕ → ℝ) (f : ℕ → ℝ) (C : ℝ)
+    (_hC : 0 < C)
+    (_hf_pos : ∀ N, 0 < f N)
+    (hf_inf : Filter.Tendsto f Filter.atTop Filter.atTop)
+    (h_nonneg : ∀ N, 0 ≤ d2 N)
+    (h_bound : ∀ N, d2 N ≤ C / f N) :
+    Filter.Tendsto d2 Filter.atTop (nhds 0) := by
+  -- Strategy: 0 ≤ d2(N) ≤ C/f(N) → 0, sandwich gives d2 → 0
+  -- First show C/f(N) → 0
+  have h_inv : Filter.Tendsto (fun N => (f N)⁻¹) Filter.atTop (nhds 0) :=
+    Filter.Tendsto.inv_tendsto_atTop hf_inf
+  have h_upper : Filter.Tendsto (fun N => C / f N) Filter.atTop (nhds 0) := by
+    have : Filter.Tendsto (fun N => C * (f N)⁻¹) Filter.atTop (nhds 0) := by
+      rw [show (0 : ℝ) = C * 0 from by ring]
+      exact h_inv.const_mul C
+    refine this.congr (fun N => ?_)
+    rw [div_eq_mul_inv]
+  -- Now sandwich: 0 ≤ d2 ≤ C/f → 0
+  apply tendsto_of_tendsto_of_tendsto_of_le_of_le tendsto_const_nhds h_upper
+  · intro N; exact h_nonneg N
+  · exact h_bound
+
+-- ════════════════════════════════════════════════════════════════
 -- §5. DOCUMENTATION
 -- ════════════════════════════════════════════════════════════════
 
