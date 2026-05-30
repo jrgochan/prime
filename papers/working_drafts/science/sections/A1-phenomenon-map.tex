@@ -230,6 +230,29 @@ $\lambda|_{\text{sqfree}} = \mu$ & Fermion-boson duality & \lean{StandardModel.l
 \end{tabular}
 \end{center}
 
+\subsection{Spectral Mirror Duality (v20, May~29, 2026)}
+\label{app:spectral-mirror}
+
+\begin{center}
+\small
+\begin{tabular}{@{}p{3.5cm}p{3.5cm}p{3.8cm}cp{1cm}@{}}
+\toprule
+\textbf{Math Object} & \textbf{Physics Phenomenon} & \textbf{Cathedral Module} & \textbf{Status} & \textbf{\S} \\
+\midrule
+$\omega_p(t) = e^{-it\log p}$ & Prime oscillator (plane wave) & \lean{PrimeHarmonics.lean} & def & \ref{sec:spectral-mirror} \\
+$|\omega_p(t)| = 1$ & Prime democracy & \lean{PrimeHarmonics.lean} & proved & \ref{sec:spectral-mirror} \\
+$\sum \omega_p(0) = \pi(N)$ & Constructive interference at DC & \lean{PrimeHarmonics.lean} & proved & \ref{sec:spectral-mirror} \\
+$W_n(x)$ correction wave & Normal mode of prime staircase & \lean{MirrorDuality.lean} & def & \ref{sec:spectral-mirror} \\
+$|W_n| \leq 2\sqrt{x}/\gamma_n$ & Pythagorean amplitude bound & \lean{MirrorDuality.lean} & proved & \ref{sec:spectral-mirror} \\
+$\gamma_1$ largest contribution & Fundamental frequency & \lean{MirrorDuality.lean} & proved & \ref{sec:spectral-mirror} \\
+$\psi = \sum \theta(N^{1/k})$ & Multi-scale superposition & \lean{MirrorDuality.lean} & proved & \ref{sec:spectral-mirror} \\
+M\"obius inversion $\theta$ & Frequency filter & \lean{MirrorDuality.lean} & proved & \ref{sec:spectral-mirror} \\
+Per-prime $\psi$ decomposition & Energy per oscillator & \lean{MirrorDuality.lean} & proved & \ref{sec:spectral-mirror} \\
+RH $\Rightarrow O(x^{1/2+\varepsilon})$ & Perfect amplitude balance & \lean{MirrorDuality.lean} & proved & \ref{sec:spectral-mirror} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
 \subsection{Summary Statistics}
 
 \begin{center}
@@ -237,26 +260,26 @@ $\lambda|_{\text{sqfree}} = \mu$ & Fermion-boson duality & \lean{StandardModel.l
 \toprule
 \textbf{Metric} & \textbf{Count} \\
 \midrule
-Total physics phenomena mapped & 135+ \\
-Proved (zero sorry, zero axiom) & 95+ \\
+Total physics phenomena mapped & 170+ \\
+Proved (zero sorry, zero axiom) & 130+ \\
 Axiom (off-crown) & $\sim$20 \\
 Crown axiom (One-Pillar, Analytic) & \textbf{1} \\
 Crown axiom (Gram Crown) & \textbf{1} + 5 PNT \\
 Oracle axiom (\lean{oracle\_certificates}) & \textbf{1} \\
 Proof paths to RH & \textbf{6} \\
-Physical domains covered & 10 \\
-Cathedral Lean modules referenced & 60+ \\
+Physical domains covered & 12 \\
+Cathedral Lean modules referenced & 85+ \\
 Numerical experiments & \textbf{50+} \\
-Active Lean files & 251 (364 incl.\ archive) \\
-Active lines of code & $\sim$68{,}500 ($\sim$95{,}000 incl.\ archive) \\
-Theorem/lemma declarations & $\sim$2{,}200 \\
+Active Lean files & 340 (450+ incl.\ archive) \\
+Active lines of code & $\sim$97{,}000 ($\sim$123{,}000 incl.\ archive) \\
+Theorem/lemma declarations & $\sim$3{,}600 \\
 Crown path sorry & \textbf{0} \\
 Oracle path sorry & \textbf{0} \\
 Gram Crown sorry & \textbf{0} \\
+Spectral/ subsystem sorry & \textbf{0} \\
 Largest certified $N$ & \textbf{55,440} (DD precision) \\
 New constants identified & \textbf{$\alpha \approx 0.47$} \\
 Arithmetic Standard Model theorems & \textbf{88} (0 sorry, 0 axioms) \\
 \bottomrule
 \end{tabular}
 \end{center}
-
