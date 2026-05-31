@@ -751,41 +751,70 @@ theorem eigenDrop_le_projection_over_schur (N : ℕ) (hN : 3 ≤ N) :
   -- STEP 0: Handle the trivial case eigenDrop ≤ 0
   -- ═══════════════════════════════════════════════════════════════
   by_cases h_trivial : eigenDrop N ≤ 0
-  · -- eigenDrop ≤ 0 ≤ RHS (cos²θ·‖g‖²/S ≥ 0 since S > 0 for PD Gram)
-    sorry
+  · sorry -- eigenDrop ≤ 0 ≤ RHS (S > 0 for PD Gram)
   push_neg at h_trivial
-
   -- ═══════════════════════════════════════════════════════════════
-  -- STEP 1: Recast to bordered framework
+  -- KEY TRICK: Eliminate N by writing N = k + 3
   -- ═══════════════════════════════════════════════════════════════
-  -- eigenDrop N = lambdaMin(N-1) - lambdaMin(N) > 0
-  have hδ_pos : 0 < eigenDrop N := h_trivial
-  -- μ = lambdaMin(N) < lambdaMin(N-1)
-  have hmu_lt : lambdaMin N < lambdaMin (N - 1) := by
-    simp only [eigenDrop] at hδ_pos; linarith
-
-  -- Set n = N-2; gramMatrix N : Fin(n+1)×Fin(n+1), gramMatrix(N-1) : Fin(n)×Fin(n)
-  have hn_pos : 0 < N - 2 := by omega
-  have hA_herm := gramMatrix_hermitian (N - 1)
-
+  -- This makes N-1 = k+2 = (k+1)+1 syntactically, so
+  -- gramMatrix N is on Fin((k+1)+1) — the Fin(n+1) form
+  -- needed by the secular equation theorems.
+  obtain ⟨k, rfl⟩ : ∃ k, N = k + 3 := ⟨N - 3, by omega⟩
+  -- Now: N = k+3, N-1 = k+2, N-2 = k+1
+  -- gramMatrix (k+3) : Fin(k+2) × Fin(k+2) = Fin((k+1)+1)
+  -- gramMatrix (k+2) : Fin(k+1) × Fin(k+1) = Fin(n)
+  set n := k + 1 with hn_def
+  -- M := gramMatrix(k+3) on Fin(n+1), A := gramMatrix(k+2) on Fin(n)
+  set M := gramMatrix (k + 3) with hM_def
+  set A := gramMatrix (k + 2) with hA_def
+  set gv := crossCorrVec (k + 2) with hg_def
+  set γ := gramEntry (k + 2) (k + 2) with hγ_def
+  have hM_herm := gramMatrix_hermitian (k + 3)
+  have hA_herm := gramMatrix_hermitian (k + 2)
+  have hn_pos : 0 < n := by omega
+  -- Nat subtraction simplification
+  have hk3 : k + 3 - 1 = k + 2 := by omega
+  have hk2 : k + 2 - 1 = k + 1 := by omega
   -- ═══════════════════════════════════════════════════════════════
-  -- STEP 2: Chain the secular equation infrastructure (§1, 0 sorry)
+  -- STEP 1: Bordered structure (types match!)
   -- ═══════════════════════════════════════════════════════════════
-  --
-  -- The bordered matrix theorems (all PROVED in §1) give:
-  --   bordered_secular_identity: γ - μ = gᵀ(A-μI)⁻¹g
-  --   secular_drop_bound:        gᵀ(A-μI)⁻¹g ≥ ⟨g,v₀⟩²/(λ_min-μ)
-  --
-  -- Combining: δ = λ_min-μ ≤ ⟨g,v₀⟩²/(γ-μ)
-  -- Resolvent monotonicity: γ-μ ≥ S, so δ ≤ ⟨g,v₀⟩²/S
-  -- Eigenspace projection: ⟨g,v₀⟩² ≤ cos²θ·‖g‖²
-  -- Therefore: δ ≤ cos²θ·‖g‖²/S ✅
-  --
-  -- The bridge lemmas in §1b connect gramMatrix to the bordered framework:
-  -- • gramMatrix_bordered_topleft/border/corner (proved, 0 sorry)
-  -- • lambdaMin_is_eigenvalue/lambdaMin_le_eigenvalue (proved, 0 sorry)
-  --
-  -- Remaining work: Fin(N-1) ↔ Fin((N-2)+1) type bridge to apply §1 theorems
+  -- Top-left block: M(castSucc i, castSucc j) = A(i, j)
+  have hA_eq : ∀ i j : Fin n,
+      M (Fin.castSucc i) (Fin.castSucc j) = A i j := by
+    intro i j
+    show (gramMatrix (k + 3)) ⟨i.val, _⟩ ⟨j.val, _⟩ =
+         (gramMatrix (k + 2)) i j
+    simp only [gramMatrix, of_apply]
+  -- Border: M(castSucc i, last n) = gv(i)
+  have hg_eq : ∀ i : Fin n,
+      M (Fin.castSucc i) (Fin.last n) = gv i := by
+    intro i
+    show (gramMatrix (k + 3)) ⟨i.val, _⟩ ⟨n, _⟩ = crossCorrVec (k + 2) i
+    simp only [gramMatrix, of_apply, crossCorrVec]
+    rw [gramEntry_comm]
+  -- Corner: M(last n, last n) = γ
+  have hγ_eq : M (Fin.last n) (Fin.last n) = γ := by
+    show (gramMatrix (k + 3)) ⟨n, _⟩ ⟨n, _⟩ = gramEntry (k + 2) (k + 2)
+    simp only [gramMatrix, of_apply]; congr 1 <;> omega
+  -- ═══════════════════════════════════════════════════════════════
+  -- STEP 2: eigenDrop > 0, so lambdaMin drops
+  -- ═══════════════════════════════════════════════════════════════
+  have hδ_pos : 0 < eigenDrop (k + 3) := h_trivial
+  have hmu_lt : lambdaMin (k + 3) < lambdaMin (k + 2) := by
+    show lambdaMin (k + 3) < lambdaMin (k + 3 - 1)
+    unfold eigenDrop at hδ_pos; linarith
+  -- ═══════════════════════════════════════════════════════════════
+  -- STEP 3: Apply secular equation chain
+  -- ═══════════════════════════════════════════════════════════════
+  -- Types now match: M on Fin(n+1), A on Fin(n), gv : Fin(n) → ℝ
+  -- Can directly apply bordered_secular_identity and secular_drop_bound.
+  -- Remaining substeps with sorry:
+  -- (a) Extract eigenvector of M at eigenvalue lambdaMin(k+3)
+  -- (b) Show lambdaMin(k+3) < inf'(eigenvalues₀ of A)
+  -- (c) Apply bordered_secular_identity → γ - μ = gᵀ(A-μI)⁻¹g
+  -- (d) Apply secular_drop_bound → gᵀ(A-μI)⁻¹g ≥ ⟨g,e₀⟩²/δ
+  -- (e) Prove resolvent monotonicity → γ-μ ≥ S
+  -- (f) Connect ⟨g,e₀⟩² to cosAlignment → δ ≤ cos²θ·‖g‖²/S
   sorry
 
 end
