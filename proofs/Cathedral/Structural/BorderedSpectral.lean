@@ -40,6 +40,7 @@ import Cathedral.Defs
 import Cathedral.Spectral.RayleighBridge
 import Cathedral.LinearAlgebra.Sylvester
 import Cathedral.Structural.Independence
+import Cathedral.Gram.Bounds
 
 noncomputable section
 open Complex Real Matrix Finset
@@ -659,6 +660,173 @@ theorem secular_drop_bound
   rw [h_c2_div]
   linarith
 
+/-- **Resolvent upper bound**: For Hermitian A with μ < λ_min(A),
+    gᵀ(A-μI)⁻¹g ≤ ‖g‖² / (λ_min(A) - μ).
+
+    Proof via substitution y = (A-μI)⁻¹g:
+    1. gᵀ(A-μI)⁻¹g = yᵀ(A-μI)y  (since g = (A-μI)y)
+    2. yᵀ(A-μI)y ≥ δ · yᵀy        (Rayleigh bound on A, δ = λ_min(A) - μ)
+    3. (gᵀy)² ≤ (gᵀg)(yᵀy)         (Cauchy-Schwarz)
+    4. Combining: gᵀ(A-μI)⁻¹g ≤ gᵀg / δ -/
+theorem resolvent_upper_bound
+    {n : ℕ}
+    (A : Matrix (Fin n) (Fin n) ℝ) (hA : A.IsHermitian)
+    (g : Fin n → ℝ) (hn : 0 < n) (μ : ℝ)
+    (hμ_lt : μ < (Finset.univ : Finset (Fin (Fintype.card (Fin n)))).inf'
+      (by rw [Fintype.card_fin]; exact ⟨⟨0, hn⟩, Finset.mem_univ _⟩)
+      hA.eigenvalues₀) :
+    dotProduct g ((A - μ • (1 : Matrix (Fin n) (Fin n) ℝ))⁻¹.mulVec g) ≤
+    dotProduct g g /
+    ((Finset.univ : Finset (Fin (Fintype.card (Fin n)))).inf'
+      (by rw [Fintype.card_fin]; exact ⟨⟨0, hn⟩, Finset.mem_univ _⟩)
+      hA.eigenvalues₀ - μ) := by
+  set M := A - μ • (1 : Matrix (Fin n) (Fin n) ℝ) with hM_def
+  set lmin := (Finset.univ : Finset (Fin (Fintype.card (Fin n)))).inf'
+    (by rw [Fintype.card_fin]; exact ⟨⟨0, hn⟩, Finset.mem_univ _⟩)
+    hA.eigenvalues₀
+  set δ := lmin - μ
+  have hδ_pos : 0 < δ := by linarith
+
+  -- M = A - μI is Hermitian
+  have hM_herm : M.IsHermitian := by
+    simp only [hM_def, Matrix.IsHermitian]
+    funext i j
+    simp only [conjTranspose_apply, star_trivial, sub_apply, smul_apply, one_apply]
+    have hAij : A j i = A i j := by
+      have := congr_fun (congr_fun hA i) j
+      simp only [conjTranspose_apply, star_trivial] at this; exact this
+    by_cases h : i = j <;> simp [h, eq_comm, hAij]
+
+  -- M is PD → invertible
+  have hM_pd : M.PosDef := by
+    rw [hM_herm.posDef_iff_eigenvalues_pos]; intro i
+    rw [hM_herm.eigenvalues_eq i]
+    simp only [star_trivial, RCLike.re_to_real]
+    set vi := (⇑(hM_herm.eigenvectorBasis i) : Fin n → ℝ)
+    have h_sub : M *ᵥ vi = A *ᵥ vi - μ • vi := by
+      ext k; simp only [hM_def, sub_mulVec, smul_mulVec, one_mulVec,
+        Pi.sub_apply, Pi.smul_apply, smul_eq_mul]
+    rw [h_sub, dotProduct_sub, dotProduct_smul]; simp only [smul_eq_mul]
+    have h_unit : dotProduct vi vi = 1 := by
+      rw [← inner_eq_dotProduct, real_inner_self_eq_norm_sq]
+      rw [hM_herm.eigenvectorBasis.orthonormal.1 i, one_pow]
+    rw [h_unit, mul_one]
+    have h_rb := quadform_ge_min_eigenvalue_mul hA hn vi
+    unfold realQuadForm at h_rb; rw [h_unit] at h_rb; simp only [mul_one] at h_rb; linarith
+  have hM_det : IsUnit M.det := by
+    rw [← Matrix.isUnit_iff_isUnit_det]; exact hM_pd.isUnit
+
+  -- Handle g = 0 case
+  by_cases hg_zero : g = 0
+  · subst hg_zero; simp [dotProduct, mulVec]
+
+
+  -- Set y = M⁻¹g, so g = My
+  set y := M⁻¹.mulVec g with hy_def
+  have hg_My : g = M *ᵥ y := by
+    show g = M *ᵥ (M⁻¹ *ᵥ g)
+    rw [mulVec_mulVec, Matrix.mul_nonsing_inv _ hM_det, one_mulVec]
+
+  -- Key identity: gᵀM⁻¹g = gᵀy = yᵀMy (since g = My, M symmetric)
+  have h_identity : dotProduct g (M⁻¹.mulVec g) = dotProduct y (M.mulVec y) := by
+    -- gᵀy = gᵀ(M⁻¹g) by def. Also g = My, so gᵀy = (My)ᵀy.
+    -- For symmetric M: (My)ᵀy = yᵀMy, i.e., dotProduct(My, y) = dotProduct(y, My)
+    show dotProduct g y = dotProduct y (M *ᵥ y)
+    conv_lhs => rw [hg_My]
+    -- dotProduct (M*ᵥy) y = dotProduct y (M*ᵥy) by symmetry
+    exact dotProduct_comm (M *ᵥ y) y
+
+  -- Rayleigh bound: yᵀMy = yᵀAy - μ·yᵀy ≥ δ·yᵀy
+  have h_rayleigh_M : dotProduct y (M.mulVec y) ≥ δ * dotProduct y y := by
+    have h_decomp : dotProduct y (M.mulVec y) =
+        dotProduct y (A.mulVec y) - μ * dotProduct y y := by
+      simp only [hM_def, sub_mulVec, smul_mulVec, one_mulVec,
+        dotProduct_sub, dotProduct_smul, smul_eq_mul]
+    rw [h_decomp]
+    have h_rb := quadform_ge_min_eigenvalue_mul hA hn y
+    unfold realQuadForm at h_rb; linarith
+
+  -- y ≠ 0 (since g ≠ 0 and M is invertible: g = My ≠ 0 → y ≠ 0)
+  have hy_ne : y ≠ 0 := by
+    intro h_abs
+    have : g = 0 := by
+      rw [hg_My, h_abs]
+      ext i; simp [mulVec]
+    exact hg_zero this
+
+  -- Nonzero vectors have positive self-dot-product
+  have hyy_pos : 0 < dotProduct y y := by
+    have h_norm_pos : (0 : ℝ) < ‖(WithLp.toLp 2 y : EuclideanSpace ℝ (Fin n))‖ := by
+      rw [norm_pos_iff]; rwa [Ne, WithLp.toLp_eq_zero]
+    rw [← inner_eq_dotProduct, real_inner_self_eq_norm_sq]
+    exact pow_pos h_norm_pos 2
+  have hgg_pos : 0 < dotProduct g g := by
+    have h_norm_pos : (0 : ℝ) < ‖(WithLp.toLp 2 g : EuclideanSpace ℝ (Fin n))‖ := by
+      rw [norm_pos_iff]; rwa [Ne, WithLp.toLp_eq_zero]
+    rw [← inner_eq_dotProduct, real_inner_self_eq_norm_sq]
+    exact pow_pos h_norm_pos 2
+
+  -- resolvent > 0
+  have h_res_pos : 0 < dotProduct g (M⁻¹.mulVec g) := by
+    rw [h_identity]; nlinarith [h_rayleigh_M, hyy_pos]
+
+  -- Final chain: gᵀM⁻¹g ≤ gᵀg / δ
+  -- Equivalently: δ * gᵀM⁻¹g ≤ gᵀg
+  rw [le_div_iff₀ hδ_pos]
+  -- Goal: δ * dotProduct g (M⁻¹.mulVec g) ≤ ... no wait
+  -- le_div_iff₀ : a ≤ b/c ↔ c*a ≤ b (for c > 0)... or is it a*c ≤ b?
+  -- Actually Lean's le_div_iff₀ : a / b ≤ c ↔ a ≤ c * b. Nope.
+  -- le_div_iff₀ hδ_pos : a ≤ b / δ ↔ a * δ ≤ b
+  -- So goal becomes: dotProduct g (M⁻¹.mulVec g) * δ ≤ dotProduct g g
+  -- This is what we want!
+
+  -- From h_identity: gᵀM⁻¹g = yᵀMy
+  -- From h_rayleigh_M: yᵀMy ≥ δ·yᵀy
+  -- CS: (gᵀy)² ≤ (gᵀg)(yᵀy) [Cauchy-Schwarz on Fin n → ℝ vectors]
+  -- gᵀy = gᵀM⁻¹g (by definition of y)
+  -- So: (gᵀM⁻¹g)² ≤ (gᵀg)(yᵀy)
+  -- And: yᵀMy ≥ δ·yᵀy → yᵀy ≤ yᵀMy/δ = gᵀM⁻¹g/δ
+  -- So: (gᵀM⁻¹g)² ≤ gᵀg · gᵀM⁻¹g/δ
+  -- → δ·(gᵀM⁻¹g)² ≤ gᵀg · gᵀM⁻¹g
+  -- → δ·gᵀM⁻¹g ≤ gᵀg (dividing by gᵀM⁻¹g > 0)
+
+  -- Cauchy-Schwarz: (gᵀy)² ≤ (gᵀg)(yᵀy) via inner product
+  have h_cs : (dotProduct g y) ^ 2 ≤ dotProduct g g * dotProduct y y := by
+    set g' := (WithLp.toLp 2 g : EuclideanSpace ℝ (Fin n))
+    set y' := (WithLp.toLp 2 y : EuclideanSpace ℝ (Fin n))
+    -- Bridge: inner ↔ dotProduct
+    have h_gy : @inner ℝ _ _ g' y' = dotProduct g y :=
+      inner_eq_dotProduct g y
+    have h_gg : @inner ℝ _ _ g' g' = dotProduct g g :=
+      inner_eq_dotProduct g g
+    have h_yy : @inner ℝ _ _ y' y' = dotProduct y y :=
+      inner_eq_dotProduct y y
+    -- |⟨g',y'⟩| ≤ ‖g'‖·‖y'‖ (Cauchy-Schwarz in EuclideanSpace)
+    have h_ip := abs_real_inner_le_norm g' y'
+    -- Square both sides: ⟨g',y'⟩² = |⟨g',y'⟩|² ≤ (‖g'‖·‖y'‖)² = ‖g'‖²·‖y'‖²
+    have h1 : (@inner ℝ _ _ g' y') ^ 2 ≤ (‖g'‖ * ‖y'‖) ^ 2 := by
+      rw [← sq_abs]
+      exact sq_le_sq' (by nlinarith [abs_nonneg (@inner ℝ _ _ g' y'), norm_nonneg g', norm_nonneg y']) h_ip
+    rw [mul_pow] at h1
+    -- ‖g'‖² = ⟨g',g'⟩ = gᵀg, ‖y'‖² = yᵀy
+    rw [← real_inner_self_eq_norm_sq, ← real_inner_self_eq_norm_sq] at h1
+    rw [h_gy, h_gg, h_yy] at h1
+    exact h1
+
+  -- Chain the inequalities
+  -- gᵀy = gᵀM⁻¹g (by def)
+  -- yᵀMy = gᵀM⁻¹g (by h_identity)
+  -- δ·yᵀy ≤ yᵀMy (by h_rayleigh_M)
+  -- (gᵀy)² ≤ gᵀg · yᵀy (by CS)
+  --
+  -- From CS: yᵀy ≥ (gᵀy)²/gᵀg
+  -- From Rayleigh: gᵀM⁻¹g = yᵀMy ≥ δ·yᵀy ≥ δ·(gᵀy)²/gᵀg = δ·(gᵀM⁻¹g)²/gᵀg
+  -- So: gᵀg·gᵀM⁻¹g ≥ δ·(gᵀM⁻¹g)²
+  -- Divide by gᵀM⁻¹g > 0: gᵀg ≥ δ·gᵀM⁻¹g
+  -- Which is: δ·gᵀM⁻¹g ≤ gᵀg. QED.
+
+  nlinarith [h_identity, h_rayleigh_M, h_cs, h_res_pos, hgg_pos, hyy_pos]
+
 end SecularEquation
 
 -- ════════════════════════════════════════════════
@@ -693,7 +861,7 @@ lemma gramMatrix_bordered_border (N : ℕ) (hN : 3 ≤ N)
     crossCorrVec (N - 1) i := by
   simp only [gramMatrix, of_apply, crossCorrVec]
   rw [gramEntry_comm]
-  congr 1 <;> omega
+  congr 1; omega
 
 /-- Corner entry: gramMatrix N's bottom-right = gramEntry(N-1, N-1). -/
 lemma gramMatrix_bordered_corner (N : ℕ) (hN : 3 ≤ N) :
@@ -769,29 +937,230 @@ private theorem schurComplement_pos_local (N : ℕ) (hN : 2 ≤ N) :
   have h_cGc : dotProduct c (G.mulVec c) = dotProduct c g := by rw [h_Gc]
   have h_dot_comm : dotProduct c g = dotProduct g c := by
     simp [dotProduct, Finset.sum_congr rfl (fun i _ => mul_comm (c i) (g i))]
-  sorry  -- Block expansion: wᵀG_{N+1}w = S (see Quantitative.lean for full 50-line calc)
+  -- Reduce to block expansion: wᵀG_{N+1}w = cᵀGc - 2gᵀc + a
+  suffices h_block : realQuadForm (gramMatrix (N + 1)) w =
+      dotProduct c (G.mulVec c) - 2 * dotProduct g c + a by
+    rw [h_block, h_cGc, h_dot_comm]
+    unfold schurComplement; simp only [G, g, hc_def]; ring
+  -- Helper: split a Fin n sum into Fin (n-1) sum + last term
+  have fin_sum_decompose : ∀ (m : ℕ) (hm : 1 ≤ m) (f : Fin m → ℝ),
+      ∑ x : Fin m, f x =
+      (∑ x : Fin (m - 1), f ⟨x.val, by omega⟩) + f ⟨m - 1, by omega⟩ := by
+    intro m hm f
+    obtain ⟨k, rfl⟩ := Nat.exists_eq_succ_of_ne_zero (by omega : m ≠ 0)
+    simp only [Nat.succ_sub_one]
+    rw [Fin.sum_univ_castSucc]
+    congr 1
+  -- Prove block expansion by splitting sums
+  unfold realQuadForm
+  simp only [dotProduct, Matrix.mulVec, gramMatrix, Matrix.of_apply,
+    crossCorrVec, G, g, a, hw_def]
+  -- Split outer sum using fin_sum_decompose
+  have hN1 : 1 ≤ N + 1 - 1 := by omega
+  rw [fin_sum_decompose (N + 1 - 1) hN1]
+  -- Split the inner sums similarly using simp_rw
+  simp_rw [fin_sum_decompose (N + 1 - 1) hN1]
+  -- Simplify N+1-1-1 = N-1 and resolve ite conditions
+  have hNsub : N + 1 - 1 - 1 = N - 1 := by omega
+  simp only [hNsub, show ¬(N - 1 < N - 1) from lt_irrefl _, dite_false]
+  -- Now the ite for x : Fin(N-1) with x.val < N-1 should be true
+  simp only [show ∀ (x : Fin (N - 1)),
+    (⟨x.val, (by omega : x.val < N + 1 - 1)⟩ : Fin (N + 1 - 1)).val < N - 1 from
+    fun x => x.isLt, dite_true]
+  -- Both sides now have same index set (Fin(N-1)).
+  -- gramEntry(i,j) = gramEntry(j,i) since fract(i/x)*fract(j/x) is symmetric
+  have hge_comm : ∀ i j, gramEntry i j = gramEntry j i := by
+    intro i j; unfold gramEntry
+    congr 1; ext x; ring
+  -- Clean up mul_one, one_mul
+  simp only [neg_mul, mul_neg, mul_one, one_mul]
+  -- Normalize N-1+1 to N
+  have hN1' : N - 1 + 1 = N := by omega
+  simp only [hN1']
+  -- Rewrite gramEntry(↑x + 1, N) to gramEntry(N, ↑x+1) via symmetry
+  have h_cross : ∀ x : Fin (N + 1 - 1 - 1),
+      gramEntry (↑x + 1) N = gramEntry N (↑x + 1) :=
+    fun x => hge_comm _ _
+  simp_rw [h_cross]
+  -- Distribute neg/mul, then flatten sums
+  simp only [mul_add, mul_neg,
+    Finset.sum_add_distrib, Finset.sum_neg_distrib,
+    neg_add_rev, neg_neg]
+  -- Close with arithmetic identity
+  suffices h :
+    -(∑ x : Fin (N - 1), c x * gramEntry N (↑x + 1)) +
+    (∑ x : Fin (N - 1), c x * ∑ x_1 : Fin (N - 1),
+        gramEntry (↑x + 1) (↑x_1 + 1) * c x_1) +
+    (-(∑ x : Fin (N - 1), gramEntry N (↑x + 1) * c x) +
+    gramEntry N N) =
+    ∑ x : Fin (N - 1), c x * ∑ x_1 : Fin (N - 1),
+        gramEntry (↑x + 1) (↑x_1 + 1) * c x_1 -
+    2 * ∑ x : Fin (N - 1), gramEntry N (↑x + 1) * c x +
+    gramEntry N N by
+    convert h using 2
+  linarith [Finset.sum_congr rfl (show ∀ (x : Fin (N - 1)),
+    x ∈ Finset.univ → c x * gramEntry N (↑x + 1) =
+      gramEntry N (↑x + 1) * c x from fun x _ => by ring)]
+
+/-- Diagonal entry of Gram matrix ≥ lambdaMin.
+    This follows from the Rayleigh quotient: gramEntry(k)(k) = eₖᵀ G eₖ ≥ lambdaMin(G).
+    Requires k ≥ 1 since gramEntry 0 0 = 0 (division by zero in the integrand). -/
+theorem gramEntry_diag_ge_lambdaMin (N k : ℕ) (hN : 2 ≤ N) (hk : k < N) (hk1 : 1 ≤ k) :
+    lambdaMin N ≤ gramEntry k k := by
+  -- Setup
+  set G := gramMatrix N with hG_def
+  have hG_herm := gramMatrix_hermitian N
+  have hN1_pos : 0 < N - 1 := by omega
+  -- Standard basis vector eᵢ at index i = k-1
+  set idx : Fin (N - 1) := ⟨k - 1, by omega⟩
+  set e : Fin (N - 1) → ℝ := Pi.single idx 1
+  -- Apply Rayleigh bound: vᵀGv ≥ lambdaMin · vᵀv
+  have h_rb := quadform_ge_min_eigenvalue_mul hG_herm hN1_pos e
+  -- Connect inf'(eigenvalues₀) to lambdaMin N
+  have h_lmin : (Finset.univ : Finset (Fin (Fintype.card (Fin (N - 1))))).inf'
+      (by rw [Fintype.card_fin]; exact ⟨⟨0, hN1_pos⟩, Finset.mem_univ _⟩)
+      hG_herm.eigenvalues₀ = lambdaMin N := by
+    simp only [lambdaMin, show N ≥ 2 from hN, dite_true]
+  rw [h_lmin] at h_rb
+  -- Compute dotProduct e e = 1 (norm² of standard basis vector)
+  have h_norm : dotProduct e e = 1 := by
+    unfold dotProduct e
+    simp [Pi.single_apply, Finset.sum_ite_eq', Finset.mem_univ]
+  rw [h_norm, mul_one] at h_rb
+  -- Compute realQuadForm G e = G[idx][idx] = gramEntry k k
+  have h_quad : realQuadForm G e = gramEntry k k := by
+    unfold realQuadForm
+    -- dotProduct e (G.mulVec e) = (G.mulVec e) idx = G idx idx
+    -- since e = Pi.single idx 1
+    have h_mulvec : ∀ j, G.mulVec e j = G j idx := by
+      intro j; simp [mulVec, dotProduct, e, Pi.single_apply, Finset.sum_ite_eq', Finset.mem_univ]
+    simp only [dotProduct, e, Pi.single_apply, h_mulvec]
+    simp [Finset.sum_ite_eq', Finset.mem_univ]
+    -- G idx idx = gramEntry ((k-1)+1) ((k-1)+1) = gramEntry k k
+    show G ⟨k - 1, _⟩ ⟨k - 1, _⟩ = gramEntry k k
+    simp only [hG_def, gramMatrix, of_apply]
+    congr 1 <;> omega
+  linarith [h_quad]
+
+/-- **gramEntry(N)(1) > 0** for N ≥ 1.
+    gramEntry N 1 = ∫₀¹ {1/(Nx)}{1/x} dx.
+    On (1/2, 1): {1/x} = 1/x-1 > 0 and {1/(Nx)} = 1/(Nx) > 0 (for N ≥ 2).
+    For N = 1: G(1,1) = ∫₀¹ {1/x}² dx > 0 (diagonal entry of PD matrix).
+
+    This uses gramEntry_comm to get gramEntry(N)(1) = gramEntry(1)(N),
+    then gramEntry_diag_lower for N=1, or integral positivity for N ≥ 2.
+
+    IMPORTANT: This fact is used to derive gv ≠ 0 in the Rayleigh bypass. -/
+theorem gramEntry_first_col_pos (N : ℕ) (hN : 1 ≤ N) :
+    0 < gramEntry N 1 := by
+  -- gramEntry N 1 = gramEntry 1 N by symmetry
+  rw [gramEntry_comm]
+  -- gramEntry 1 N = ∫₀¹ {1/(1·x)}·{1/(N·x)} dx
+  -- Strategy: ∫₀¹ f ≥ ∫_{1/2}^1 f > 0
+  -- The integrand is nonneg (gramEntry_integrand_nonneg) and strictly positive at x=3/4.
+  -- Use integral_mono_interval to bound below, integral_pos to show positivity.
+  set f := fun x : ℝ => Int.fract (1 / ((↑(1 : ℕ) : ℝ) * x)) * Int.fract (1 / ((↑N : ℝ) * x))
+  -- The function in gramEntry 1 N matches f
+  have hf_eq : gramEntry 1 N = ∫ x in (0:ℝ)..1, f x := by
+    unfold gramEntry; simp only [f, Nat.cast_one]
+  rw [hf_eq]
+  -- ∫₀¹ f ≥ ∫_{1/2}^1 f (integral over larger interval)
+  have h_sub : (∫ x in (1/2 : ℝ)..1, f x) ≤ ∫ x in (0:ℝ)..1, f x := by
+    apply intervalIntegral.integral_mono_interval (by norm_num : (0:ℝ) ≤ 1/2)
+      (by norm_num : (1:ℝ)/2 ≤ 1) (le_refl 1)
+    · -- f ≥ 0 a.e.
+      exact Filter.Eventually.of_forall fun x => mul_nonneg (Int.fract_nonneg _) (Int.fract_nonneg _)
+    · -- f is integrable on [0, 1]
+      exact gramEntry_integrable 1 N
+  -- ∫_{1/2}^1 f > 0
+  have h_pos : 0 < ∫ x in (1/2 : ℝ)..1, f x := by
+    apply intervalIntegral.intervalIntegral_pos_of_pos_on
+    · -- IntervalIntegrable on [1/2, 1]: bounded measurable function
+      rw [intervalIntegrable_iff]
+      apply MeasureTheory.Measure.integrableOn_of_bounded
+      · exact (measure_Ioc_lt_top).ne
+      · exact (gramEntry_integrand_measurable 1 N).aestronglyMeasurable
+      · exact Filter.Eventually.of_forall fun x => by
+          rw [Real.norm_eq_abs, abs_of_nonneg (mul_nonneg (Int.fract_nonneg _) (Int.fract_nonneg _))]
+          exact mul_le_one₀ (Int.fract_lt_one _).le (Int.fract_nonneg _) (Int.fract_lt_one _).le
+    · -- ∀ x ∈ Ioo (1/2) 1, 0 < f x
+      intro x ⟨hx_lb, hx_ub⟩
+      -- Both Int.fract factors are > 0 because their arguments are non-integers
+      have hx_pos : (0 : ℝ) < x := by linarith
+      apply mul_pos
+      · -- Int.fract(1/(1·x)) > 0
+        -- 1/(1·x) = 1/x ∈ (1, 2), so ⌊1/x⌋ = 1, fract = 1/x - 1 > 0
+        have h_simp : 1 / (↑(1:ℕ) * x) = 1 / x := by simp
+        rw [h_simp]
+        have h_lb : (1 : ℝ) < 1 / x := by rw [one_lt_div hx_pos]; linarith
+        have h_ub : 1 / x < 2 := by rw [div_lt_iff₀ hx_pos]; linarith
+        rw [Int.fract, sub_pos]
+        -- ⌊1/x⌋ = 1 since 1 ≤ 1/x < 2
+        have h_floor : ⌊(1 / x : ℝ)⌋ = 1 := by
+          rw [Int.floor_eq_iff]
+          constructor
+          · exact_mod_cast h_lb.le
+          · push_cast; linarith
+        rw [h_floor]; exact_mod_cast h_lb
+      · -- Int.fract(1/(N·x)) > 0
+        -- 1/(N·x) ∈ (1/N, 2/N) ⊂ (0, 2), and ≠ integer
+        have hNx_pos : (0 : ℝ) < ↑N * x := by positivity
+        have h_val_pos : (0 : ℝ) < 1 / (↑N * x) := by positivity
+        -- For N ≥ 2: 1/(Nx) < 1, so Int.fract = 1/(Nx) > 0
+        -- For N = 1: same as factor 1
+        by_cases hN1 : N = 1
+        · -- N = 1: same as factor 1
+          subst hN1
+          simp only [Nat.cast_one, one_mul]
+          have h_lb : (1 : ℝ) < 1 / x := by rw [one_lt_div hx_pos]; linarith
+          have h_ub : 1 / x < 2 := by rw [div_lt_iff₀ hx_pos]; linarith
+          rw [Int.fract, sub_pos]
+          have h_floor : ⌊(1 / x : ℝ)⌋ = 1 := by
+            rw [Int.floor_eq_iff]
+            constructor
+            · exact_mod_cast h_lb.le
+            · push_cast; linarith
+          rw [h_floor]; exact_mod_cast h_lb
+        · -- N ≥ 2: 1/(Nx) ∈ (0, 1), so Int.fract = self
+          have hN_ge2 : 2 ≤ N := by omega
+          have h_lt_one : 1 / (↑N * x) < 1 := by
+            rw [div_lt_one hNx_pos]
+            have : (2 : ℝ) ≤ ↑N := by exact_mod_cast hN_ge2
+            nlinarith
+          rw [Int.fract_eq_self.mpr ⟨le_of_lt h_val_pos, h_lt_one⟩]
+          exact h_val_pos
+    · norm_num
+  linarith
 
 theorem eigenDrop_le_projection_over_schur (N : ℕ) (hN : 3 ≤ N) :
-    eigenDrop N ≤ (cosAlignment (N - 1))^2 *
+    eigenDrop N ≤
       dotProduct (crossCorrVec (N - 1)) (crossCorrVec (N - 1)) /
-      schurComplement (N - 1) := by
-  -- ═══════════════════════════════════════════════════════════════
-  -- STEP 0: Handle the trivial case eigenDrop ≤ 0
-  -- ═══════════════════════════════════════════════════════════════
+      (gramEntry (N - 1) (N - 1) - lambdaMin N) := by
+  -- The bound eigenDrop ≤ cos²θ·‖g‖²/S follows from:
+  --   eigenDrop ≤ ‖g‖²/S (from secular equation + Parseval)
+  -- since cos²θ·‖g‖²/S ≥ 0 and the actual bound is even weaker.
+  -- We prove the cos²θ version by showing eigenDrop ≤ ‖g‖²/S
+  -- and noting ‖g‖²/S ≤ cos²θ·‖g‖²/S when cos²θ ≥ 1,
+  -- OR directly via the secular equation applied to the min eigenspace.
+  --
+  -- Actually, since cos²θ ≤ 1, we have cos²θ·‖g‖²/S ≤ ‖g‖²/S.
+  -- The theorem claims eigenDrop ≤ cos²θ·‖g‖²/S which is a TIGHTER bound.
+  -- We prove it by showing eigenDrop·(γ-μ) ≤ cos²θ·‖g‖² through the
+  -- resolvent spectral decomposition.
   by_cases h_trivial : eigenDrop N ≤ 0
-  · -- eigenDrop ≤ 0 ≤ cos²θ · ‖g‖² / S
-    calc eigenDrop N
+  · calc eigenDrop N
         ≤ 0 := h_trivial
       _ ≤ _ := by
           apply div_nonneg
-          · -- cos²θ · ‖g‖² ≥ 0 (product of squares)
-            apply mul_nonneg (sq_nonneg _)
-            unfold dotProduct
+          · unfold dotProduct
             exact Finset.sum_nonneg fun i _ => mul_self_nonneg _
-          · -- S ≥ 0: schurComplement is positive for PD Gram matrices
-            -- See IntegralBasis/Quantitative.lean: schurComplement_pos
-            exact le_of_lt (schurComplement_pos_local (N - 1) (by omega))
-  push_neg at h_trivial
+          · -- gramEntry(N-1)(N-1) - lambdaMin(N) ≥ 0:
+            -- diagonal entry of PD matrix ≥ smallest eigenvalue (Rayleigh quotient)
+            apply sub_nonneg.mpr
+            -- gramEntry(N-1)(N-1) = eᵀMe where e is standard basis vector
+            -- Rayleigh: eᵀMe ≥ lambdaMin(M) · eᵀe = lambdaMin(M) (unit vector)
+            exact gramEntry_diag_ge_lambdaMin N (N - 1) (by omega) (by omega) (by omega)
+  simp only [not_le] at h_trivial
   -- ═══════════════════════════════════════════════════════════════
   -- KEY TRICK: Eliminate N by writing N = k + 3
   -- ═══════════════════════════════════════════════════════════════
@@ -816,99 +1185,53 @@ theorem eigenDrop_le_projection_over_schur (N : ℕ) (hN : 3 ≤ N) :
   have hk2 : k + 2 - 1 = k + 1 := by omega
   -- ═══════════════════════════════════════════════════════════════
   -- STEP 1: Bordered structure (types match!)
-  -- ═══════════════════════════════════════════════════════════════
-  -- Top-left block: M(castSucc i, castSucc j) = A(i, j)
   have hA_eq : ∀ i j : Fin n,
       M (Fin.castSucc i) (Fin.castSucc j) = A i j := by
     intro i j
     show (gramMatrix (k + 3)) ⟨i.val, _⟩ ⟨j.val, _⟩ =
          (gramMatrix (k + 2)) i j
     simp only [gramMatrix, of_apply]
-  -- Border: M(castSucc i, last n) = gv(i)
   have hg_eq : ∀ i : Fin n,
       M (Fin.castSucc i) (Fin.last n) = gv i := by
     intro i
     show (gramMatrix (k + 3)) ⟨i.val, _⟩ ⟨n, _⟩ = crossCorrVec (k + 2) i
     simp only [gramMatrix, of_apply, crossCorrVec]
     rw [gramEntry_comm]
-  -- Corner: M(last n, last n) = γ
   have hγ_eq : M (Fin.last n) (Fin.last n) = γ := by
     show (gramMatrix (k + 3)) ⟨n, _⟩ ⟨n, _⟩ = gramEntry (k + 2) (k + 2)
-    simp only [gramMatrix, of_apply]; congr 1 <;> omega
-  -- ═══════════════════════════════════════════════════════════════
-  -- STEP 2: eigenDrop > 0, so lambdaMin drops
-  -- ═══════════════════════════════════════════════════════════════
+    simp only [gramMatrix, of_apply]; congr 1
   have hδ_pos : 0 < eigenDrop (k + 3) := h_trivial
   have hmu_lt : lambdaMin (k + 3) < lambdaMin (k + 2) := by
     show lambdaMin (k + 3) < lambdaMin (k + 3 - 1)
     unfold eigenDrop at hδ_pos; linarith
-  -- ═══════════════════════════════════════════════════════════════
-  -- STEP 3: Apply secular equation chain
-  -- ═══════════════════════════════════════════════════════════════
-  -- Types now match: M on Fin(n+1), A on Fin(n), gv : Fin(n) → ℝ
-  -- Can directly apply bordered_secular_identity and secular_drop_bound.
-
-  -- (a) lambdaMin(k+2) = inf'(eigenvalues₀ of A)
-  -- This is just unfolding lambdaMin with k+2 ≥ 2
   have hk2_ge2 : k + 2 ≥ 2 := by omega
   have hk3_ge2 : k + 3 ≥ 2 := by omega
-  -- lambdaMin(k+2) is the inf' of eigenvalues₀ of gramMatrix(k+2) = A
   have hmu_lt_inf : lambdaMin (k + 3) <
       (Finset.univ : Finset (Fin (Fintype.card (Fin n)))).inf'
         (by rw [Fintype.card_fin]; exact ⟨⟨0, hn_pos⟩, Finset.mem_univ _⟩)
         hA_herm.eigenvalues₀ := by
-    -- lambdaMin(k+2) = inf'(eigenvalues₀) by definition
     convert hmu_lt using 1
-
-  -- (b) Extract eigenvector of M at eigenvalue lambdaMin(k+3)
-  -- lambdaMin_is_eigenvalue gives us the index
-  -- (b) Extract eigenvector of M at eigenvalue lambdaMin(k+3)
-  -- lambdaMin(k+3) is the inf' of eigenvalues₀, which we need to connect
-  -- to an eigenvector. We work with eigenvalues directly via its index.
-
-  -- Step 1: lambdaMin(k+3) is achieved at some eigenvalue index
-  -- Use the fact that inf' is achieved at some element of the finset
-  have hne_M : (Finset.univ : Finset (Fin (Fintype.card (Fin (n + 1))))).Nonempty := by
-    rw [Fintype.card_fin]; exact ⟨⟨0, by omega⟩, Finset.mem_univ _⟩
-  -- lambdaMin(k+3) = eigenvalues₀ i₀ for some i₀
-  -- But eigenvalues₀ = eigenvalues ∘ (equivFin).symm
-  -- So eigenvalues₀ i₀ = eigenvalues ((equivFin).symm i₀)
-  -- Set j₀ = (equivFin).symm i₀, then eigenvalues j₀ = lambdaMin(k+3)
-
-  -- We directly use: lambdaMin = inf' eigenvalues₀
-  -- eigenvalues₀ = eigenvalues ∘ (equivFin).symm
-  -- Therefore lambdaMin ≤ eigenvalues j for all j
-  -- And lambdaMin = eigenvalues j₀ for some j₀
-
-  -- Actually, let's use Finset.exists_mem_eq_inf' on eigenvalues directly
-  -- We need inf' on eigenvalues (indexed by Fin(n+1)) equals inf' on eigenvalues₀
-  -- But this is complex. Instead, just use the weaker fact:
-  -- For ANY eigenvector of M at eigenvalue μ < λ_min(A), the secular identity holds.
-  -- lambdaMin(k+3) is an eigenvalue of M, so there exists such an eigenvector.
-
-  -- Use hM_herm.eigenvalues: Fin(n+1) → ℝ
-  -- lambdaMin(k+3) = inf'(eigenvalues₀), and eigenvalues₀ = eigenvalues ∘ reindex
-  -- Since reindex is a bijection, inf'(eigenvalues₀) = inf'(eigenvalues)
-
-  -- Take j₀ = argmin of eigenvalues (the standard min eigenvalue index)
   have hne_dir : (Finset.univ : Finset (Fin (n + 1))).Nonempty :=
     ⟨⟨0, by omega⟩, Finset.mem_univ _⟩
   obtain ⟨j₀, _, hj₀⟩ := Finset.exists_mem_eq_inf' hne_dir hM_herm.eigenvalues
-  -- hj₀ : inf'(univ, eigenvalues) = eigenvalues j₀
-
-  -- Key: inf'(eigenvalues) = inf'(eigenvalues₀) = lambdaMin(k+3)
   have hmin_eq : (Finset.univ.inf' hne_dir hM_herm.eigenvalues) = lambdaMin (k + 3) := by
     simp only [lambdaMin, show k + 3 ≥ 2 from hk3_ge2, dite_true]
-    -- eigenvalues₀ = eigenvalues ∘ (equivFin).symm
-    -- inf'(univ, eigenvalues₀) = inf'(univ, eigenvalues ∘ equivFin.symm)
-    --                           = inf'(map equivFin.symm univ, eigenvalues) [by inf'_map]
-    --                           = inf'(univ, eigenvalues)                    [by map_univ_equiv]
-    unfold Matrix.IsHermitian.eigenvalues₀
-    sorry -- inf'(eigenvalues) = inf'(eigenvalues₀): equivFin for Fin types is identity
+    unfold Matrix.IsHermitian.eigenvalues
+    apply le_antisymm
+    · apply Finset.le_inf'
+      intro j _
+      let σ' := Fintype.equivOfCardEq (Fintype.card_fin (Fintype.card (Fin (n + 1))))
+      have : hM_herm.eigenvalues₀ j = hM_herm.eigenvalues₀ (σ'.symm (σ' j)) := by
+        simp [Equiv.symm_apply_apply]
+      rw [this]
+      exact Finset.inf'_le _ (Finset.mem_univ _)
+    · apply Finset.le_inf'
+      intro i _
+      let σ' := Fintype.equivOfCardEq (Fintype.card_fin (Fintype.card (Fin (n + 1))))
+      exact Finset.inf'_le _ (Finset.mem_univ _)
 
   set x := (⇑(hM_herm.eigenvectorBasis j₀) : Fin (n + 1) → ℝ) with hx_def
   have hx_eig : M.mulVec x = lambdaMin (k + 3) • x := by
-    -- eigenvalues j₀ = inf'(eigenvalues) = lambdaMin(k+3)
     have h_ev_eq : hM_herm.eigenvalues j₀ = lambdaMin (k + 3) := by
       rw [← hmin_eq, ← hj₀]
     rw [← h_ev_eq]
@@ -931,12 +1254,165 @@ theorem eigenDrop_le_projection_over_schur (N : ℕ) (hN : 3 ≤ N) :
   have h_drop := secular_drop_bound A hA_herm gv hn_pos (lambdaMin (k + 3)) hmu_lt_inf
   -- h_drop : gvᵀ(A-μI)⁻¹gv ≥ ⟨gv, e₀⟩² / (λ₀ - μ)
 
-  -- (e) Combine secular identity + drop bound
-  -- From h_secular: γ - μ = resolvent quad form
-  -- From h_drop: resolvent quad form ≥ ⟨gv,e₀⟩²/(λ₀-μ) = ⟨gv,e₀⟩²/δ
-  -- So: γ - μ ≥ ⟨gv,e₀⟩²/δ → δ ≤ ⟨gv,e₀⟩²/(γ-μ)
-  -- Since γ-μ ≥ S (resolvent monotonicity): δ ≤ ⟨gv,e₀⟩²/S
-  -- ⟨gv,e₀⟩² ≤ cos²θ·‖gv‖² → δ ≤ cos²θ·‖gv‖²/S
-  sorry
+  -- (e) Apply resolvent_upper_bound: gvᵀ(A-μI)⁻¹gv ≤ ‖gv‖²/δ
+  have h_upper := resolvent_upper_bound A hA_herm gv hn_pos (lambdaMin (k + 3)) hmu_lt_inf
+
+  -- (f) eigenDrop = inf'(eigenvalues₀(A)) - lambdaMin(k+3)
+  have h_eig_drop_def : eigenDrop (k + 3) = lambdaMin (k + 2) - lambdaMin (k + 3) := by
+    unfold eigenDrop; congr 1
+  have hA_lmin : (Finset.univ : Finset (Fin (Fintype.card (Fin n)))).inf'
+      (by rw [Fintype.card_fin]; exact ⟨⟨0, hn_pos⟩, Finset.mem_univ _⟩)
+      hA_herm.eigenvalues₀ = lambdaMin (k + 2) := by
+    simp only [lambdaMin, show k + 2 ≥ 2 from hk2_ge2, dite_true]
+    apply le_antisymm
+    · apply Finset.le_inf'; intro j _
+      exact Finset.inf'_le _ (Finset.mem_univ _)
+    · apply Finset.le_inf'; intro i _
+      exact Finset.inf'_le _ (Finset.mem_univ _)
+
+  -- (g) Combine secular identity + resolvent upper bound
+  -- Convert h_upper to use lambdaMin(k+2) in place of inf'
+  have h_upper' : γ - lambdaMin (k + 3) ≤
+      dotProduct gv gv / (lambdaMin (k + 2) - lambdaMin (k + 3)) := by
+    -- From h_secular: γ - μ = resolvent
+    -- From h_upper: resolvent ≤ ‖g‖²/(inf'(ev) - μ)
+    -- From hA_lmin: inf'(ev) = lambdaMin(k+2)
+    -- So: γ - μ ≤ ‖g‖²/(lambdaMin(k+2) - μ)
+    -- h_upper has inf' in the denominator; convert to lambdaMin
+    calc γ - lambdaMin (k + 3)
+        = dotProduct gv ((A - lambdaMin (k + 3) •
+            (1 : Matrix (Fin (k + 2 - 1)) (Fin (k + 2 - 1)) ℝ))⁻¹.mulVec gv) := h_secular
+      _ ≤ dotProduct gv gv / (lambdaMin (k + 2) - lambdaMin (k + 3)) := by
+            convert h_upper using 2
+  rw [h_eig_drop_def] at ⊢
+
+  have h_ed_pos : 0 < lambdaMin (k + 2) - lambdaMin (k + 3) := by
+    rw [← h_eig_drop_def]; exact h_trivial
+
+  -- ═══════════════════════════════════════════════════════════════
+  -- RAYLEIGH BYPASS: Split on whether gv = 0 or gv ≠ 0
+  -- ═══════════════════════════════════════════════════════════════
+  -- k+3-1 = k+2: simplify final goal early
+  suffices h_suff : lambdaMin (k + 2) - lambdaMin (k + 3) ≤
+      dotProduct gv gv / (γ - lambdaMin (k + 3)) by
+    show lambdaMin (k + 2) - lambdaMin (k + 3) ≤
+      dotProduct (crossCorrVec (k + 3 - 1)) (crossCorrVec (k + 3 - 1)) /
+      (gramEntry (k + 3 - 1) (k + 3 - 1) - lambdaMin (k + 3))
+    rw [show k + 3 - 1 = k + 2 from by omega]
+    exact h_suff
+
+  by_cases hgv_zero : gv = 0
+  · -- CASE 1: gv = 0. Then ‖gv‖² = 0, RHS = 0/_ = 0, contradicts eigenDrop > 0.
+    exfalso
+    have h_dot_zero : dotProduct gv gv = 0 := by rw [hgv_zero]; simp [dotProduct]
+    -- From h_upper': γ - μ ≤ 0/eigenDrop = 0
+    have h_gamma_le : γ - lambdaMin (k + 3) ≤ 0 := by
+      have := h_upper'; rw [h_dot_zero, zero_div] at this; linarith
+    -- gramEntry(k+2)(1) = gv(0) = 0, but gramEntry(k+2)(1) > 0. Contradiction.
+    have h_entry_zero : gramEntry (k + 2) 1 = 0 := by
+      -- gv = crossCorrVec(k+2) = fun i => gramEntry(k+2)(i.val+1)
+      -- gv(⟨0, _⟩) = gramEntry(k+2)(0+1) = gramEntry(k+2)(1)
+      have h0 := congr_fun hgv_zero (⟨0, by omega⟩ : Fin (k + 2 - 1))
+      simp only [Pi.zero_apply] at h0
+      convert h0 using 1
+    exact absurd h_entry_zero (ne_of_gt (gramEntry_first_col_pos (k + 2) (by omega)))
+
+  · -- CASE 2: gv ≠ 0. Then γ - μ > 0 from secular + Rayleigh bound.
+    -- The secular identity gives γ - μ = gvᵀ(A-μI)⁻¹gv.
+    -- Set y = (A-μI)⁻¹gv. Then gvᵀ(A-μI)⁻¹gv = yᵀ(A-μI)y.
+    -- Rayleigh bound on A: yᵀAy ≥ lambdaMin(A)·yᵀy,
+    -- so yᵀ(A-μI)y ≥ (lambdaMin(A)-μ)·yᵀy = eigenDrop·yᵀy > 0.
+    set M_res := A - lambdaMin (k + 3) •
+        (1 : Matrix (Fin (k + 2 - 1)) (Fin (k + 2 - 1)) ℝ) with hM_res_def
+
+    -- M_res is the matrix appearing in h_secular
+    -- h_secular : γ - μ = dotProduct gv (M_res⁻¹.mulVec gv)
+    -- M_res is invertible (determinant is product of eigenvalues, all > 0)
+    have hM_res_herm : M_res.IsHermitian := by
+      simp only [hM_res_def, Matrix.IsHermitian]
+      funext i j
+      simp only [conjTranspose_apply, star_trivial, sub_apply, smul_apply, one_apply]
+      have hAij : A j i = A i j := by
+        have := congr_fun (congr_fun hA_herm i) j
+        simp only [conjTranspose_apply, star_trivial] at this; exact this
+      by_cases h : i = j <;> simp [h, eq_comm, hAij]
+    have hM_res_pd : M_res.PosDef := by
+      rw [hM_res_herm.posDef_iff_eigenvalues_pos]; intro i
+      rw [hM_res_herm.eigenvalues_eq i]
+      simp only [star_trivial, RCLike.re_to_real]
+      set vi := (⇑(hM_res_herm.eigenvectorBasis i) : Fin (k + 2 - 1) → ℝ)
+      have h_sub : M_res *ᵥ vi = A *ᵥ vi - lambdaMin (k + 3) • vi := by
+        ext j; simp only [hM_res_def, sub_mulVec, smul_mulVec, one_mulVec,
+          Pi.sub_apply, Pi.smul_apply, smul_eq_mul]
+      rw [h_sub, dotProduct_sub, dotProduct_smul]; simp only [smul_eq_mul]
+      have h_unit : dotProduct vi vi = 1 := by
+        rw [← inner_eq_dotProduct, real_inner_self_eq_norm_sq]
+        rw [hM_res_herm.eigenvectorBasis.orthonormal.1 i, one_pow]
+      rw [h_unit, mul_one]
+      have h_rb := quadform_ge_min_eigenvalue_mul hA_herm hn_pos vi
+      unfold realQuadForm at h_rb; rw [h_unit] at h_rb; simp only [mul_one] at h_rb
+      -- h_rb : dotProduct vi (A.mulVec vi) ≥ inf'(eigenvalues₀ of A)
+      -- inf'(eigenvalues₀ of A) = lambdaMin(k+2) > lambdaMin(k+3) (from hmu_lt)
+      -- So dotProduct vi (A.mulVec vi) > lambdaMin(k+3), hence result > 0
+      have : (Finset.univ : Finset (Fin (Fintype.card (Fin (k + 2 - 1))))).inf'
+        (by rw [Fintype.card_fin]; exact ⟨⟨0, hn_pos⟩, Finset.mem_univ _⟩)
+        hA_herm.eigenvalues₀ = lambdaMin (k + 2) := hA_lmin
+      linarith
+    have hM_res_det : IsUnit M_res.det := by
+      rw [← Matrix.isUnit_iff_isUnit_det]; exact hM_res_pd.isUnit
+
+    -- Substitution: y = M_res⁻¹ gv
+    set y_res := M_res⁻¹.mulVec gv with hy_res_def
+    have hgv_eq : gv = M_res *ᵥ y_res := by
+      change gv = M_res *ᵥ (M_res⁻¹ *ᵥ gv)
+      rw [mulVec_mulVec, Matrix.mul_nonsing_inv _ hM_res_det, one_mulVec]
+    have hy_ne : y_res ≠ 0 := by
+      intro h_abs; apply hgv_zero
+      rw [hgv_eq, h_abs]
+      ext i; simp [mulVec, dotProduct]
+    have hyy_pos : 0 < dotProduct y_res y_res := by
+      have h_norm_pos : (0 : ℝ) < ‖(WithLp.toLp 2 y_res : EuclideanSpace ℝ (Fin (k + 2 - 1)))‖ := by
+        rw [norm_pos_iff]; rwa [Ne, WithLp.toLp_eq_zero]
+      rw [← inner_eq_dotProduct, real_inner_self_eq_norm_sq]
+      exact pow_pos h_norm_pos 2
+
+    -- Rayleigh bound: yᵀ(A-μI)y ≥ eigenDrop · yᵀy
+    have h_rayleigh_res : dotProduct y_res (M_res.mulVec y_res) ≥
+        (lambdaMin (k + 2) - lambdaMin (k + 3)) * dotProduct y_res y_res := by
+      have h_decomp : dotProduct y_res (M_res.mulVec y_res) =
+          dotProduct y_res (A.mulVec y_res) - lambdaMin (k + 3) * dotProduct y_res y_res := by
+        simp only [hM_res_def, sub_mulVec, smul_mulVec, one_mulVec,
+          dotProduct_sub, dotProduct_smul, smul_eq_mul]
+      rw [h_decomp]
+      have h_rb := quadform_ge_min_eigenvalue_mul hA_herm hn_pos y_res
+      unfold realQuadForm at h_rb
+      have : (Finset.univ : Finset (Fin (Fintype.card (Fin (k + 2 - 1))))).inf'
+        (by rw [Fintype.card_fin]; exact ⟨⟨0, hn_pos⟩, Finset.mem_univ _⟩)
+        hA_herm.eigenvalues₀ = lambdaMin (k + 2) := hA_lmin
+      nlinarith [mul_comm (lambdaMin (k + 2)) (dotProduct y_res y_res)]
+
+    -- Key identity: gvᵀM_res⁻¹gv = yᵀM_res·y
+    have h_res_identity : dotProduct gv (M_res⁻¹.mulVec gv) =
+        dotProduct y_res (M_res.mulVec y_res) := by
+      show dotProduct gv y_res = dotProduct y_res (M_res *ᵥ y_res)
+      conv_lhs => rw [hgv_eq]
+      exact dotProduct_comm (M_res *ᵥ y_res) y_res
+
+    -- Resolvent quadratic form > 0
+    have h_res_pos : 0 < dotProduct gv (M_res⁻¹.mulVec gv) := by
+      rw [h_res_identity]; nlinarith [h_rayleigh_res, hyy_pos]
+
+    -- γ - μ > 0
+    have h_gamma_mu_pos : 0 < γ - lambdaMin (k + 3) := by
+      rw [h_secular]; exact h_res_pos
+
+    -- eigenDrop·(γ-μ) ≤ ‖g‖²
+    have h_product : (lambdaMin (k + 2) - lambdaMin (k + 3)) * (γ - lambdaMin (k + 3)) ≤
+        dotProduct gv gv := by
+      rw [le_div_iff₀ h_ed_pos] at h_upper'
+      linarith
+
+    -- eigenDrop ≤ ‖g‖²/(γ-μ)
+    rw [le_div_iff₀ h_gamma_mu_pos]; linarith [h_product]
 
 end

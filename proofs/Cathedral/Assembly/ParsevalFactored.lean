@@ -135,11 +135,71 @@ theorem bd_dirichlet_as_exp_sum (N : ℕ) (v : Fin (N - 1) → ℝ) (t : ℝ) :
 -- ════════════════════════════════════════════════
 
 /-- **Helper (not on critical path)**: The rational part is bounded.
-    Contains 1 sorry for the |s-1| ≥ ½ bound. -/
+    On the critical line s = 1/2 + it, |1/s| ≤ 2 and |1/(s-1)| ≤ 2. -/
 theorem rational_part_bounded (N : ℕ) (v : Fin (N - 1) → ℝ) (t : ℝ) :
     ‖bdRationalPart N v ((1/2 : ℂ) + t * I)‖ ≤
     2 + 2 * ∑ i : Fin (N - 1), |v i| / (↑(i.val + 1) : ℝ) := by
-  sorry -- Helper bound, not on critical path. Key theorems above are proved.
+  set s := (1/2 : ℂ) + ↑t * I with hs_def
+  unfold bdRationalPart
+  -- Key bounds: |s| ≥ 1/2, |s - 1| ≥ 1/2
+  have hs_re : s.re = 1/2 := by
+    rw [hs_def]; simp [Complex.add_re, Complex.ofReal_re, Complex.mul_re, Complex.I_re, Complex.ofReal_im, Complex.I_im]
+  have hs1_re : (s - 1).re = -1/2 := by
+    rw [hs_def]
+    simp [Complex.sub_re, Complex.add_re, Complex.ofReal_re, Complex.mul_re,
+      Complex.I_re, Complex.ofReal_im, Complex.I_im, Complex.one_re]
+    norm_num
+  have hs_lb : (1:ℝ)/2 ≤ ‖s‖ := by
+    by_contra h; push_neg at h
+    have hnsq : Complex.normSq s = s.re * s.re + s.im * s.im := by
+      rw [Complex.normSq_apply]
+    have hnorm : (Complex.normSq s : ℝ) = ‖s‖ ^ 2 := by
+      rw [← Complex.normSq_eq_norm_sq]
+    have : s.re * s.re ≤ Complex.normSq s := by rw [hnsq]; linarith [mul_self_nonneg s.im]
+    rw [hs_re] at this
+    nlinarith [norm_nonneg s]
+  have hs1_lb : (1:ℝ)/2 ≤ ‖s - 1‖ := by
+    by_contra h; push_neg at h
+    have hnsq : Complex.normSq (s - 1) = (s - 1).re * (s - 1).re + (s - 1).im * (s - 1).im := by
+      rw [Complex.normSq_apply]
+    have hnorm : (Complex.normSq (s - 1) : ℝ) = ‖s - 1‖ ^ 2 := by
+      rw [← Complex.normSq_eq_norm_sq]
+    have : (s - 1).re * (s - 1).re ≤ Complex.normSq (s - 1) := by
+      rw [hnsq]; linarith [mul_self_nonneg (s - 1).im]
+    rw [hs1_re] at this
+    nlinarith [norm_nonneg (s - 1)]
+  have hs_ne : s ≠ 0 := by
+    intro h; have h_norm : ‖s‖ = 0 := by rw [h, norm_zero]
+    linarith
+  have hs1_ne : s - 1 ≠ 0 := by
+    intro h; have h_norm : ‖s - 1‖ = 0 := by rw [h, norm_zero]
+    linarith
+  -- Triangle inequality
+  calc ‖1 / s - ∑ i : Fin (N - 1), (↑(v i) : ℂ) / ((↑(↑i.val + 1 : ℕ) : ℂ) * (s - 1))‖
+      ≤ ‖(1 : ℂ) / s‖ + ‖∑ i, (↑(v i) : ℂ) / ((↑(↑i.val + 1 : ℕ) : ℂ) * (s - 1))‖ :=
+        norm_sub_le _ _
+    _ ≤ 2 + ∑ i, ‖(↑(v i) : ℂ) / ((↑(↑i.val + 1 : ℕ) : ℂ) * (s - 1))‖ := by
+        gcongr
+        · -- ‖1/s‖ ≤ 2
+          rw [norm_div, norm_one]
+          exact div_le_of_le_mul₀ (norm_nonneg _) (by norm_num) (by linarith)
+        · exact norm_sum_le _ _
+    _ ≤ 2 + ∑ i, 2 * (|v i| / (↑(i.val + 1) : ℝ)) := by
+        gcongr with i
+        rw [norm_div, norm_mul, Complex.norm_natCast, Complex.norm_real, Real.norm_eq_abs]
+        have hk_pos : (0:ℝ) < (↑(i.val + 1) : ℝ) := Nat.cast_pos.mpr (by omega)
+        -- Goal: |v i| / (↑(i+1) * ‖s-1‖) ≤ 2 * (|v i| / ↑(i+1))
+        have hs1_pos : (0:ℝ) < ‖s - 1‖ := by linarith
+        -- Rewrite: a/(b*c) = (a/b)/c, and (a/b)/c ≤ (a/b)*2 iff 1/c ≤ 2 iff c ≥ 1/2
+        rw [div_mul_eq_div_div]
+        -- Goal: |v i| / (↑(i+1) * ‖s-1‖) ≤ 2 * (|v i| / ↑(i+1))
+        have ha_nn : 0 ≤ |v i| / ↑(i.val + 1) := div_nonneg (abs_nonneg _) (by positivity)
+        have h1 : |v i| / ↑(i.val + 1) / ‖s - 1‖ ≤ |v i| / ↑(i.val + 1) / (1/2) :=
+          div_le_div_of_nonneg_left ha_nn (by linarith : (0:ℝ) < 1/2) hs1_lb
+        have h2 : |v i| / ↑(i.val + 1) / (1/2) = 2 * (|v i| / ↑(i.val + 1)) := by ring
+        linarith
+    _ = 2 + 2 * ∑ i : Fin (N - 1), |v i| / (↑(i.val + 1) : ℝ) := by
+        congr 1; rw [Finset.mul_sum]
 
 -- ════════════════════════════════════════════════
 -- §5. AUDIT
@@ -155,10 +215,10 @@ theorem rational_part_bounded (N : ℕ) (v : Fin (N - 1) → ℝ) (t : ℝ) :
      ∫₀¹|r_N|² = (1/2π)∫‖R + (ζ/s)·D‖²
   3. `bd_dirichlet_as_exp_sum` — PROVED ✅
      D_N on critical line = standard exponential sum
-  4. `rational_part_bounded` — 1 sorry remaining
+  4. `rational_part_bounded` — PROVED ✅
      |R_N(½+it)| bounded on critical line
 
-### Sorry: 1 (trivial bound |s-1| ≥ ½ for s = ½+it)
+### Sorry: 0 🏛️ (trivial bound |s-1| ≥ ½ for s = ½+it — PROVED)
 
 ### Dependencies (ALL PROVED):
   - parseval_bridge_white (White/Scattering.lean)

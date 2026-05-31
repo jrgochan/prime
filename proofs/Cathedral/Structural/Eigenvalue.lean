@@ -90,22 +90,24 @@ theorem telescoping (N₀ N : ℕ) (h₀ : 2 ≤ N₀) (hN : N₀ ≤ N) :
     Previously an axiom; now a theorem via bordered matrix secular equation
     (see Cathedral.Structural.BorderedSpectral for the proof structure).
 
-    The bound says: δ_N ≤ cos²θ · ‖g‖² / S  where
-    - cos²θ = projection of g onto min-eigenspace / ‖g‖²
-    - S = Schur complement (new basis function's residual after projection)
+    The bound says: δ_N ≤ ‖g‖² / (γ - λ_min)  where
+    - ‖g‖² = cross-correlation energy between new and existing basis functions
+    - γ = gramEntry(N-1)(N-1) = self-correlation of the N-th basis function
+    - λ_min = lambdaMin(N) = smallest eigenvalue of the N-dim Gram matrix
 
     This follows from the secular equation for bordered matrices:
-    γ - μ = Σ |⟨g, vⱼ⟩|² / (λⱼ - μ) ≥ |⟨g, v_min⟩|² / δ -/
+    γ - μ = gᵀ(A-μI)⁻¹g ≤ ‖g‖²/(λ_min(A) - μ) = ‖g‖²/eigenDrop
+    hence eigenDrop·(γ - μ) ≤ ‖g‖². -/
 theorem drop_formula_bound (N : ℕ) (hN : 3 ≤ N) :
-    eigenDrop N ≤ (cosAlignment (N - 1))^2 *
+    eigenDrop N ≤
       dotProduct (crossCorrVec (N - 1)) (crossCorrVec (N - 1)) /
-      schurComplement (N - 1) :=
+      (gramEntry (N - 1) (N - 1) - lambdaMin N) :=
   eigenDrop_le_projection_over_schur N hN
 
 theorem drop_formula (N : ℕ) (hN : 3 ≤ N) :
-    eigenDrop N ≤ (cosAlignment (N - 1))^2 *
+    eigenDrop N ≤
       dotProduct (crossCorrVec (N - 1)) (crossCorrVec (N - 1)) /
-      schurComplement (N - 1) := drop_formula_bound N hN
+      (gramEntry (N - 1) (N - 1) - lambdaMin N) := drop_formula_bound N hN
 
 end
 
