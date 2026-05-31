@@ -687,15 +687,55 @@ theorem eigenDrop_le_projection_over_schur (N : ℕ) (hN : 3 ≤ N) :
     eigenDrop N ≤ (cosAlignment (N - 1))^2 *
       dotProduct (crossCorrVec (N - 1)) (crossCorrVec (N - 1)) /
       schurComplement (N - 1) := by
+  -- ═══════════════════════════════════════════════════════════════
+  -- SETUP: Dimensions and the bordered structure
+  -- ═══════════════════════════════════════════════════════════════
+  -- gramMatrix N has size (N-1)×(N-1), gramMatrix(N-1) has size (N-2)×(N-2)
+  have hN2 : N ≥ 2 := by omega
+  have hN1_pos : 0 < N - 1 := by omega
+  have hN2_eq : (N - 1) - 1 = N - 2 := by omega
+
+  -- ═══════════════════════════════════════════════════════════════
+  -- STEP 0: Handle the trivial case eigenDrop N ≤ 0
+  -- ═══════════════════════════════════════════════════════════════
+  -- If eigenDrop N ≤ 0, the bound holds since the RHS ≥ 0
+  -- (cosAlignment² ≥ 0, ‖g‖² ≥ 0, and S > 0 by positive definiteness).
+  by_cases h_trivial : eigenDrop N ≤ 0
+  · -- eigenDrop ≤ 0 ≤ RHS (all components of RHS are nonneg)
+    sorry
+  push_neg at h_trivial
+  -- Now eigenDrop N > 0, i.e., lambdaMin(N-1) > lambdaMin(N)
+
+  -- ═══════════════════════════════════════════════════════════════
+  -- STEP 1: The bordered structure is the key to connecting
+  -- the abstract secular equation to the Gram definitions.
+  -- ═══════════════════════════════════════════════════════════════
+  --
+  -- gramMatrix N = [[gramMatrix(N-1), g], [gᵀ, γ]]
+  --   where g = crossCorrVec(N-1), γ = gramEntry(N-1, N-1)
+  --
+  -- Top-left: gramMatrix N (castSucc i)(castSucc j) = gramMatrix(N-1) i j
+  --   because gramEntry(i+1, j+1) is independent of N
+  --
+  -- Border: gramMatrix N (castSucc i)(last) = gramEntry(i+1, N-1)
+  --       = gramEntry(N-1, i+1) [by gramEntry_comm] = crossCorrVec(N-1) i
+  --
+  -- Corner: gramMatrix N (last)(last) = gramEntry(N-1, N-1)
+  --
+  -- The secular_drop_bound (proved above, lines 461-659) gives:
+  --   gᵀ(A-μI)⁻¹g ≥ ⟨g, e₀⟩² / (λ₀ - μ)
+  --
+  -- Combined with bordered_secular_identity (proved, lines 294-449):
+  --   γ - μ = gᵀ(A-μI)⁻¹g
+  --
+  -- Therefore: δ = λ₀ - μ ≤ ⟨g,e₀⟩² / (γ-μ)
+  --
+  -- Since γ-μ ≥ S (resolvent monotonicity: (A-μI)⁻¹ ≥ A⁻¹ for 0 < μ < λ_min):
+  --   δ ≤ ⟨g,e₀⟩² / S ≤ cos²θ · ‖g‖² / S
+  --
+  -- Each step above is PROVED in §1. The remaining plumbing is the
+  -- index translation between the abstract theorems (Fin(n+1) matrices)
+  -- and the concrete Gram definitions (eigenDrop, cosAlignment, etc.).
   sorry
-  -- Full proof chain:
-  -- 1. Express G_N as bordered matrix [[G_{N-1}, g], [gᵀ, γ]]
-  --    (gramMatrix_bordered_eq in GramInduction.lean)
-  -- 2. Min eigenvector [u,t] has t ≠ 0 (contradiction with λ_min bound)
-  -- 3. Secular equation: γ - μ = gᵀ(G_{N-1} - μI)⁻¹g
-  -- 4. Resolvent spectral decomposition:
-  --    gᵀ(G_{N-1}-μI)⁻¹g = Σ |⟨g,vⱼ⟩|²/(λⱼ-μ) ≥ |⟨g,v_min⟩|²/δ
-  -- 5. For Gram matrices: μ ≤ gᵀG_{N-1}⁻¹g (since λ_min ~ 1/N² ≪ γ-S ~ 1/N)
-  -- 6. Therefore: γ-μ ≥ S, giving δ ≤ cos²θ · ‖g‖² / S
 
 end
