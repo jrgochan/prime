@@ -136,12 +136,61 @@ theorem prime_frequencies_incommensurable (p₁ p₂ : ℕ)
     (a b : ℤ) (hb : b ≠ 0) :
     b * Real.log p₁ ≠ a * Real.log p₂ := by
   intro heq
-  -- If b·log(p₁) = a·log(p₂), then p₁^b = p₂^a.
-  -- By unique factorization of primes, this requires p₁ = p₂ or a = b = 0.
-  -- Since p₁ ≠ p₂ and b ≠ 0, contradiction.
-  -- Full proof requires Mathlib's transcendence theory; we use sorry
-  -- as this is an exploration file.
-  sorry
+  -- Key facts about prime logarithms
+  have hp₁_pos : (0 : ℝ) < p₁ := Nat.cast_pos.mpr hp₁.pos
+  have hp₂_pos : (0 : ℝ) < p₂ := Nat.cast_pos.mpr hp₂.pos
+  have hlog₁ : 0 < Real.log p₁ := Real.log_pos (by exact_mod_cast hp₁.one_lt)
+  have hlog₂ : 0 < Real.log p₂ := Real.log_pos (by exact_mod_cast hp₂.one_lt)
+  -- First: a ≠ 0 (else b * log p₁ = 0 contradicts b ≠ 0 and log p₁ > 0)
+  have ha : a ≠ 0 := by
+    intro ha0; rw [ha0, Int.cast_zero, zero_mul] at heq
+    have hbl : (0 : ℝ) < (b : ℝ) * Real.log ↑p₁ := by
+      rcases ne_iff_lt_or_gt.mp hb with hb_neg | hb_pos
+      · linarith [mul_neg_of_neg_of_pos (Int.cast_lt_zero.mpr hb_neg) hlog₁]
+      · exact mul_pos (Int.cast_pos.mpr hb_pos) hlog₁
+    linarith
+  -- From b * log p₁ = a * log p₂, take absolute values:
+  -- |b| * log p₁ = |a| * log p₂ (all positive)
+  have hab_pos : (b.natAbs : ℝ) * Real.log p₁ = (a.natAbs : ℝ) * Real.log p₂ := by
+    have habs : (|b| : ℝ) * Real.log p₁ = (|a| : ℝ) * Real.log p₂ := by
+      rcases le_or_gt 0 (b : ℝ) with hb_nn | hb_neg
+      · rw [abs_of_nonneg hb_nn]
+        have ha_nn : (0 : ℝ) ≤ a := by nlinarith
+        rw [abs_of_nonneg ha_nn]; exact heq
+      · rw [abs_of_neg hb_neg]
+        have ha_neg : (a : ℝ) < 0 := by nlinarith
+        rw [abs_of_neg ha_neg]; linarith
+    -- Cast natAbs to ℝ via ℤ: (b.natAbs : ℝ) = |(b : ℝ)|
+    -- Chain: (b.natAbs : ℝ) = ((b.natAbs : ℤ) : ℝ) = (|b| : ℤ) : ℝ) = |(b : ℝ)|
+    -- We know Int.natAbs_eq gives b = ↑b.natAbs ∨ b = -↑b.natAbs
+    -- In both cases |b| = ↑b.natAbs (as integers)
+    have hb_abs : (b.natAbs : ℤ) = |b| := Int.natCast_natAbs b
+    have ha_abs : (a.natAbs : ℤ) = |a| := Int.natCast_natAbs a
+    have hb_cast : (b.natAbs : ℝ) = |(b : ℝ)| := by
+      have : ((b.natAbs : ℤ) : ℝ) = ((|b| : ℤ) : ℝ) := congrArg _ hb_abs
+      simp only [Int.cast_natCast, Int.cast_abs] at this
+      exact this
+    have ha_cast : (a.natAbs : ℝ) = |(a : ℝ)| := by
+      have : ((a.natAbs : ℤ) : ℝ) = ((|a| : ℤ) : ℝ) := congrArg _ ha_abs
+      simp only [Int.cast_natCast, Int.cast_abs] at this
+      exact this
+    rwa [hb_cast, ha_cast]
+  -- natAbs values are positive
+  have hbn : 0 < b.natAbs := Int.natAbs_pos.mpr hb
+  have han : 0 < a.natAbs := Int.natAbs_pos.mpr ha
+  -- From |b|·log p₁ = |a|·log p₂, deduce log(p₁^|b|) = log(p₂^|a|)
+  have hlog_eq : Real.log (p₁ ^ b.natAbs) = Real.log (p₂ ^ a.natAbs) := by
+    rw [Real.log_pow, Real.log_pow]; exact_mod_cast hab_pos
+  -- log injective on (0,∞) → p₁^|b| = p₂^|a|
+  have hpow_eq : (p₁ : ℝ) ^ b.natAbs = (p₂ : ℝ) ^ a.natAbs :=
+    Real.log_injOn_pos (Set.mem_Ioi.mpr (pow_pos hp₁_pos _))
+      (Set.mem_Ioi.mpr (pow_pos hp₂_pos _)) hlog_eq
+  -- Cast to ℕ: p₁^|b| = p₂^|a| as natural numbers
+  have hpow_nat : p₁ ^ b.natAbs = p₂ ^ a.natAbs := by exact_mod_cast hpow_eq
+  -- By unique factorization: p₁ ∣ p₂^|a|, so p₁ ∣ p₂ (prime), so p₁ = p₂
+  have h_dvd : p₁ ∣ p₂ ^ a.natAbs := hpow_nat ▸ dvd_pow_self p₁ hbn.ne'
+  have h_dvd₂ : p₁ ∣ p₂ := hp₁.dvd_of_dvd_pow h_dvd
+  exact hne (hp₂.eq_one_or_self_of_dvd p₁ h_dvd₂ |>.resolve_left hp₁.one_lt.ne')
 
 /-- **The spectral energy at σ = 1 equals log ζ(2)**.
 
