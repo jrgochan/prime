@@ -121,8 +121,14 @@ theorem rpow_neg_antitone (σ : ℝ) (hσ : 0 < σ) (n : ℕ) (hn : 1 ≤ n) :
 /-- **Terms vanish**: n^{-σ} → 0 as n → ∞ for σ > 0. -/
 theorem rpow_neg_tendsto_zero (σ : ℝ) (hσ : 0 < σ) :
     Filter.Tendsto (fun n : ℕ => (n : ℝ) ^ (-σ)) Filter.atTop (nhds 0) := by
-  rw [show (0 : ℝ) = 0 ^ (-σ) from by simp [ne_of_gt hσ]]
-  sorry -- TODO: Mathlib tendsto_rpow, needs careful setup
+  -- n^{-σ} = (n^σ)⁻¹ → 0 since n^σ → ∞ for σ > 0.
+  -- Strategy: compose tendsto_rpow_atTop with natCast tendsto.
+  have h_inv : (fun n : ℕ => (n : ℝ) ^ (-σ)) = (fun n : ℕ => ((n : ℝ) ^ σ)⁻¹) := by
+    ext n; rw [rpow_neg (Nat.cast_nonneg n)]
+  rw [h_inv]
+  apply Filter.Tendsto.inv_tendsto_atTop
+  -- (n : ℝ) ^ σ → ∞ as n → ∞
+  exact (tendsto_rpow_atTop hσ).comp (tendsto_natCast_atTop_atTop (R := ℝ))
 
 /-- **The alternating series tail bound** (σ > 0):
     After N terms, the tail is bounded by the next term.
@@ -187,10 +193,41 @@ theorem sqrt_dominates_log :
     ∀ C : ℝ, ∃ N₀ : ℕ, ∀ N : ℕ, N ≥ N₀ →
       Real.sqrt (N : ℝ) ≥ C * Real.log (N : ℝ) := by
   intro C
-  -- √N / logN → ∞, so eventually √N > C·logN
-  -- This is a standard real analysis result
-  refine ⟨max 4 (Nat.ceil (C^4 + 1)), fun N hN => ?_⟩
-  sorry -- Standard: √x/log(x) → ∞
+  -- log x = o(x^{1/2}) is a standard Mathlib result (isLittleO_log_rpow_atTop).
+  -- We extract a concrete N₀ from the asymptotic statement.
+  have h_littleo := isLittleO_log_rpow_atTop (show (0:ℝ) < 1/2 by norm_num)
+  -- From o(x^{1/2}): eventually |log x| ≤ (1/max 1 |C|) · x^{1/2}
+  have hε : (0:ℝ) < 1 / (max 1 (|C| + 1)) := by positivity
+  rw [Asymptotics.isLittleO_iff] at h_littleo
+  have hev := h_littleo hε
+  rw [Filter.eventually_atTop] at hev
+  obtain ⟨M, hM⟩ := hev
+  refine ⟨max 2 (Nat.ceil M), fun N hN => ?_⟩
+  have hN_ge_2 : 2 ≤ N := le_trans (le_max_left _ _) hN
+  have hN_pos : (0:ℝ) < (N:ℝ) := by positivity
+  have hN_ge_M : M ≤ (N:ℝ) := le_trans (Nat.le_ceil M) (by exact_mod_cast le_trans (le_max_right _ _) hN)
+  have h1 := hM (N:ℝ) hN_ge_M
+  -- h1: ‖log N‖ ≤ 1/(max 1 (|C|+1)) · ‖N^{1/2}‖
+  rw [Real.norm_of_nonneg (rpow_nonneg hN_pos.le _)] at h1
+  rw [show (N:ℝ) ^ (1/2:ℝ) = Real.sqrt N from by rw [Real.sqrt_eq_rpow]] at h1
+  have hlog_bound : |Real.log (N:ℝ)| ≤ Real.sqrt N / (max 1 (|C| + 1)) := by
+    rwa [div_mul_eq_mul_div, one_mul] at h1
+  have hsqrt_pos : 0 < Real.sqrt (N:ℝ) := Real.sqrt_pos.mpr hN_pos
+  -- C · log N ≤ |C| · |log N| ≤ |C| · sqrt N / (|C|+1) ≤ sqrt N
+  calc C * Real.log (N:ℝ) ≤ |C * Real.log (N:ℝ)| := le_abs_self _
+    _ = |C| * |Real.log (N:ℝ)| := abs_mul C _
+    _ ≤ |C| * (Real.sqrt N / (max 1 (|C| + 1))) := by
+        gcongr
+    _ ≤ |C| * (Real.sqrt N / (|C| + 1)) := by
+        gcongr; exact le_max_right _ _
+    _ = Real.sqrt N * (|C| / (|C| + 1)) := by ring
+    _ ≤ Real.sqrt N * 1 := by
+        gcongr
+        have : |C| / (|C| + 1) ≤ 1 := by
+          rw [div_le_one (by positivity : (0:ℝ) < |C| + 1)]
+          linarith [abs_nonneg C]
+        exact this
+    _ = Real.sqrt N := mul_one _
 
 -- ════════════════════════════════════════════════
 -- §4. THE BRIDGE BACK TO NB
