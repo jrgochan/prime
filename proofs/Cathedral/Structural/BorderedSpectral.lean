@@ -860,9 +860,12 @@ theorem eigenDrop_le_projection_over_schur (N : ℕ) (hN : 3 ≤ N) :
   -- Key: inf'(eigenvalues) = inf'(eigenvalues₀) = lambdaMin(k+3)
   have hmin_eq : (Finset.univ.inf' hne_dir hM_herm.eigenvalues) = lambdaMin (k + 3) := by
     simp only [lambdaMin, show k + 3 ≥ 2 from hk3_ge2, dite_true]
-    -- inf' eigenvalues = inf' eigenvalues₀ since eigenvalues₀ is a reindexing
-    -- Both take the inf over the same set of values
-    sorry -- inf' under bijection
+    -- eigenvalues₀ = eigenvalues ∘ (equivFin).symm
+    -- inf'(univ, eigenvalues₀) = inf'(univ, eigenvalues ∘ equivFin.symm)
+    --                           = inf'(map equivFin.symm univ, eigenvalues) [by inf'_map]
+    --                           = inf'(univ, eigenvalues)                    [by map_univ_equiv]
+    unfold Matrix.IsHermitian.eigenvalues₀
+    sorry -- inf'(eigenvalues) = inf'(eigenvalues₀): equivFin for Fin types is identity
 
   set x := (⇑(hM_herm.eigenvectorBasis j₀) : Fin (n + 1) → ℝ) with hx_def
   have hx_eig : M.mulVec x = lambdaMin (k + 3) • x := by
