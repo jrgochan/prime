@@ -160,7 +160,9 @@ fn ooc_build_gram(max_n: usize, precision: u32, t_max: usize) -> std::io::Result
     println!();
 
     // Build ln(n) table — must cover at least t_max+1
-    let table_size = t_max.max(max_n * 5).max(10_000).min(500_000);
+    // NOTE: no cap — gram_entry_fast_at_t needs ln(n) up to t_max for breakpoints.
+    // RAM is ~80 bytes/entry × T_max (e.g., 80 MB for T=1M). Trivial.
+    let table_size = t_max.max(max_n * 5).max(10_000);
     let ln_table = gram::LnNTable::new(table_size + 1, precision);
 
     // Open output file with buffered writer
