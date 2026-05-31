@@ -61,6 +61,7 @@ fn l_idx(row: usize, col: usize) -> usize {
 /// Memory-mapped OOC Gram matrix for zero-copy access.
 struct MmapGram {
     data: *const f64,
+    mmap_base: *mut libc::c_void,
     dim: usize,
     _mmap_len: usize,
 }
@@ -114,7 +115,7 @@ impl MmapGram {
                 std::ptr::null_mut(),
                 file_len,
                 libc::PROT_READ,
-                libc::MAP_PRIVATE,
+                libc::MAP_SHARED, // SHARED: no copy-on-write page duplication
                 fd,
                 0,
             )
@@ -134,6 +135,7 @@ impl MmapGram {
 
         Ok(MmapGram {
             data: data_ptr,
+            mmap_base: ptr,
             dim,
             _mmap_len: file_len,
         })
@@ -143,6 +145,22 @@ impl MmapGram {
     #[inline]
     fn row(&self, i: usize) -> &[f64] {
         unsafe { std::slice::from_raw_parts(self.data.add(i * self.dim), self.dim) }
+    }
+
+    /// Release page cache for rows we've already read.
+    /// This prevents the mmap'd file from competing with L triangle for RAM.
+    fn dontneed_rows(&self, start_row: usize, count: usize) {
+        if count == 0 { return; }
+        let page_size = 4096usize;
+        let byte_offset = start_row * self.dim * 8;
+        let byte_len = count * self.dim * 8;
+        // Align to page boundary
+        let aligned_start = byte_offset & !(page_size - 1);
+        let aligned_len = ((byte_offset + byte_len + page_size - 1) & !(page_size - 1)) - aligned_start;
+        unsafe {
+            let base = (self.mmap_base as *const u8).add(OOC_HEADER_SIZE + aligned_start);
+            libc::madvise(base as *mut libc::c_void, aligned_len, libc::MADV_DONTNEED);
+        }
     }
 }
 
@@ -377,6 +395,13 @@ fn run_inner(path: &Path, max_n: usize) {
 
             // ── BLOCKED PARALLEL FORWARD SOLVE ──
             let w = blocked_forward_solve(&l_data, &gram_row[..new_row], new_row);
+
+            // Release the mmap'd page cache for rows we've consumed.
+            // This prevents the 75 GB file from evicting L triangle pages.
+            // Release in batches of 1024 rows to amortize syscall overhead.
+            if new_row % 1024 == 0 && new_row >= 1024 {
+                gram.dontneed_rows(new_row - 1024, 1024);
+            }
 
             // s = sqrt(G(new_row, new_row) - ‖w‖²)
             // Parallel w_norm_sq for large dim
