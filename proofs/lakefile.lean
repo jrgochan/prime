@@ -123,6 +123,8 @@ lean_lib «Cathedral» where
     `Cathedral.Structural.TailSumBound,
     `Cathedral.Structural.PrimeFractal,
     `Cathedral.Structural.Structural,
+    -- Cholesky Decrement (d²(N+1) = d²(N) - y²_new, Approach A, May 31 2026)
+    `Cathedral.Structural.CholeskyDecrement,
     -- Mellin bridge
     `Cathedral.MellinBridge.Basic,
     `Cathedral.MellinBridge.FloorMellin,

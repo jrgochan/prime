@@ -914,7 +914,7 @@ lemma lambdaMin_le_eigenvalue (N : ℕ) (hN : 2 ≤ N)
     operators. -/
 
 -- Schur complement S_N > 0 for all N ≥ 2 (PD Gram matrices).
-private theorem schurComplement_pos_local (N : ℕ) (hN : 2 ≤ N) :
+theorem schurComplement_pos_of_ge_two (N : ℕ) (hN : 2 ≤ N) :
     0 < schurComplement N := by
   set G := gramMatrix N
   set g := crossCorrVec N
