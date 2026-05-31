@@ -661,6 +661,66 @@ theorem secular_drop_bound
 end SecularEquation
 
 -- ════════════════════════════════════════════════
+-- §1b: GRAM MATRIX BORDERED STRUCTURE (Bridge)
+-- ════════════════════════════════════════════════
+
+/-! ### Bridge lemmas connecting gramMatrix to bordered matrix framework.
+
+    gramMatrix N (size (N-1)×(N-1)) is a bordered extension of
+    gramMatrix (N-1) (size (N-2)×(N-2)):
+
+      gramMatrix N = [[gramMatrix(N-1), g], [gᵀ, γ]]
+
+    where g = crossCorrVec(N-1), γ = gramEntry(N-1)(N-1).
+
+    These lemmas are pure index arithmetic — no mathematics. -/
+
+/-- Top-left block: gramMatrix N embeds gramMatrix(N-1).
+    Both use gramEntry(i+1, j+1), which is independent of N. -/
+lemma gramMatrix_bordered_topleft (N : ℕ) (hN : 3 ≤ N)
+    (i j : Fin (N - 2)) :
+    (gramMatrix N) ⟨i.val, by omega⟩ ⟨j.val, by omega⟩ =
+    (gramMatrix (N - 1)) i j := by
+  simp only [gramMatrix, of_apply]
+
+/-- Border column: gramMatrix N's last column matches crossCorrVec(N-1).
+    (gramMatrix N)(i, last) = gramEntry(i+1, N-1) = gramEntry(N-1, i+1)
+    = crossCorrVec(N-1)(i). -/
+lemma gramMatrix_bordered_border (N : ℕ) (hN : 3 ≤ N)
+    (i : Fin (N - 2)) :
+    (gramMatrix N) ⟨i.val, by omega⟩ ⟨N - 2, by omega⟩ =
+    crossCorrVec (N - 1) i := by
+  simp only [gramMatrix, of_apply, crossCorrVec]
+  rw [gramEntry_comm]
+  congr 1 <;> omega
+
+/-- Corner entry: gramMatrix N's bottom-right = gramEntry(N-1, N-1). -/
+lemma gramMatrix_bordered_corner (N : ℕ) (hN : 3 ≤ N) :
+    (gramMatrix N) ⟨N - 2, by omega⟩ ⟨N - 2, by omega⟩ =
+    gramEntry (N - 1) (N - 1) := by
+  simp only [gramMatrix, of_apply]
+  congr 1 <;> omega
+
+/-- **lambdaMin is an eigenvalue** of gramMatrix N.
+    Since eigenvalues₀ is a finite set, inf' is achieved. -/
+lemma lambdaMin_is_eigenvalue (N : ℕ) (hN : 2 ≤ N) :
+    ∃ i₀ : Fin (Fintype.card (Fin (N - 1))),
+      lambdaMin N = (gramMatrix_hermitian N).eigenvalues₀ i₀ := by
+  simp only [lambdaMin, show N ≥ 2 from hN, dite_true]
+  -- inf' achieves its minimum on a nonempty finite set
+  have hne : (Finset.univ : Finset (Fin (Fintype.card (Fin (N - 1))))).Nonempty := by
+    rw [Fintype.card_fin]; exact ⟨⟨0, by omega⟩, Finset.mem_univ _⟩
+  obtain ⟨i₀, _, hi₀⟩ := Finset.exists_mem_eq_inf' hne (gramMatrix_hermitian N).eigenvalues₀
+  exact ⟨i₀, hi₀⟩
+
+/-- **lambdaMin is at most any eigenvalue** of gramMatrix N. -/
+lemma lambdaMin_le_eigenvalue (N : ℕ) (hN : 2 ≤ N)
+    (i : Fin (Fintype.card (Fin (N - 1)))) :
+    lambdaMin N ≤ (gramMatrix_hermitian N).eigenvalues₀ i := by
+  simp only [lambdaMin, show N ≥ 2 from hN, dite_true]
+  exact Finset.inf'_le _ (Finset.mem_univ _)
+
+-- ════════════════════════════════════════════════
 -- §2: DROP BOUND FOR GRAM MATRICES
 -- ════════════════════════════════════════════════
 
