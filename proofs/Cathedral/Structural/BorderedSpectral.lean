@@ -808,13 +808,54 @@ theorem eigenDrop_le_projection_over_schur (N : ℕ) (hN : 3 ≤ N) :
   -- ═══════════════════════════════════════════════════════════════
   -- Types now match: M on Fin(n+1), A on Fin(n), gv : Fin(n) → ℝ
   -- Can directly apply bordered_secular_identity and secular_drop_bound.
-  -- Remaining substeps with sorry:
-  -- (a) Extract eigenvector of M at eigenvalue lambdaMin(k+3)
-  -- (b) Show lambdaMin(k+3) < inf'(eigenvalues₀ of A)
-  -- (c) Apply bordered_secular_identity → γ - μ = gᵀ(A-μI)⁻¹g
-  -- (d) Apply secular_drop_bound → gᵀ(A-μI)⁻¹g ≥ ⟨g,e₀⟩²/δ
-  -- (e) Prove resolvent monotonicity → γ-μ ≥ S
-  -- (f) Connect ⟨g,e₀⟩² to cosAlignment → δ ≤ cos²θ·‖g‖²/S
+
+  -- (a) lambdaMin(k+2) = inf'(eigenvalues₀ of A)
+  -- This is just unfolding lambdaMin with k+2 ≥ 2
+  have hk2_ge2 : k + 2 ≥ 2 := by omega
+  have hk3_ge2 : k + 3 ≥ 2 := by omega
+  -- lambdaMin(k+2) is the inf' of eigenvalues₀ of gramMatrix(k+2) = A
+  have hmu_lt_inf : lambdaMin (k + 3) <
+      (Finset.univ : Finset (Fin (Fintype.card (Fin n)))).inf'
+        (by rw [Fintype.card_fin]; exact ⟨⟨0, hn_pos⟩, Finset.mem_univ _⟩)
+        hA_herm.eigenvalues₀ := by
+    -- lambdaMin(k+2) = inf'(eigenvalues₀) by definition
+    convert hmu_lt using 1
+
+  -- (b) Extract eigenvector of M at eigenvalue lambdaMin(k+3)
+  -- lambdaMin_is_eigenvalue gives us the index
+  obtain ⟨i₀, hi₀⟩ := lambdaMin_is_eigenvalue (k + 3) hk3_ge2
+  -- Reindex i₀ from Fin(Fintype.card(Fin(n+1))) to Fin(n+1)
+  have hcard : Fintype.card (Fin (n + 1)) = n + 1 := Fintype.card_fin _
+  set j₀ : Fin (n + 1) := ⟨i₀.val, by rw [← hcard]; exact i₀.isLt⟩ with hj₀_def
+  -- The eigenvector at index j₀
+  set x := (⇑(hM_herm.eigenvectorBasis j₀) : Fin (n + 1) → ℝ) with hx_def
+  -- x is a unit eigenvector: M *ᵥ x = lambdaMin(k+3) • x
+  have hx_eig : M.mulVec x = lambdaMin (k + 3) • x := by
+    sorry -- requires connecting eigenvalues₀ to mulVec_eigenvectorBasis
+  have hx_ne : x ≠ 0 := by
+    intro habs
+    have h_norm : ‖(hM_herm.eigenvectorBasis j₀ : EuclideanSpace ℝ (Fin (n + 1)))‖ = 1 :=
+      hM_herm.eigenvectorBasis.orthonormal.1 j₀
+    -- The coercion ⇑ gives the same function as x
+    have : (hM_herm.eigenvectorBasis j₀ : EuclideanSpace ℝ (Fin (n + 1))) = 0 := by
+      ext i; exact congr_fun habs i
+    rw [this, norm_zero] at h_norm; exact absurd h_norm (by norm_num)
+
+  -- (c) Apply bordered_secular_identity
+  have h_secular := bordered_secular_identity M hM_herm A hA_herm hA_eq gv hg_eq γ hγ_eq
+    x hx_eig hx_ne hn_pos hmu_lt_inf
+  -- h_secular : γ - lambdaMin(k+3) = gvᵀ(A - lambdaMin(k+3)•I)⁻¹ gv
+
+  -- (d) Apply secular_drop_bound
+  have h_drop := secular_drop_bound A hA_herm gv hn_pos (lambdaMin (k + 3)) hmu_lt_inf
+  -- h_drop : gvᵀ(A-μI)⁻¹gv ≥ ⟨gv, e₀⟩² / (λ₀ - μ)
+
+  -- (e) Combine secular identity + drop bound
+  -- From h_secular: γ - μ = resolvent quad form
+  -- From h_drop: resolvent quad form ≥ ⟨gv,e₀⟩²/(λ₀-μ) = ⟨gv,e₀⟩²/δ
+  -- So: γ - μ ≥ ⟨gv,e₀⟩²/δ → δ ≤ ⟨gv,e₀⟩²/(γ-μ)
+  -- Since γ-μ ≥ S (resolvent monotonicity): δ ≤ ⟨gv,e₀⟩²/S
+  -- ⟨gv,e₀⟩² ≤ cos²θ·‖gv‖² → δ ≤ cos²θ·‖gv‖²/S
   sorry
 
 end
