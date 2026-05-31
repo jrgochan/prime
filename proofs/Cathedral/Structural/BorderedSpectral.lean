@@ -823,15 +823,54 @@ theorem eigenDrop_le_projection_over_schur (N : ℕ) (hN : 3 ≤ N) :
 
   -- (b) Extract eigenvector of M at eigenvalue lambdaMin(k+3)
   -- lambdaMin_is_eigenvalue gives us the index
-  obtain ⟨i₀, hi₀⟩ := lambdaMin_is_eigenvalue (k + 3) hk3_ge2
-  -- Reindex i₀ from Fin(Fintype.card(Fin(n+1))) to Fin(n+1)
-  have hcard : Fintype.card (Fin (n + 1)) = n + 1 := Fintype.card_fin _
-  set j₀ : Fin (n + 1) := ⟨i₀.val, by rw [← hcard]; exact i₀.isLt⟩ with hj₀_def
-  -- The eigenvector at index j₀
+  -- (b) Extract eigenvector of M at eigenvalue lambdaMin(k+3)
+  -- lambdaMin(k+3) is the inf' of eigenvalues₀, which we need to connect
+  -- to an eigenvector. We work with eigenvalues directly via its index.
+
+  -- Step 1: lambdaMin(k+3) is achieved at some eigenvalue index
+  -- Use the fact that inf' is achieved at some element of the finset
+  have hne_M : (Finset.univ : Finset (Fin (Fintype.card (Fin (n + 1))))).Nonempty := by
+    rw [Fintype.card_fin]; exact ⟨⟨0, by omega⟩, Finset.mem_univ _⟩
+  -- lambdaMin(k+3) = eigenvalues₀ i₀ for some i₀
+  -- But eigenvalues₀ = eigenvalues ∘ (equivFin).symm
+  -- So eigenvalues₀ i₀ = eigenvalues ((equivFin).symm i₀)
+  -- Set j₀ = (equivFin).symm i₀, then eigenvalues j₀ = lambdaMin(k+3)
+
+  -- We directly use: lambdaMin = inf' eigenvalues₀
+  -- eigenvalues₀ = eigenvalues ∘ (equivFin).symm
+  -- Therefore lambdaMin ≤ eigenvalues j for all j
+  -- And lambdaMin = eigenvalues j₀ for some j₀
+
+  -- Actually, let's use Finset.exists_mem_eq_inf' on eigenvalues directly
+  -- We need inf' on eigenvalues (indexed by Fin(n+1)) equals inf' on eigenvalues₀
+  -- But this is complex. Instead, just use the weaker fact:
+  -- For ANY eigenvector of M at eigenvalue μ < λ_min(A), the secular identity holds.
+  -- lambdaMin(k+3) is an eigenvalue of M, so there exists such an eigenvector.
+
+  -- Use hM_herm.eigenvalues: Fin(n+1) → ℝ
+  -- lambdaMin(k+3) = inf'(eigenvalues₀), and eigenvalues₀ = eigenvalues ∘ reindex
+  -- Since reindex is a bijection, inf'(eigenvalues₀) = inf'(eigenvalues)
+
+  -- Take j₀ = argmin of eigenvalues (the standard min eigenvalue index)
+  have hne_dir : (Finset.univ : Finset (Fin (n + 1))).Nonempty :=
+    ⟨⟨0, by omega⟩, Finset.mem_univ _⟩
+  obtain ⟨j₀, _, hj₀⟩ := Finset.exists_mem_eq_inf' hne_dir hM_herm.eigenvalues
+  -- hj₀ : inf'(univ, eigenvalues) = eigenvalues j₀
+
+  -- Key: inf'(eigenvalues) = inf'(eigenvalues₀) = lambdaMin(k+3)
+  have hmin_eq : (Finset.univ.inf' hne_dir hM_herm.eigenvalues) = lambdaMin (k + 3) := by
+    simp only [lambdaMin, show k + 3 ≥ 2 from hk3_ge2, dite_true]
+    -- inf' eigenvalues = inf' eigenvalues₀ since eigenvalues₀ is a reindexing
+    -- Both take the inf over the same set of values
+    sorry -- inf' under bijection
+
   set x := (⇑(hM_herm.eigenvectorBasis j₀) : Fin (n + 1) → ℝ) with hx_def
-  -- x is a unit eigenvector: M *ᵥ x = lambdaMin(k+3) • x
   have hx_eig : M.mulVec x = lambdaMin (k + 3) • x := by
-    sorry -- requires connecting eigenvalues₀ to mulVec_eigenvectorBasis
+    -- eigenvalues j₀ = inf'(eigenvalues) = lambdaMin(k+3)
+    have h_ev_eq : hM_herm.eigenvalues j₀ = lambdaMin (k + 3) := by
+      rw [← hmin_eq, ← hj₀]
+    rw [← h_ev_eq]
+    exact hM_herm.mulVec_eigenvectorBasis j₀
   have hx_ne : x ≠ 0 := by
     intro habs
     have h_norm : ‖(hM_herm.eigenvectorBasis j₀ : EuclideanSpace ℝ (Fin (n + 1)))‖ = 1 :=
