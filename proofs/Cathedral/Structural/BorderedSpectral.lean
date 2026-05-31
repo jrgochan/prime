@@ -39,6 +39,7 @@
 import Cathedral.Defs
 import Cathedral.Spectral.RayleighBridge
 import Cathedral.LinearAlgebra.Sylvester
+import Cathedral.Structural.Independence
 
 noncomputable section
 open Complex Real Matrix Finset
@@ -743,6 +744,33 @@ lemma lambdaMin_le_eigenvalue (N : ℕ) (hN : 2 ≤ N)
     This is standard linear algebra (Golub & Van Loan §8.1) but
     requires Mathlib's spectral theorem infrastructure for resolvent
     operators. -/
+
+-- Schur complement S_N > 0 for all N ≥ 2 (PD Gram matrices).
+private theorem schurComplement_pos_local (N : ℕ) (hN : 2 ≤ N) :
+    0 < schurComplement N := by
+  set G := gramMatrix N
+  set g := crossCorrVec N
+  set c := G⁻¹.mulVec g with hc_def
+  set a := gramEntry N N with ha_def
+  set w : Fin ((N + 1) - 1) → ℝ := fun i =>
+    if h : i.val < N - 1 then -(c ⟨i.val, h⟩) else 1 with hw_def
+  have hw_ne : w ≠ 0 := by
+    intro hw_zero
+    have : w ⟨N - 1, by omega⟩ = 0 := congr_fun hw_zero ⟨N - 1, by omega⟩
+    simp only [hw_def, show ¬(N - 1 < N - 1) from lt_irrefl _, dite_false] at this
+    linarith
+  suffices h_eq : realQuadForm (gramMatrix (N + 1)) w = schurComplement N by
+    rw [← h_eq]; exact gram_pos_def (N + 1) (by omega) w hw_ne
+  have h_det : G.det ≠ 0 := gramMatrix_det_ne_zero N hN
+  have h_unit : IsUnit G.det := gramMatrix_isUnit_det N hN
+  have h_Gc : G.mulVec c = g := by
+    rw [hc_def, Matrix.mulVec_mulVec,
+        Matrix.mul_nonsing_inv G h_unit, Matrix.one_mulVec]
+  have h_cGc : dotProduct c (G.mulVec c) = dotProduct c g := by rw [h_Gc]
+  have h_dot_comm : dotProduct c g = dotProduct g c := by
+    simp [dotProduct, Finset.sum_congr rfl (fun i _ => mul_comm (c i) (g i))]
+  sorry  -- Block expansion: wᵀG_{N+1}w = S (see Quantitative.lean for full 50-line calc)
+
 theorem eigenDrop_le_projection_over_schur (N : ℕ) (hN : 3 ≤ N) :
     eigenDrop N ≤ (cosAlignment (N - 1))^2 *
       dotProduct (crossCorrVec (N - 1)) (crossCorrVec (N - 1)) /
@@ -751,7 +779,18 @@ theorem eigenDrop_le_projection_over_schur (N : ℕ) (hN : 3 ≤ N) :
   -- STEP 0: Handle the trivial case eigenDrop ≤ 0
   -- ═══════════════════════════════════════════════════════════════
   by_cases h_trivial : eigenDrop N ≤ 0
-  · sorry -- eigenDrop ≤ 0 ≤ RHS (S > 0 for PD Gram)
+  · -- eigenDrop ≤ 0 ≤ cos²θ · ‖g‖² / S
+    calc eigenDrop N
+        ≤ 0 := h_trivial
+      _ ≤ _ := by
+          apply div_nonneg
+          · -- cos²θ · ‖g‖² ≥ 0 (product of squares)
+            apply mul_nonneg (sq_nonneg _)
+            unfold dotProduct
+            exact Finset.sum_nonneg fun i _ => mul_self_nonneg _
+          · -- S ≥ 0: schurComplement is positive for PD Gram matrices
+            -- See IntegralBasis/Quantitative.lean: schurComplement_pos
+            exact le_of_lt (schurComplement_pos_local (N - 1) (by omega))
   push_neg at h_trivial
   -- ═══════════════════════════════════════════════════════════════
   -- KEY TRICK: Eliminate N by writing N = k + 3
