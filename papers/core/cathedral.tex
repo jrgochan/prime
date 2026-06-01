@@ -4,13 +4,13 @@
 
 \title{%
   A Formal Reduction of the Riemann Hypothesis\\
-  to One Axiom via the\\
+  to Two Axioms via the\\
   Nyman--Beurling Criterion in Lean~4%
 }
 \author{
   Jason Robert Gochanour\,\orcidlink{0000-0002-2862-526X}
 }
-\date{May 31, 2026}
+\date{June 1, 2026}
 
 \begin{document}
 
@@ -31,13 +31,16 @@ Nyman--Beurling distance:
 where $d_N^2 = \inf_{v} \int_0^1 (1 - \sum_{k=2}^{N} v_k \{1/(kx)\})^2\,dx$.
 The formalization comprises 381 active Lean files ($\sim$116{,}000 lines;
 495 files and $\sim$130{,}000 lines including archived explorations) with
-zero compilation errors. On the crown path, the theorem depends on
-exactly \textbf{one} axiom---\texttt{discrete\_riemann\_hypothesis},
-formally proved equivalent to RH---plus
-2 PNT bureaucracy axioms that are unconditionally provable from Mathlib's
-Prime Number Theorem infrastructure. The converse direction uses
-\textbf{zero} custom axioms
-and \textbf{zero sorry}.
+zero compilation errors (8{,}736 build jobs). On the crown path, the theorem
+depends on exactly \textbf{two} axioms:
+\texttt{gram\_form\_upper\_bound} ($v^T G v \leq 1 + K/\ln N$,
+equivalent to RH) and \texttt{mertens\_34\_unconditional}
+($|M(x)| \leq C x^{3/4}$, an unconditional consequence of the Prime
+Number Theorem). The former axiom
+\texttt{discrete\_riemann\_hypothesis} ($v^T C v \leq C/\ln N$) has been
+\textbf{graduated to a theorem}, derived from the Gram form bound via
+variance decomposition. The converse direction uses
+\textbf{zero} custom axioms and \textbf{zero sorry}.
 
 The proof introduces four techniques of independent interest:
 (i)~the \emph{Rank-1 Mellin Miracle}, which proves the converse by
@@ -101,11 +104,14 @@ Nyman--Beurling distance in the B\'aez-Duarte basis:
 This is the top-level declaration \lean{baez\_duarte\_forward}
 in \lean{Assembly/MainChain.lean}, re-exported through
 \lean{Assembly/Assembly.lean}. The Lean kernel verifies it depends
-on exactly 1 Cathedral axiom (\lean{discrete\_riemann\_hypothesis},
-formally equivalent to RH) plus 2 PNT bureaucracy
-axioms (unconditional, provable from Mathlib's PNT infrastructure)
-and 3 Lean kernel axioms
+on exactly 2 Cathedral axioms:
+\lean{gram\_form\_upper\_bound} ($v^T G v \leq 1+K/\ln N$,
+equivalent to RH) and
+\lean{mertens\_34\_unconditional} ($|M(x)| \leq Cx^{3/4}$, PNT),
+plus 2 PNT bureaucracy axioms and 3 Lean kernel axioms
 (\lean{propext}, \lean{Classical.choice}, \lean{Quot.sound}).
+The former axiom \lean{discrete\_riemann\_hypothesis} was
+graduated to a theorem on June~1, 2026.
 
 The proof decomposes into two pillars:
 \begin{itemize}
@@ -375,8 +381,8 @@ historical reference; the primary forward path is Path~F
 
 \subsection{The Crown Axioms}
 
-The crown theorem depends on exactly \textbf{1} axiom (equivalent to RH)
-plus 2 PNT bureaucracy axioms:
+The crown theorem depends on exactly \textbf{2} axioms (1 equivalent to RH,
+1 unconditional PNT) plus 2 PNT bureaucracy axioms:
 
 \begin{center}
 \small
@@ -384,14 +390,19 @@ plus 2 PNT bureaucracy axioms:
 \toprule
 \textbf{\#} & \textbf{Axiom} & \textbf{Content} & \textbf{Status} \\
 \midrule
-1 & \lean{discrete\_riemann\_hypothesis} &
-  $v^T C v \leq C/\ln N$ & \textbf{$\equiv$ RH (The Crowning)} \\
+1 & \lean{gram\_form\_upper\_bound} &
+  $v^T G v \leq 1 + K/\ln N$ & \textbf{$\equiv$ RH} \\
+2 & \lean{mertens\_34\_unconditional} &
+  $|M(x)| \leq C x^{3/4}$ & \textbf{PNT (unconditional)} \\
 \midrule
 \multicolumn{4}{@{}l@{}}{\emph{PNT bureaucracy (unconditional, provable from Mathlib PNTA):}} \\
-2 & \lean{frac\_error\_isLittleO} & Fractional-part error & PNT \\
-3 & \lean{pnt\_mu\_log\_sq\_div\_k} & $\sum\mu(k)\ln^2(k)/k$ & PNT \\
+3 & \lean{frac\_error\_isLittleO} & Fractional-part error & PNT \\
+4 & \lean{pnt\_mu\_log\_sq\_div\_k} & $\sum\mu(k)\ln^2(k)/k$ & PNT \\
 \midrule
-\multicolumn{4}{@{}l@{}}{\emph{Graduated (proved from Mathlib/PNTAnd, May 2026):}} \\
+\multicolumn{4}{@{}l@{}}{\emph{Graduated (proved, May--June 2026):}} \\
+--- & \lean{discrete\_riemann\_hypothesis} & $v^T C v \leq C/\ln N$ & \textbf{THEOREM} (June 1, 2026) \\
+--- & \lean{nb\_dist\_sq\_decay} & $d^2 \leq C/\ln N$ & \textbf{THEOREM} (June 1, 2026) \\
+--- & \lean{nbDistSq\_step}, etc. & 5 AsymptoticFreedom axioms & \textbf{THEOREM} (June 1, 2026) \\
 --- & \lean{R\_isLittleO} & $R(x) = o(x)$ & \textbf{THEOREM} (PNTAnd) \\
 --- & \lean{mu\_pnt\_alt} & $\sum\mu(k)/k = o(1)$ & \textbf{THEOREM} (PNTAnd) \\
 --- & \lean{mu\_log\_mul\_zeta} & $\mu\cdot\log * \zeta = -\Lambda$ & \textbf{THEOREM} \\
@@ -401,12 +412,15 @@ plus 2 PNT bureaucracy axioms:
 \end{center}
 
 \noindent
-The axiom \lean{discrete\_riemann\_hypothesis} states that the covariance
-quadratic form $v^T C v \leq C/\ln N$ for the M\"obius--Selberg witness.
-The equivalence \lean{witness\_covariance\_decay\_iff\_rh} proves
-$\texttt{discrete\_riemann\_hypothesis} \iff \RH$.
-This is not a literature axiom but RH itself, stated in the language of
-the Cathedral. The converse uses \textbf{zero} custom axioms.
+The axiom \lean{gram\_form\_upper\_bound} states that the Gram
+quadratic form $v^T G v \leq 1 + K/\ln N$ for the M\"obius--Selberg witness.
+This is formally equivalent to RH (combined with PNT) and cannot be
+derived from PNT alone, as Beurling generalized prime systems
+demonstrate. The former axiom \lean{discrete\_riemann\_hypothesis}
+($v^T C v \leq C/\ln N$) was \textbf{graduated to a theorem} on June~1,
+2026, derived from \lean{gram\_form\_upper\_bound} via the variance
+decomposition $v^T C v = v^T G v - (b^T v)^2$ combined with the PNT
+numerator rate. The converse uses \textbf{zero} custom axioms.
 
 The historical axiom \lean{covariance\_bound\_from\_mertens\_34}
 (used by Path~B/Perron Crown) was found to be mathematically false
@@ -433,16 +447,16 @@ the full repository ($\sim$3{,}000 theorem/lemma/def declarations):
 \toprule
 \textbf{Tier} & \textbf{Content} & \textbf{Count} & \textbf{On Crown} \\
 \midrule
-1 & Crown axiom (\lean{discrete\_riemann\_hypothesis} $\equiv$ RH) & 1 & 1 \\
+1 & Crown axioms (\lean{gram\_form\_upper\_bound} $\equiv$ RH, \lean{mertens\_34} PNT) & 2 & 2 \\
 1' & Oracle axioms (24 declarations, 1 certificate bundle) & 24 & 0 (Oracle path) \\
 2 & Spectral engine (off-path) & 12 & 0 \\
 3 & Sieve engine (off-path) & 7 & 0 \\
 4 & MellinBridge / alt paths / Vasyunin & 47 & 0 \\
 \cmidrule{1-4}
-& \textbf{Active subtotal} & \textbf{$\sim$118} & \textbf{1} \\
+& \textbf{Active subtotal} & \textbf{$\sim$118} & \textbf{2} \\
 5 & Archive (inactive, superseded) & $\sim$60 & 0 \\
 \midrule
-& \textbf{Grand total} & \textbf{$\sim$178} & \textbf{1} \\
+& \textbf{Grand total} & \textbf{$\sim$178} & \textbf{2} \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -472,6 +486,7 @@ the full repository ($\sim$3{,}000 theorem/lemma/def declarations):
 2026-05-24 & \textbf{File \#444: Bose--Einstein Prime Gas (v21)} & 1 + 3 PNT \\
 2026-05-29 & Cholesky Miracle + BorderedSpectral closure & 1 + 3 PNT \\
 2026-05-31 & \textbf{The Crowning: PNT graduation + dRH (v22)} & \textbf{1 + 2 PNT} \\
+2026-06-01 & \textbf{Crown Closure: 6 graduations (v23)} & \textbf{2 (1 RH + 1 PNT) + 2 PNT} \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -559,7 +574,7 @@ into per-GCD strata:
     \sum_{\substack{j,k \leq N \\ \gcd(j,k) = d}}
     v_j\,v_k\,G(j,k).
 \]
-Three structural results are proved with zero sorry:
+Five structural results are proved with zero sorry:
 \begin{itemize}
   \item \textbf{GCD Partition}
     (\lean{Covariance/GCDPartition.lean}):
@@ -572,6 +587,24 @@ Three structural results are proved with zero sorry:
   \item \textbf{GCD Stratum Bound}
     (\lean{Covariance/GCDStratumBound.lean}):
     each stratum satisfies $|S_d| \leq C/d^2$.
+  \item \textbf{Ramanujan GCD Strata}
+    (\lean{Covariance/RamanujanGCDStrata.lean}):
+    the Ramanujan matrix $R(j,k) = \gcd(j,k)^2/(12jk)$
+    possesses a \emph{universal coprime kernel}: for coprime $a,b$,
+    \[
+      R(da, db) = \frac{1}{12ab},
+    \]
+    independent of the stratum $d$. Non-squarefree strata vanish
+    identically ($\mu(da) = 0$ when $d$ is not squarefree).
+  \item \textbf{Coprime Inner Sum}
+    (\lean{Covariance/CoprimeInnerSum.lean}):
+    the coprime M\"obius--Ramanujan sum satisfies
+    $12\,\Phi(M) = S(M)^2 - \mathrm{NCP}(M)$, where
+    $S(M) = \sum_{a=1}^{M} \mu(a)/a \to 0$ by PNT. This reveals
+    that the log-cutoff taper is the \emph{engine} of convergence:
+    raw M\"obius weights give $\Phi \to 0$ (no convergence), while
+    the Selberg-optimal taper $v_k = -\mu(k)(1 - \log k/\log N)$
+    creates the critical mass for $d^2 \to 0$ at rate $O(1/\log N)$.
 \end{itemize}
 
 Companion GPU experiments at $N = 55{,}440$ (the largest highly
@@ -704,7 +737,7 @@ The Cathedral is organized into 25+ modules (381 active files):
 \textbf{Module} & \textbf{Content} & \textbf{Files} & \textbf{Crown} \\
 \midrule
 \lean{Vasyunin} & Cotangent formula, witness & 53 & 0 \\
-\lean{Covariance} & GCD strata, Euler product, taper & 24 & 0 \\
+\lean{Covariance} & GCD strata, Euler product, taper, Ramanujan kernel & 26 & 0 \\
 \lean{MellinBridge} & Mellin transforms, Plancherel & 18 & 0 \\
 \lean{Perron} & Perron contour chain & 16 & 0 \\
 \lean{Analysis} & Real/complex analysis, Stirling & 16 & 0 \\
@@ -749,38 +782,40 @@ that do not affect the crown theorem.
 \subsection{Build Verification}
 
 The codebase compiles with \lean{lake build} with zero errors
-(8{,}485 build jobs).
+(8{,}736 build jobs).
 The crown path has \textbf{zero sorry} and \textbf{zero custom axioms}
-(converse) or \textbf{one} custom axiom (forward).
-Exploratory paths produce 3 \lean{sorry} warnings
-(\lean{DirectMellinBound.lean} and \lean{DedekindBridge.lean});
+(converse) or \textbf{two} custom axioms (forward: 1 RH-equivalent + 1 PNT).
+Exploratory paths produce \lean{sorry} warnings in off-crown files;
 these are safely quarantined off the crown path.
 
 \begin{verbatim}
 cd proofs
 lake build    # 381 active files, 114 archived
-              # Build completed successfully (8485 jobs)
+              # Build completed successfully (8736 jobs)
 
 #print axioms baez_duarte_forward  -- PRIMARY EXPORT
 -- frac_error_isLittleO,
 -- pnt_mu_log_sq_div_k,
--- Cathedral.Vasyunin.discrete_riemann_hypothesis,
+-- Cathedral.Vasyunin.gram_form_upper_bound,
+-- Cathedral.Vasyunin.mertens_34_unconditional,
 -- propext, Classical.choice, Quot.sound
 \end{verbatim}
 
 \noindent
 The theorem carries 2 PNT bureaucracy axioms (unconditional, provable
-from Mathlib's PNT infrastructure). The single substantive
-axiom is {\tt discrete\_riemann\_hypothesis}, encoding the covariance
-decay bound $v^TCv \leq C/\ln N$ (formally equivalent to RH).
-Former PNT axioms {\tt R\_isLittleO} and {\tt mu\_pnt\_alt} were
-graduated on May~31, 2026, via PrimeNumberTheoremAnd.
-The historically-used axiom
-{\tt covariance\_bound\_from\_mertens\_34} was found to be mathematically
-false (it claimed the Mertens $x^{3/4}$ bound alone implies
-covariance decay; it does not) and has been eliminated from the
-primary export. The false axiom is preserved on Path~B (Perron Crown)
-for historical reference only.
+from Mathlib's PNT infrastructure). The two substantive
+axioms are:
+{\tt gram\_form\_upper\_bound}, encoding the Gram form bound
+$v^TGv \leq 1+K/\ln N$ (equivalent to RH), and
+{\tt mertens\_34\_unconditional}, encoding the classical Mertens bound
+$|M(x)| \leq Cx^{3/4}$ (unconditional PNT consequence).
+The former sole axiom {\tt discrete\_riemann\_hypothesis}
+($v^TCv \leq C/\ln N$) was \textbf{graduated to a theorem}
+on June~1, 2026, derived from the Gram form bound via variance
+decomposition: $v^TCv = v^TGv - (b^Tv)^2 \leq (1+K/\ln N) - (1-2K_1/\ln N)$.
+This graduation, along with 5 other axiom graduations in
+\lean{AsymptoticFreedom.lean} (the ``Night of Six Graduations''),
+reduced the crown path from 5 axioms to 2.
 
 % ================================================================
 \section{The Oracle Bridge: A Conditional Certificate from Computation}

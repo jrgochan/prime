@@ -86,6 +86,14 @@ lean_lib «Cathedral» where
     -- L² Bridge: Mertens L² rate → Gram bound → RH (Exploration 36)
     `Cathedral.Vasyunin.Proof.GramL2Bridge,
     `Cathedral.Vasyunin.Proof.Chain,
+    -- E_ratio Vanishing + Cotangent Reduction (Exploration 37: Crown → cotangent axiom)
+    `Cathedral.Vasyunin.Proof.RatioVanishing,
+    -- Selberg-Möbius stratification of cotangent sum (Exploration 37)
+    `Cathedral.Vasyunin.Proof.CotangentStratification,
+    -- Step Monotonicity: d²(N+1) ≤ d²(N) via variational bound (PROVED, zero axiom)
+    `Cathedral.Vasyunin.Proof.StepMonotone,
+    -- Asymptotic freedom: d² → 0 via telescoping Schur complements
+    `Cathedral.Vasyunin.Proof.AsymptoticFreedom,
     -- Gram integral analysis
     `Cathedral.Gram.FractIntegral,
     `Cathedral.Gram.Bounds,
@@ -227,6 +235,16 @@ lean_lib «Cathedral» where
     `Cathedral.Covariance.GCDStratumBound,
     -- GCD sign law (Layer 5, Möbius Stratum Conjecture, Exploration 35)
     `Cathedral.Covariance.GCDSignLaw,
+    -- Ramanujan GCD Strata (Path B: v^T R v by arithmetic locality, Exploration 37)
+    `Cathedral.Covariance.RamanujanGCDStrata,
+    -- Coprime Inner Sum (Path B Phase 2: universal kernel Φ(M) analysis, Exploration 37)
+    `Cathedral.Covariance.CoprimeInnerSum,
+    -- Twelve Bridge (Trinity of 1/12: ζ(-1) ↔ R(k,k) ↔ kernel, Higgs anomaly, Exploration 37)
+    `Cathedral.Covariance.TwelveBridge,
+    -- Anomaly Strata (Final Reduction: Crown ↔ anomaly decay, Exploration 37)
+    `Cathedral.Covariance.AnomalyStrata,
+    -- Crown Reduction (3 Legs → Crown: PNT + Ramanujan + Anomaly, Exploration 37)
+    `Cathedral.Covariance.CrownReduction,
     -- HC number formalization (unbounded HC subsequence, Exploration 36)
     `Cathedral.Covariance.HighlyComposite,
     -- HC-Gram bridge (HC bound → subseq bound → RH, Exploration 36)

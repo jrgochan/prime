@@ -135,7 +135,7 @@ private lemma gramMatrix_corner_eq (N : ℕ) (hN : N ≥ 2) :
     gramEntry N N := by
   simp only [gramMatrix, of_apply]
   have h1 : (N : ℕ) - 1 + 1 = N := by omega
-  congr 1 <;> omega
+  congr 1
 
 -- Helper: G_N is symmetric (IsHermitian)
 private lemma gramMatrix_symmetric (N : ℕ) :

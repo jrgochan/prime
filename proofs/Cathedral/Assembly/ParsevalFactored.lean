@@ -150,7 +150,7 @@ theorem rational_part_bounded (N : ℕ) (v : Fin (N - 1) → ℝ) (t : ℝ) :
       Complex.I_re, Complex.ofReal_im, Complex.I_im, Complex.one_re]
     norm_num
   have hs_lb : (1:ℝ)/2 ≤ ‖s‖ := by
-    by_contra h; push_neg at h
+    by_contra h; push Not at h
     have hnsq : Complex.normSq s = s.re * s.re + s.im * s.im := by
       rw [Complex.normSq_apply]
     have hnorm : (Complex.normSq s : ℝ) = ‖s‖ ^ 2 := by
@@ -159,7 +159,7 @@ theorem rational_part_bounded (N : ℕ) (v : Fin (N - 1) → ℝ) (t : ℝ) :
     rw [hs_re] at this
     nlinarith [norm_nonneg s]
   have hs1_lb : (1:ℝ)/2 ≤ ‖s - 1‖ := by
-    by_contra h; push_neg at h
+    by_contra h; push Not at h
     have hnsq : Complex.normSq (s - 1) = (s - 1).re * (s - 1).re + (s - 1).im * (s - 1).im := by
       rw [Complex.normSq_apply]
     have hnorm : (Complex.normSq (s - 1) : ℝ) = ‖s - 1‖ ^ 2 := by
