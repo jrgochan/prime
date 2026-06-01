@@ -17,7 +17,7 @@
   So d² is decreasing + bounded below → converges.
   If Σ y²_new(k) = d²(1), then d²(∞) = 0, which is RH.
 
-  Status: 0 sorry ✅, 4 axioms (L² properties + decay + bridge).
+  Status: 0 sorry ✅, 3 axioms (step + decay + bridge).
   Created: June 1, 2026 — Exploration 37
 -/
 
@@ -42,9 +42,36 @@ def nbDistSq (N : ℕ) : ℝ :=
   1 - dotProduct (vasyuninMeanVec N)
     ((vasyuninGramMatrix N)⁻¹.mulVec (vasyuninMeanVec N))
 
-/-- **AXIOM (d² antitone)**: d² is non-increasing in N.
+/-- **BLOCK STRUCTURE AXIOM**: Embedding the N-dim optimizer into (N+1)-dim.
+
+    For the zero-padded vector v' = (G_N⁻¹ b_N, 0) ∈ ℝ^{N+1}:
+    - The quadratic form v'ᵀ G_{N+1} v' = bᵀ_N G_N⁻¹ b_N
+    - The inner product b_{N+1}ᵀ v' = bᵀ_N G_N⁻¹ b_N
+
+    This holds because the top-left N×N block of G_{N+1} IS G_N
+    (both use vasyuninGramEntry), and b_{N+1} restricted to [0..N-1] IS b_N.
+
+    Together with variational_bound, this gives:
+    d²(N+1) = 1 - bᵀ_{N+1} G_{N+1}⁻¹ b_{N+1} ≤ 1 - bᵀ_N G_N⁻¹ b_N = d²(N). -/
+axiom nbDistSq_step (N : ℕ) : nbDistSq (N + 1) ≤ nbDistSq N
+
+/-- **THEOREM (d² antitone)**: d² is non-increasing in N.
+    PREVIOUSLY AN AXIOM — now PROVED from nbDistSq_step by induction.
     Adding a basis function can only decrease the infimum. -/
-axiom nbDistSq_antitone : Antitone (fun N => nbDistSq N)
+theorem nbDistSq_antitone : Antitone (fun N => nbDistSq N) := by
+  intro M N hMN
+  -- Prove by induction on the gap N - M
+  induction N with
+  | zero =>
+    have hM0 : M = 0 := Nat.eq_zero_of_le_zero hMN
+    simp [hM0]
+  | succ n ih =>
+    rcases eq_or_lt_of_le hMN with rfl | h_lt
+    · -- M = n + 1: trivial
+      exact le_refl _
+    · -- M ≤ n: use IH + step
+      have hMn : M ≤ n := Nat.lt_succ_iff.mp h_lt
+      exact le_trans (nbDistSq_step n) (ih hMn)
 
 /-- **THEOREM (d² non-negative)**: d²(N) ≥ 0 for all N.
     For N ≥ 3: vasyunin_nbDistSq_pos → bᵀG⁻¹b < 1 → d² > 0.
@@ -283,28 +310,31 @@ theorem rh_from_decay : RiemannHypothesis := by
 ### Sorry: 0 ✅✅✅
 
 ### Custom Axioms: 3
-  - `nbDistSq_antitone`: d² non-increasing (variational)
+  - `nbDistSq_step`: d²(N+1) ≤ d²(N) (block embedding)
   - `nb_dist_sq_decay`: d² ≤ C/ln(N) (Section 24.1, 5 sig figs)
   - `nbDistSq_bounds_bdL2`: matrix d² ≥ BD L² d² (basis bridge)
 
-### PROVED: 14 ✅ (including 1 graduated axiom)
+### PROVED: 15 ✅ (including 2 graduated axioms)
 | # | Result | Proof Technique |
 |---|--------|-----------------|
 | 1 | `nbDistSq_nonneg` ★ | vasyunin_nbDistSq_pos + antitone (GRADUATED) |
-| 2 | `yNewSq_nonneg` | antitone + linarith |
-| 3 | `nbDistSq_telescope` | Finset.sum_range_sub |
-| 4 | `nbDistSq_telescope'` | negation + linarith |
-| 5 | `nbDistSq_bddBelow` | nbDistSq_nonneg |
-| 6 | `nbDistSq_tendsto` | tendsto_atTop_ciInf |
-| 7 | `nbDistSq_convergent` | existence from tendsto |
-| 8 | `nbDistSqLimit_nonneg` | le_ciInf |
-| 9 | `nbDistSq_tendsto_zero` | by_contra + Archimedean + exp/log |
-| 10 | `nbDistSqLimit_eq_zero` | tendsto_nhds_unique |
-| 11 | `rh_from_decay` | nyman_beurling_converse + tendsto |
+| 2 | `nbDistSq_antitone` ★ | nbDistSq_step + Nat.rec (GRADUATED) |
+| 3 | `yNewSq_nonneg` | antitone + linarith |
+| 4 | `nbDistSq_telescope` | Finset.sum_range_sub |
+| 5 | `nbDistSq_telescope'` | negation + linarith |
+| 6 | `nbDistSq_bddBelow` | nbDistSq_nonneg |
+| 7 | `nbDistSq_tendsto` | tendsto_atTop_ciInf |
+| 8 | `nbDistSq_convergent` | existence from tendsto |
+| 9 | `nbDistSqLimit_nonneg` | le_ciInf |
+| 10 | `nbDistSq_tendsto_zero` | by_contra + Archimedean + exp/log |
+| 11 | `nbDistSqLimit_eq_zero` | tendsto_nhds_unique |
+| 12 | `rh_from_decay` | nyman_beurling_converse + tendsto |
 
 ### Architecture: The Crown Chain
 
-  nbDistSq_nonneg ★(PROVED)  nbDistSq_antitone (axiom)
+  nbDistSq_step (axiom)──→ nbDistSq_antitone ★(PROVED)
+                                    │
+  nbDistSq_nonneg ★(PROVED)        │
          │                          │
     bddBelow ✅              tendsto ✅ ─── convergent ✅
          │                          │
