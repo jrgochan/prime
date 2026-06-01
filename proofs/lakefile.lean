@@ -88,6 +88,8 @@ lean_lib «Cathedral» where
     `Cathedral.Vasyunin.Proof.Chain,
     -- E_ratio Vanishing + Cotangent Reduction (Exploration 37: Crown → cotangent axiom)
     `Cathedral.Vasyunin.Proof.RatioVanishing,
+    -- Selberg-Möbius stratification of cotangent sum (Exploration 37)
+    `Cathedral.Vasyunin.Proof.CotangentStratification,
     -- Gram integral analysis
     `Cathedral.Gram.FractIntegral,
     `Cathedral.Gram.Bounds,
