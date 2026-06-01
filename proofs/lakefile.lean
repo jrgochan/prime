@@ -86,6 +86,8 @@ lean_lib «Cathedral» where
     -- L² Bridge: Mertens L² rate → Gram bound → RH (Exploration 36)
     `Cathedral.Vasyunin.Proof.GramL2Bridge,
     `Cathedral.Vasyunin.Proof.Chain,
+    -- E_ratio Vanishing + Cotangent Reduction (Exploration 37: Crown → cotangent axiom)
+    `Cathedral.Vasyunin.Proof.RatioVanishing,
     -- Gram integral analysis
     `Cathedral.Gram.FractIntegral,
     `Cathedral.Gram.Bounds,
