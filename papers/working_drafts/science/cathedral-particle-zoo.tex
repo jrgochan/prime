@@ -11,7 +11,7 @@
 \author{
   Jason Robert Gochanour
 }
-\date{May 2026}
+\date{June 2026}
 
 \begin{document}
 
@@ -178,6 +178,15 @@ at $N = 55{,}440$ reveal an 88\% correlation between
 $\operatorname{sgn}(S_d)$ and $\mu(d)$---suggesting that the
 boson--fermion duality observed here is a finite-$N$ shadow of the
 M\"obius function's sign structure on the divisor lattice.
+
+The Torus Projection (\texttt{Physics/TorusProjection.lean}, zero sorry,
+zero axioms) extends this analysis: it decomposes the Gram energy onto
+the infinite-dimensional torus $T^\infty = \prod_p S^1_p$, proving
+that the per-prime energy $E_p(v) = \sum_{p \mid d} E_d(v)$ is
+independent across primes via GCD multiplicativity. Numerically,
+prime $p = 2$ carries 46--86\% of the stratum energy---the dominant
+circle in the torus---consistent with the $2^a$ amplifier effect
+discovered in this paper (\S\ref{sec:mersenne}).
 \end{remark}
 
 % ================================================================
@@ -679,6 +688,7 @@ RG flow & Mersenne Cascade ($M_3 \to M_7 \to M_{13} \to \cdots$) \\
 BPS states & Perfect numbers ($\sigma(n) = 2n$) \\
 Double Higgs & Twin-prime sandwiches ($p, k, p'$) \\
 Robin's inequality & $\sigma(n)/n < e^\gamma \ln\ln n \iff \RH$ \\
+Torus $T^\infty$ & Per-prime energy on $\prod_p S^1_p$ \\
 \bottomrule
 \end{tabular}
 \end{center}

@@ -8,7 +8,7 @@
   via Certified Rust/MPFR/DD Pipelines%
 }
 \author{Jason Robert Gochanour}
-\date{May 2026}
+\date{June 2026}
 
 \begin{document}
 \maketitle
@@ -112,7 +112,11 @@ arithmetic.
 46 & moebius-microscope & Gram (GPU) & MPFR-256 + CUDA \\
 47 & hc-gram-oracle & DD cert & DD + HPDF \\
 48 & spectral-observatory & Spectral & DD MPFR-256 \\
-49--50+ & (additional experiments) & Various & Mixed \\
+49 & prime-harmonics & Mirror & f64 (10K zeros) \\
+50 & overcancellation-scan & Analysis & f64 + MPFR \\
+51 & torus-projection & Torus & f64 \\
+52 & selberg-ecot-exponent & Exponent & f64 \\
+53--55+ & (additional experiments) & Various & Mixed \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -226,11 +230,30 @@ localization at participation ratio $\alpha \approx 0.47$, identifying
 a new arithmetic-GOE constant characterizing the boundary between
 number-theoretic order and random matrix chaos.
 
+\subsection{Torus Projection (June 2026)}
+
+The \texttt{torus-projection} experiment decomposes the Gram energy
+$v^T G v$ by GCD strata onto the infinite-dimensional torus
+$T^\infty = \prod_p S^1_p$. Per-prime energy analysis shows that
+prime $p = 2$ carries 46--86\% of stratum energy, with coherence
+decaying for larger primes. Zeta-zero phases equidistribute with
+Weyl discrepancy decreasing as $N$ grows---consistent with GOE
+universality. The Lean~4 companion \texttt{TorusProjection.lean}
+proves the GCD partition theorem with zero sorry and zero axioms.
+
+\subsection{Spectral Mirror (May 2026)}
+
+The \texttt{prime-harmonics} experiment reconstructs $\pi(x)$ from
+zeta zeros via the explicit formula. With 10{,}000 zeros: exact at
+$\pi(10) = 4$, $\pi(50) = 15$, $\pi(200) = 46$. Eight modes
+(mirror, sweep, portrait, bench, hunt, fine\_scan, full, democracy)
+explore different aspects of the prime--zero duality.
+
 % ================================================================
 \section{Conclusion}
 % ================================================================
 
-The 50+ experiments provide computational validation at every level
+The 55+ experiments provide computational validation at every level
 of the Cathedral's proof architecture, from the Gram matrix entries
 to the spectral gap to the Parseval bridge to the thermodynamic
 equation of state to the DD-precision Dekker--Knuth frontier.
@@ -238,6 +261,10 @@ The certified JSON pipeline ensures that
 computational discoveries are automatically available to the formal
 proof engine. The DD-precision pipeline extends certification to
 $N = 55{,}440$, beyond the reach of any standard eigensolver.
+The torus projection experiment (June 2026) extends the analysis
+to the per-prime structure of the Gram energy on $T^\infty$,
+confirming that primes act as independent circles in the
+infinite-dimensional torus.
 
 The author gratefully acknowledges Google DeepMind's Gemini for
 experimental design strategy and Anthropic's Claude for Rust
