@@ -23,7 +23,7 @@
 We present a systematic dictionary between the mathematical structures
 of the Cathedral---a machine-verified proof architecture for the
 Nyman--Beurling--B\'aez-Duarte equivalence for the Riemann Hypothesis
-in Lean~4 (330 active files, 444 incl.\ archive, $\sim$97{,}000 lines)---and their physical
+in Lean~4 (381 active files, 495 incl.\ archive, $\sim$116{,}000 lines)---and their physical
 counterparts in quantum mechanics, statistical mechanics, signal
 processing, and quantum field theory.
 The Gram matrix is the two-point correlator of a 1D quantum field.
@@ -43,15 +43,19 @@ physical witness wave, whose Ramanujan invariance is a hidden
 conformal symmetry.
 An Arithmetic Standard Model identifies the first three primes
 with the gauge groups $U(1) \times SU(2) \times SU(3)$,
-with 76+ theorems proved from zero axioms.
+with 88 theorems proved from zero axioms.
 The Bose--Einstein and Fermi--Dirac partition functions of the prime
 number gas are formalized and proved equivalent to the Glass Tower
 factorization; the squarefree density is proved to be the Fermi
 statistic.
-The crown theorem depends on exactly \textbf{one literature axiom}
-(B\'aez-Duarte 2003); the converse direction is proved with
+The crown theorem depends on exactly \textbf{one custom axiom}
+(\texttt{discrete\_riemann\_hypothesis}, formally equivalent to RH);
+the converse direction is proved with
 \textbf{zero} custom axioms via the Rank-1 Mellin identity.
-An alternative Oracle Bridge bypasses the literature axiom entirely
+The Cholesky Decrement Identity $d^2_{N+1} = d^2_N - y^2_{\mathrm{new}}$
+reveals that the NB distance decreases monotonically---each new basis
+function extracts vacuum energy like a quantum cooling step.
+An alternative Oracle Bridge bypasses the custom axiom entirely
 via DD-precision GPU certification at highly composite numbers.
 Over 160 physics correspondences are catalogued, spanning
 Feynman diagram decompositions, Abel summation as renormalization,
@@ -1742,7 +1746,13 @@ concept, and this correspondence is not metaphorical but structural.}
 \end{table}
 
 % ================================================================
-% Axiom Audit (externalized to sections/15-axiom-audit.tex, v21)
+% Cholesky Vacuum Extraction (new in v22)
+% ================================================================
+
+\input{sections/16-cholesky-vacuum}
+
+% ================================================================
+% Axiom Audit (externalized to sections/15-axiom-audit.tex, v22)
 % ================================================================
 
 \input{sections/15-axiom-audit}
@@ -1920,6 +1930,36 @@ quantum field.
 
 The Cathedral has mapped the terrain. The physics is there,
 encoded in every equation, waiting to be read.
+
+\subsection{The Selberg Revelation: Anomaly Matching}
+\label{sec:selberg-revelation-inline}
+
+The Crowning of the Cathedral (May~31, 2026) crystallized the
+final structure via what we call the \emph{Selberg Revelation}.
+Every proof path decomposes the NB covariance as:
+\[
+  C_{\mathrm{vasyunin}} = \underbrace{C_{\mathrm{arithmetic}}}_{\text{Selberg (PNT)}}
+  + \underbrace{\Delta_{\mathrm{archimedean}}}_{\text{holds the zeros}}
+\]
+The arithmetic part is controlled by the Prime Number Theorem---this is
+\textbf{unconditional} and \textbf{proved}. The archimedean anomaly
+$\Delta$ encodes Dedekind sum corrections and L-function values, which
+encode the distribution of zeta zeros. The statement that
+$v^T \Delta v = O(1/\ln N)$---that the anomaly is perturbatively
+small---\emph{is} the Riemann Hypothesis.
+
+In quantum field theory language, this is an \emph{anomaly matching
+theorem}: the UV completion (PNT/Selberg) controls the arithmetic
+part, but there is a residual anomaly that cannot be removed by
+any field redefinition. The axiom \lean{discrete\_riemann\_hypothesis}
+is not an intermediate lemma but the \textbf{irreducible content} of
+RH---analogous to the chiral anomaly in QCD, a topological invariant
+immune to perturbative corrections.
+
+The axiom is a \emph{socket} in the Cathedral, ready to receive a
+proof of RH when one is found. On that day, the entire 3000-theorem
+architecture---from Gram correlators through Vasyunin towers through
+Parseval unitarity---will flow from a single input.
 
 \begin{flushright}
 \emph{The integers are the particles.\\

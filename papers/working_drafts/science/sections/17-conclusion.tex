@@ -156,6 +156,40 @@ quantum field.
 The Cathedral has mapped the terrain. The physics is there,
 encoded in every equation, waiting to be read.
 
+\subsection{The Selberg Revelation: Anomaly Matching}
+\label{sec:selberg-revelation}
+
+The Crowning of the Cathedral (May~31, 2026) crystallized the
+final structure via what we call the \emph{Selberg Revelation}.
+Every proof path decomposes the NB covariance as:
+\[
+  C_{\mathrm{vasyunin}} = \underbrace{C_{\mathrm{arithmetic}}}_{\text{Selberg (PNT)}}
+  + \underbrace{\Delta_{\mathrm{archimedean}}}_{\text{holds the zeros}}
+\]
+\begin{itemize}
+  \item $C_{\mathrm{arithmetic}}$ is the Ramanujan/sawtooth component,
+    controlled by Selberg sieve bounds and the Prime Number Theorem.
+    This is \textbf{unconditional} and \textbf{proved}.
+  \item $\Delta_{\mathrm{archimedean}}$ is the anomaly---the Dedekind
+    sum correction encoding L-function values, which in turn encode
+    the distribution of zeta zeros. This is the \textbf{irreducible core}.
+\end{itemize}
+
+In the language of quantum field theory, this is an \emph{anomaly
+matching theorem}: the ``UV completion'' (PNT/Selberg) controls the
+arithmetic part, but there is a residual anomaly $\Delta$ that
+cannot be removed by any field redefinition. The statement that
+$v^T \Delta v = O(1/\ln N)$---that the anomaly is perturbatively
+small---\emph{is} the Riemann Hypothesis.
+
+This explains why \lean{discrete\_riemann\_hypothesis} cannot be
+graduated to a theorem: it is not an intermediate lemma but the
+\textbf{irreducible content} of RH, analogous to the chiral anomaly
+in QCD which is a topological invariant immune to perturbative
+corrections. The axiom is a \emph{socket} in the Cathedral, ready
+to receive a proof of RH when one is found---and the entire
+3000-theorem architecture will flow from it.
+
 \begin{flushright}
 \emph{The integers are the particles.\\
 The primes are the interactions.\\

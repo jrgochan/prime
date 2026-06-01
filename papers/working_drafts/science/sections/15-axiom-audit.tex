@@ -1,11 +1,13 @@
 % ================================================================
-\section{Axiom Audit: The Quad-Crown Cathedral (v21, May 26, 2026)}
+\section{Axiom Audit: The Crowned Cathedral (v22, May 31, 2026)}
 \label{sec:axiom-audit}
 % ================================================================
 
 The crown theorem \lean{nyman\_beurling\_equivalence} depends on exactly
-\textbf{one} literature axiom, plus the three
-Lean kernel axioms (\texttt{propext}, \texttt{Classical.choice},
+\textbf{one} custom axiom---\lean{discrete\_riemann\_hypothesis},
+which states $v^T C v \leq C / \ln N$ for the Möbius--Selberg witness
+and is \textbf{formally proved equivalent to the Riemann Hypothesis}---plus
+the three Lean kernel axioms (\texttt{propext}, \texttt{Classical.choice},
 \texttt{Quot.sound}).
 
 \begin{remark}[The Quad-Crown Architecture (v21)]
@@ -53,32 +55,38 @@ physical interpretation:
 \toprule
 \textbf{\#} & \textbf{Axiom} & \textbf{Physics} & \textbf{Module} & \textbf{Status} \\
 \midrule
-1 & \texttt{baez\_duarte\_forward} & Unitarity constraint & \lean{MainChain.lean} & literature \\
+1 & \texttt{discrete\_riemann\_hypothesis} & Vacuum energy decay & \lean{WitnessAsymptotics.lean} & $\equiv$ RH \\
 \bottomrule
 \end{tabular}
 \end{center}
 
 \begin{remark}[Physical meaning of the single gate]
-The sole axiom \texttt{baez\_duarte\_forward} states that under RH,
-the BD basis can approximate~$1$ in $L^2(0,1)$:
+The sole axiom \texttt{discrete\_riemann\_hypothesis} states:
 \[
-  \RH \implies \forall\,\varepsilon > 0,\; \exists\, N_0,\;
-  \forall\, N \geq N_0,\; \exists\, v :\;
-  \int_0^1 (1 - f_{N,v})^2\,dx < \varepsilon.
+  \exists\, C > 0,\; \exists\, N_0,\;
+  \forall\, N \geq N_0 :\;
+  v^T C v \leq C / \ln N
 \]
-This is the \emph{unitarity constraint} of the prime number quantum
-field theory: the statement that vacuum screening is complete. In quantum
-field theory, unitarity (probability conservation) is the one axiom that
-cannot be derived from within the theory---it must be imposed from
-outside. The Cathedral mirrors this precisely: everything \emph{except}
-the forward direction is proved internally with zero axioms.
+where $v$ is the Möbius--Selberg log-cutoff witness and $C = G - bb^T$
+is the covariance matrix. This is the \emph{vacuum energy decay}:
+the fluctuation energy of the optimal trial wavefunction vanishes
+logarithmically.
 
-The forward direction requires complex-analytic machinery
-(the Parseval/Mellin identity on the critical line $\re s = 1/2$)
-that involves the full strength of the zeta function's analytic
-continuation. Real-variable Abel summation alone cannot capture the
-phase interference of the fractional-part sawtooth waves---this is
-the \emph{Mertens Wall}, documented in \lean{Archive/TheMertensWall/}.
+The equivalence \lean{witness\_covariance\_decay\_iff\_rh} proves
+$\texttt{discrete\_riemann\_hypothesis} \iff \RH$
+using only PNT-level axioms (\lean{frac\_error\_isLittleO},
+\lean{pnt\_mu\_log\_sq\_div\_k}) for the converse.
+The naming reflects the Selberg Revelation (May~31, 2026):
+the axiom is not an intermediate lemma about covariance matrices---it
+\emph{is} the Riemann Hypothesis, stated in the language of the Cathedral.
+
+Physically, this is the statement that the prime number vacuum is
+\emph{perfectly screening}: the quantum fluctuations of the Möbius
+field are controlled at logarithmic rate. In quantum field theory,
+vacuum screening is the statement that virtual pairs can
+neutralize any test charge---here, the ``charge'' is the constant
+function~$1$, and the ``virtual pairs'' are the fractional-part
+oscillations weighted by Möbius spins.
 \end{remark}
 
 \begin{remark}[Alternative proof paths]
@@ -199,6 +207,9 @@ Riemann Sphere geometry & v20 & Zeta/MirrorGeometry,RiemannSphere (E38--40) & Cr
 $\mathbb{F}_1$ Dream graduation & v20 & TowerFusion $\to$ MirrorGeometry (E40) & Axiom $\to$ theorem via fusion \\
 Arakelov Fusion & v21 & Arakelov layers 1--4 (E41--42) & $G = G_{\mathrm{fin}} + G_{\mathrm{arch}}$ (\S\ref{sec:arakelov}) \\
 Two-Tier Gram Bound & v21 & TwoTierGramBound (E43) & Diagonal + off-diagonal control \\
+PNT graduation ($\times 10$) & v22 & PNTAndBridge (PNTAnd) & 10 PNT axioms $\to$ theorems \\
+\texttt{abel\_summation\_cov\_bound} & v22 & Trivial from dRH & Mertens $\to$ cov (redundant) \\
+The Crowning & v22 & WitnessAsymptotics & Sole axiom = \texttt{discrete\_riemann\_hypothesis} \\
 \bottomrule
 \end{tabular}
 \end{center}
