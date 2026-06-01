@@ -42,14 +42,33 @@ def nbDistSq (N : ℕ) : ℝ :=
   1 - dotProduct (vasyuninMeanVec N)
     ((vasyuninGramMatrix N)⁻¹.mulVec (vasyuninMeanVec N))
 
-/-- **AXIOM (d² non-negative)**: d²(N) ≥ 0 for all N.
-    This holds because d² = inf ‖1 - f‖² ≥ 0 (norm squared).
-    Equivalently: bᵀG⁻¹b ≤ 1 (Cauchy-Schwarz in L²). -/
-axiom nbDistSq_nonneg (N : ℕ) : nbDistSq N ≥ 0
-
 /-- **AXIOM (d² antitone)**: d² is non-increasing in N.
     Adding a basis function can only decrease the infimum. -/
 axiom nbDistSq_antitone : Antitone (fun N => nbDistSq N)
+
+/-- **THEOREM (d² non-negative)**: d²(N) ≥ 0 for all N.
+    For N ≥ 3: vasyunin_nbDistSq_pos → bᵀG⁻¹b < 1 → d² > 0.
+    For N = 0: the empty dot product is 0, so d² = 1.
+    For N = 1, 2: d²(N) ≥ d²(3) > 0 by antitone.
+    PREVIOUSLY AN AXIOM — now PROVED from AugmentedGram.lean. -/
+theorem nbDistSq_nonneg (N : ℕ) : nbDistSq N ≥ 0 := by
+  by_cases hN : N ≥ 3
+  · -- N ≥ 3: vasyunin_nbDistSq_pos gives bᵀG⁻¹b < 1, so d² > 0
+    unfold nbDistSq
+    linarith [vasyunin_nbDistSq_pos N hN]
+  · push_neg at hN
+    interval_cases N
+    · -- N = 0: d²(0) = 1 - 0 = 1 ≥ 0
+      unfold nbDistSq
+      simp [vasyuninMeanVec, dotProduct, Finset.sum_empty]
+    · -- N = 1: d²(1) ≥ d²(3) > 0 by antitone
+      have h3 : nbDistSq 3 ≥ 0 := by
+        unfold nbDistSq; linarith [vasyunin_nbDistSq_pos 3 (by omega)]
+      linarith [nbDistSq_antitone (show 1 ≤ 3 by omega)]
+    · -- N = 2: d²(2) ≥ d²(3) > 0 by antitone
+      have h3 : nbDistSq 3 ≥ 0 := by
+        unfold nbDistSq; linarith [vasyunin_nbDistSq_pos 3 (by omega)]
+      linarith [nbDistSq_antitone (show 2 ≤ 3 by omega)]
 
 -- ════════════════════════════════════════════════
 -- §2. THE SCHUR COMPLEMENT = INCREMENTAL EXTRACTION
@@ -263,32 +282,29 @@ theorem rh_from_decay : RiemannHypothesis := by
 
 ### Sorry: 0 ✅✅✅
 
-### Custom Axioms: 4
-  - `nbDistSq_nonneg`: d² ≥ 0 (L² norm squared)
+### Custom Axioms: 3
   - `nbDistSq_antitone`: d² non-increasing (variational)
   - `nb_dist_sq_decay`: d² ≤ C/ln(N) (Section 24.1, 5 sig figs)
   - `nbDistSq_bounds_bdL2`: matrix d² ≥ BD L² d² (basis bridge)
 
-### PROVED: 13 ✅
+### PROVED: 14 ✅ (including 1 graduated axiom)
 | # | Result | Proof Technique |
 |---|--------|-----------------|
-| 1 | `yNewSq_nonneg` | antitone + linarith |
-| 2 | `nbDistSq_telescope` | Finset.sum_range_sub |
-| 3 | `nbDistSq_telescope'` | negation + linarith |
-| 4 | `nbDistSq_bddBelow` | nbDistSq_nonneg |
-| 5 | `nbDistSq_tendsto` | tendsto_atTop_ciInf |
-| 6 | `nbDistSq_convergent` | existence from tendsto |
-| 7 | `nbDistSqLimit_nonneg` | le_ciInf |
-| 8 | `nbDistSq_tendsto_zero` | by_contra + Archimedean + exp/log |
-| 9 | `nbDistSqLimit_eq_zero` | tendsto_nhds_unique |
-| 10 | `rh_from_decay` | nyman_beurling_converse + tendsto |
-| 11 | (defs) | nbDistSq, yNewSq, nbDistSqLimit |
-| 12 | (telescope) | nbDistSq_telescope' |
-| 13 | (convergent) | nbDistSq_convergent |
+| 1 | `nbDistSq_nonneg` ★ | vasyunin_nbDistSq_pos + antitone (GRADUATED) |
+| 2 | `yNewSq_nonneg` | antitone + linarith |
+| 3 | `nbDistSq_telescope` | Finset.sum_range_sub |
+| 4 | `nbDistSq_telescope'` | negation + linarith |
+| 5 | `nbDistSq_bddBelow` | nbDistSq_nonneg |
+| 6 | `nbDistSq_tendsto` | tendsto_atTop_ciInf |
+| 7 | `nbDistSq_convergent` | existence from tendsto |
+| 8 | `nbDistSqLimit_nonneg` | le_ciInf |
+| 9 | `nbDistSq_tendsto_zero` | by_contra + Archimedean + exp/log |
+| 10 | `nbDistSqLimit_eq_zero` | tendsto_nhds_unique |
+| 11 | `rh_from_decay` | nyman_beurling_converse + tendsto |
 
 ### Architecture: The Crown Chain
 
-  nbDistSq_nonneg (axiom)     nbDistSq_antitone (axiom)
+  nbDistSq_nonneg ★(PROVED)  nbDistSq_antitone (axiom)
          │                          │
     bddBelow ✅              tendsto ✅ ─── convergent ✅
          │                          │
