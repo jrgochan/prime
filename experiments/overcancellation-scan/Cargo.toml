@@ -177,6 +177,11 @@ name = "two-tier-gram-probe"
 path = "src/bin/two_tier_gram_probe.rs"
 required-features = ["hpdf"]
 
+[[bin]]
+name = "selberg-ecot-exponent"
+path = "src/bin/selberg_ecot_exponent.rs"
+required-features = ["hpdf"]
+
 [profile.release]
 opt-level = 3
 lto = true
