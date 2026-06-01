@@ -559,7 +559,7 @@ into per-GCD strata:
     \sum_{\substack{j,k \leq N \\ \gcd(j,k) = d}}
     v_j\,v_k\,G(j,k).
 \]
-Three structural results are proved with zero sorry:
+Five structural results are proved with zero sorry:
 \begin{itemize}
   \item \textbf{GCD Partition}
     (\lean{Covariance/GCDPartition.lean}):
@@ -572,6 +572,24 @@ Three structural results are proved with zero sorry:
   \item \textbf{GCD Stratum Bound}
     (\lean{Covariance/GCDStratumBound.lean}):
     each stratum satisfies $|S_d| \leq C/d^2$.
+  \item \textbf{Ramanujan GCD Strata}
+    (\lean{Covariance/RamanujanGCDStrata.lean}):
+    the Ramanujan matrix $R(j,k) = \gcd(j,k)^2/(12jk)$
+    possesses a \emph{universal coprime kernel}: for coprime $a,b$,
+    \[
+      R(da, db) = \frac{1}{12ab},
+    \]
+    independent of the stratum $d$. Non-squarefree strata vanish
+    identically ($\mu(da) = 0$ when $d$ is not squarefree).
+  \item \textbf{Coprime Inner Sum}
+    (\lean{Covariance/CoprimeInnerSum.lean}):
+    the coprime M\"obius--Ramanujan sum satisfies
+    $12\,\Phi(M) = S(M)^2 - \mathrm{NCP}(M)$, where
+    $S(M) = \sum_{a=1}^{M} \mu(a)/a \to 0$ by PNT. This reveals
+    that the log-cutoff taper is the \emph{engine} of convergence:
+    raw M\"obius weights give $\Phi \to 0$ (no convergence), while
+    the Selberg-optimal taper $v_k = -\mu(k)(1 - \log k/\log N)$
+    creates the critical mass for $d^2 \to 0$ at rate $O(1/\log N)$.
 \end{itemize}
 
 Companion GPU experiments at $N = 55{,}440$ (the largest highly
@@ -704,7 +722,7 @@ The Cathedral is organized into 25+ modules (381 active files):
 \textbf{Module} & \textbf{Content} & \textbf{Files} & \textbf{Crown} \\
 \midrule
 \lean{Vasyunin} & Cotangent formula, witness & 53 & 0 \\
-\lean{Covariance} & GCD strata, Euler product, taper & 24 & 0 \\
+\lean{Covariance} & GCD strata, Euler product, taper, Ramanujan kernel & 26 & 0 \\
 \lean{MellinBridge} & Mellin transforms, Plancherel & 18 & 0 \\
 \lean{Perron} & Perron contour chain & 16 & 0 \\
 \lean{Analysis} & Real/complex analysis, Stirling & 16 & 0 \\
