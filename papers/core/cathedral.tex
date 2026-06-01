@@ -49,7 +49,7 @@ exploiting rank-1 factorization of the Mellin transform at zeta zeros;
 direction to a frequency-domain integral on the critical line,
 bypassing the Vasyunin cotangent formula entirely;
 (iii)~the \emph{Glass Bridge Identity}, which decomposes the Gram
-matrix as $G = R + \frac{1}{4}\mathbf{1}\mathbf{1}^\top$ where
+matrix as $G = R + \frac{1}{4}\mathbf{1}\mathbf{1}^T$ where
 $R(j,k) = \gcd(j,k)^2/(12jk)$ is the Ramanujan residual, reducing
 RH to pure GCD arithmetic via Sherman--Morrison inversion;
 and (iv)~the \emph{Cholesky Decrement Identity}
@@ -156,7 +156,7 @@ The proof decomposes into two pillars:
         identity $\int|1-f|^2 = 1 - 2b^Tv + v^TGv$ $\to$
         Gram decay + PNT dot product $\to$ $L^2$ decay.
         \textbf{Primary (preferred) architecture.}
-        1 crown axiom + 2 PNT bureaucracy. \textbf{0 sorry, 0 false axioms.}
+        2 crown axioms (1 RH + 1 PNT) + 2 PNT bureaucracy. \textbf{0 sorry, 0 false axioms.}
       \item \textbf{Path G (Glass Bridge)}: $G = R + \tfrac{1}{4}\mathbf{1}\mathbf{1}^T$
         $\to$ Sherman--Morrison $\to$ $b^T R^{-1}b \to 1 \Leftrightarrow$ RH.
         Reduces the entire forward direction to pure GCD arithmetic.
@@ -178,7 +178,7 @@ The proof decomposes into two pillars:
     completely avoids the Vasyunin cotangent formula.
   \item \textbf{The Glass Bridge Identity}
     (Theorem~\ref{thm:glass}): decomposing the Gram matrix as
-    $G = R + \frac{1}{4}\mathbf{1}\mathbf{1}^\top$, separating
+    $G = R + \frac{1}{4}\mathbf{1}\mathbf{1}^T$, separating
     the arithmetic core from the rank-1 mean noise.
   \item \textbf{A multi-path architecture}: seven forward
     proofs providing cross-validation.
@@ -459,10 +459,10 @@ the full repository ($\sim$3{,}000 theorem/lemma/def declarations):
 3 & Sieve engine (off-path) & 7 & 0 \\
 4 & MellinBridge / alt paths / Vasyunin & 47 & 0 \\
 \cmidrule{1-4}
-& \textbf{Active subtotal} & \textbf{$\sim$118} & \textbf{2} \\
+& \textbf{Active subtotal} & \textbf{$\sim$92} & \textbf{2} \\
 5 & Archive (inactive, superseded) & $\sim$60 & 0 \\
 \midrule
-& \textbf{Grand total} & \textbf{$\sim$178} & \textbf{2} \\
+& \textbf{Grand total} & \textbf{$\sim$152} & \textbf{2} \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -1006,7 +1006,7 @@ consumed by Lean oracle axioms:
 
 \subsection{Glass Bridge Validation}
 
-The Glass Bridge identity $G = R + \frac{1}{4}\mathbf{1}\mathbf{1}^\top$
+The Glass Bridge identity $G = R + \frac{1}{4}\mathbf{1}\mathbf{1}^T$
 was validated numerically at DD precision. The Ramanujan residual
 $R(j,k) = \gcd(j,k)^2/(12jk)$ is computed alongside the Dark Gram
 form $G^{(2)}(j,k) = \gcd(j,k)^4/(180j^2k^2)$, yielding the
@@ -1086,8 +1086,12 @@ The Cathedral establishes, via machine-verified proof, that the
 Riemann Hypothesis is true \emph{if and only if} the B\'aez-Duarte
 distance decays to zero. The biconditional is complete. The converse
 uses \textbf{zero} custom axioms. The forward direction uses
-\textbf{one} axiom on the crown path (\lean{discrete\_riemann\_hypothesis},
-formally proved equivalent to RH via \lean{witness\_covariance\_decay\_iff\_rh}).
+\textbf{two} axioms on the crown path:
+\lean{gram\_form\_upper\_bound} (equivalent to RH) and
+\lean{mertens\_34\_unconditional} (an unconditional consequence of
+the Prime Number Theorem). The former sole axiom
+\lean{discrete\_riemann\_hypothesis} was graduated to a theorem
+derived from these bounds.
 
 The Gram Crown (v18) provides the preferred proof architecture:
 a discrete, covariance-free path through direct Gram matrix bounds,
