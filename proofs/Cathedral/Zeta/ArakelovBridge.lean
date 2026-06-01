@@ -303,7 +303,7 @@ arithmetic divisors" is the key gap. Proving this requires:
 
     This is a research-level open problem, not just formalization. -/
 axiom hodge_index_eigenvalue_bound :
-    ∃ (C : ℝ) (hC : 0 < C), ∃ (ε : ℝ) (_hε : 0 < ε),
+    ∃ (C : ℝ) (_hC : 0 < C), ∃ (ε : ℝ) (_hε : 0 < ε),
       ∀ (N : ℕ), 2 ≤ N →
         -- The smallest eigenvalue of G_N decays as O(1/N^{1+ε})
         -- (stated abstractly since eigenvalue defs need matrix theory)

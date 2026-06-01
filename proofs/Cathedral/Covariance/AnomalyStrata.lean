@@ -112,7 +112,7 @@ theorem anomalySum_partition (N : ℕ) (hN : 2 ≤ N) :
     This decomposes the RH-equivalent quantity into:
     - The arithmetic skeleton (R strata: d-independent kernel)
     - The Archimedean anomaly (Δ strata: the RH content) -/
-theorem gram_eq_ramanujan_plus_anomaly (N : ℕ) (hN : 2 ≤ N) :
+theorem gram_eq_ramanujan_plus_anomaly (N : ℕ) (_hN : 2 ≤ N) :
     (∑ j ∈ Icc 1 (N - 1), ∑ k ∈ Icc 1 (N - 1),
       ((moebius j : ℤ) : ℝ) * ((moebius k : ℤ) : ℝ) * gramEntry j k) =
     (∑ j ∈ Icc 1 (N - 1), ∑ k ∈ Icc 1 (N - 1),
