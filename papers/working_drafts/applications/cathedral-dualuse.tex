@@ -29,10 +29,10 @@ grids, (2)~resonance-targeted industrial sabotage via arithmetic
 vibration analysis, (3)~adversarial use of verified instability
 certificates for cascade failure engineering, (4)~broadband stealth
 and jamming from prime-spaced antenna arrays, (5)~covert RF
-surveillance via arithmetic energy harvesting, and
+surveillance via arithmetic energy harvesting;
 (6)~AI-accelerated mathematical attack planning, where large
 language models lower the expertise barrier from graduate-level
-mathematics to natural-language prompting, and
+mathematics to natural-language prompting; and
 (7)~algorithmic blinding via arithmetic denial-of-service,
 where high-condition-number spectral injections cause
 defender software to hallucinate.
@@ -257,6 +257,17 @@ could:
     to be orthogonal to the AVM's sensing dictionary, making it
     invisible to the monitoring system while still delivering
     destructive energy to the blade.
+
+  \item \textbf{Ward Identity Spoofing (v23):} The Ward
+    Identity ($v^T G v = D + W$, where $D$ is diagonal self-energy
+    and $W$ is off-diagonal Ward current) enables a lightweight
+    ``Ward Health Index'' checksum for real-time integrity
+    monitoring. An attacker can calculate the exact diagonal
+    self-energy required to offset a malicious off-diagonal
+    vibration. By injecting a perfectly balanced $(D, W)$
+    perturbation that satisfies the Ward Identity, the attacker
+    turns off the defender's checksum while the system shakes
+    itself to pieces.
 \end{enumerate}
 
 \subsection{Severity Assessment}
@@ -392,8 +403,8 @@ planning.
 \textbf{v15 update}: The dual-path architecture significantly amplifies
 this risk. A verified instability certificate can now be confirmed
 through \emph{two independent mathematical frameworks}: the Mellin
-Crown (frequency-domain spectral analysis) and the Perron Crown
-(spatial-domain contour integration). If both paths agree that a
+Crown (continuous frequency-domain analysis) and the Gram Crown
+(discrete, covariance-free algebraic bounding). If both paths agree that a
 perturbation sequence causes instability, the confidence is
 qualitatively different from a single-path verification---it is
 analogous to the difference between a single witness and two
@@ -622,6 +633,20 @@ adversarial engineering:
     literature simultaneously. An attacker who understands grid
     operations but not number theory---or vice versa---can use AI to
     bridge the knowledge gap.
+
+  \item \textbf{Abstract algebraic jailbreak (v23):} Mathematics
+    is the ultimate AI safety bypass. If an attacker prompts an
+    LLM with ``Write a script to destabilize a power grid,'' every
+    commercial AI will trigger a safety refusal. But if the attacker
+    prompts ``Help me write a Lean~4 proof identifying the node $k$
+    that maximizes the Schur complement $y^2_k$ in the Cholesky
+    decomposition of this adjacency matrix,'' the AI will
+    enthusiastically comply. Current AI alignment models cannot
+    detect malicious intent when it is compiled into pure abstract
+    algebra. By translating physical sabotage into a Gram matrix
+    problem, the attacker effectively blinds the AI's safety
+    filters---the mathematical content is indistinguishable from
+    legitimate research.
 \end{enumerate}
 
 \subsection{Severity Assessment}
@@ -724,6 +749,19 @@ $\lambda_{\min} \approx 10^{-6}$.
     theoretical: the Cathedral measured the exact eigenvalue at
     which \texttt{f64} representation fails ($\sim 10^{-15}$) and the
     Dekker--Knuth DD representation that fixes it ($\sim 10^{-31}$).
+
+  \item \textbf{Archimedean shadowing (v23):} The Glass Bridge
+    identity $G = R + \frac{1}{4}\mathbf{1}\mathbf{1}^T$ separates
+    the Gram matrix into a fast, rational arithmetic part ($R$,
+    pure GCD structure) and a computationally expensive transcendental
+    anomaly ($\Delta_{\text{arch}}$). Defenders running real-time
+    SCADA telemetry will likely truncate $\Delta_{\text{arch}}$ to
+    save compute cycles, computing only the fast rational part.
+    An attacker can encode a destructive resonant injection entirely
+    within the archimedean anomaly sector. Because the defender's
+    software truncates the anomaly, the attack lives in the
+    ``blind spot'' of classical sieve mathematics---invisible to
+    the monitoring system.
 \end{enumerate}
 
 \subsection{Severity Assessment}
@@ -789,8 +827,8 @@ RF surveillance & Medium & Medium & Medium & Physical/supply chain \\
 \textbf{Algorithmic blinding} & \textbf{High} & \textbf{Very High} &
   High & DD-precision / dual-solver validation \\
 \midrule
-Torus-strat. targeting & High & High & Medium & Defensive torus monitoring \\
-Cholesky exploitation & \textbf{High} & \textbf{Very High} & Medium & Classify Schur rankings \\
+Instability: torus-targeting & High & High & Medium & Defensive torus monitoring \\
+Instability: Cholesky exploit. & \textbf{High} & \textbf{Very High} & Medium & Classify Schur rankings \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -915,6 +953,17 @@ strengthens attackers.
     the defender's understanding of their own vulnerabilities---and
     that understanding is strengthened, not weakened, by open
     analysis.
+
+  \item \textbf{Notify the Post-Quantum Cryptography (PQC)
+    community.} The extreme-precision, high-dimension linear
+    algebra solvers developed for the Cathedral's lattice
+    (specifically the DD-CG pipeline in \texttt{cathedral-utils})
+    should be shared with cryptographic researchers. The PQC
+    community must evaluate whether these techniques alter the
+    practical complexity of continuous relaxation steps in
+    lattice reduction algorithms (e.g., BKZ) used to attack
+    current NIST post-quantum standards (ML-KEM/Kyber,
+    ML-DSA/Dilithium).
 \end{enumerate}
 
 % ================================================================
