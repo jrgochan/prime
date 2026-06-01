@@ -9,7 +9,7 @@
 \author{
   Jason Robert Gochanour\,\orcidlink{0000-0002-2862-526X}
 }
-\date{May 17, 2026}
+\date{June 2026}
 
 \begin{document}
 
@@ -40,6 +40,11 @@ precision Gram matrices computed on GPU, and show that the
 condition number explosion $\kappa(G) \sim N$ is entirely
 an artifact of the rank-1 shift, while $\kappa(R) \sim \sqrt{N}$
 and the dark crystal $\kappa(G^{(2)}) \sim 3$.
+The Glass Bridge is also the mathematical foundation of the
+\emph{anomaly separation} (Insight~E in the companion
+physics paper~\cite{cathedral-physics}): the decomposition
+$G = A + H$ into arithmetic and archimedean components that
+underpins anomaly-gated precision engineering.
 \end{abstract}
 
 \tableofcontents
@@ -429,6 +434,12 @@ a classical arithmetic function.
   \item \textbf{Connection to $L$-functions.} Does the Glass
     Bridge generalize to Dirichlet $L$-functions, replacing
     $\mu$ with twisted M\"obius functions?
+  \item \textbf{The Glass Bridge as anomaly separator.} The
+    decomposition $G = R + \frac{1}{4}\mathbf{1}\mathbf{1}^\top$
+    is an exact instance of the arithmetic/archimedean anomaly
+    separation. Does the Torus Projection
+    $T^\infty = \prod_p S^1_p$ further decompose $R$ into
+    per-prime strata with independent spectral behavior?
 \end{enumerate}
 
 % ================================================================
@@ -465,7 +476,7 @@ reduction requiring no PNT input.
 
 The author thanks Claude (Anthropic) and Gemini (Google DeepMind)
 for computational and theoretical contributions to the Glass Bridge
-discovery and formalization campaign (March--May 2026).
+discovery and formalization campaign (March--June 2026).
 
 % ================================================================
 \begin{thebibliography}{99}
@@ -507,8 +518,14 @@ a formalized conditional proof in Lean~4,''
 
 \bibitem{cathedral-main}
 J.~R.~Gochanour,
-``A formal reduction of the Riemann Hypothesis to one literature axiom
+``A formal reduction of the Riemann Hypothesis to two axioms
 via the Nyman--Beurling criterion in Lean~4,''
+2026.
+
+\bibitem{cathedral-physics}
+J.~R.~Gochanour,
+``The Physics of the Primes: A Dictionary Between the Cathedral
+Proof and Quantum Mechanics,''
 2026.
 
 \bibitem{mathlib}
