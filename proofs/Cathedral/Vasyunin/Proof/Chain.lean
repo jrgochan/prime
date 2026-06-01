@@ -20,7 +20,7 @@ namespace Cathedral.Vasyunin
 -- **FORMERLY `axiom log_cutoff_witness_bound`.**
 -- Now proved in WitnessAsymptotics.lean from:
 --   1. witness_numerator_convergence (PNT: bᵀv → 1)
---   2. witness_covariance_decay (RH: vᵀCv ≤ C/ln N)
+--   2. discrete_riemann_hypothesis (RH: vᵀCv ≤ C/ln N)
 -- See WitnessAsymptotics.lean for the full decomposition.
 
 /-- The log cutoff witness is nonzero for N ≥ 3. -/

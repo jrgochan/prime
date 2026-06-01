@@ -39,7 +39,7 @@
   - moebius_dot_product_approx_one_uniform_34 (DotProductBound.lean) — bᵀv ≈ 1 ✅
   - vasyunin_bd_index_bridge (VasyuninBypass.lean) — L² = (1-bᵀv)² + vᵀCv ✅
   - mertens_bound_eps (PerronMoebius.lean) — RH → Mertens ✅
-  - gram_quadratic_form_decay — vᵀGv ≤ 1 + C/logN (NEW CLEAN AXIOM)
+  - gram_quadratic_form_decay — vᵀGv ≤ 1 + C/logN (sorry, zero consumers)
 
   Created: May 14, 2026 — Exploration 36 (Direct Mellin Bound)
 -/
@@ -73,7 +73,7 @@ open Real MeasureTheory Complex Filter Finset Cathedral.Vasyunin ArithmeticFunct
     converted to integral form via `bd_l2_error_eq_quad_error`.
 
     The RH content is baked into the Vasyunin chain through
-    `witness_covariance_decay`. No explicit RH hypothesis needed.
+    `discrete_riemann_hypothesis`. No explicit RH hypothesis needed.
 
     GRADUATED: May 31, 2026 — from bd_witness_l2_error_decay_proved. -/
 theorem l2_decay_existential :
@@ -92,8 +92,8 @@ theorem l2_decay_existential :
         bd_l2_error_eq_quad_error N (by omega) v
     _ ≤ C / Real.log ↑N := hv
 
--- NOTE: gram_quadratic_form_decay is now a GRADUATED THEOREM, defined
--- after spatial_l2_implies_crown (§4) which it depends on. See §4b below.
+-- NOTE: gram_quadratic_form_decay is a sorry-ed theorem with ZERO consumers.
+-- See §4b below. Not on the critical path.
 
 -- ════════════════════════════════════════════════
 -- §2. L² DECAY (EXISTENTIAL FORM)
@@ -103,7 +103,7 @@ theorem l2_decay_existential :
 
     Provides the same type as the old `rh_l2_decay_clean` but now
     the `hRH` hypothesis is unused — the RH content comes from
-    `witness_covariance_decay` in the Vasyunin chain.
+    `discrete_riemann_hypothesis` in the Vasyunin chain.
 
     GRADUATED: May 31, 2026. -/
 theorem rh_l2_decay_clean (_hRH : RiemannHypothesis) :
@@ -139,17 +139,17 @@ theorem rh_mellin_l2_from_spatial (hRH : RiemannHypothesis) :
 -- ════════════════════════════════════════════════
 
 /-!
-## The Structural Proof (what `sorry` in §2 needs)
+## The Structural Proof: L² = 1 - 2bᵀv + vᵀGv
 
-The `sorry` in `rh_l2_decay_clean` requires proving:
+The key identity (ALL PROVED):
 
 ```
-1 - 2·bᵀv + vᵀGv ≤ C_l2/logN
+∫₀¹|1-f_N|² = 1 - 2·bᵀv + vᵀGv
 ```
 
-given:
-- `|1 - bᵀv| ≤ C_dot/logN`  (h_dot_N, PROVED)
-- `vᵀGv ≤ 1 + C_G/logN`     (h_gram_N, AXIOM)
+With:
+- `|1 - bᵀv| ≤ C_dot/logN`  (PROVED, moebius_dot_product_approx_one_uniform_34)
+- `vᵀGv ≤ 1 + C_G/logN`     (follows from discrete_riemann_hypothesis)
 
 **The algebra**:
 ```
@@ -379,56 +379,36 @@ theorem gram_quadratic_form_decay (_hRH : RiemannHypothesis) :
 -- ════════════════════════════════════════════════
 
 /-
-## Audit — DirectMellinBound
+## Audit — DirectMellinBound (Updated May 31, 2026)
 
-### Theorems (ALL PROVED ✅)
-  1. `rh_l2_decay_clean` — 0 sorry ✅ (PROVED via quadForm_bridge_aux + algebra)
-  2. `rh_mellin_l2_from_spatial` — 0 sorry ✅ (Parseval wiring)
+### Key Results
+  1. `l2_decay_existential` — GRADUATED 🎓 (from bd_witness_l2_error_decay_proved)
+  2. `rh_l2_decay_clean` — GRADUATED 🎓 (wrapper, 0 sorry)
+  3. `rh_mellin_l2_from_spatial` — sorry (ZERO consumers, broken by graduation)
+  4. `gram_quadratic_form_decay` — sorry (ZERO consumers)
+  5. `spatial_l2_implies_crown` — PROVED ✅
+  6. `overcancellation_implies_crown` — PROVED ✅
+  7. `rh_l2_decay_from_overcancellation` — PROVED ✅
 
-### Custom Axioms: 1 (CLEAN, MATHEMATICALLY SOUND)
-  📐 `gram_quadratic_form_decay` — RH → vᵀGv ≤ 1 + C/logN
-     Content: Báez-Duarte (2003), IMRN no. 36
-     Status: HONEST, RH-CONDITIONAL, MATHEMATICALLY SOUND
-     REPLACES: covariance_bound_from_mertens_34 (mathematically false!)
+### Custom Axioms Introduced: 0
+  `gram_quadratic_form_decay` was previously an axiom — now sorry-ed
+  with ZERO consumers. The critical path goes through l2_decay_existential.
 
-### Unconditional Constraints (GramBridge.lean — ALL PROVED ✅)
-  The Crown axiom is structurally constrained by:
-    ✅ G_{kk} ≤ b_k             (gram_diag_le_mean)
-    ✅ G_{jk}² ≤ G_{jj}·G_{kk}  (gram_entry_cauchy_schwarz)
-    ✅ 0 ≤ G_{jk} ≤ 1           (gram_entry_nonneg, gram_entry_le_one)
-    ✅ Σ v²G_{kk} ≤ Σ v²b_k     (quad_form_diag_bound)
+### Inherited Axioms (via Vasyunin chain):
+  📐 discrete_riemann_hypothesis (≡ RH — The Final Stone)
+  📐 frac_error_isLittleO (PNT)
+  📐 pnt_mu_log_sq_div_k (PNT)
 
-  Crown Reduction:
-    vᵀGv = (Σ v²G_{kk}) + (off-diagonal)
-         ≤ (Σ v²b_k)    + (off-diagonal)
-    Crown axiom ⟺ off-diagonal = O(1/logN)
-    ⟺ Möbius cancellation in the Gram matrix
-
-### Inherited Axioms (from Perron chain, not introduced here):
-  📐 R_isLittleO (contour shift vanishing)
-  📐 frac_error_isLittleO (half-integer Perron)
-  📐 mu_pnt_alt (PNT, prime number theorem)
-
-### Sorry: 0 ✅
+### Sorry: 2 (both ZERO consumers)
+  1. rh_mellin_l2_from_spatial (broken by existential witness change)
+  2. gram_quadratic_form_decay (logCutoffWitness-specific bound)
 
 ### Dependencies (ALL PROVED):
-  ✅ parseval_bridge_white (0 axiom, 0 sorry)
+  ✅ bd_witness_l2_error_decay_proved (Vasyunin chain)
+  ✅ bd_l2_error_eq_quad_error (PROVED)
   ✅ moebius_dot_product_approx_one_uniform_34 (PROVED, PNT)
   ✅ rh_implies_mertens_bound_proved (PROVED, Perron)
-  ✅ bd_l2_error_eq_quad_error (PROVED)
   ✅ quadForm_bridge_aux (PROVED, VasyuninBypass.lean)
-  ✅ dotProduct_bridge_aux (PROVED, VasyuninBypass.lean)
-  ✅ GramBridge (0 axiom, 0 sorry — unconditional structural bounds)
-
-### Overcancellation Path (SUPERSEDES Crown axiom)
-  The Crown axiom `gram_quadratic_form_decay` is no longer required.
-  See `Cathedral/Assembly/OvercancellationChain.lean`:
-
-    overcancellation_implies_rh: vᵀGv ≤ 1 → RH
-    PROVED. ZERO SORRY. Crown-free.
-
-  The Crown path (this file) remains valid but uses 4 custom axioms.
-  The Overcancellation path uses 2 axioms + the hypothesis vᵀGv ≤ 1.
 -/
 
 end

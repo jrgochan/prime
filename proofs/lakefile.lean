@@ -4,10 +4,9 @@ open Lake DSL
 package "hyperzeta_proofs" where
   -- Build constraints securely limiting memory limits
 
--- PrimeNumberTheoremAnd: REMOVED (axiom-ified, May 10 2026).
--- All PNTAnd results used by the Cathedral are now stated as axioms
--- in the individual files that previously imported PNTAnd.
--- This makes the repo self-contained: only Lean 4 + Mathlib required.
+-- PrimeNumberTheoremAnd: Was temporarily removed (axiom-ified, May 10 2026).
+-- Re-enabled May 31, 2026 at v4.29.0 to graduate 6 PNT axioms.
+-- See Cathedral.PNT.PNTAndBridge for the bridge.
 
 require mathlib from git
   "https://github.com/leanprover-community/mathlib4.git" @ "v4.29.0"
@@ -204,7 +203,7 @@ lean_lib «Cathedral» where
     `Cathedral.Perron.MertensFromPerron,
     -- Perron Crown (axiom elimination + covariance graduation)
     `Cathedral.Assembly.PerronCrown,
-    -- Path E: Mellin-Spectral Fusion (witness_covariance_decay graduation)
+    -- Path E: Mellin-Spectral Fusion (discrete_riemann_hypothesis graduation path)
     `Cathedral.Assembly.CovarianceFromPerron,
     -- Mellin Crown (frequency-domain forward direction, exploration10)
     `Cathedral.Assembly.MellinPerronBridge,

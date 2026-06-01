@@ -114,8 +114,9 @@ theorem log_factor_lower_bound (p : ℕ) (hp : Nat.Prime p) :
     Z₂(N) ≥ exp(-2 · Σ_{n≥1} 1/n²) > 0 for all N.
 
     This graduates the axiom `zeta2Product_lower_bound`.
-    The only remaining axiom is `log_one_sub_ge_neg_two_mul`
-    (elementary calculus: ln(1-x) ≥ -2x for x ∈ [0,1/2]). -/
+    Both component axioms are now graduated:
+    - `log_one_sub_ge_neg_two_mul` — GRADUATED 🎓 (Mathlib: add_one_le_exp)
+    - `zeta2Product_lower_bound` — GRADUATED 🎓 (this theorem) -/
 theorem zeta2Product_lower_bound_proved :
     ∃ c : ℝ, 0 < c ∧ ∀ N : ℕ, c ≤ zeta2Product N := by
   -- Step 1: Σ 1/n² converges (Mathlib p-series test, since 1 < 2)

@@ -961,7 +961,7 @@ nyman_beurling_converse (PROVED, 0 axioms)
 |------|-------------|----------|-------------------|
 | **Inversion Bridge** | **inversion_completeness** | **1** | **★★★★★** |
 | Gram Crown | gram_quadratic_form_decay | 1 | ★★★ |
-| Heisenberg | witness_covariance_decay | 1 | ★★ |
+| Heisenberg | discrete_riemann_hypothesis | 1 | ★★ |
 | Overcancellation | vᵀGv ≤ 1 (FALSE for N≥30) | — | ★★★★ |
 | Perron Crown | R_isLittleO + 3 PNT | 4 | ★★ |
 

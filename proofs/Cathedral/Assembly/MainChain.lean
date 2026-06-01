@@ -64,7 +64,7 @@ import Cathedral.Physics.Bridges.SpectralDivergence
   ARCHITECTURE 2 — Nyman-Beurling (HISTORICAL):
   The forward direction uses the Perron Crown (RH → Mertens → L² decay),
   which inherits 4 PNTAnd axioms + 1 covariance axiom from the Perron chain.
-  The `witness_covariance_decay` axiom is ELIMINATED (graduated in
+  The `witness_covariance_decay` axiom (now `discrete_riemann_hypothesis`)
   CovarianceFromPerron.lean). The converse direction has ZERO custom axioms.
 
   ARCHITECTURE 3 — Ramanujan-Smith Physics (ALTERNATIVE, May 16, 2026):
@@ -273,18 +273,18 @@ theorem spectral_energy_divergence :
     **GRADUATED: May 12, 2026 (Exploration 36)**
     **PATH E FUSION: May 13, 2026 (Exploration 37)**
     **CLEAN GRAM PATH: May 14, 2026 (Exploration 36 — Direct Mellin Bound)**
+    **EXISTENTIAL FORM: May 31, 2026 — l2_decay_from_rh graduated**
 
-    Now proved via the Direct Mellin Bound (CLEAN — no false axioms!):
+    Now proved via the Vasyunin chain (l2_decay_existential):
       1. `rh_l2_decay_clean` (DirectMellinBound.lean)
-         RH → ∫₀¹(1-f_N)² ≤ C_l2/logN
-         Uses: gram_quadratic_form_decay (CLEAN AXIOM, ≡ RH)
-                + moebius_dot_product_approx_one_uniform_34 (PROVED)
+         ∃ v, ∫₀¹(1-f_N)² ≤ C_l2/logN
+         Uses: bd_witness_l2_error_decay_proved (Vasyunin chain)
+                inherits discrete_riemann_hypothesis (≡ RH)
       2. `log_grows_unboundedly` (this file)
          C/logN < ε eventually (standard calculus)
 
     This path does NOT use:
       ✗ covariance_bound_from_mertens_34 (MATHEMATICALLY FALSE)
-      ✗ witness_covariance_decay
       ✗ any sorry
 
     Alternative forward paths preserved:
