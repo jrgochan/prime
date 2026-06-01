@@ -333,12 +333,12 @@ theorem distance_decomposition_limit
 /-! ### The Dyson Protocol Status Report (May 29, 2026)
 
   ```
-  PROVED (0 axioms, 0 sorry except matrix_dyson wiring):
+  ALL PROVED ✅ (0 axioms, 0 sorry):
     ├── DC offset: R_true = R + (1/4)J
     ├── True anomaly: Δ_true = G - R_true = Δ - (1/4)J
     ├── Gram decomposition: G = R_true + Δ_true
     ├── Dyson equation (scalar): d²_opt = d²_free + scattering
-    ├── Dyson equation (matrix): A⁻¹ = B⁻¹ - B⁻¹CB⁻¹ (1 sorry)
+    ├── Dyson equation (matrix): A⁻¹ = B⁻¹ - B⁻¹CB⁻¹ (PROVED ✅)
     └── R_true properties: symmetric, diagonal = 1/3
 
   THE GAP (what remains for RH):

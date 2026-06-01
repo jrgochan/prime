@@ -23,7 +23,7 @@
   which in turn encode L-function values at s=1.
 
   Under RH, the L-function values provide the cancellation needed to
-  make vᵀCv = O(1/logN), graduating the l2_decay_from_rh axiom.
+  make vᵀCv = O(1/logN), which is `discrete_riemann_hypothesis` (the sole axiom).
 
   ## References
 

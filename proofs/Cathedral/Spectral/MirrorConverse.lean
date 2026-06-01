@@ -245,7 +245,7 @@ We have 2·(1 - b^T v) → 0 (PROVED).
 We need v^T G v → 1 (or at least v^T G v ≤ 1 + C/log N).
 
 THIS IS THE CROWN AXIOM — the single remaining axiom
-(gram_quadratic_form_decay / l2_decay_from_rh).
+(`discrete_riemann_hypothesis`, formerly `gram_quadratic_form_decay` / `l2_decay_from_rh`).
 
 ## The Overcancellation Path ⭐
 
