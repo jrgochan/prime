@@ -53,7 +53,7 @@ lemma padVec_last {N : ℕ} (v : Fin N → ℝ) :
 /-- The i-th component of padVec agrees with v. -/
 lemma padVec_castSucc {N : ℕ} (v : Fin N → ℝ) (i : Fin N) :
     padVec v (Fin.castSucc i) = v i := by
-  simp [padVec, Fin.snoc, Fin.castSucc, (Fin.castSucc_lt_last i).ne]
+  simp [padVec, Fin.snoc, Fin.castSucc]
 
 -- ════════════════════════════════════════════════
 -- §3. BLOCK STRUCTURE IDENTITIES
