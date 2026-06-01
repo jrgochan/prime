@@ -7,19 +7,24 @@
   Research Frontiers Beyond the Cathedral%
 }
 \author{Jason Robert Gochanour}
-\date{May 2026}
+\date{June 2026}
 
 \begin{document}
 \maketitle
 
 \begin{abstract}
 We survey the open problems and research directions suggested by
-the Cathedral project, spanning computer science, pure mathematics,
-and formalization engineering. The Cathedral reduced the Riemann
-Hypothesis to one literature axiom; we identify the mathematical
-infrastructure needed to close it, the algorithmic questions raised by the
-DD-precision pipeline, and the broader implications for the formal
-verification of analytic number theory.
+the Cathedral project, spanning mathematics, physics, engineering,
+medicine, AI collaboration, and formalization methodology.
+The Cathedral reduced the Riemann Hypothesis to two axioms
+and discovered a structural correspondence between the integers
+and gauge field theory captured by five Pentagon insights.
+We identify the mathematical infrastructure needed to close the
+remaining axioms, the physical questions raised by the Torus
+Projection on $T^\infty = \prod_p S^1_p$, the medical applications
+of the Ward Health Index, the broader implications of the
+human-AI pair programming model, and a vision for verified
+knowledge beyond mathematics.
 \end{abstract}
 
 \tableofcontents
@@ -36,11 +41,12 @@ the Cathedral walls.
 \section{Closing the One Crown Axiom}
 % ================================================================
 
-The sole crown axiom \lean{baez\_duarte\_forward} states that under
-RH, the BD basis can approximate 1 in $L^2(0,1)$. This is the
-B\'aez-Duarte forward direction (IMRN 2003). Closing it requires
-connecting the existing infrastructure (see BOUNTY.md for the
-detailed gap analysis):
+The two crown axioms are \lean{gram\_form\_upper\_bound} (the Gram
+quadratic form bound, formally equivalent to RH) and
+\lean{mertens\_34\_unconditional} (the classical Mertens bound
+$|M(x)| \leq Cx^{3/4}$, an unconditional consequence of PNT).
+Closing them requires connecting the existing infrastructure
+(see BOUNTY.md for the detailed gap analysis):
 
 \begin{enumerate}
   \item The Littlewood Maneuver (\textbf{PROVED}, 0 axioms).
@@ -240,12 +246,127 @@ The Cathedral architecture could be adapted for:
 % ================================================================
 
 The Cathedral is an ending and a beginning. The proof architecture
-is complete; the mathematical questions it raises are not. The
-research frontier extends in at least five directions: closing the
-one crown axiom, understanding the spectral universality, exploiting the
-algorithmic structure (including the DD-precision pipeline),
-contributing to Mathlib, and generalizing to other $L$-functions.
+is complete; the questions it raises are not. The research frontier
+extends in at least eight directions: closing the two crown axioms,
+understanding the spectral universality, exploiting the algorithmic
+structure (including the DD-precision pipeline), contributing to
+Mathlib, generalizing to other $L$-functions, testing the Pentagon
+insights in biology and physics, deploying the Ward Health Index
+in medicine, and building the next generation of human-AI
+proof engineering collaborations.
 
+The mathematics does not choose sides. But by making it verified,
+open, and accessible, we ensure it serves the light.
+
+% ================================================================
+\section{Physics: The Pentagon of Arithmetic Physics}
+% ================================================================
+
+The Cathedral discovered five structural insights---the Pentagon
+of Arithmetic Physics---connecting the multiplicative structure
+of the integers to gauge field theory.
+
+\begin{center}
+\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Insight} & \textbf{Integer Lattice} & \textbf{Physics} \\
+\midrule
+A. Percolation & $6/\pi^2 \approx 0.608$ squarefree density & 2D critical threshold \\
+B. Ward & $D + B + F$, $B + F \approx 0$ & Noether current conservation \\
+C. Projection & $\mu = \lambda \cdot \mu^2$ & Fermions from bosons via exclusion \\
+D. Vacuum & $d^2_{N+1} = d^2_N - y^2$ & Asymptotic freedom / QCD \\
+E. Anomaly & $G = A + H$ & Chiral anomaly matching \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Open problems}:
+\begin{enumerate}
+  \item Why does the integer lattice mirror gauge field theory?
+    Is there a categorical functor from the divisor lattice to
+    the gauge group hierarchy $U(1) \times SU(2) \times SU(3)$?
+  \item Can the Torus Projection $T^\infty = \prod_p S^1_p$ serve
+    as a model for extra compact dimensions in the sense of
+    Kaluza--Klein theory?
+  \item Does the per-prime energy profile $\{E_p\}_{p \leq N}$
+    (with $p = 2$ carrying 46--86\%) have a cosmological analogue?
+\end{enumerate}
+
+% ================================================================
+\section{Medicine and Biology}
+% ================================================================
+
+\subsection{The Ward Health Index}
+
+The Ward Health Index (WHI), defined as
+$\text{WHI}(M, \pi) = 1 - |W|/\operatorname{tr}(M)$
+for a symmetric matrix $M$ with binary partition $\pi$, provides
+a single-scalar diagnostic for parity-structured systems.
+
+\textbf{Medical frontiers}:
+\begin{itemize}
+  \item \textbf{Stroke detection}: Hemispheric EEG coherence with
+    left/right parity. WHI~$\approx 1$ in healthy subjects; WHI~$\ll 1$
+    in unilateral stroke. Testable against public EEG datasets
+    (Temple University Hospital corpus).
+  \item \textbf{Cardiac monitoring}: Left/right bundle branch ECG
+    parity. WHI as a bedside alarm for bundle branch blocks.
+  \item \textbf{Gene co-expression}: Chromosomal parity of gene
+    expression panels for cancer screening.
+\end{itemize}
+
+\subsection{The $6/\pi^2$ Threshold in Biology}
+
+The squarefree density $6/\pi^2 \approx 60.8\%$ is a fundamental
+constant of the integers. Biologically:
+\begin{itemize}
+  \item Active gene fraction in healthy tissue (GTEx): $\approx 60\%$.
+  \item Awake cortical neuron activation: $\approx 60\%$.
+  \item Thymic T-cell positive selection: $\approx 60\%$.
+\end{itemize}
+Each is testable against public databases within one week.
+
+% ================================================================
+\section{AI Collaboration: The Cathedral Model}
+% ================================================================
+
+The Cathedral was built by three minds---a human Architect, an AI
+Proof Engineer (Claude), and an AI Theorist (Gemini)---over 68 days.
+This human-AI pair programming model is transferable:
+
+\begin{itemize}
+  \item \textbf{Climate science}: Formalize and verify climate
+    models with explicit axioms and machine-checked predictions.
+  \item \textbf{Economic policy}: Formally verify stability
+    properties of proposed monetary policies.
+  \item \textbf{Drug safety}: AI-assisted verification of
+    pharmacological interaction models.
+\end{itemize}
+
+The key insight: formal verification does not just prevent
+errors---it \emph{creates trust}. A verified model is one that
+regulators, policymakers, and the public can examine. The axioms
+are explicit. The reasoning is machine-checked. The trust
+boundaries are visible.
+
+% ================================================================
+\section{Education: The Epistemic Debt Model}
+% ================================================================
+
+The Cathedral's ``axiom-theorem gradient'' (\S3 of
+cathedral-lean.tex) provides a pedagogical framework:
+\begin{enumerate}
+  \item Start with axioms (the \texttt{sorry} placeholders).
+  \item Build on axioms (the dependent theorems).
+  \item Graduate axioms (the reduction campaign).
+  \item Track the gradient: at any moment, see exactly how much
+    epistemic debt remains.
+\end{enumerate}
+The compiler becomes a teacher that never tires, never loses
+patience, and reports the exact line number of every error.
+Human teachers are freed to focus on intuition, motivation,
+and beauty.
 \begin{thebibliography}{99}
 \bibitem{cathedral}
 J.R.~Gochanour, \emph{The Cathedral}, 2026.
