@@ -84,11 +84,11 @@ theorem nbDistSq_nonneg (N : ℕ) : nbDistSq N ≥ 0 := by
   · -- N ≥ 3: vasyunin_nbDistSq_pos gives bᵀG⁻¹b < 1, so d² > 0
     unfold nbDistSq
     linarith [vasyunin_nbDistSq_pos N hN]
-  · push_neg at hN
+  · push Not at hN
     interval_cases N
     · -- N = 0: d²(0) = 1 - 0 = 1 ≥ 0
       unfold nbDistSq
-      simp [vasyuninMeanVec, dotProduct, Finset.sum_empty]
+      simp [vasyuninMeanVec, dotProduct]
     · -- N = 1: d²(1) ≥ d²(3) > 0 by antitone
       have h3 : nbDistSq 3 ≥ 0 := by
         unfold nbDistSq; linarith [vasyunin_nbDistSq_pos 3 (by omega)]
@@ -131,7 +131,7 @@ theorem nbDistSq_telescope' (N : ℕ) :
   have h := nbDistSq_telescope N
   have : ∑ k ∈ Finset.range N, (nbDistSq k - nbDistSq (k + 1)) =
     -(∑ k ∈ Finset.range N, (nbDistSq (k + 1) - nbDistSq k)) := by
-    simp [Finset.sum_neg_distrib]
+    simp
   linarith
 
 -- ════════════════════════════════════════════════
@@ -288,7 +288,7 @@ theorem nbDistSq_tendsto_zero :
   apply le_antisymm
   · set L := ⨅ N, nbDistSq N with hL_def
     by_contra h_pos
-    push_neg at h_pos
+    push Not at h_pos
     obtain ⟨C, hC_pos, N₀, hbound⟩ := nb_dist_sq_decay
     -- log(↑N : ℝ) → ∞ as N → ∞
     have hlog_tendsto : Filter.Tendsto (fun N : ℕ => Real.log (N : ℝ))
@@ -313,7 +313,7 @@ theorem nbDistSq_tendsto_zero :
     have hlog_big : C / L < Real.log (M : ℝ) := by
       have hN₁_pos : (0 : ℝ) < ↑N₁ := by
         by_contra h_le
-        push_neg at h_le
+        push Not at h_le
         have hN₁_zero : (N₁ : ℝ) = 0 := le_antisymm h_le (Nat.cast_nonneg N₁)
         rw [hN₁_zero, Real.log_zero] at hN₁_log
         linarith [div_pos hC_pos h_pos]
@@ -377,8 +377,7 @@ theorem nbDistSq_eq_bd_optimal (N : ℕ) (hN : N ≥ 1) :
     have h := bd_l2_error_eq_quad_error (N+1) hN2 v_opt
     -- N + 1 - 1 = N definitionally, so types match
     -- Rewrite using the dimension bridge identities
-    convert h using 2 <;>
-    · first | exact (bd_mean_eq_vasyunin (N+1)) | exact (bd_gram_eq_vasyunin (N+1))
+    exact h
   rw [h_l2]
   -- G v_opt = b
   have h_Gv : (vasyuninGramMatrix N).mulVec v_opt = vasyuninMeanVec N := by
