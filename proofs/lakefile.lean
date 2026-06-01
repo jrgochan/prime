@@ -235,6 +235,8 @@ lean_lib «Cathedral» where
     `Cathedral.Covariance.TwelveBridge,
     -- Anomaly Strata (Final Reduction: Crown ↔ anomaly decay, Exploration 37)
     `Cathedral.Covariance.AnomalyStrata,
+    -- Crown Reduction (3 Legs → Crown: PNT + Ramanujan + Anomaly, Exploration 37)
+    `Cathedral.Covariance.CrownReduction,
     -- HC number formalization (unbounded HC subsequence, Exploration 36)
     `Cathedral.Covariance.HighlyComposite,
     -- HC-Gram bridge (HC bound → subseq bound → RH, Exploration 36)
