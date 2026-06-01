@@ -21,8 +21,8 @@ with everything else certified by a proof assistant.
 
 The Riemann Hypothesis (RH), arguably the deepest open problem in
 mathematics, has been formally reduced in this sense. The Cathedral
-is a Lean~4 formalization comprising 330 active files and
-approximately 97{,}000 lines of code, with zero compilation errors,
+is a Lean~4 formalization comprising 390 active files and
+approximately 120{,}000 lines of code, with zero compilation errors,
 that establishes the biconditional
 \[
   \RH \;\iff\; d_N^2 \to 0
@@ -31,8 +31,9 @@ where $d_N^2 = \inf_v \int_0^1 (1 - \sum_{k=2}^{N} v_k \{1/(kx)\})^2\,dx$
 is the Nyman--Beurling distance. The converse direction
 ($d_N^2 \to 0 \implies \RH$) is proved with \textbf{zero} custom
 axioms and \textbf{zero sorry}. The forward direction
-($\RH \implies d_N^2 \to 0$) depends on exactly \textbf{one}
-literature axiom~\cite{baezduarte2003}.
+($\RH \implies d_N^2 \to 0$) depends on exactly \textbf{two}
+crown axioms: one a reformulation of RH as a Gram form bound,
+the other an unconditional consequence of PNT~\cite{baezduarte2003}.
 
 This paper examines what this formal reduction \emph{means}---not
 mathematically (the companion paper~\cite{cathedral} provides the
