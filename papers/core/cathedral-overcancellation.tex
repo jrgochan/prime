@@ -9,7 +9,7 @@
 \author{
   Jason Robert Gochanour\,\orcidlink{0000-0002-2862-526X}
 }
-\date{May 17, 2026}
+\date{June 2026}
 
 \begin{document}
 
@@ -98,7 +98,7 @@ function does not merely cancel---it overcancels.
 \toprule
 \textbf{Path} & \textbf{Hypothesis} & \textbf{Custom Axioms} & \textbf{Sorry} \\
 \midrule
-Crown (B\'aez-Duarte fwd) & $v^\top G v \leq 1 + C/\log N$ & 4 & 0 \\
+Crown (B\'aez-Duarte fwd) & $v^\top G v \leq 1 + C/\log N$ & 2 & 0 \\
 Perron contour & RH (as input) & 4 & 0 \\
 \textbf{Overcancellation} & $\boldsymbol{v^\top G v \leq 1}$ & \textbf{1} & \textbf{0} \\
 \bottomrule
@@ -366,7 +366,7 @@ building on:
     ($\sim$4 million lines of Lean~4),
   \item \textbf{PrimeNumberTheoremAnd}: PNT formalization,
   \item \textbf{Cathedral}: Our proof infrastructure
-    ($\sim$150 files, $\sim$50{,}000 lines).
+    ($\sim$390 files, $\sim$120{,}000 lines).
 \end{itemize}
 
 \subsection{Axiom Footprint}
@@ -421,8 +421,25 @@ prime factorization---produces sufficient destructive interference
 in the off-diagonal terms to force $v^\top G v$ below~$1$.
 
 This is overcancellation: the M\"obius function does not just
-cancel to zero ($S_1 \to 0$); its higher-order correlations in
-the Gram matrix cancel \emph{past} the critical threshold.
+cancel to zero ($S_1 \to 0$); its higher-order correlations in the Gram matrix cancel \emph{past} the critical threshold.
+
+\subsection{The Physics: Vacuum Extraction}
+
+In the companion physics paper~\cite{cathedral-physics}, the
+overcancellation phenomenon has a physical interpretation.
+The Cholesky decrement identity
+$d^2_{N+1} = d^2_N - y^2_{\text{new}}$ (Insight~D: Monotone
+Vacuum Extraction) shows that each new basis function extracts
+a non-negative quantum $y^2_{\text{new}}$ from the vacuum energy.
+Overcancellation at the Gram level is the mechanism that
+\emph{generates} this vacuum extraction: the M\"obius sign
+structure forces destructive interference in the off-diagonal
+GCD terms, producing the monotone decrease that drives
+$d^2_N \to 0$.
+
+The running coupling constant $g_N = d^2_N \cdot \ln N \to 0$
+(asymptotic freedom) is the thermodynamic consequence of
+persistent overcancellation across all scales.
 
 \subsection{Relationship to RH}
 
@@ -456,7 +473,7 @@ in the GCD lattice.
 
 The author thanks Claude (Anthropic) and Gemini (Google DeepMind)
 for extensive computational and mathematical assistance during the
-formalization campaign (March--May 2026). The Lean~4 formalization
+formalization campaign (March--June 2026). The Lean~4 formalization
 builds on the extraordinary work of the Mathlib community and the
 PrimeNumberTheoremAnd project.
 
@@ -493,9 +510,15 @@ V.~I.~Vasyunin,
 
 \bibitem{cathedral-main}
 J.~R.~Gochanour,
-``A formal reduction of the Riemann Hypothesis to one literature axiom
+``A formal reduction of the Riemann Hypothesis to two axioms
 via the Nyman--Beurling criterion in Lean~4,''
-2026, \texttt{arXiv:????.?????}.
+2026.
+
+\bibitem{cathedral-physics}
+J.~R.~Gochanour,
+``The Physics of the Primes: A Dictionary Between the Cathedral
+Proof and Quantum Mechanics,''
+2026.
 
 \bibitem{hales2017}
 T.~C.~Hales \emph{et al.},
