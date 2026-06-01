@@ -28,7 +28,7 @@
 
   The theorem inherits from the Vasyunin chain:
   - witness_numerator_convergence (PNT-level, unconditional)
-  - witness_covariance_decay (THE Riemann Hypothesis content)
+  - discrete_riemann_hypothesis (THE Riemann Hypothesis — The Final Stone)
 
   ### Status: PROVED.
 -/

@@ -1,14 +1,14 @@
 /-
   Cathedral/Vasyunin/Proof/WitnessConditional.lean
 
-  The conditional direction: RH → witness_covariance_decay.
+  The conditional direction: RH → discrete_riemann_hypothesis.
 
   [ALTERNATIVE PATH — uses rh_implies_mertens_bound, graduated in v7]
 
   Combined with WitnessAsymptotics.lean (which proves the converse direction
-  witness_covariance_decay → RH via the chain), this establishes:
+  discrete_riemann_hypothesis → RH via the chain), this establishes:
 
-    witness_covariance_decay ↔ RH
+    discrete_riemann_hypothesis ↔ RH
 
   The mathematical argument:
     RH → M(x) = O(x^{1/2+ε})                    [classical]
@@ -68,7 +68,7 @@ axiom abel_summation_covariance_bound :
         ((vasyuninCovMatrix N).mulVec (logCutoffWitness N)) ≤ C_cov / Real.log ↑N
 
 -- ════════════════════════════════════════════════
--- THE CONDITIONAL: RH → witness_covariance_decay
+-- THE CONDITIONAL: RH → discrete_riemann_hypothesis
 -- ════════════════════════════════════════════════
 
 /-- **RH implies the witness covariance decays.**
@@ -138,16 +138,17 @@ theorem rh_implies_witness_bound :
 
 -- algebraic_nb_bridge is imported from Cathedral.Vasyunin.Proof.Chain
 
-/-- **THE CROWN JEWEL: Witness covariance decay ↔ RH.**
+/-- **THE CROWN JEWEL: discrete_riemann_hypothesis ↔ RH.**
 
-    The Cathedral's single remaining axiom (witness_covariance_decay)
-    is formally equivalent to the Riemann Hypothesis.
+    The Cathedral's single remaining axiom (`discrete_riemann_hypothesis`,
+    formerly `witness_covariance_decay`) is formally equivalent to
+    the Riemann Hypothesis.
 
-    Forward:  witness_covariance_decay → log_cutoff_bound → d² → 0 → RH
+    Forward:  discrete_riemann_hypothesis → log_cutoff_bound → d² → 0 → RH
     Converse: RH → Mertens bound → Abel summation → covariance decay
 
     This means the Cathedral is a VALID proof framework:
-    accepting witness_covariance_decay is exactly as strong as
+    accepting discrete_riemann_hypothesis is exactly as strong as
     accepting RH — no more, no less. -/
 theorem witness_covariance_decay_iff_rh :
     (∃ C_cov : ℝ, C_cov > 0 ∧ ∃ N₀ : ℕ, ∀ N : ℕ, N ≥ N₀ →

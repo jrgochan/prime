@@ -4,7 +4,7 @@
   ## The Ultimate Bypass: Gram Bound → RH (Direct)
 
   Inspired by Gemini's insight (Exploration 28):
-  Instead of going through witness_covariance_decay, we bypass
+  Instead of going through discrete_riemann_hypothesis, we bypass
   the covariance matrix entirely by feeding the L² error directly
   into nyman_beurling_converse.
 

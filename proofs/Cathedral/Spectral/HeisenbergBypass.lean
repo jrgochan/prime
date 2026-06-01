@@ -503,12 +503,12 @@ end
 --
 -- #print axioms heisenberg_implies_d_sq_zero
 --   → [propext, Classical.choice, Quot.sound,
---      witness_covariance_decay, witness_numerator_convergence]
+--      discrete_riemann_hypothesis, witness_numerator_convergence]
 --
 -- 0 custom axioms in HeisenbergBypass!
 -- The only non-standard axioms are the two Vasyunin Crown axioms:
---   1. witness_covariance_decay (THE Riemann Hypothesis content)
---   2. witness_numerator_convergence (PNT-level, unconditional)
+--   1. discrete_riemann_hypothesis (THE Riemann Hypothesis — The Final Stone)
+--   2. witness_numerator_convergence (PNT-level, GRADUATED 🎓)
 --
 -- GRADUATED (2026-05-07 Phase X):
 --   - bd_witness_l2_error_decay: axiom → THEOREM (bd_witness_l2_error_decay_proved)

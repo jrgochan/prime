@@ -1,9 +1,9 @@
 /-
   Cathedral/Vasyunin/Proof/GramBoundReduction.lean
 
-  ## Reducing witness_covariance_decay to a Gram Form Upper Bound
+  ## Reducing discrete_riemann_hypothesis to a Gram Form Upper Bound
 
-  The last remaining axiom is `witness_covariance_decay`:
+  The sole remaining axiom is `discrete_riemann_hypothesis`:
     ∃ C > 0, ∃ N₀, ∀ N ≥ N₀, N ≥ 3 → vᵀCv ≤ C / ln(N)
 
   This file shows that it follows from TWO simpler statements:
@@ -204,7 +204,7 @@ theorem witness_covariance_decay_from_gram_bound
 
 ### Reduction theorem:
 - `witness_covariance_decay_from_gram_bound`:
-  Proves `witness_covariance_decay` from A + Mertens hypothesis.
+  Proves `discrete_riemann_hypothesis` from A + Mertens hypothesis.
   Uses `gram_cov_decomposition` (proved) and
   `sq_ge_one_minus_from_abs` (proved) from CovarianceAbel.lean.
 
@@ -214,7 +214,7 @@ theorem witness_covariance_decay_from_gram_bound
                                       ├── witness_covariance_decay_from_gram_bound
   witness_numerator_rate (THEOREM) ──┘        │
   + Mertens x^{3/4} (hypothesis)              ↓
-                                     witness_covariance_decay
+                                     discrete_riemann_hypothesis
                                               │
                                               ↓
                                      log_cutoff_witness_bound

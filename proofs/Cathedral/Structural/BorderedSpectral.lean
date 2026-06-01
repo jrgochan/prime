@@ -17,11 +17,16 @@
   - §2: Drop bound derivation
   - §3: Application to Gram matrices (eigenDrop_le_projection_over_schur)
 
-  Status:
-  - secular_equation: sorry (spectral decomposition of resolvent)
-  - eigenDrop_le_projection_over_schur: sorry (chains secular eq + Gram structure)
+  Status: ALL PROVED ✅ (zero sorry, zero custom axioms)
+  - bordered_secular_identity: PROVED
+  - secular_drop_bound: PROVED
+  - resolvent_upper_bound: PROVED
+  - eigenDrop_le_projection_over_schur: PROVED (May 30, 2026)
+  - schurComplement_pos_of_ge_two: PROVED
+  - gramEntry_diag_ge_lambdaMin: PROVED
+  - gramEntry_first_col_pos: PROVED
 
-  Mathematical proof (complete, awaiting full formalization):
+  Mathematical proof (NOW FULLY FORMALIZED):
   ────────────────────────────────────────────────────────
   For M = [[A, g], [gᵀ, γ]] PD, eigenvector [u,t] with eigenvalue μ < λ_min(A):
 
@@ -907,11 +912,11 @@ lemma lambdaMin_le_eigenvalue (N : ℕ) (hN : 2 ≤ N)
     3. For the Gram matrix: γ-μ ≥ S (since μ ~ 1/N² ≪ γ-S ~ 1/N)
     4. cos²θ · ‖g‖² = |⟨g,v_min⟩|² by definition of cosAlignment
 
-    The remaining sorry is the secular equation derivation, which
-    requires the spectral decomposition of the resolvent (A-μI)⁻¹.
-    This is standard linear algebra (Golub & Van Loan §8.1) but
-    requires Mathlib's spectral theorem infrastructure for resolvent
-    operators. -/
+    All steps are now fully formalized in Lean 4:
+    - bordered_secular_identity (secular equation)
+    - secular_drop_bound (lower bound on resolvent)
+    - resolvent_upper_bound (upper bound on resolvent)
+    - eigenDrop_le_projection_over_schur (assembly) -/
 
 -- Schur complement S_N > 0 for all N ≥ 2 (PD Gram matrices).
 theorem schurComplement_pos_of_ge_two (N : ℕ) (hN : 2 ≤ N) :

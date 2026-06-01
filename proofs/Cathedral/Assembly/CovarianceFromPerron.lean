@@ -3,7 +3,7 @@
 
   ## Path E: The Mellin-Spectral Fusion
 
-  Graduates `witness_covariance_decay` from axiom to theorem under RH,
+  Graduates `discrete_riemann_hypothesis` from axiom to theorem under RH,
   by fusing the Perron Crown (spatial L² decay) with the proved
   covariance decomposition identity.
 
@@ -21,7 +21,7 @@
 
   Therefore:
 
-    RH → vᵀCv ≤ C/logN                [THIS IS witness_covariance_decay!]
+    RH → vᵀCv ≤ C/logN                [THIS IS discrete_riemann_hypothesis!]
 
   ### Architecture
 
@@ -30,7 +30,7 @@
   2. `baez_duarte_forward_perron`: RH → d²→0 via Perron (bypasses axiom)
   3. `nyman_beurling_equivalence_fused`: The fused equivalence
 
-  The fusion eliminates `witness_covariance_decay` from the primary chain.
+  The fusion eliminates `discrete_riemann_hypothesis` from the primary chain.
 
   ### Axiom Footprint
 
@@ -61,7 +61,7 @@ open Real Matrix Finset MeasureTheory Filter Cathedral.Vasyunin ArithmeticFuncti
 
       vᵀCv ≤ C / ln(N)
 
-    This was previously the sole irreducible axiom (`witness_covariance_decay`)
+    This was previously the sole irreducible axiom (`discrete_riemann_hypothesis`)
     in the Vasyunin crown chain. It is now proved by combining:
 
     1. Perron Crown: RH → ∫₀¹(1-f_N)² ≤ C_l2/logN
@@ -120,12 +120,12 @@ theorem witness_covariance_from_perron (hRH : RiemannHypothesis) :
 -- §2. THE FUSED FORWARD DIRECTION
 -- ═══════════════════════════════════════════════
 
-/-- **THEOREM**: RH → d²→0 via the Perron Crown (no witness_covariance_decay).
+/-- **THEOREM**: RH → d²→0 via the Perron Crown (no discrete_riemann_hypothesis).
 
     This is functionally identical to `rh_implies_bd_convergence_perron`
     but is stated here as the explicit graduation target for the
     `baez_duarte_forward` theorem. The Perron Crown achieves the
-    forward direction WITHOUT the `witness_covariance_decay` axiom. -/
+    forward direction WITHOUT the `discrete_riemann_hypothesis` axiom. -/
 theorem baez_duarte_forward_fused :
     RiemannHypothesis →
     ∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, ∃ v : Fin (N - 1) → ℝ,
@@ -140,7 +140,7 @@ theorem baez_duarte_forward_fused :
 
     Forward: `rh_implies_bd_convergence_perron` (Perron Crown)
       Chain: RH → Mertens x^{3/4} → L² decay → d²→0
-      NO `witness_covariance_decay` axiom.
+      NO `discrete_riemann_hypothesis` axiom.
 
     Converse: `nyman_beurling_converse` (Rank-1 Mellin)
       Chain: d²→0 → L² closure → zeta zeros on critical line
@@ -167,7 +167,7 @@ end
 --
 -- 5 custom axioms (4 PNTAnd + 1 covariance) + 3 Lean kernel axioms.
 --
--- The `witness_covariance_decay` axiom is NOT in the dependency tree.
+-- The `discrete_riemann_hypothesis` axiom is NOT in the dependency tree.
 -- The `witness_numerator_convergence` is NOT in the dependency tree.
 --
 -- INHERITED AXIOMS (via Perron chain):

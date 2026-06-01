@@ -216,7 +216,7 @@ theorem bd_l2_error_upper_bound (N : ℕ) (hN : 2 ≤ N) (v : Fin (N - 1) → �
     where b = vasyuninMeanVec and G = vasyuninGramMatrix.
 
     Inherited axioms (from the Vasyunin Crown):
-      - witness_covariance_decay (THE Riemann Hypothesis content)
+      - discrete_riemann_hypothesis (THE Riemann Hypothesis — The Final Stone)
       - witness_numerator_convergence (PNT-level, unconditional) -/
 axiom bd_witness_l2_error_decay :
     ∃ C_err : ℝ, C_err > 0 ∧ ∃ N₀ : ℕ, ∀ N : ℕ, N ≥ N₀ →
