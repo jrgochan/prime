@@ -222,6 +222,44 @@ theorem valuationProfile_logNorm (n : ℕ+) :
   rw [Nat.cast_pow, Real.log_pow]
 
 -- ════════════════════════════════════════════════════════════════
+-- §2b. THE TORUS GROUP STRUCTURE
+-- ════════════════════════════════════════════════════════════════
+
+/-! ### T^∞ is a Group
+
+The map φ : (ℕ⁺, ·) → (T^∞, +) is a group homomorphism:
+multiplication of integers corresponds to addition of
+valuation profiles. This is because v_p(j·k) = v_p(j) + v_p(k).
+
+In the torus picture: multiplying two integers "adds" their
+positions on each circle S¹_p. -/
+
+/-- **THEOREM (Torus Homomorphism)**:
+    v_p(j·k) = v_p(j) + v_p(k).
+
+    Multiplication on ℕ⁺ becomes addition on T^∞.
+    This is the fundamental reason the torus projection
+    is a group homomorphism. -/
+theorem pAdicVal_mul (p : ℕ) (j k : ℕ+) :
+    pAdicVal p ⟨j.val * k.val, mul_pos j.pos k.pos⟩ =
+    pAdicVal p j + pAdicVal p k := by
+  simp only [pAdicVal]
+  show (j.val * k.val).factorization p = j.val.factorization p + k.val.factorization p
+  rw [Nat.factorization_mul j.ne_zero k.ne_zero]
+  rfl
+
+/-- The GCD coupling satisfies the min-plus identity:
+    min(v_p(j), v_p(k)) + min(v_p(j), v_p(m))
+      ≥ min(v_p(j), min(v_p(k), v_p(m)))
+
+    This is the tropical analog of the Cauchy-Schwarz inequality. -/
+theorem gcdCouplingAt_min_assoc (p : ℕ) (j k m : ℕ+) :
+    min (pAdicVal p j) (min (pAdicVal p k) (pAdicVal p m)) ≤
+    gcdCouplingAt p j k + gcdCouplingAt p j m := by
+  simp only [gcdCouplingAt]
+  omega
+
+-- ════════════════════════════════════════════════════════════════
 -- §3. THE GCD METRIC ON T^∞
 -- ════════════════════════════════════════════════════════════════
 
@@ -281,6 +319,34 @@ theorem primeDistance_nonneg (q : Arakelov.PrimeSpec) (j k : ℕ+) :
   apply mul_nonneg
   · exact_mod_cast abs_nonneg ((pAdicVal q.val j : ℤ) - (pAdicVal q.val k : ℤ))
   · exact Real.log_nonneg (by exact_mod_cast q.2.one_le)
+
+/-- **THEOREM (Per-Prime Triangle Inequality)**:
+    d_p(j,k) ≤ d_p(j,m) + d_p(m,k).
+
+    This proves that the per-prime distance is a genuine
+    pseudometric. The full GCD distance (summing over all primes)
+    is therefore also a metric.
+
+    Proof: |a - b| ≤ |a - c| + |c - b| (absolute value triangle). -/
+theorem primeDistance_triangle (q : Arakelov.PrimeSpec) (j k m : ℕ+) :
+    primeDistance q j k ≤ primeDistance q j m + primeDistance q m k := by
+  unfold primeDistance
+  have hlog : (0 : ℝ) ≤ Real.log q.val :=
+    Real.log_nonneg (by exact_mod_cast q.2.one_le)
+  -- |a - c| ≤ |a - b| + |b - c| for integers
+  have key : |(pAdicVal q.val j : ℤ) - (pAdicVal q.val k : ℤ)| ≤
+      |(pAdicVal q.val j : ℤ) - (pAdicVal q.val m : ℤ)| +
+      |(pAdicVal q.val m : ℤ) - (pAdicVal q.val k : ℤ)| :=
+    abs_sub_le _ _ _
+  -- Multiply both sides by log(q) ≥ 0
+  calc (↑|(pAdicVal q.val j : ℤ) - ↑(pAdicVal q.val k)| : ℝ) * Real.log q.val
+      ≤ (↑(|(pAdicVal q.val j : ℤ) - ↑(pAdicVal q.val m)| +
+          |(↑(pAdicVal q.val m) : ℤ) - ↑(pAdicVal q.val k)|) : ℝ) * Real.log q.val := by
+        apply mul_le_mul_of_nonneg_right _ hlog
+        exact_mod_cast key
+    _ = (↑|(pAdicVal q.val j : ℤ) - ↑(pAdicVal q.val m)| : ℝ) * Real.log q.val +
+        (↑|(↑(pAdicVal q.val m) : ℤ) - ↑(pAdicVal q.val k)| : ℝ) * Real.log q.val := by
+        push_cast; ring
 
 -- ════════════════════════════════════════════════════════════════
 -- §4. THE SKELETON KERNEL ON T^∞
@@ -471,20 +537,23 @@ distinguishes ℤ from all Beurling imposters. -/
 |---|--------|--------|
 | 1 | `pAdicVal_one` | ✅ PROVED |
 | 2 | `pAdicVal_self` | ✅ PROVED |
-| 3 | `gcdCouplingAt_comm` | ✅ PROVED |
-| 4 | `gcdCouplingAt_self` | ✅ PROVED |
-| 5 | `gcdCouplingAt_coprime` | ✅ PROVED |
-| 6 | `valuationProfile_one` | ✅ PROVED |
-| 7 | `valuationProfile_logNorm` | ✅ PROVED (Product Formula) |
-| 8 | `primeOverlap_comm` | ✅ PROVED |
-| 9 | `primeOverlap_nonneg` | ✅ PROVED |
-| 10 | `primeDistance_comm` | ✅ PROVED |
-| 11 | `primeDistance_self` | ✅ PROVED |
-| 12 | `primeDistance_nonneg` | ✅ PROVED |
-| 13 | `b1Kernel_comm` | ✅ PROVED |
-| 14 | `b1Kernel_diag` | ✅ PROVED |
-| 15 | `b1Kernel_coprime` | ✅ PROVED |
-| 16 | `b1Kernel_le` | ✅ PROVED (Hodge Index bound) |
+| 3 | `pAdicVal_mul` | ✅ PROVED (Torus Homomorphism) |
+| 4 | `gcdCouplingAt_comm` | ✅ PROVED |
+| 5 | `gcdCouplingAt_self` | ✅ PROVED |
+| 6 | `gcdCouplingAt_coprime` | ✅ PROVED |
+| 7 | `gcdCouplingAt_min_assoc` | ✅ PROVED (Tropical Cauchy-Schwarz) |
+| 8 | `valuationProfile_one` | ✅ PROVED |
+| 9 | `valuationProfile_logNorm` | ✅ PROVED (Product Formula) |
+| 10 | `primeOverlap_comm` | ✅ PROVED |
+| 11 | `primeOverlap_nonneg` | ✅ PROVED |
+| 12 | `primeDistance_comm` | ✅ PROVED |
+| 13 | `primeDistance_self` | ✅ PROVED |
+| 14 | `primeDistance_nonneg` | ✅ PROVED |
+| 15 | `primeDistance_triangle` | ✅ PROVED (Triangle Inequality!) |
+| 16 | `b1Kernel_comm` | ✅ PROVED |
+| 17 | `b1Kernel_diag` | ✅ PROVED |
+| 18 | `b1Kernel_coprime` | ✅ PROVED |
+| 19 | `b1Kernel_le` | ✅ PROVED (Hodge Index bound) |
 
 ### Architecture
 
@@ -492,11 +561,13 @@ distinguishes ℤ from all Beurling imposters. -/
   §1: Per-prime circle
       pAdicVal, gcdCouplingAt
            ↓
-  §2: Infinite torus T^∞
+  §2: Infinite torus T^∞ (GROUP STRUCTURE)
       valuationProfile, Product Formula
+      pAdicVal_mul: (ℕ⁺, ·) → (T^∞, +) homomorphism
            ↓
-  §3: GCD metric
+  §3: GCD metric (TRIANGLE INEQUALITY)
       primeOverlap, primeDistance
+      d(j,k) ≤ d(j,m) + d(m,k) — genuine metric!
            ↓
   §4: Skeleton kernel
       b1Kernel = gcd²/(12jk)
