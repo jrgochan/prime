@@ -12,7 +12,7 @@
 \author{
   Jason Robert Gochanour
 }
-\date{May 2026}
+\date{June 2026}
 
 \begin{document}
 
@@ -38,10 +38,16 @@ where high-condition-number spectral injections cause
 defender software to hallucinate.
 Since the original version of this paper (April~20, 2026),
 the Cathedral has evolved from a single-path, single-axiom
-architecture (v5) to a \emph{one-pillar} architecture (v17) with
-two independent compiler-verified proof routes connected by the
+architecture (v5) to a \emph{two-axiom crown} architecture (v23) with
+multiple independent compiler-verified proof routes connected by the
 Parseval Bridge---a zero-axiom isometry between time and frequency
-domains. This architectural upgrade strengthens both the defensive
+domains---and a Torus Projection that decomposes the Gram energy onto
+the infinite-dimensional torus $T^\infty = \prod_p S^1_p$.
+Four universal engineering design patterns (Cholesky cooling,
+Ward Health Index, anomaly-gated precision, torus-stratified
+parallelism) create new dual-use surface area that this
+updated edition addresses.
+This architectural upgrade strengthens both the defensive
 and offensive implications of formal verification.
 For each risk, we
 assess the severity, the novelty (whether the attack vector is
@@ -112,17 +118,23 @@ has undergone a fundamental architectural transformation:
     IMRN 2003). Three alternative proof paths (Mellin, Perron,
     Renormalization) are preserved with different axiom footprints,
     all connected by the Parseval Bridge (zero-axiom isometry).
-  \item \textbf{Scale}: 227 active Lean files, $\sim$60{,}500 lines of
-    formally verified logic, 50+ computational experiments,
-    0 sorry placeholders on the critical path.
+  \item \textbf{Scale}: 390+ active Lean files, $\sim$120{,}000 lines of
+    formally verified logic, 55+ computational experiments,
+    0 sorry placeholders on the critical path, 8{,}736 build jobs.
   \item \textbf{DD-precision certification}: A Dekker--Knuth
     Double-Double Conjugate Gradient engine certifies the
     B\'aez-Duarte distance at $N = 55{,}440$ ($\dim = 55{,}439$),
     the largest such computation in the literature. A 512-bit MPFR
     engine provides Sherman-Morrison cross-validation to $10^{-17}$.
-  \item \textbf{AI collaboration}: The entire v5 $\to$ v17 journey
-    was conducted through human-AI pair programming, demonstrating
-    the feasibility of AI-assisted formal verification.
+  \item \textbf{AI collaboration}: The entire v5 $\to$ v23 journey
+    was conducted through human-AI pair programming over 68 days,
+    demonstrating the feasibility of AI-assisted formal verification.
+  \item \textbf{Engineering design patterns (v23)}: Four universal
+    patterns now extend the attack surface beyond spectral analysis:
+    Cholesky cooling (iterative resource allocation), Ward Health
+    Index (parity diagnostics), anomaly-gated precision (arithmetic
+    vs.\ archimedean separation), and torus-stratified parallel
+    computation ($T^\infty$).
 \end{itemize}
 
 These changes affect the dual-use landscape. Each risk section
@@ -332,6 +344,26 @@ causes cascade failure.
     it appears mathematically stable, then trigger a single
     additional perturbation that snaps the system into chaotic
     thermalization, overwhelming all linear response controllers.
+
+  \item \textbf{Torus-Stratified Targeting (v23):}
+    The Torus Projection ($T^\infty = \prod_p S^1_p$) decomposes
+    system energy onto per-prime circles. An attacker can identify
+    which prime strata carry the most system energy (e.g., $p = 2$
+    carries 46--86\% in the Cathedral's measurements) and
+    target \emph{that specific stratum}---disabling the dominant
+    harmonic while leaving the system superficially operational.
+    This is analogous to targeting a specific quark color in QCD
+    rather than attacking the whole proton.
+
+  \item \textbf{Cholesky Decrement Exploitation (v23):}
+    The identity $d^2_{N+1} = d^2_N - y^2_{\text{new}}$ reveals
+    the \emph{exact marginal contribution} of each system component.
+    An attacker can compute the Schur complement
+    $y^2_k = (b_k - g^T G_{-k}^{-1} b)^2 / (G_{kk} - g^T G_{-k}^{-1} g)$
+    for every node $k$, producing a rank-ordered list of the most
+    critical components. Removing the node with the largest $y^2_k$
+    causes the maximum increase in system residual---mathematically
+    optimal sabotage.
 \end{enumerate}
 
 \subsection{Severity Assessment}
@@ -756,6 +788,9 @@ RF surveillance & Medium & Medium & Medium & Physical/supply chain \\
   \textbf{Very High} & \textbf{Normalize defensive AI use} \\
 \textbf{Algorithmic blinding} & \textbf{High} & \textbf{Very High} &
   High & DD-precision / dual-solver validation \\
+\midrule
+Torus-strat. targeting & High & High & Medium & Defensive torus monitoring \\
+Cholesky exploitation & \textbf{High} & \textbf{Very High} & Medium & Classify Schur rankings \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -897,11 +932,19 @@ AI-assisted mathematics, ``learning'' happens faster than ever before.
 
 The dual-path architecture adds a new dimension to this neutrality.
 The proof has a gauge symmetry: the same truth can be witnessed in
-two independent mathematical frameworks, connected by the Parseval
+multiple independent mathematical frameworks, connected by the Parseval
 isometry. This makes verified claims---whether stability or
 instability certificates---carry extraordinary epistemic weight.
 A claim verified in both gauges cannot be forged, but it also
 cannot be dismissed.
+
+The v23 engineering design patterns (Cholesky cooling, Ward Health
+Index, anomaly gating, torus stratification) extend this neutrality
+into four new domains. The Cholesky decrement that helps a sensor
+network designer find optimal placement is the same formula that
+helps an attacker find the most critical node to remove. The torus
+projection that parallelizes computation also reveals per-prime
+vulnerabilities. The mathematics does not choose sides.
 
 This paper exists to ensure that the people who protect critical
 infrastructure understand the same mathematics---and the same
@@ -941,9 +984,9 @@ FERC, \emph{Critical Energy Infrastructure Information (CEII)
 Regulations}, 18 CFR \S 388.113.
 
 \bibitem{cathedral-v17}
-J.R.~Gochanour, \emph{The Cathedral: A Machine-Verified Proof
-Architecture for the Riemann Hypothesis (v17, Oracle
-Capstone Edition)}, 2026.
+J.R.~Gochanour, \emph{The Cathedral: A Formal Reduction of the
+Riemann Hypothesis to Two Axioms via the Nyman--Beurling
+Criterion (v23)}, 2026.
 
 \bibitem{cathedral-physics}
 J.R.~Gochanour, \emph{The Physics of the Primes: A Dictionary
