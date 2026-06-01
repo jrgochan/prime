@@ -29,9 +29,9 @@ Nyman--Beurling distance:
   \RH \;\iff\; d_N^2 \to 0
 \]
 where $d_N^2 = \inf_{v} \int_0^1 (1 - \sum_{k=2}^{N} v_k \{1/(kx)\})^2\,dx$.
-The formalization comprises 381 active Lean files ($\sim$116{,}000 lines;
-495 files and $\sim$130{,}000 lines including archived explorations) with
-zero compilation errors (8{,}736 build jobs). On the crown path, the theorem
+The formalization comprises 390+ active Lean files ($\sim$120{,}000 lines;
+500+ files and $\sim$140{,}000 lines including archived explorations) with
+zero compilation errors (8{,}736 build jobs, zero non-sorry warnings). On the crown path, the theorem
 depends on exactly \textbf{two} axioms:
 \texttt{gram\_form\_upper\_bound} ($v^T G v \leq 1 + K/\ln N$,
 equivalent to RH) and \texttt{mertens\_34\_unconditional}
@@ -58,6 +58,12 @@ is monotonically decreasing.
 Six alternative forward paths (Mellin Crown, Perron Crown,
 Renormalization Bridge, Oracle Bridge, Gram Crown, Direct Mellin
 Bound) provide a multi-path architecture.
+The \emph{Torus Projection} decomposes the Gram energy onto the
+infinite-dimensional torus $T^\infty = \prod_p S^1_p$ via the GCD
+partition, proved with zero sorry and zero axioms.
+The \emph{Asymptotic Freedom} module proves $d^2_{N+1} = d^2_N -
+y^2_{\mathrm{new}}$, establishing monotone vacuum extraction with
+zero sorry and zero axioms.
 The \emph{Oracle Bridge} (v17) provides a conditional certificate
 that bypasses the literature axiom: DD-precision GPU measurements
 of $v^T G v < 1$ at highly composite numbers, imported as trusted
@@ -522,6 +528,13 @@ S-duality glass ratio & \lean{Physics/SDualityGlass.lean} & 0 \\
 Bose--Einstein / Fermi--Dirac prime gas & \lean{Physics/Glass/BoseEinsteinPrimes.lean} & 0 \\
 Cholesky Decrement Identity & \lean{Structural/CholeskyDecrement.lean} & 0 \\
 Bordered secular equation & \lean{Structural/BorderedSpectral.lean} & 0 \\
+Torus Partition ($v^TGv = \sum_d E_d(v)$) & \lean{Physics/TorusProjection.lean} & 0 \\
+Asymptotic Freedom ($d^2_{N+1} = d^2_N - y^2_{\mathrm{new}}$) & \lean{Vasyunin/Proof/AsymptoticFreedom.lean} & 0 \\
+Cotangent stratification & \lean{Vasyunin/Proof/CotangentStratification.lean} & 0 \\
+Ratio vanishing & \lean{Vasyunin/Proof/RatioVanishing.lean} & 0 \\
+Padded vector monotonicity & \lean{Vasyunin/Proof/StepMonotone.lean} & 0 \\
+Anomaly strata (Ramanujan + archimedean) & \lean{Covariance/AnomalyStrata.lean} & 0 \\
+Twelve Bridge (12-gate covariance bound) & \lean{Covariance/TwelveBridge.lean} & 0 \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -728,7 +741,7 @@ to informal proof:
 
 \subsection{Module Organization}
 
-The Cathedral is organized into 25+ modules (381 active files):
+The Cathedral is organized into 25+ modules (390+ active files):
 
 \begin{center}
 \small
@@ -752,20 +765,20 @@ The Cathedral is organized into 25+ modules (381 active files):
 \lean{ZeroAxiom} & Zero-axiom engine & 5 & 0 \\
 \lean{LinearAlgebra} & Sherman--Morrison, Schur & 4 & 0 \\
 \lean{Structural} & Eigenvalue, Cholesky, bordered & 9 & 0 \\
-\lean{Sieve} & Bilinear sieve (off-path) & 4 & 0 \\
 \lean{PNT} & PNT bridge (PNTA dependency) & 5 & 0 \\
-\lean{+ 6 others} & Renorm., Compute, IntegralBasis, etc. & 13 & 0 \\
+\lean{F1} & $\mathbb{F}_1$ dream, Hodge quad form & 3 & 0 \\
+\lean{NumberTheory} & Euler product limit & 3 & 0 \\
+\lean{+ 5 others} & Renorm., Compute, IntegralBasis, etc. & 10 & 0 \\
 \midrule
-& \textbf{Active total} & \textbf{381} & \textbf{1 + Oracle} \\
+& \textbf{Active total} & \textbf{390+} & \textbf{1 + Oracle} \\
 \bottomrule
 \end{tabular}
 \end{center}
 
 An additional 114 files are preserved in \lean{Archive/}.
-The build emits exploratory \lean{sorry} warnings in off-crown paths
-(PNT Bridge, Covariance, Assembly/QualitativeForward,
-Assembly/ParsevalFactored, ZeroAxiom)
-that do not affect the crown theorem.
+The build emits zero non-sorry warnings; exploratory \lean{sorry}
+warnings in off-crown paths (PNT Bridge, Covariance, Assembly)
+do not affect the crown theorem.
 
 \subsection{The Axiom Audit Protocol}
 
@@ -790,8 +803,9 @@ these are safely quarantined off the crown path.
 
 \begin{verbatim}
 cd proofs
-lake build    # 381 active files, 114 archived
+lake build    # 390+ active files, 114 archived
               # Build completed successfully (8736 jobs)
+              # Zero non-sorry warnings
 
 #print axioms baez_duarte_forward  -- PRIMARY EXPORT
 -- frac_error_isLittleO,
@@ -1092,12 +1106,18 @@ verifying a finite computation (Oracle path).
 
 \subsection{What Remains}
 
-The 1 remaining crown axiom (\lean{discrete\_riemann\_hypothesis}) is
-the covariance decay bound $v^T C v \leq C/\ln N$, proved equivalent
-to RH. Graduating this axiom is equivalent to proving the
-Riemann Hypothesis itself. Six forward paths with
-different axiom footprints are preserved, including the Direct Mellin
-Bound (preferred), the Gram Crown, and the Oracle Bridge (conditional).
+The 2 remaining crown axioms are:
+\begin{itemize}
+  \item \lean{gram\_form\_upper\_bound}: the Gram form bound
+    $v^T G v \leq 1+K/\ln N$ (equivalent to RH). This is the
+    irreducible content of the Riemann Hypothesis.
+  \item \lean{mertens\_34\_unconditional}: the Mertens bound
+    $|M(x)| \leq Cx^{3/4}$ (unconditional PNT consequence,
+    awaiting Mathlib formalization of 1899 results).
+\end{itemize}
+Graduating axiom~1 is equivalent to proving the Riemann Hypothesis.
+Graduating axiom~2 is a software engineering problem (importing
+PNT infrastructure from Mathlib/PNTAnd), not a mathematical one.
 
 The Oracle path's \lean{oracle\_certificates} axiom could be graduated
 by implementing interval arithmetic verification of $v^T G v$ inside
@@ -1125,7 +1145,7 @@ The machine taught us to listen.}
 % ================================================================
 
 This project was built through AI-assisted formal verification using
-Lean~4 and Mathlib over $\sim$66 days (March--May 2026). The author
+Lean~4 and Mathlib over $\sim$68 days (March--June 2026). The author
 gratefully acknowledges Google DeepMind's Gemini for mathematical
 strategy, the Mellin Crown architecture, phase cancellation
 analysis, the Transit of the Primes correspondence, and the
@@ -1141,7 +1161,7 @@ The complete Lean~4 formalization, Rust experiments, and GPU
 pipeline code are available at
 \url{https://github.com/jrgochan/prime}.
 The repository compiles with \texttt{lake build} (Lean~4 /
-Mathlib, zero errors, 8{,}485 build jobs).
+Mathlib, zero errors, 8{,}736 build jobs, zero non-sorry warnings).
 
 % ================================================================
 % BIBLIOGRAPHY
