@@ -227,6 +227,10 @@ lean_lib «Cathedral» where
     `Cathedral.Covariance.GCDStratumBound,
     -- GCD sign law (Layer 5, Möbius Stratum Conjecture, Exploration 35)
     `Cathedral.Covariance.GCDSignLaw,
+    -- Ramanujan GCD Strata (Path B: v^T R v by arithmetic locality, Exploration 37)
+    `Cathedral.Covariance.RamanujanGCDStrata,
+    -- Coprime Inner Sum (Path B Phase 2: universal kernel Φ(M) analysis, Exploration 37)
+    `Cathedral.Covariance.CoprimeInnerSum,
     -- HC number formalization (unbounded HC subsequence, Exploration 36)
     `Cathedral.Covariance.HighlyComposite,
     -- HC-Gram bridge (HC bound → subseq bound → RH, Exploration 36)
