@@ -183,17 +183,43 @@ theorem valuationProfile_one :
     valuationProfile 1 = fun _ => 0 := by
   ext q; simp [valuationProfile, pAdicVal_one]
 
+/-- Helper: primes in the factorization support are indeed prime. -/
+private lemma mem_support_prime' {n : ℕ} {p : ℕ} (hp : p ∈ n.factorization.support) :
+    Nat.Prime p :=
+  Nat.prime_of_mem_primeFactors (Finsupp.mem_support_iff.mpr
+    (Finsupp.mem_support_iff.mp hp))
+
+/-- Helper: p^k ≠ 0 for prime p. -/
+private lemma prime_pow_ne_zero' {p k : ℕ} (hp : Nat.Prime p) : p ^ k ≠ 0 :=
+  pow_ne_zero _ hp.ne_zero
+
 /-- The log-norm of a valuation profile equals log(n):
     Σ_p v_p(n) · log(p) = log(n).
 
     This is the Product Formula: the sum of all p-adic norms
-    equals the archimedean norm. -/
+    equals the archimedean norm.
+
+    Proof: n = Π_p p^{v_p(n)} (Fundamental Theorem of Arithmetic),
+    so log(n) = log(Π p^k) = Σ log(p^k) = Σ k·log(p). -/
 theorem valuationProfile_logNorm (n : ℕ+) :
     n.val.factorization.sum (fun p k => (k : ℝ) * Real.log p) =
     Real.log n.val := by
-  sorry  -- Requires: Nat.log_eq_sum_factorization or equivalent Mathlib API
-  -- The identity log(n) = Σ_p v_p(n)·log(p) follows from
-  -- n = Π_p p^{v_p(n)} by taking logarithms.
+  -- n = factorization.prod (· ^ ·)
+  have hprod : n.val.factorization.prod (· ^ ·) = n.val :=
+    Nat.prod_factorization_pow_eq_self n.ne_zero
+  -- Rewrite ONLY the RHS: log(n) = log(Π p^k)
+  conv_rhs => rw [← hprod]
+  -- Unfold Finsupp.sum/prod to Finset operations
+  simp only [Finsupp.sum, Finsupp.prod]
+  -- Cast Π to ℝ, then use log_prod and log_pow
+  rw [Nat.cast_prod,
+    @Real.log_prod ℕ n.val.factorization.support
+      (fun p => ((p ^ n.val.factorization p : ℕ) : ℝ))
+      (fun p hp => Nat.cast_ne_zero.mpr (prime_pow_ne_zero' (mem_support_prime' hp)))]
+  -- Σ k·log(p) = Σ log(p^k)
+  apply Finset.sum_congr rfl
+  intro p _
+  rw [Nat.cast_pow, Real.log_pow]
 
 -- ════════════════════════════════════════════════════════════════
 -- §3. THE GCD METRIC ON T^∞
@@ -424,7 +450,7 @@ distinguishes ℤ from all Beurling imposters. -/
 /-!
 ## Audit
 
-### Sorry: 0 ✅
+### Sorry: 0 ✅ (Product Formula PROVED!)
 ### Custom Axioms: 0 ✅
 
 ### Definitions
