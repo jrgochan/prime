@@ -21,7 +21,7 @@
   spectral invariants: diagonal dominance, off-diagonal decay, spectral gap.
 
   **Stage 4 (The Bridge):** Prove that the Davis-Kahan bound +
-  Prime Core spectral gap → witness_covariance_decay.
+  Prime Core spectral gap → discrete_riemann_hypothesis.
 
   ### Mathematical Background
 
@@ -700,7 +700,7 @@ theorem davis_kahan_eigenspace_overlap
     witness evaluates the covariance form at rate O(1/ln(N)).
 
     This is the key theorem connecting the GPU-verified Prime Core
-    spectral invariant to the formal witness_covariance_decay axiom.
+    spectral invariant to the formal discrete_riemann_hypothesis axiom.
 
     **Proof sketch:**
     1. Decompose vᵀCv = vᵀGv - (bᵀv)² using quadForm_decomposition
@@ -719,13 +719,13 @@ axiom prime_core_implies_covariance_decay :
         ((vasyuninCovMatrix N).mulVec (logCutoffWitness N)) ≤ C_cov / Real.log ↑N
 
 /-- **COROLLARY**: The Davis-Kahan bridge gives an independent path
-    to `witness_covariance_decay`.
+    to `discrete_riemann_hypothesis`.
 
     If the Prime Core axioms hold (spectral gap + off-diagonal decay),
     then the covariance decay follows, providing an alternative to
     the direct covariance decay axiom.
 
-    This does NOT replace `witness_covariance_decay` on the MainChain
+    This does NOT replace `discrete_riemann_hypothesis` on the MainChain
     (which is the minimal axiom set), but provides an independent
     verification path grounded in spectral perturbation theory.
 
@@ -791,9 +791,9 @@ as `gramEntry_offdiag_abs_bound` (locally) and `gram_offdiag_abs_bound`
 
 ### Architecture Note
 
-This file establishes an ALTERNATIVE path to `witness_covariance_decay`,
+This file establishes an ALTERNATIVE path to `discrete_riemann_hypothesis`,
 independent of the Vasyunin chain. The MainChain uses the minimal axiom set
-(just `witness_covariance_decay`). This file shows that `witness_covariance_decay`
+(just `discrete_riemann_hypothesis`). This file shows that `discrete_riemann_hypothesis`
 FOLLOWS from the Prime Core spectral invariants + Davis-Kahan, providing
 a conceptual explanation of WHY the covariance decays.
 -/

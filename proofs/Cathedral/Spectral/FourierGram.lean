@@ -8,7 +8,7 @@
   This file establishes the Fourier-analytic infrastructure needed to
   connect the Gram matrix inner product ∫₀¹ {1/(jx)}{1/(kx)} dx to
   the Montgomery-Vaughan Large Sieve inequality, which is the key
-  step in closing `witness_covariance_decay`.
+  step in closing `discrete_riemann_hypothesis`.
 
   ## Phase 1: Sawtooth Function and Fourier Coefficients
 
@@ -35,7 +35,7 @@
   - Mathlib.Data.Int.Fract (Int.fract)
 
   Created: May 9, 2026 — Exploration 31: The Fourier Bridge
-  Status: Phase 1 of 5 toward closing witness_covariance_decay.
+  Status: Phase 1 of 5 toward closing discrete_riemann_hypothesis.
 -/
 
 import Mathlib.Analysis.Fourier.AddCircle

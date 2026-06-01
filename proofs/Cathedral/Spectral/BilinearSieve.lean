@@ -210,7 +210,7 @@ axiom spectral_b1_large_sieve_bound :
     where C = G - bbᵀ is the covariance matrix and v are the
     Möbius log-taper weights.
 
-    This closes `witness_covariance_decay` when combined with
+    This closes `discrete_riemann_hypothesis` when combined with
     the PNT weight norm bound (Phase 4).
 
     Proof: By `spectral_b1_large_sieve_bound`,

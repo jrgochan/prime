@@ -10,7 +10,7 @@
 
   ### The Key Insight
 
-  The crown axiom `witness_covariance_decay` asks for:
+  The crown axiom `discrete_riemann_hypothesis` asks for:
 
     vᵀCv ≤ C_cov / ln(N)
 
@@ -200,7 +200,7 @@ theorem gauge_split (N : ℕ) (M : Fin N → Fin N → ℝ) (w : Fin N → ℝ) 
 /-!
 ## The Vacuum Stability Interpretation
 
-The gauge decomposition reveals that `witness_covariance_decay` is:
+The gauge decomposition reveals that `discrete_riemann_hypothesis` is:
 
   **vᵀCv = bosonic(N) + fermionic(N) ≤ C/ln(N)**
 

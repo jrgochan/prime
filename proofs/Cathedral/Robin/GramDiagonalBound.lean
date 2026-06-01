@@ -187,7 +187,7 @@ axiom robin_gram_form_bound
     4. vᵀCv = vᵀGv - (bᵀv)² ≤ (K_R + 2K₁)/log(N)
 
     This directly feeds into WitnessAsymptotics.lean's
-    witness_covariance_decay axiom. -/
+    discrete_riemann_hypothesis axiom. -/
 theorem robin_covariance_decay
     (hRH : RiemannHypothesis)
     (C_m : ℝ) (hC : 0 < C_m)
@@ -254,7 +254,7 @@ RH (Cathedral.Defs)
     → σ(n)/n bound (rh_implies_sigma_ratio_bound)
     → Gram form bound (robin_gram_form_bound, AXIOM)
       → Covariance decay (robin_covariance_decay, THEOREM)
-        → witness_covariance_decay (WitnessAsymptotics.lean)
+        → discrete_riemann_hypothesis (WitnessAsymptotics.lean)
 ```
 
 The single axiom `robin_gram_form_bound` replaces the broken

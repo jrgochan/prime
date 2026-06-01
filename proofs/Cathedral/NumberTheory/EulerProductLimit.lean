@@ -141,7 +141,7 @@ theorem divisorProjection_one : divisorProjection 1 = 6 / π ^ 2 := by
   exact hshift
 
 -- ════════════════════════════════════════════════════════════════
--- §4. THE EULER PRODUCT IDENTITY (axiom — to be graduated)
+-- §4. THE EULER PRODUCT IDENTITY (🎓 GRADUATED — now a theorem)
 -- ════════════════════════════════════════════════════════════════
 
 /-! ### The Euler Product — Option A Graduation Plan
@@ -363,9 +363,9 @@ theorem arithmetic_surplus_pos :
 -- ════════════════════════════════════════════════════════════════
 
 /-!
-## Audit
+## Audit (Updated May 31, 2026)
 
-### Status: 1 axiom, 0 sorry — The Euler Product Limit is Sealed ⚡
+### Status: 0 axioms, 0 sorry — FULLY GRADUATED ✅
 
 | # | Result | Status |
 |---|--------|--------|
@@ -373,30 +373,27 @@ theorem arithmetic_surplus_pos :
 | 2 | `divisorProjection_zero` | **🎓 PROVED** |
 | 3 | `divisorProjection_nonsquarefree` | **🎓 PROVED** (squarefree annihilation) |
 | 4 | `divisorProjection_one` | **🎓 PROVED** (A(1) = 6/π² from BaselMoebius) |
-| 5 | `euler_product_b1_energy` | **📐 AXIOM** (to be graduated via Option A) |
-| 6 | `tsum_j2_div_proj_sq` | **🎓 PROVED** (from axiom) |
-| 7 | `summable_j2_div_proj_sq` | **🎓 PROVED** (from axiom) |
+| 5 | `euler_product_b1_energy` | **🎓 GRADUATED** (Option A, May 27 2026) |
+| 6 | `tsum_j2_div_proj_sq` | **🎓 PROVED** (corollary of #5) |
+| 7 | `summable_j2_div_proj_sq` | **🎓 PROVED** (corollary of #5) |
 | 8 | `one_twelfth_times_six_over_pi_sq` | **🎓 PROVED** (arithmetic) |
 | 9 | `b1_skeleton_energy_limit` | **🎓 PROVED** (THE MAIN THEOREM) |
 | 10 | `b1_energy_lt_one` | **🎓 PROVED** (key bound: 1/(2π²) < 1) |
 | 11 | `b1_energy_pos` | **🎓 PROVED** (positivity) |
 | 12 | `arithmetic_surplus_pos` | **🎓 PROVED** (margin > 0) |
 
-### Graduation Path for `euler_product_b1_energy`:
-
-**Option A** (current target):
-1. Prove A(d) = μ(d)/d² · (6/π²)/Π(1-1/p²) for squarefree d
-   (requires: coprime-restricted Möbius sum = Euler product × restricted product)
-2. Show J₂(d)·A(d)² = (6/π²)² · Π_{p|d} 1/(p²-1)
-3. Apply Euler product: Π_p(1 + 1/(p²-1)) = ζ(2) = π²/6
-4. Combine: (6/π²)² · π²/6 = 6/π²
-
-**Option B** (future alternative):
-- Use Dirichlet convolution: A = μ * id⁻² restricted to d-multiples
-- Evaluate via ζ * μ = δ identity in the Dirichlet ring
+### Graduation Chain (for `euler_product_b1_energy`):
+Proved via Option A in EulerProductGraduation.lean:
+1. A(d) = μ(d)/d² · CR(d)          [CoprimeRestricted.lean]
+2. CR(d) = (6/π²) / Π(1-1/p²)     [coprime_restricted_moebius_sum]
+3. J₂(d)·A(d)² = (6/π²)²/J₂(d)   [algebraic simplification]
+4. Σ 1/J₂(d) = π²/6               [SquarefreeJ2Sum.lean]
+5. (6/π²)² · π²/6 = 6/π²          [arithmetic]
 
 ### Dependencies:
 - `Cathedral.NumberTheory.BaselMoebius` (tsum_moebius_div_sq, summable_moebius_div_sq)
+- `Cathedral.NumberTheory.CoprimeRestricted` (coprime_restricted_moebius_sum)
+- `Cathedral.NumberTheory.SquarefreeJ2Sum` (squarefree_reciprocal_j2_sum)
 - `Cathedral.Physics.Bridges.BernoulliSkeleton` (jordanTotient2)
 - Mathlib: ArithmeticFunction.moebius, Squarefree, Real.pi
 -/
