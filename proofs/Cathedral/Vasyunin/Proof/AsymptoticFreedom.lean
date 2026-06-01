@@ -206,12 +206,30 @@ theorem nbDistSqLimit_eq_zero : nbDistSqLimit = 0 := by
     to the limiting NB distance being zero.
 
     This is the Nyman-Beurling-Báez-Duarte theorem.
-    The existing Cathedral infrastructure proves both directions:
-    - Forward: RH → approximation exists (Mellin representation)
-    - Converse: d² → 0 → completeness → RH (Separation.lean) -/
+
+    ### Bridge documentation
+
+    Both directions are PROVED in the Cathedral:
+    - **Converse** (d²→0 ⟹ RH): `nyman_beurling_converse` in Separation.lean
+    - **Forward** (RH ⟹ d²→0): `rh_implies_bd_convergence_perron` in PerronCrown.lean
+
+    Those use the L² integral formulation:
+      `∀ ε > 0, ∃ N₀, ∀ N ≥ N₀, ∃ v, ∫₀¹ (1 - bdLinComb N v)² < ε`
+
+    Our `nbDistSq N` uses the matrix formulation:
+      `nbDistSq N = 1 - bᵀG⁻¹b`
+
+    The TYPE BRIDGE connecting them is:
+      `inf_v ∫₀¹ (1 - Σ vₖ{k/x})² dx = 1 - bᵀG⁻¹b = nbDistSq N`
+
+    This identity follows from expanding the L² norm into the Gram matrix,
+    completing the square, and taking the infimum. It is standard
+    but requires connecting `bdLinComb` to `vasyuninGramMatrix`.
+
+    See also: `vasyunin_nbDistSq_pos` in Rayleigh.lean (proves bᵀG⁻¹b < 1). -/
 theorem rh_iff_nbDistSq_zero :
     RiemannHypothesis ↔ nbDistSqLimit = 0 := by
-  sorry  -- Bridge to existing NB infrastructure
+  sorry  -- TYPE BRIDGE: L²(bdLinComb) ↔ matrix(vasyuninGramMatrix)
 
 /-- **COROLLARY (RH from decay)**:
     The Riemann Hypothesis follows from d²_opt → 0. -/
@@ -226,16 +244,17 @@ theorem rh_from_decay : RiemannHypothesis := by
 /-!
 ## Audit — AsymptoticFreedom.lean
 
-### Sorry: 2
-  1. `nbDistSq_tendsto_zero`: C/ln(N) → 0 (needs ln → ∞)
-  2. `rh_iff_nbDistSq_zero`: NB equivalence bridge
+### Sorry: 1
+  1. `rh_iff_nbDistSq_zero`: TYPE BRIDGE — L²(bdLinComb) ↔ matrix(Gram)
+     Both directions exist: Separation.lean (converse) + PerronCrown.lean (forward)
+     Needs: inf_v ∫(1-Σv·{k/x})²dx = 1 - bᵀG⁻¹b = nbDistSq N
 
 ### Custom Axioms: 3
   - `nbDistSq_nonneg`: d² ≥ 0 (L² norm squared)
   - `nbDistSq_antitone`: d² non-increasing (variational)
   - `nb_dist_sq_decay`: d² ≤ C/ln(N) (Section 24.1, 5 sig figs)
 
-### PROVED: 10 ✅
+### PROVED: 12 ✅
 | # | Result | Proof Technique |
 |---|--------|-----------------|
 | 1 | `yNewSq_nonneg` | antitone + linarith |
@@ -245,9 +264,11 @@ theorem rh_from_decay : RiemannHypothesis := by
 | 5 | `nbDistSq_tendsto` | tendsto_atTop_ciInf |
 | 6 | `nbDistSq_convergent` | existence from tendsto |
 | 7 | `nbDistSqLimit_nonneg` | le_ciInf |
-| 8 | `nbDistSqLimit_eq_zero` | tendsto_nhds_unique |
-| 9 | `rh_from_decay` | rh_iff + limit = 0 |
-| 10 | (defs) | nbDistSq, yNewSq, nbDistSqLimit |
+| 8 | `nbDistSq_tendsto_zero` | by_contra + Archimedean + exp/log |
+| 9 | `nbDistSqLimit_eq_zero` | tendsto_nhds_unique |
+| 10 | `rh_from_decay` | rh_iff + limit = 0 |
+| 11 | (defs) | nbDistSq, yNewSq, nbDistSqLimit |
+| 12 | (telescope corollary) | nbDistSq_telescope' |
 
 ### Architecture
 
