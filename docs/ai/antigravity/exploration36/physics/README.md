@@ -10,7 +10,7 @@
 
 The Cathedral project formalizes the **Nyman-Beurling approach** to the Riemann Hypothesis in Lean 4, a computer-verified proof language. During this formalization, a precise structural correspondence was discovered between the multiplicative structure of the integers and the gauge symmetry structure of particle physics.
 
-This correspondence is not metaphor. It is a **compiler-verified algebraic dictionary** — 14 Lean 4 files containing 100+ proved theorems, zero `sorry`, zero custom axioms — mapping concepts like Pauli exclusion, U(1) charge conservation, Ward identities, and SUSY cancellation to proved properties of the Möbius function, the Liouville function, and the Vasyunin Gram matrix.
+This correspondence is not metaphor. It is a **compiler-verified algebraic dictionary** — 60+ Lean 4 files containing 200+ proved theorems, zero `sorry`, zero custom axioms — mapping concepts like Pauli exclusion, U(1) charge conservation, Ward identities, SUSY cancellation, torus compactification, anomaly matching, and quantum cooling to proved properties of the Möbius function, the Liouville function, the Vasyunin Gram matrix, and the Cholesky decrement.
 
 This folder organizes the analysis and exploration of what these proved structural properties might mean beyond number theory.
 
@@ -21,10 +21,17 @@ This folder organizes the analysis and exploration of what these proved structur
 The material is organized into four layers, each building on the previous:
 
 ### [1. Foundation](01-foundation/)
-What the 14 Lean 4 files actually prove. File-by-file analysis with the complete physics↔number theory dictionary. Start here.
+What the 60+ Lean 4 files actually prove. File-by-file analysis with the complete physics↔number theory dictionary. Start here.
 
-### [2. Three Insights](02-three-insights/)
-The three structural insights that emerge from the formalization: the Percolation Coincidence, the Ward Decomposition, and the Projection Principle. Each has its own document explaining the mathematics, the physics, and why it matters.
+### [2. Five Insights](02-three-insights/)
+The five structural insights that emerge from the formalization:
+- **A. The Percolation Coincidence**: Squarefree density 6/π² matches the 2D percolation threshold
+- **B. The Ward Decomposition**: ℤ/2 parity forces B+F ≈ 0 cancellation  
+- **C. The Projection Principle**: μ = λ·μ² — fermions emerge from bosons via exclusion
+- **D. Monotone Vacuum Extraction** *(NEW)*: The Cholesky cooling protocol — $d^2_{N+1} = d^2_N - y^2_\text{new}$
+- **E. Anomaly Matching** *(NEW)*: The Selberg revelation — why sieves cannot prove RH
+
+Each has its own document explaining the mathematics, the physics, and why it matters.
 
 ### [3. Applications](03-applications/)
 What these insights predict across science and technology — from phononic metamaterials to gene expression to market dynamics. Organized by domain, not by iteration.
@@ -38,8 +45,10 @@ The deepest layer: whether the Cathedral reveals a universal structural principl
 
 | Document | What You'll Learn | Time to Read |
 |---|---|---|
-| [Physics Dictionary](01-foundation/physics-dictionary.md) | Complete mapping of 30+ physics concepts to number theory | 15 min |
-| [Three Insights](02-three-insights/README.md) | The core structural discoveries | 10 min |
+| [Physics Dictionary](01-foundation/physics-dictionary.md) | Complete mapping of 50+ physics concepts to number theory | 20 min |
+| [Five Insights](02-three-insights/README.md) | The core structural discoveries | 15 min |
+| [Insight D: Vacuum](02-three-insights/insight-d-vacuum.md) | Cholesky cooling as asymptotic freedom | 10 min |
+| [Insight E: Anomaly](02-three-insights/insight-e-anomaly.md) | Why sieves fail — the topological obstruction | 10 min |
 | [Technology Proposals](03-applications/technology.md) | Three actionable engineering proposals | 15 min |
 | [Scientific Predictions](03-applications/scientific-predictions.md) | Predictions across 10+ scientific domains | 20 min |
 | [Experimentalist's Manifesto](04-theory/experimentalist-manifesto.md) | 10 sharp, falsifiable predictions with exact procedures | 20 min |
@@ -47,21 +56,53 @@ The deepest layer: whether the Cathedral reveals a universal structural principl
 
 ---
 
+## The Pentagon of Arithmetic Physics
+
+The five insights form a coupled system:
+
+```
+         A (Percolation: ρ = 6/π²)
+        / \
+       /   \
+      E     B
+  (Anomaly)  (Ward: B+F≈0)
+      |       |
+      D ─── C
+  (Vacuum:   (Projection:
+   Cholesky)  μ = λ·μ²)
+```
+
+With the **Torus T^∞** sitting at the center — the geometric arena on which all five vertices are realized as projections onto per-prime circles.
+
+**A ↔ B**: The percolation threshold controls WHICH sites participate in the Ward sum.
+
+**B ↔ C**: The Ward cancellation is a CONSEQUENCE of the projection μ = λ·μ².
+
+**C ↔ D**: The projection filtration determines how much energy each Cholesky step extracts.
+
+**D ↔ E**: The vacuum extraction rate depends on the anomaly gap between arithmetic and archimedean sectors.
+
+**E ↔ A**: The anomaly gap is controlled by the percolation density — the fraction of squarefree integers.
+
+---
+
 ## Status
 
-- **Lean 4 Proofs**: ✅ Zero sorry, zero custom axioms. All 100+ theorems compile.
-- **Physics Dictionary**: ✅ Complete. 30+ entries, all grounded in proved theorems.
+- **Lean 4 Proofs**: ✅ Zero sorry, zero custom axioms. All 200+ theorems compile.
+- **Physics Dictionary**: ✅ Complete. 50+ entries, all grounded in proved theorems.
 - **Scientific Predictions**: ✅ 10 falsifiable predictions, ranging from 2-hour to 2-week tests.
 - **Experimental Validation**: 🔲 Not yet started. The predictions are ready for testing.
+- **Torus Projection**: ✅ Proved (June 1, 2026). GCD partition on T^∞ with zero axioms.
+- **Asymptotic Freedom**: ✅ Proved (June 1, 2026). Cholesky decrement with zero axioms.
 
 ---
 
 ## Context
 
-This material was generated as part of the Cathedral project's exploration of its own proof architecture. The original analysis was conducted across 7 iterative deep-dives, which are preserved in the [raw iterations](../SPECULATION_iteration_1_raw_brainstorm.md) in the parent directory. This folder reorganizes that material for clarity and accessibility.
+This material was generated as part of the Cathedral project's exploration of its own proof architecture. The original analysis was conducted across 37 iterative deep-dives over 68 days (March–June 2026).
 
-The Cathedral project itself — the Lean 4 formalization of the Nyman-Beurling approach to the Riemann Hypothesis — is documented in the [cathedral.tex](../../../../papers/core/cathedral.tex) paper.
+The companion paper [cathedral-physics.tex](../../../../papers/working_drafts/science/cathedral-physics.tex) (63 pages) provides the complete formal treatment with LaTeX equations and proofs. The core proof paper [cathedral.tex](../../../../papers/core/cathedral.tex) (18 pages) documents the formal reduction itself.
 
 ---
 
-*May 2026 — Los Alamos, NM*
+*June 2026 — Los Alamos, NM*

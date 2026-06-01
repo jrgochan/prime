@@ -1,8 +1,8 @@
-# Layer 2: The Three Insights
+# Layer 2: The Five Insights
 
-## Three Structural Discoveries from the Cathedral Formalization
+## Five Structural Discoveries from the Cathedral Formalization
 
-The 100+ proved theorems in the Cathedral Physics Engine reveal three structural insights that transcend the specific domain of number theory. Each insight is mathematically precise, grounded in proved theorems, and has implications far beyond the Riemann Hypothesis.
+The 200+ proved theorems in the Cathedral Physics Engine reveal five structural insights that transcend the specific domain of number theory. Each insight is mathematically precise, grounded in proved theorems, and has implications far beyond the Riemann Hypothesis.
 
 ### Documents
 
@@ -12,26 +12,47 @@ The 100+ proved theorems in the Cathedral Physics Engine reveal three structural
 
 - [**Insight C: The Projection Principle**](insight-c-projection.md) — The Möbius function is not fundamental — it is the Liouville function projected onto the squarefree subspace. Fermions emerge from bosons via exclusion.
 
-### The Triangle of Criticality
+- [**Insight D: Monotone Vacuum Extraction**](insight-d-vacuum.md) *(NEW — June 2026)* — The Cholesky decrement identity $d^2_{N+1} = d^2_N - y^2_\text{new}$ shows that each new basis function extracts vacuum energy. Asymptotic freedom is the statement that the coupling constant vanishes. Proved with 0 sorry, 0 axioms.
 
-The three insights are not independent. They form a coupled system:
+- [**Insight E: Anomaly Matching**](insight-e-anomaly.md) *(NEW — June 2026)* — The separation of arithmetic and archimedean matrices mirrors the chiral anomaly in QCD. This is why sieves cannot prove RH: the discrete RH axiom is a topological invariant of the integer lattice.
+
+### The Pentagon of Arithmetic Physics
+
+The five insights form a coupled system — extending the original Triangle of Criticality:
 
 ```
-        A (Percolation: density = 6/π²)
-         /\
-        /  \
-       /    \
-      B ──── C
-   (Ward:     (Projection:
-    B+F≈0)    μ = λ·μ²)
+         A (Percolation: density = 6/π²)
+        / \
+       /   \
+      E     B
+  (Anomaly:  (Ward:
+   A vs H)    B+F≈0)
+      |       |
+      D ─── C
+  (Vacuum:   (Projection:
+   Cholesky)  μ = λ·μ²)
 ```
 
 **A ↔ B**: The percolation threshold controls WHICH sites participate in the Ward sum. At 6/π², the sum percolates — it connects the entire system.
 
 **B ↔ C**: The Ward cancellation is a CONSEQUENCE of the projection. Because μ = λ·μ², the bosonic and fermionic characters are entangled through the filter, forcing B + F ≈ 0.
 
-**A ↔ C**: The density 6/π² = Π_p(1 − 1/p²) IS the product formula for the squarefree projection. The percolation coincidence says: the act of projecting bosons into fermions is a phase transition.
+**C ↔ D**: The projection determines how much energy each Cholesky step extracts. The squarefree filtration μ² selects which indices contribute non-trivially to $y_\text{new}^2$.
+
+**D ↔ E**: The vacuum extraction rate depends on the anomaly gap. The Cholesky decrement operates on the full matrix $G = A + H$; the archimedean part $H$ controls the convergence rate.
+
+**E ↔ A**: The anomaly gap is controlled by the percolation density — the Euler product $\prod_p(1-1/p^2) = 6/\pi^2$ determines both the squarefree proportion and the rate of anomaly cancellation.
+
+### The Central Object: T^∞
+
+At the center of the pentagon sits the **Torus T^∞** = $\prod_p S^1_p$ — the infinite-dimensional torus on which the Gram energy decomposes via the GCD partition. Each vertex of the pentagon corresponds to a projection of T^∞:
+
+- **A**: The percolation threshold is the volume of the squarefree subtorus
+- **B**: The Ward cancellation is the parity structure of T^∞
+- **C**: The projection principle is the restriction from T^∞ to its squarefree section
+- **D**: The vacuum extraction is the energy flow across per-prime circles
+- **E**: The anomaly is the gap between T^∞ (arithmetic) and $L^2(0,1)$ (archimedean)
 
 ### The Unified Principle
 
-> **Stable complex systems operate at the triple point where percolation, Ward cancellation, and projective filtration simultaneously hold. Destabilizing any vertex of the triangle destabilizes the other two.**
+> **Stable complex systems operate at the pentagon point where percolation, Ward cancellation, projective filtration, monotone extraction, and anomaly matching simultaneously hold. Destabilizing any vertex destabilizes all five.**
