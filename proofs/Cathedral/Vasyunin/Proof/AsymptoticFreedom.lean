@@ -17,11 +17,12 @@
   So d² is decreasing + bounded below → converges.
   If Σ y²_new(k) = d²(1), then d²(∞) = 0, which is RH.
 
-  Status: 0 sorry ✅, 3 axioms (step + decay + bridge).
+  Status: 0 sorry ✅, 2 axioms (decay + bridge).
   Created: June 1, 2026 — Exploration 37
 -/
 
 import Cathedral.Vasyunin.Proof.WitnessAsymptotics
+import Cathedral.Vasyunin.Proof.StepMonotone
 import Cathedral.NymanBeurling.Separation
 import Mathlib.Topology.Order.MonotoneConvergence
 import Mathlib.Topology.MetricSpace.Pseudo.Defs
@@ -42,18 +43,13 @@ def nbDistSq (N : ℕ) : ℝ :=
   1 - dotProduct (vasyuninMeanVec N)
     ((vasyuninGramMatrix N)⁻¹.mulVec (vasyuninMeanVec N))
 
-/-- **BLOCK STRUCTURE AXIOM**: Embedding the N-dim optimizer into (N+1)-dim.
-
-    For the zero-padded vector v' = (G_N⁻¹ b_N, 0) ∈ ℝ^{N+1}:
-    - The quadratic form v'ᵀ G_{N+1} v' = bᵀ_N G_N⁻¹ b_N
-    - The inner product b_{N+1}ᵀ v' = bᵀ_N G_N⁻¹ b_N
-
-    This holds because the top-left N×N block of G_{N+1} IS G_N
-    (both use vasyuninGramEntry), and b_{N+1} restricted to [0..N-1] IS b_N.
-
-    Together with variational_bound, this gives:
-    d²(N+1) = 1 - bᵀ_{N+1} G_{N+1}⁻¹ b_{N+1} ≤ 1 - bᵀ_N G_N⁻¹ b_N = d²(N). -/
-axiom nbDistSq_step (N : ℕ) : nbDistSq (N + 1) ≤ nbDistSq N
+/-- **THEOREM (d² step monotonicity)**: d²(N+1) ≤ d²(N).
+    PREVIOUSLY AN AXIOM — now PROVED in StepMonotone.lean using:
+    - The variational bound (Variational.lean)
+    - The block structure of the Gram matrix
+    - Zero-padding the N-dim optimizer into (N+1)-dim -/
+theorem nbDistSq_step (N : ℕ) : nbDistSq (N + 1) ≤ nbDistSq N :=
+  Cathedral.Vasyunin.StepMonotone.nbDistSq_step_proved N
 
 /-- **THEOREM (d² antitone)**: d² is non-increasing in N.
     PREVIOUSLY AN AXIOM — now PROVED from nbDistSq_step by induction.
@@ -309,31 +305,31 @@ theorem rh_from_decay : RiemannHypothesis := by
 
 ### Sorry: 0 ✅✅✅
 
-### Custom Axioms: 3
-  - `nbDistSq_step`: d²(N+1) ≤ d²(N) (block embedding)
+### Custom Axioms: 2
   - `nb_dist_sq_decay`: d² ≤ C/ln(N) (Section 24.1, 5 sig figs)
   - `nbDistSq_bounds_bdL2`: matrix d² ≥ BD L² d² (basis bridge)
 
-### PROVED: 15 ✅ (including 2 graduated axioms)
+### PROVED: 16 ✅ (including 3 graduated axioms)
 | # | Result | Proof Technique |
 |---|--------|-----------------|
-| 1 | `nbDistSq_nonneg` ★ | vasyunin_nbDistSq_pos + antitone (GRADUATED) |
-| 2 | `nbDistSq_antitone` ★ | nbDistSq_step + Nat.rec (GRADUATED) |
-| 3 | `yNewSq_nonneg` | antitone + linarith |
-| 4 | `nbDistSq_telescope` | Finset.sum_range_sub |
-| 5 | `nbDistSq_telescope'` | negation + linarith |
-| 6 | `nbDistSq_bddBelow` | nbDistSq_nonneg |
-| 7 | `nbDistSq_tendsto` | tendsto_atTop_ciInf |
-| 8 | `nbDistSq_convergent` | existence from tendsto |
-| 9 | `nbDistSqLimit_nonneg` | le_ciInf |
-| 10 | `nbDistSq_tendsto_zero` | by_contra + Archimedean + exp/log |
-| 11 | `nbDistSqLimit_eq_zero` | tendsto_nhds_unique |
-| 12 | `rh_from_decay` | nyman_beurling_converse + tendsto |
+| 1 | `nbDistSq_step` ★ | variational_bound + block structure (GRADUATED) |
+| 2 | `nbDistSq_nonneg` ★ | vasyunin_nbDistSq_pos + antitone (GRADUATED) |
+| 3 | `nbDistSq_antitone` ★ | nbDistSq_step + Nat.rec (GRADUATED) |
+| 4 | `yNewSq_nonneg` | antitone + linarith |
+| 5 | `nbDistSq_telescope` | Finset.sum_range_sub |
+| 6 | `nbDistSq_telescope'` | negation + linarith |
+| 7 | `nbDistSq_bddBelow` | nbDistSq_nonneg |
+| 8 | `nbDistSq_tendsto` | tendsto_atTop_ciInf |
+| 9 | `nbDistSq_convergent` | existence from tendsto |
+| 10 | `nbDistSqLimit_nonneg` | le_ciInf |
+| 11 | `nbDistSq_tendsto_zero` | by_contra + Archimedean + exp/log |
+| 12 | `nbDistSqLimit_eq_zero` | tendsto_nhds_unique |
+| 13 | `rh_from_decay` | nyman_beurling_converse + tendsto |
 
 ### Architecture: The Crown Chain
 
-  nbDistSq_step (axiom)──→ nbDistSq_antitone ★(PROVED)
-                                    │
+  nbDistSq_step ★(PROVED)──→ nbDistSq_antitone ★(PROVED)
+  (StepMonotone.lean)                │
   nbDistSq_nonneg ★(PROVED)        │
          │                          │
     bddBelow ✅              tendsto ✅ ─── convergent ✅

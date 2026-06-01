@@ -90,6 +90,8 @@ lean_lib «Cathedral» where
     `Cathedral.Vasyunin.Proof.RatioVanishing,
     -- Selberg-Möbius stratification of cotangent sum (Exploration 37)
     `Cathedral.Vasyunin.Proof.CotangentStratification,
+    -- Step Monotonicity: d²(N+1) ≤ d²(N) via variational bound (PROVED, zero axiom)
+    `Cathedral.Vasyunin.Proof.StepMonotone,
     -- Asymptotic freedom: d² → 0 via telescoping Schur complements
     `Cathedral.Vasyunin.Proof.AsymptoticFreedom,
     -- Gram integral analysis
