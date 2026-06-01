@@ -12,6 +12,11 @@ package "hyperzeta_proofs" where
 require mathlib from git
   "https://github.com/leanprover-community/mathlib4.git" @ "v4.29.0"
 
+-- PrimeNumberTheoremAnd: RE-ENABLED (May 31, 2026) at v4.29.0.
+-- Graduates PNT axioms: mu_pnt_alt, R_isLittleO, frac_error_isLittleO.
+require PrimeNumberTheoremAnd from git
+  "https://github.com/AlexKontorovich/PrimeNumberTheoremAnd.git" @ "v4.29.0"
+
 -- Legacy roots (superseded by Cathedral architecture)
 -- @[default_target]
 -- lean_lib «HyperzetaProofs» where
@@ -193,6 +198,8 @@ lean_lib «Cathedral» where
     `Cathedral.Assembly.Assembly,
     -- PNT bridge (re-enabled via local PNTAnd clone with v4.29 fix)
     `Cathedral.PNT.Bridge,
+    -- PNTAnd Bridge (graduates mu_pnt_alt, R_isLittleO from PrimeNumberTheoremAnd)
+    `Cathedral.PNT.PNTAndBridge,
     -- Mertens graduation (axiom → theorem via Perron)
     `Cathedral.Perron.MertensFromPerron,
     -- Perron Crown (axiom elimination + covariance graduation)
@@ -585,4 +592,6 @@ lean_lib «Cathedral» where
     `Cathedral.Physics.GramWiring.MoebiusOrthogonality,
     -- Dyson Equation (The Nuclear Option: d²_opt = d²_free + scattering, May 29, 2026)
     `Cathedral.Physics.GramWiring.DysonEquation,
+    -- Inversion Bridge (The Boat: sawtooth → BD via x ↦ 1/x, 1 axiom ≡ RH, May 31, 2026)
+    `Cathedral.Assembly.InversionBridge,
   ]

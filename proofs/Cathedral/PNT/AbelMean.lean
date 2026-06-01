@@ -49,13 +49,12 @@ open Real Matrix Finset MeasureTheory Cathedral.Vasyunin
 -- Declared inline to avoid importing PNT/Bridge.lean's 2 sorry.
 -- ════════════════════════════════════════════════
 
-/-- **PNT** (axiom from PrimeNumberTheoremAnd.Consequences.mu_pnt_alt):
-    The summatory Möbius function Σ μ(n)/n = o(1).
-    This is equivalent to the Prime Number Theorem ψ(x) ~ x.
-    Reference: Kontorovich et al., PrimeNumberTheoremAnd (2024-2026). -/
-axiom mu_pnt_alt :
-  (fun x : ℝ ↦ ∑ n ∈ Finset.range ⌊x⌋₊,
-    (↑(ArithmeticFunction.moebius n) : ℝ) / n) =o[Filter.atTop] fun _ ↦ (1 : ℝ)
+-- **PNT** (GRADUATED 🎓 — now imported from PrimeNumberTheoremAnd.Consequences):
+--     The summatory Möbius function Σ μ(n)/n = o(1).
+--     This is equivalent to the Prime Number Theorem ψ(x) ~ x.
+--     Reference: Kontorovich et al., PrimeNumberTheoremAnd (2024-2026).
+--     Graduated: May 31, 2026.
+-- was: axiom mu_pnt_alt (now imported from PNTAnd via Cathedral.PNT.LogBridge)
 
 /-- **PNT (discrete Tendsto form)**: Σ_{k=1}^{N} μ(k)/k → 0.
     Proved from mu_pnt_alt via composition with ℕ → ℝ. -/

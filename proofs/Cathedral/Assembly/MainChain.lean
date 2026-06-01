@@ -303,7 +303,7 @@ theorem baez_duarte_forward :
     ∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, ∃ v : Fin (N - 1) → ℝ,
       ∫ x in (0:ℝ)..1, (1 - bdLinComb N v x) ^ 2 < ε := by
   intro hRH ε hε
-  -- Step 1: Get L² decay from the CLEAN path (no false axioms!)
+  -- Step 1: Get L² decay from the GRADUATED path (existential witness)
   obtain ⟨C_l2, hC_l2_pos, N₀, h_decay⟩ := rh_l2_decay_clean hRH
   -- Step 2: Get N large enough that C_l2/logN < ε (standard calculus)
   obtain ⟨N₁, hN₁⟩ := log_grows_unboundedly C_l2 hC_l2_pos ε hε
@@ -311,11 +311,12 @@ theorem baez_duarte_forward :
   refine ⟨max N₀ N₁, fun N hN => ?_⟩
   have hN₀ : N ≥ N₀ := by omega
   have hN₁' : N₁ ≤ N := by omega
-  -- Step 4: Use bdMoebiusWeight as the witness
-  refine ⟨bdMoebiusWeight N, ?_⟩
+  -- Step 4: Get witness from the existential L² decay
+  obtain ⟨v, hv⟩ := h_decay N hN₀
+  refine ⟨v, ?_⟩
   -- ∫|1-f|² ≤ C_l2/logN < ε
-  calc ∫ x in (0:ℝ)..1, (1 - bdLinComb N (bdMoebiusWeight N) x) ^ 2
-      ≤ C_l2 / Real.log ↑N := h_decay N hN₀
+  calc ∫ x in (0:ℝ)..1, (1 - bdLinComb N v x) ^ 2
+      ≤ C_l2 / Real.log ↑N := hv
     _ < ε := hN₁ N hN₁'
 
 -- ──── PRIMARY EXPORT: DIRECT MELLIN PATH (CLEAN) ────

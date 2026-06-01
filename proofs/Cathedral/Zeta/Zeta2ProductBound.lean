@@ -34,14 +34,37 @@ open Cathedral.GlassEulerConvergence
 -- §1. LOGARITHMIC BOUND: ln(1-x) ≥ -2x for 0 ≤ x ≤ 1/2
 -- ════════════════════════════════════════════════════════════════
 
-/-- For 0 ≤ x ≤ 1/2, we have ln(1-x) ≥ -2x.
-    This follows from the concavity of ln: ln(1-x) ≥ ln(1) + ln'(1)·(-x) = -x ≥ -2x,
-    but we use a direct bound: 1-x ≥ exp(-2x) for x ∈ [0, 1/2].
+/-- **GRADUATED 🎓** (was axiom `log_one_sub_ge_neg_two_mul`):
+    For 0 ≤ x ≤ 1/2, we have `ln(1-x) ≥ -2x`.
 
-    For the Cathedral, this is axiomatized as an elementary calculus fact.
-    It can be graduated via monotonicity of f(x) = ln(1-x) + 2x on [0, 1/2]. -/
-axiom log_one_sub_ge_neg_two_mul :
-    ∀ x : ℝ, 0 ≤ x → x ≤ 1/2 → Real.log (1 - x) ≥ -2 * x
+    **Proof strategy**:
+    1. `log(1/(1-x)) ≤ 1/(1-x) - 1` from `exp(y) ≥ 1+y` at `y = 1/(1-x) - 1`
+    2. `log(1/(1-x)) = -log(1-x)`, so `-log(1-x) ≤ x/(1-x)`
+    3. For `x ≤ 1/2`: `x/(1-x) ≤ 2x`
+    4. Combine: `log(1-x) ≥ -2x` ✓
+
+    GRADUATED: May 31, 2026 — pure Mathlib proof, no PNTAnd needed. -/
+theorem log_one_sub_ge_neg_two_mul :
+    ∀ x : ℝ, 0 ≤ x → x ≤ 1/2 → Real.log (1 - x) ≥ -2 * x := by
+  intro x hx0 hx1
+  have h1mx_pos : 0 < 1 - x := by linarith
+  have h_inv_pos : (0 : ℝ) < 1/(1-x) := by positivity
+  -- Step 1: log(1/(1-x)) ≤ 1/(1-x) - 1
+  have key : Real.log (1/(1-x)) ≤ 1/(1-x) - 1 := by
+    rw [Real.log_le_iff_le_exp h_inv_pos]
+    have := Real.add_one_le_exp (1/(1-x) - 1)
+    linarith
+  -- Step 2: -log(1-x) ≤ x/(1-x)
+  have h_log_neg : -Real.log (1-x) ≤ x/(1-x) := by
+    have h_eq : Real.log (1/(1-x)) = -Real.log (1-x) := by
+      rw [one_div, Real.log_inv]
+    rw [← h_eq]
+    have h_eq2 : 1/(1-x) - 1 = x/(1-x) := by field_simp; ring
+    linarith [h_eq2]
+  -- Step 3: x/(1-x) ≤ 2x (since 1-x ≥ 1/2)
+  have h_ratio : x/(1-x) ≤ 2*x := by
+    rw [div_le_iff₀ h1mx_pos]; nlinarith
+  linarith
 
 -- ════════════════════════════════════════════════════════════════
 -- §2. PRODUCT-LOG CONNECTION

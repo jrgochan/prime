@@ -35,6 +35,7 @@
 
 import Cathedral.Physics.Glass.MoebiusShadowCrown
 import Cathedral.PNT.AbelMean
+import Cathedral.PNT.PNTAndBridge
 import Mathlib.Analysis.SpecialFunctions.Gamma.Digamma
 import Mathlib.NumberTheory.ArithmeticFunction.VonMangoldt
 
@@ -149,22 +150,18 @@ theorem moebius_sum_tendsto_zero :
 -- §4. PNTAnd AXIOM BRIDGE: Mertens' Theorems
 -- ════════════════════════════════════════════════════════════════
 
-/-! ### PNTAnd Axiom Bridge for Mertens' Theorems
+/-! ### PNTAnd Theorem Bridge for Mertens' Theorems
 
-These axioms correspond to PROVED or IN-PROGRESS theorems in
-`PrimeNumberTheoremAnd.Mertens` (Kontorovich, Tao, et al.).
+These theorems are GRADUATED from `PrimeNumberTheoremAnd` v4.29
+via `Cathedral.PNT.PNTAndBridge`.
 
-**Current PNTAnd status** (v4.28.0, as of May 2026):
-- Mertens' 1st (Λ form): PROVED (`E₁Λ.le`, `E₁Λ.ge`)
-- Mertens' 1st (prime form): PROVED (`E₁p.le`, `E₁p.ge`)
-- Mertens' 2nd: sorry (blocked by `sum_div_log_eq` Abel identity)
-- γ identification: sorry (needs ζ Laurent expansion)
-- Mertens' 3rd: sorry (needs 2nd + γ)
+**Graduated** (May 31, 2026):
+- Mertens' 1st (Λ form): 🎓 from `Mertens.E₁Λ.le/ge + sum_mangoldt_div_eq`
+- Mertens' 1st (prime form): 🎓 from `RS_prime.mertens_first_theorem`
+- Mertens' 2nd: 🎓 from `RS_prime.mertens_second_theorem`
 
-**Upgrade path**: When PNTAnd bumps to Lean 4.29 / Mathlib 4.29:
-1. Add `require PrimeNumberTheoremAnd` to lakefile.lean
-2. Import `PrimeNumberTheoremAnd.Mertens`
-3. Replace each axiom below with `Mertens.<theorem_name>`
+**Still axiom** (blocked by PNTAnd sorry):
+- Mertens' 3rd: blocked by `Mertens.γ.eq_eulerMascheroni` sorry
 -/
 
 /-- The Euler-Mascheroni constant γ from Mathlib.
@@ -172,75 +169,70 @@ These axioms correspond to PROVED or IN-PROGRESS theorems in
 noncomputable abbrev eulerΓ : ℝ := Real.eulerMascheroniConstant
 
 -- ────────────────────────────────────────────────
--- AXIOM 1: Mertens' First Theorem (von Mangoldt form)
--- PNTAnd status: PROVED (E₁Λ.le + E₁Λ.ge)
--- Maps to: Mertens.sum_mangoldt_div_eq_log'
+-- THEOREM 1: Mertens' First Theorem (von Mangoldt form) 🎓
+-- GRADUATED from PNTAnd v4.29 (Mertens.E₁Λ.le/ge)
 -- ────────────────────────────────────────────────
 
-/-- **PNTAnd AXIOM** (PROVED in PNTAnd v4.28):
+/-- **GRADUATED 🎓** (was axiom `mertens_first_mangoldt`):
     Mertens' first theorem (von Mangoldt form).
 
-    Σ_{n ≤ x} Λ(n)/n ~ log(x)
+    `Σ_{n ≤ x} Λ(n)/n ~ log(x)`
 
-    PNTAnd proves this with explicit bounds:
-      -2 ≤ Σ Λ(n)/n - log(x) ≤ log(4) + 4
+    **Proof**: From PNTAnd's sorry-free `Mertens.E₁Λ.le/ge` bounds:
+    `-2 ≤ E₁Λ(x) ≤ log(4) + 4`, giving O(1) = o(logx).
 
-    Maps to: `Mertens.sum_mangoldt_div_eq_log'` -/
-axiom mertens_first_mangoldt :
+    GRADUATED: May 31, 2026. -/
+theorem mertens_first_mangoldt :
     Asymptotics.IsEquivalent Filter.atTop
       (fun x : ℝ => ∑ d ∈ (Finset.Ioc 0 ⌊x⌋₊),
         ArithmeticFunction.vonMangoldt d / d)
-      (fun x => Real.log x)
+      (fun x => Real.log x) :=
+  mertens_first_mangoldt_proved
 
 -- ────────────────────────────────────────────────
--- AXIOM 2: Mertens' First Theorem (prime form)
--- PNTAnd status: PROVED (E₁p.le + E₁p.ge + E₁.summable)
--- Maps to: Mertens.sum_log_prime_div_eq_log''
+-- THEOREM 2: Mertens' First Theorem (prime form) 🎓
+-- GRADUATED from PNTAnd v4.29 (RS_prime.mertens_first_theorem)
 -- ────────────────────────────────────────────────
 
-/-- **PNTAnd AXIOM** (PROVED in PNTAnd v4.28):
+/-- **GRADUATED 🎓** (was axiom `mertens_first_prime`):
     Mertens' first theorem (prime form).
 
-    Σ_{p ≤ x} log(p)/p ~ log(x)
+    `Σ_{p ≤ x} log(p)/p ~ log(x)`
 
-    PNTAnd proves this with explicit bounds:
-      -2 - E₁ ≤ Σ log(p)/p - log(x) ≤ log(4) + 4
-    where E₁ = Σ_p log(p)/(p(p-1)) is a convergent series.
+    **Proof**: From PNTAnd's sorry-free `RS_prime.mertens_first_theorem`:
+    `Σ logp/p - logx → mertensConstant`. Convergent difference = O(1) = o(logx).
 
-    Maps to: `Mertens.sum_log_prime_div_eq_log''` -/
-axiom mertens_first_prime :
+    GRADUATED: May 31, 2026. -/
+theorem mertens_first_prime :
     Asymptotics.IsEquivalent Filter.atTop
       (fun x : ℝ => ∑ p ∈ (Finset.Ioc 0 ⌊x⌋₊).filter Nat.Prime,
         Real.log p / p)
-      (fun x => Real.log x)
+      (fun x => Real.log x) :=
+  mertens_first_prime_proved
 
 -- ────────────────────────────────────────────────
--- AXIOM 3: Mertens' Second Theorem (prime form, convergence)
--- PNTAnd status: IN PROGRESS (sorry on sum_div_log_eq)
--- Maps to: Mertens.E₂p.bound' + Mertens.M
+-- THEOREM 3: Mertens' Second Theorem (prime form, convergence) 🎓
+-- GRADUATED from PNTAnd v4.29 (RS_prime.mertens_second_theorem)
 -- ────────────────────────────────────────────────
 
-/-- **PNTAnd AXIOM** (IN PROGRESS in PNTAnd v4.28):
-    Mertens' second theorem (prime form, convergence version).
+/-- **GRADUATED 🎓** (was axiom `mertens_second_ioc`):
+    Mertens' second theorem (prime form, convergence).
 
-    ∃ M, Tendsto (Σ_{p ≤ x} 1/p - log(log(x))) → M
+    `∃ M, Tendsto (Σ_{p ≤ x} 1/p - log(log(x))) → M`
 
-    The limit M ≈ 0.2615 is the Meissel-Mertens constant.
+    The limit M = `meisselMertensConstant` ≈ 0.2615.
 
-    PNTAnd's proof route (all blocked by same Abel identity sorry):
-    1. Mertens' 1st (Σ log(p)/p = log x + O(1))     [PROVED]
-    2. Abel with 1/log weight (sum_div_log_eq)        [sorry]
-    3. Integration identity for E₂p                   [sorry]
-    4. |E₂p(x)| ≤ (log 4 + 6 + E₁)/log x → 0       [proved from 3]
+    **Proof**: Direct from PNTAnd's sorry-free
+    `RS_prime.mertens_second_theorem`, converting `Iic` → `Ioc 0`.
 
-    Maps to: `Mertens.E₂p.bound'` (the o(1) form implies convergence)
-    + `Mertens.M` (the Meissel-Mertens constant) -/
-axiom mertens_second_ioc :
+    GRADUATED: May 31, 2026. -/
+theorem mertens_second_ioc :
     ∃ M : ℝ,
     Tendsto (fun x : ℝ =>
       (∑ p ∈ (Finset.Ioc 0 ⌊x⌋₊).filter Nat.Prime, 1 / (p : ℝ)) -
       Real.log (Real.log x))
-      atTop (nhds M)
+      atTop (nhds M) :=
+  mertens_second_ioc_proved
 
 -- ────────────────────────────────────────────────
 -- AXIOM 4: Mertens' Third Theorem (quantitative)
@@ -526,19 +518,23 @@ theorem shadow_light_duality :
 -- ════════════════════════════════════════════════════════════════
 
 /-!
-## Audit — MertensThird (Updated May 21, 2026)
+## Audit — MertensThird (Updated May 31, 2026)
 
-### 🏆 ZERO SORRY — ALL THEOREMS PROVED (modulo 4 PNTAnd axioms)
+### 🏆 ZERO SORRY — ALL THEOREMS PROVED (modulo 1 PNTAnd axiom)
 
-### PNTAnd Axioms: 4 (future imports when PNTAnd bumps to v4.29)
-| # | Axiom | PNTAnd Status | Maps to |
+### Graduated from PNTAnd v4.29: 3 🎓
+| # | Former Axiom | PNTAnd Source | Status |
 |---|-------|---------------|---------|
-| 1 | `mertens_first_mangoldt` | ✅ PROVED | `Mertens.sum_mangoldt_div_eq_log'` |
-| 2 | `mertens_first_prime` | ✅ PROVED | `Mertens.sum_log_prime_div_eq_log''` |
-| 3 | `mertens_second_ioc` | ❌ sorry | `Mertens.E₂p.bound'` + `Mertens.M` |
-| 4 | `mertens_third_ioc` | ❌ sorry | `Mertens.E₃.bound''` |
+| 1 | `mertens_first_mangoldt` | `Mertens.E₁Λ.le/ge` | 🎓 GRADUATED |
+| 2 | `mertens_first_prime` | `RS_prime.mertens_first_theorem` | 🎓 GRADUATED |
+| 3 | `mertens_second_ioc` | `RS_prime.mertens_second_theorem` | 🎓 GRADUATED |
 
-### Sorry: 0 🏆 (down from 3 → 2 → 1 → 0 ✅✅✅)
+### PNTAnd Axioms remaining: 1
+| # | Axiom | Blocker |
+|---|-------|---------|
+| 1 | `mertens_third_ioc` | `Mertens.γ.eq_eulerMascheroni` sorry |
+
+### Sorry: 0 🏆
 
 ### PROVED: 13 🎓
 | # | Result | Status |
@@ -559,12 +555,12 @@ theorem shadow_light_duality :
 
 ### Architecture
 ```
-  PNTAnd Axiom Bridge (4 axioms)
+  PNTAnd Theorem Bridge (3 graduated + 1 axiom)
   ┌─────────────────────────────────────────────────────┐
-  │  mertens_first_mangoldt  [PROVED in PNTAnd]         │
-  │  mertens_first_prime     [PROVED in PNTAnd]         │
-  │  mertens_second_ioc      [sorry in PNTAnd]          │
-  │  mertens_third_ioc       [sorry in PNTAnd]          │
+  │  mertens_first_mangoldt  [🎓 GRADUATED]             │
+  │  mertens_first_prime     [🎓 GRADUATED]             │
+  │  mertens_second_ioc      [🎓 GRADUATED]             │
+  │  mertens_third_ioc       [axiom — γ sorry]          │
   └─────────────┬───────────────────────────────────────┘
                 ↓ (comp + Ioc↔range)
   mertens_second 🎓               mertens_third_quantitative 🎓
@@ -578,14 +574,6 @@ theorem shadow_light_duality :
   │  ∏(1-1/p) → 0   PROVED!       │
   └────────────────────────────────┘
 ```
-
-### Upgrade Path (when PNTAnd → v4.29)
-1. `require PrimeNumberTheoremAnd` in lakefile.lean
-2. `import PrimeNumberTheoremAnd.Mertens`
-3. Replace `axiom mertens_first_mangoldt` → `Mertens.sum_mangoldt_div_eq_log'`
-4. Replace `axiom mertens_first_prime` → `Mertens.sum_log_prime_div_eq_log''`
-5. Replace `axiom mertens_second_ioc` → `Mertens.E₂p.bound'` + `Mertens.M`
-6. Replace `axiom mertens_third_ioc` → derive from `Mertens.E₃.bound''`
 -/
 
 end Cathedral.MertensThird

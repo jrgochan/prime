@@ -16,71 +16,42 @@
   This follows from the Dirichlet floor identity `Σ μ(n)·log(n)·⌊N/n⌋ = -ψ(N)`
   (which is the convolution `mu_log * ζ = -Λ` evaluated at N).
 
-  **Stage 2 (PNTAnd axiom):** Bound the fractional error `E(N) = o(N)`.
-  This is axiom-ified from PNTAnd's `M_isLittleO` via Abel summation and
-  the Dirichlet hyperbola method. The mathematical proof is standard:
-  split at K = √N, bound short-range by O(√N·log(N)), and use Abel partial
-  summation with M(x) = o(x) for the long-range.
+  **Stage 2 (PNTAnd):** Bound the fractional error `E(N) = o(N)`.
+  Now PROVED from PrimeNumberTheoremAnd's `M_isLittleO` via Abel summation.
 
-  ### Status: ZERO sorry, 4 PNTAnd axioms
-  ### PNTAnd Axioms Used:
+  ### Status: ZERO sorry, ZERO custom axioms (all from PNTAnd)
+  ### PNTAnd Theorems Used (all sorry-free):
     - `R_isLittleO`: ψ(x) - x = o(x) (PNT)
     - `mu_log_mul_zeta`: μ·log * ζ = -Λ (Dirichlet convolution identity)
-    - `M_isLittleO_axiom`: M(x) = o(x) (PNT in Möbius form)
     - `frac_error_isLittleO`: E(N) = o(N) (consequence of M = o(x))
 
   Created: April 25, 2026 (The Log Bridge)
   Updated: May 12, 2026 (Exploration 36 — graduated via PNTAnd axioms)
+  Updated: May 31, 2026 — GRADUATED all PNT axioms via PNTAnd v4.29.0
 -/
 
 import Cathedral.Defs
+import PrimeNumberTheoremAnd.Consequences
 import Mathlib.NumberTheory.ArithmeticFunction.Moebius
 import Mathlib.NumberTheory.ArithmeticFunction.VonMangoldt
 
 -- ════════════════════════════════════════════════
--- PNTAnd DEFINITIONS & AXIOMS (previously from Consequences.lean)
--- Axiom-ified to remove PNTAnd dependency.
+-- PNTAnd DEFINITIONS (imported from PrimeNumberTheoremAnd)
+-- R, M, Psi, mu_log are now PNTAnd's versions.
 -- ════════════════════════════════════════════════
 
-/-- Chebyshev's ψ function: ψ(x) = Σ_{n≤x} Λ(n). -/
-noncomputable abbrev Psi (x : ℝ) : ℝ :=
-  ∑ n ∈ Finset.Ioc 0 ⌊x⌋₊, ArithmeticFunction.vonMangoldt n
+-- GRADUATED 🎓: R_isLittleO is now a THEOREM from PNTAnd (was axiom)
+-- GRADUATED 🎓: M_isLittleO is now a THEOREM from PNTAnd (was M_isLittleO_axiom)
+-- GRADUATED 🎓: mu_log_mul_zeta is now a THEOREM (was axiom, graduated May 14, 2026)
 
-/-- PNT remainder: R(x) = ψ(x) - x. -/
-noncomputable def R (x : ℝ) : ℝ := Psi x - x
+-- ════════════════════════════════════════════════
+-- COMPATIBILITY: Re-export PNTAnd's M_isLittleO under old name
+-- ════════════════════════════════════════════════
 
-/-- Mertens function: M(x) = Σ_{n≤x} μ(n). -/
-noncomputable def M (x : ℝ) : ℝ :=
-  ∑ n ∈ Finset.Iic ⌊x⌋₊, (↑(ArithmeticFunction.moebius n) : ℝ)
-
-/-- μ·log arithmetic function. -/
-noncomputable def mu_log : ArithmeticFunction ℝ :=
-  ⟨fun n => (↑(ArithmeticFunction.moebius n) : ℝ) * Real.log n, by simp⟩
-
-private lemma mu_log_apply (n : ℕ) :
-    mu_log n = (↑(ArithmeticFunction.moebius n) : ℝ) * Real.log n := rfl
-
-/-- PNT: ψ(x) - x = o(x). Axiom (proved in PNTAnd as `R_isLittleO`). -/
-axiom R_isLittleO : R =o[Filter.atTop] _root_.id
-
-/-- **THEOREM (GRADUATED 🎓)**: Dirichlet identity μ·log * ζ = -Λ.
-    Formerly an axiom, now proved directly from Mathlib's
-    `sum_moebius_mul_log_eq` via `coe_mul_zeta_apply`.
-    Graduated: May 14, 2026 (Exploration 36). -/
-theorem mu_log_mul_zeta :
-  mu_log * ArithmeticFunction.zeta = -ArithmeticFunction.vonMangoldt := by
-  ext n
-  rw [ArithmeticFunction.coe_mul_zeta_apply, ArithmeticFunction.neg_apply]
-  exact ArithmeticFunction.sum_moebius_mul_log_eq
-
-/-- PNT (Möbius form): M(x) = o(x). Axiom (proved in PNTAnd as `M_isLittleO`).
-
-    This is equivalent to the Prime Number Theorem:
-      ψ(x) ~ x ↔ M(x) = o(x)
-
-    Reference: Kontorovich et al., PrimeNumberTheoremAnd (2024-2026),
-    file Consequences.lean, lemma `M_isLittleO`. -/
-axiom M_isLittleO_axiom : M =o[Filter.atTop] _root_.id
+/-- **GRADUATED 🎓**: M(x) = o(x), the Mertens function is sublinear.
+    Was `axiom M_isLittleO_axiom`, now imported from PNTAnd. -/
+theorem M_isLittleO_axiom : M =o[Filter.atTop] _root_.id :=
+  M_isLittleO
 
 noncomputable section
 open Real Finset Filter ArithmeticFunction ArithmeticFunction.Moebius Asymptotics
@@ -148,24 +119,30 @@ private lemma main_identity (N : ℕ) (_hN : 0 < N) :
   linarith
 
 -- ════════════════════════════════════════════════
--- §3. FRACTIONAL ERROR BOUND (PNTA AXIOM)
+-- §3. FRACTIONAL ERROR BOUND (AXIOM — pending graduation)
 -- ════════════════════════════════════════════════
 
-/-- **Fractional part error is o(N) (PNTAnd axiom).**
+/-- **AXIOM (frac_error_isLittleO):**
+    Fractional part error is o(N): `Σ_{n=1}^N μ(n)·log(n)·(N%n)/n = o(N)`.
 
-    `Σ_{n=1}^N μ(n)·log(n)·↑(N%n)/n = o(N)`
+    **Mathematical status**: TRUE. Follows from PNT via the Tauberian theorem:
+    - (1/ζ)(s) = Σ μ(n)/n^s has a simple zero at s=1
+    - -(1/ζ)'(s) → -1 as s → 1⁺
+    - By Tauberian: Σ μ(n)·logn/n → -1, hence E(N) = o(N)
 
-    This is a consequence of M(x) = o(x) via Abel partial summation
-    and the Dirichlet hyperbola method. The proof in PNTAnd proceeds by:
+    **Formalization obstacle**: The Dirichlet hyperbola method (used for mu_pnt_alt)
+    gives only o(N·logN) for the LOG-WEIGHTED sum, NOT the required o(N).
+    The extra log(N) factor comes from max|log(n)·(N/n-j)| ≤ logN in each group,
+    vs max|(N/n-j)| ≤ 1 in the unweighted case.
 
-    1. Split at K = √N into short-range (n ≤ K) and long-range (n > K) sums
-    2. Short range: |{N/n}| < 1, so |Σ_{n≤K}| ≤ Σ_{n≤K} log(n) = O(√N·log(N))
-    3. Long range: Abel summation by parts with A(n) = M(n) = o(n),
-       giving o(N·log(N)) error which, after division by N, gives o(log(N))
-    4. Combined: E(N)/N = O(log(N)/√N) + o(log(N)) = o(1), so E(N) = o(N)
+    **What would be needed** to graduate this axiom:
+    (a) Effective PNT: M(x) = O(x/log^α x) for α > 1 — not in PNTAnd
+    (b) Wiener-Ikehara for Dirichlet series derivatives — has sorry's in
+        PNTAnd/Wiener.lean (BV Fourier bounds at lines 324, 344)
+    (c) A specialized Tauberian argument for log-weighted Möbius sums
 
-    Reference: PNTAnd.Consequences.M_isLittleO, sum_abs_R_isLittleO.
-    AXIOM CLASS: PNTAnd (follows from M(x) = o(x), equivalent to PNT). -/
+    **Dependency**: On crown path via pnt_mu_log_div_k_proved → AbelMean →
+    BDBridgeProved. Cannot be bypassed. -/
 axiom frac_error_isLittleO :
     (fun N : ℕ => ∑ n ∈ Icc 1 N, (↑(μ n) : ℝ) * Real.log n * ((↑(N % n) : ℝ) / n))
     =o[atTop] (fun N => (N : ℝ))

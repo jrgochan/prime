@@ -24,6 +24,7 @@
 import Cathedral.Vasyunin.Defs
 import Cathedral.Vasyunin.Witness
 import Cathedral.Vasyunin.Augmented.DiagBound
+import Cathedral.PNT.PNTAndBridge
 import Mathlib.Data.Nat.Prime.Basic
 import Mathlib.Analysis.Complex.ExponentialBounds
 import Mathlib.Analysis.Real.Pi.Bounds
@@ -225,13 +226,43 @@ theorem witness_quadform_prime_dominated (N : ℕ) (hN : 10 ≤ N) :
 -- §5. MERTENS SECOND THEOREM
 -- ════════════════════════════════════════════════════════
 
-/-- **Mertens' second theorem** (weak form):
-    Σ_{p ≤ N, p prime} 1/p ≤ 2 · ln(ln(N)) for N ≥ 3.
+/-- Helper: `Iic N` and `Icc 2 N` agree for the prime filter (primes ≥ 2). -/
+private lemma iic_icc_prime_eq (N : ℕ) (_hN : 2 ≤ N) :
+    (Finset.Iic N).filter Nat.Prime = (Finset.Icc 2 N).filter Nat.Prime := by
+  ext p; simp only [Finset.mem_filter, Finset.mem_Iic, Finset.mem_Icc]
+  exact ⟨fun ⟨h1, h2⟩ => ⟨⟨h2.two_le, h1⟩, h2⟩, fun ⟨⟨_, h2⟩, h3⟩ => ⟨h2, h3⟩⟩
 
-    AXIOM CLASS: NUMBER-THEORY (standard, could import from PNTAnd). -/
-axiom mertens_second_upper (N : ℕ) (hN : 3 ≤ N) :
+/-- **GRADUATED 🎓** (was axiom `mertens_second_upper`):
+    Mertens' second theorem (weak upper bound, eventually form).
+
+    `∀ᶠ N in atTop, Σ_{p ≤ N, prime} 1/p ≤ 2 · loglog(N)`
+
+    **Proof**: From PNTAnd's sorry-free `RS_prime.mertens_second_theorem'`:
+    `∃ C, ∀ x ≥ 2, |Σ 1/p - loglog(x)| ≤ C`. Combined with `loglog → ∞`,
+    eventually `C ≤ loglog(N)`, giving `Σ ≤ loglog(N) + C ≤ 2·loglog(N)`.
+
+    **Note**: The former axiom `∀ N ≥ 6, ...` was FALSE for N ∈ {3,4,5}
+    and cannot be proved for ALL N ≥ 6 without ~80 explicit small-case
+    verifications (the bound C from `mertens_second_theorem'` is inflated
+    by the x = 2 case where loglog is negative). The `eventually` form is
+    both correct and sufficient for all downstream applications.
+
+    GRADUATED: May 31, 2026 — from RS_prime.mertens_second_theorem'. -/
+theorem mertens_second_upper :
+    ∀ᶠ (N : ℕ) in Filter.atTop,
     ∑ p ∈ (Finset.Icc 2 N).filter Nat.Prime,
-      (1 : ℝ) / (p : ℝ) ≤ 2 * Real.log (Real.log ↑N)
+      (1 : ℝ) / (p : ℝ) ≤ 2 * Real.log (Real.log ↑N) := by
+  obtain ⟨C, hC⟩ := RS_prime.mertens_second_theorem'
+  have h_loglog : Filter.Tendsto (fun N : ℕ => Real.log (Real.log (N : ℝ)))
+      Filter.atTop Filter.atTop :=
+    tendsto_log_atTop.comp (tendsto_log_atTop.comp tendsto_natCast_atTop_atTop)
+  filter_upwards [(Filter.tendsto_atTop.mp h_loglog) C, Filter.Ici_mem_atTop 2]
+    with N hN1 hN2
+  rw [← iic_icc_prime_eq N hN2]
+  have hC_nat : |∑ p ∈ (Finset.Iic N).filter Nat.Prime, 1 / (p : ℝ) -
+      Real.log (Real.log N)| ≤ C := by
+    have := hC (N : ℝ) (by exact_mod_cast hN2); simpa [Nat.floor_natCast]
+  linarith [(abs_le.mp hC_nat).2]
 
 -- ════════════════════════════════════════════════════════
 -- §6. DOCUMENTATION
@@ -249,7 +280,7 @@ axiom mertens_second_upper (N : ℕ) (hN : 3 ≤ N) :
 | 5 | `gram_offdiag_amgm_bound` | **🎓 THEOREM** (AM-GM + diag upper) |
 | 6 | `gram_offdiag_abs_bound` | **🎓 THEOREM** (nonnegativity + upper) |
 | 7 | `witness_quadform_prime_dominated` | **🎓 THEOREM** (quantifier triviality) |
-| 8 | `mertens_second_upper` | AXIOM (PNTAnd, pending v4.29 upgrade) |
+| 8 | `mertens_second_upper` | **🎓 THEOREM** (RS_prime.mertens_second_theorem', eventually form) |
 
 ### Data-Free Proof Chain
 
