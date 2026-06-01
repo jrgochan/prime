@@ -42,7 +42,7 @@ workarounds (infinite sums, measure theory), 5 original Mathlib gaps
 (3 graduated by the project, 2 remaining), 12 essential lemmas,
 project structure advice, and common tactic patterns.
 We document 4 deprecated-API traps (including the \lean{push\_neg}
-$\to$ \lean{push Not} migration) and provide
+$\to$ \lean{push\_not} migration) and provide
 a verification checklist for large-scale proof engineering.
 \end{abstract}
 
@@ -111,9 +111,9 @@ The crown theorem (\lean{baez\_duarte\_forward}) reports 7 axioms via
 
 \begin{center}
 \small
-\begin{tabular}{@{}clcc@{}}
+\begin{tabular}{@{}clcl@{}}
 \toprule
-\textbf{\#} & \textbf{Axiom} & \textbf{Origin} & \textbf{Tier} \\
+\textbf{\#} & \textbf{Axiom} & \textbf{Origin} & \textbf{Content} \\
 \midrule
 1 & \lean{propext} & Lean kernel & --- \\
 2 & \lean{Classical.choice} & Lean kernel & --- \\
@@ -151,6 +151,11 @@ non-constructive. The forward direction is inherently classical,
 requiring the Montgomery--Vaughan MVT and Perron's formula.
 
 \subsection{The de Bruijn Criterion}
+
+The de Bruijn criterion states that a formal verification system
+should have a small, isolated trusted computing base (the kernel)
+so that proof correctness does not depend on the massive complexity
+of the tactics or library~\cite{debruijn1970}.
 
 \begin{center}
 \begin{tabular}{@{}lr@{}}
@@ -282,7 +287,8 @@ PNT axioms were graduated to theorems using the PrimeNumberTheoremAnd
 bridge. Two PNT bureaucracy axioms remain (\lean{frac\_error\_isLittleO},
 \lean{pnt\_mu\_log\_sq\_div\_k}). These would be eliminated
 if Mathlib exported the specific asymptotic forms of the Prime Number
-Theorem. The analytic continuation gap (2 axioms)
+Theorem. The analytic continuation gap (2 axioms,
+\textbf{safely quarantined off the crown path})
 encodes the Mellin--Fourier interchange and spectral bounds.
 
 % ================================================================
@@ -368,7 +374,7 @@ The Cathedral maintains: 0 sorry on the crown path.
 \lean{isHermitian\_iff\_isSymmetric} & (none yet) & Kept \\
 \lean{Integrable.bdd\_mul'} & \lean{Integrable.bdd\_mul} & Updated \\
 \lean{measurable\_of\_continuousOn} & \lean{Continuous.measurable} & Updated \\
-\lean{push\_neg} & \lean{push Not} & Updated (Lean~4 nightly) \\
+\lean{push\_neg} & \lean{push\_not} & Updated (Lean~4 nightly) \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -401,8 +407,10 @@ requires significant infrastructure work. Of five original Mathlib
 gaps, three were resolved by direct formalization (Gallagher MVT,
 Perron contour chain, off-diagonal Vasyunin). The Mertens/PNT gap
 was substantially reduced by the PrimeNumberTheoremAnd bridge
-(10 axioms graduated); 2 PNT bureaucracy axioms and 2 analytic
-continuation axioms remain. The Cathedral took $\sim$68 days and produced
+(10 axioms graduated); 2 PNT bureaucracy axioms remain
+\textbf{on the crown path}, while 2 analytic
+continuation axioms remain \textbf{quarantined on alternative
+exploratory paths}. The Cathedral took $\sim$68 days and produced
 $\sim$120{,}000 lines across 390+ active files (500+ including archived
 explorations).
 
