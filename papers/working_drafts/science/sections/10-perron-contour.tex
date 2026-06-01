@@ -104,7 +104,7 @@ the IR cutoff $T$ (the frequency truncation height), ensuring both
 errors converge simultaneously.
 
 The crucial algebraic step is the \emph{asymptotic freedom calculation}
-(\\lean{h\_tail\_crushed}, proved April~24):
+(\lean{h\_tail\_crushed}, proved April~24):
 \begin{align}
   C_{\mathrm{tail}} \cdot N^{1-c} \cdot X^c \cdot T
   &\leq \frac{1}{T^2 X} \cdot X^c \cdot T
@@ -114,7 +114,7 @@ The crucial algebraic step is the \emph{asymptotic freedom calculation}
 The first step uses $N^{c-1} > C_{\mathrm{tail}} T^2 X$ (from the
 Archimedean choice$)$, so $N^{1-c} < 1/(C_{\mathrm{tail}} T^2 X)$.
 The final step uses $X^{c-1} \leq X^{c+1}$ since $X > 1$
-(\\lean{rpow\_le\_rpow\_of\_exponent\_le}).
+(\lean{rpow\_le\_rpow\_of\_exponent\_le}).
 
 In physics language: the ``coupling constant'' $g_N = C_{\mathrm{tail}} \cdot N^{1-c}$
 decreases as the energy scale $N$ increases, precisely as in

@@ -1891,30 +1891,7 @@ Weyl discrepancy of zeta-zero phases decreases with $N$
 (consistent with GOE universality, \S\ref{sec:universality}).
 \end{correspondence}
 
-\subsection{Asymptotic Freedom}
-\label{sec:asymptotic-freedom}
 
-The \emph{Asymptotic Freedom} module
-(\lean{AsymptoticFreedom.lean}, \textbf{0 sorry, 0 custom axioms})
-formalizes the monotone vacuum extraction structure:
-\[
-  d^2(N+1) = d^2(N) - y_{\mathrm{new}}^2(N+1)
-\]
-where $y_{\mathrm{new}}^2 \geq 0$ (PSD of Gram, proved) and $d^2(N) \geq 0$
-(norm squared, proved). So $d^2$ is \emph{decreasing} and \emph{bounded below}
-$\Rightarrow$ converges. If the sum $\sum y_{\mathrm{new}}^2(k) = d^2(1)$,
-then $d^2(\infty) = 0$, which is RH.
-
-\begin{principle}[Quantum Cooling]
-Each new basis function $h_{N+1}$ extracts vacuum energy
-$y_{\mathrm{new}}^2(N+1)$ from the system, like a quantum cooling step.
-The PSD positivity of the Gram matrix guarantees that each step
-\emph{decreases} the vacuum energy. Asymptotic freedom---the
-property that the coupling constant vanishes at high energies---is
-the statement that these cooling steps eventually extract all the
-vacuum energy. The module proves: $d^2$ converges, and under the
-single axiom \lean{discrete\_riemann\_hypothesis}, it converges to zero.
-\end{principle}
 
 \subsection{Experimental Verification}
 
