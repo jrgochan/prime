@@ -93,7 +93,7 @@ def primeEnergy (N : ℕ) (v : Fin (N - 1) → ℝ) (p : ℕ) : ℝ :=
 
     This is the algebraic fact that makes the torus projection
     well-defined: every pair (j,k) belongs to exactly one stratum. -/
-theorem gram_energy_eq_sum_strata (N : ℕ) (hN : 2 ≤ N)
+theorem gram_energy_eq_sum_strata (N : ℕ) (_hN : 2 ≤ N)
     (v : Fin (N - 1) → ℝ) :
     (∑ i : Fin (N - 1), ∑ j : Fin (N - 1),
       v i * Cathedral.Vasyunin.vasyuninGramEntry (i.val + 1) (j.val + 1) * v j) =
@@ -148,7 +148,7 @@ theorem moebius_zero_of_not_squarefree (n : ℕ) (hn : ¬Squarefree n) :
     of circles: the GCD splits multiplicatively over coprime factors,
     and each prime contributes independently. -/
 theorem gcd_mul_of_coprime (a b c d : ℕ)
-    (hc : 0 < c) (hd : 0 < d) (hcd : Nat.Coprime c d) :
+    (_hc : 0 < c) (_hd : 0 < d) (_hcd : Nat.Coprime c d) :
     Nat.gcd (c * a) (c * b) = c * Nat.gcd a b := by
   rw [Nat.gcd_mul_left]
 
@@ -160,7 +160,7 @@ theorem gcd_mul_of_coprime (a b c d : ℕ)
     independently to the Gram interaction.
 
     This is a purely number-theoretic fact, no analysis required. -/
-theorem gcd_eq_prod_prime_powers (j k : ℕ) (hj : 0 < j) (hk : 0 < k) :
+theorem gcd_eq_prod_prime_powers (j k : ℕ) (_hj : 0 < j) (_hk : 0 < k) :
     Nat.gcd j k = Nat.gcd j k := rfl  -- tautological; the content is in the docstring
 
 -- ════════════════════════════════════════════════════════════════
