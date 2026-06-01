@@ -231,6 +231,8 @@ lean_lib «Cathedral» where
     `Cathedral.Covariance.RamanujanGCDStrata,
     -- Coprime Inner Sum (Path B Phase 2: universal kernel Φ(M) analysis, Exploration 37)
     `Cathedral.Covariance.CoprimeInnerSum,
+    -- Twelve Bridge (Trinity of 1/12: ζ(-1) ↔ R(k,k) ↔ kernel, Higgs anomaly, Exploration 37)
+    `Cathedral.Covariance.TwelveBridge,
     -- HC number formalization (unbounded HC subsequence, Exploration 36)
     `Cathedral.Covariance.HighlyComposite,
     -- HC-Gram bridge (HC bound → subseq bound → RH, Exploration 36)
