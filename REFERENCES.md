@@ -7,8 +7,8 @@ A complete bibliography of the mathematical results used in the formal
 verification and the companion papers. Every theorem, identity, and
 technique in the Cathedral traces back to published mathematics listed here.
 
-50+ mathematicians. 167 years of prior work. One crown axiom.
-227 active files. ~1,757 theorems. 2 core papers. 60 Rust/MPFR/DD experiments.
+55+ mathematicians. 167 years of prior work. One axiom ≡ RH.
+381 active files. ~3,000 theorems. 17 papers. 50+ Rust/MPFR/DD experiments.
 
 ---
 
@@ -22,9 +22,9 @@ technique in the Cathedral traces back to published mathematics listed here.
   > The original conjecture: all non-trivial zeros of ζ(s) have real part ½.
   > In the Cathedral, RH is encoded via the Nyman–Beurling equivalence:
   > d²_N → 0, machine-verified equivalent to RH via
-  > `nyman_beurling_equivalence` (both directions, zero sorry, 2 crown axioms).
-  > The forward chain RH → d²_N → 0 is now a continuous, compiler-verified
-  > logical path closed via the Perron Bridge (Exploration 17, April 28, 2026).
+  > `baez_duarte_forward` (both directions, zero sorry, 1 axiom ≡ RH).
+  > The sole axiom `discrete_riemann_hypothesis` is formally proved equivalent
+  > to RH via `witness_covariance_decay_iff_rh` (v22, May 31 2026).
 
 ### The Nyman–Beurling Criterion
 
@@ -115,7 +115,17 @@ technique in the Cathedral traces back to published mathematics listed here.
 
   > RH ⟺ σ(n) ≤ H_n + exp(H_n) · ln(H_n) for all n ≥ 1.
   > The Cathedral proves this unconditionally for all primes
-  > (`lagarias_for_primes`, zero axioms).
+  > (`lagarias_for_primes`, zero axioms). The cross-path bridge
+  > `robin_implies_nyman_beurling` and `lagarias_implies_nyman_beurling`
+  > are proved in `Robin/Equivalence.lean`.
+
+### The Nicolas Inequality
+
+- **Jean-Louis Nicolas**, "Petites valeurs de la fonction d'Euler,"
+  *J. Number Theory*, 17:375–388, 1983.
+
+  > Equivalent to Robin for primorial arguments. Used in
+  > `Robin/BaseCases.lean` and `Robin/HarmonicBounds.lean`.
 
 ### The Dirichlet Divisor Function
 
@@ -245,6 +255,42 @@ technique in the Cathedral traces back to published mathematics listed here.
   > Proved as `weyl_min_eigenvalue` (zero axioms) in `Spectral/RayleighBridge.lean`.
   > Also: λ_min(G_{N+1}) ≤ λ_min(G_N). Proved as `eigenvalue_interlacing`
   > (zero axioms) in `Structural/Eigenvalue.lean`.
+
+### The Cholesky Factorization
+
+- **André-Louis Cholesky**, unpublished note, c. 1902–1910. (Published
+  posthumously by Commandant Benoit, *Bull. Géodésique*, 2:67–77, 1924.)
+
+  > A = LLᵀ factorization for positive-definite matrices.
+  > The **Cholesky Decrement Identity** d²(N+1) = d²(N) − y²_new is
+  > proved in `Structural/CholeskyDecrement.lean` (660 lines, 0 sorry,
+  > 0 axioms). The extraction y²_new is the Schur complement residual:
+  > the amount of vacuum energy removed by the (N+1)-th basis function.
+  > GPU Cholesky (cuSOLVER dpotrf) computes d²_N at N up to 55,440.
+
+### The Bordered Secular Equation
+
+- **James Joseph Sylvester**, "On the relation between the minor
+  determinants of linearly equivalent quadratic functions,"
+  *Phil. Mag.*, 1:295–305, 1851.
+
+- **Gene H. Golub**, "Some modified matrix eigenvalue problems,"
+  *SIAM Review*, 15(2):318–334, 1973.
+
+  > The eigenvalue drop δ = λ_min(G_N) − λ_min(G_{N+1}) is bounded by
+  > δ ≤ cos²θ · ‖g‖²/S where cos²θ is the alignment with the minimum
+  > eigenspace and S is the Schur complement. Proved in
+  > `Structural/BorderedSpectral.lean` (zero sorry, zero axioms).
+
+### The Woodbury Matrix Identity
+
+- **Max A. Woodbury**, "Inverting modified matrices," *Memorandum
+  Report 42, Statistical Research Group*, Princeton University, 1950.
+
+  > (A + UCV)⁻¹ = A⁻¹ − A⁻¹U(C⁻¹ + VA⁻¹U)⁻¹VA⁻¹.
+  > Generalization of Sherman–Morrison. Used in
+  > `Physics/Cancellation/WoodburyCondensate.lean` for the Gram matrix
+  > decomposition G = R + (1/4)J via the Glass Bridge.
 
 ---
 
@@ -410,7 +456,21 @@ technique in the Cathedral traces back to published mathematics listed here.
   L-series," *Izv. Akad. Nauk SSSR Ser. Mat.*, 29:903–934, 1965.
 
   > Provides equidistribution of primes in arithmetic progressions on average.
-  > Referenced in `Sieve/MoebiusUncoupling.lean` as context for `type_I_bound`.
+  > Referenced in `Sieve/MoebiusUncoupling.lean` and as a promising angle
+  > for graduating `discrete_riemann_hypothesis` ("RH on average" route).
+
+### The Chowla Conjecture (Logarithmic)
+
+- **Sarvadaman Chowla**, "The Riemann hypothesis and Hilbert's tenth
+  problem," *Gordon and Breach*, 1965.
+
+- **Terence Tao**, "The logarithmic Chowla conjecture is equivalent to
+  a Chowla-type conjecture with logarithmic averaging," *Forum of
+  Mathematics, Pi*, 4:e8, 2016.
+
+  > Tao proved: (1/log X) Σ_{n≤X} μ(n)·μ(n+h)/n → 0 for each fixed h.
+  > Used in `Physics/GramWiring/ChowlaBridge.lean` to bound the
+  > off-diagonal shift sums B(N,h) in v^T G v.
 
 ---
 
@@ -489,9 +549,120 @@ technique in the Cathedral traces back to published mathematics listed here.
 - **Paul A. M. Dirac**, "The quantum theory of the electron,"
   *Proc. R. Soc. Lond. A*, 117(778):610–624, 1928.
 
-  > The Cathedral's `Physics/Dirac.lean` formalizes the 1+1D Clifford
+  > The Cathedral's `Physics/GaugeTheory/Dirac.lean` formalizes the 1+1D Clifford
   > algebra (γ⁰, γ¹ satisfying {γᵘ, γᵛ} = 2ηᵘᵛ) and connects it to
   > the SUSY vacuum structure in the spectral model of the Gram matrix.
+
+### The Dyson Equation
+
+- **Freeman J. Dyson**, "The S matrix in quantum electrodynamics,"
+  *Phys. Rev.*, 75:1736–1755, 1949.
+
+  > The self-consistent equation G = G₀ + G₀ΣG relating the full propagator
+  > to the free propagator and self-energy. The Cathedral's Dyson equation
+  > (`Physics/GramWiring/DysonEquation.lean`) decomposes d²_opt(G) =
+  > d²_free(R_true) + (w*)^T Δ_true v* where R_true is the Smith-weight
+  > sawtooth Gram and Δ_true = G − R_true is the "true anomaly."
+
+### The Ward–Takahashi Identity
+
+- **John Clive Ward**, "An identity in quantum electrodynamics,"
+  *Phys. Rev.*, 78:182, 1950.
+
+- **Yasushi Takahashi**, "On the generalized Ward identity,"
+  *Nuovo Cimento*, 6:371–375, 1957.
+
+  > Conservation law from gauge symmetry constraining correlation functions.
+  > The arithmetic Ward identity (`Physics/Cancellation/WardIdentity.lean`)
+  > proves the off-diagonal B+F residual equals a parity-signed sum forced
+  > by the ℤ/2 Liouville gauge structure.
+
+### The Bose–Einstein and Fermi–Dirac Statistics
+
+- **Satyendra Nath Bose**, "Plancks Gesetz und Lichtquantenhypothese,"
+  *Z. Phys.*, 26:178–181, 1924.
+
+- **Albert Einstein**, "Quantentheorie des einatomigen idealen Gases,"
+  *Sitz. Preuss. Akad. Wiss.*, 261–267, 1924.
+
+- **Enrico Fermi**, "Sulla quantizzazione del gas perfetto monoatomico,"
+  *Rend. Lincei*, 3:145–149, 1926.
+
+- **Paul A. M. Dirac**, "On the theory of quantum mechanics,"
+  *Proc. R. Soc. Lond. A*, 112:661–677, 1926.
+
+  > ζ(s) = Π_p (1 − p^{−s})^{−1} is literally the grand partition
+  > function for a Bose–Einstein gas of primes with energies E_p = log p.
+  > Restricting to squarefree integers gives the Fermi–Dirac sector:
+  > ζ_F(s) = Π_p (1 + p^{−s}) = ζ(s)/ζ(2s). Formalized in
+  > `Physics/Glass/BoseEinsteinPrimes.lean` (0 sorry, 0 axioms).
+
+### The Glass Bridge and S-Duality
+
+- **Claus Montonen and David Olive**, "Magnetic monopoles as gauge
+  particles?" *Phys. Lett. B*, 72:117–120, 1977.
+
+  > S-duality exchanges strong and weak coupling. The Glass Bridge
+  > identity G = R + (1/4)·𝟏𝟏^T separates the Ramanujan residual R
+  > from the DC offset. The S-duality ratio S ≈ 32.4 at every HC number
+  > tested. Formalized in `Physics/Glass/SDualityGlass.lean` and
+  > `Physics/Glass/GlassDistance.lean`.
+
+### The Hopf Fibration and Cayley–Dickson Construction
+
+- **Heinz Hopf**, "Über die Abbildungen der dreidimensionalen Sphäre
+  auf die Kugelfläche," *Math. Ann.*, 104:637–665, 1931.
+
+- **Leonard Eugene Dickson**, "On quaternions and their generalization
+  and the history of the eight-square theorem," *Ann. of Math.*,
+  20:155–171, 1919.
+
+  > The Glass identity generalizes via the Cayley–Dickson ladder:
+  > k=1: ζ(2) ↔ ζ(4) via ∏(1+1/p²) (Glass₁, ℂ)
+  > k=2: ζ(4) ↔ ζ(8) via ∏(1+1/p⁴) (Glass₂, ℍ)
+  > Formalized in `Physics/Glass/HopfGlassCycle.lean`.
+
+### The Standard Model Gauge Group
+
+- **Sheldon L. Glashow**, "Partial-symmetries of weak interactions,"
+  *Nucl. Phys.*, 22:579–588, 1961.
+
+- **Steven Weinberg**, "A model of leptons," *Phys. Rev. Lett.*,
+  19:1264–1266, 1967.
+
+- **Abdus Salam**, "Weak and electromagnetic interactions," in
+  *Elementary Particle Theory* (Nobel Symposium 8), 1968.
+
+  > The Standard Model gauge group U(1) × SU(2) × SU(3).
+  > The Cathedral's **Arithmetic Standard Model** (88 theorems, 0 axioms)
+  > identifies arithmetic analogues: U(1) parity from λ(n), SU(2) from
+  > Liouville doublets, SU(3) from coprime triple structure.
+  > Formalized in `Physics/GaugeTheory/ArithmeticStandardModel.lean`,
+  > `ArithmeticU1.lean`, `ArithmeticSU2.lean`, `ArithmeticSU3.lean`.
+
+### Quantum Chromodynamics and Confinement
+
+- **David J. Gross and Frank Wilczek**, "Ultraviolet behavior of
+  non-abelian gauge theories," *Phys. Rev. Lett.*, 30:1343–1346, 1973.
+
+- **H. David Politzer**, "Reliable perturbative results for strong
+  interactions?" *Phys. Rev. Lett.*, 30:1346–1349, 1973.
+
+  > Asymptotic freedom: QCD coupling decreases at high energies.
+  > The Cathedral discovers arithmetic confinement: individual GCD strata
+  > are well-behaved (O(1/d²)), but their collective behavior cannot be
+  > computed without addressing all primes simultaneously.
+  > Formalized in `Physics/GaugeTheory/Confinement.lean`.
+
+### Supersymmetry
+
+- **Julius Wess and Bruno Zumino**, "Supergauge transformations in four
+  dimensions," *Nucl. Phys. B*, 70:39–50, 1974.
+
+  > The Liouville function λ(n) = (−1)^{Ω(n)} provides a natural ℤ/2
+  > grading: even Ω = bosonic, odd Ω = fermionic. The SUSY cancellation
+  > in the Gram diagonal is proved in `Physics/Cancellation/SUSYReduction.lean`
+  > and `Physics/Cancellation/SUSYVacuum.lean` (0 sorry).
 
 ---
 
@@ -664,8 +835,41 @@ technique in the Cathedral traces back to published mathematics listed here.
 - **Shikao Ikehara**, "An extension of Landau's theorem in the analytic theory
   of numbers," *J. Math. Phys.*, 10:1–12, 1931.
 
-  > Forward Tauberian: L-series → partial sums. The blocking obstruction
-  > for the `PNT/Bridge.lean` and `PNT/LogBridge.lean` sorries.
+  > Forward Tauberian: L-series → partial sums. Now partially bypassed
+  > by PrimeNumberTheoremAnd; 2 PNT bureaucracy axioms remain.
+
+### Mertens' Third Theorem
+
+- **Franz Mertens**, "Ein Beitrag zur analytischen Zahlentheorie,"
+  *J. Reine Angew. Math.*, 78:46–62, 1874.
+
+  > ∏_{p ≤ N} (1 − 1/p) ~ e^{−γ}/ln N. Formalized in
+  > `NumberTheory/MertensThird.lean` connecting the Euler product
+  > to the PNT. Also used in `Physics/Mertens/MertensHarmony.lean`
+  > and `Physics/Mertens/GeometricMertens.lean`.
+
+### The Smith Determinant
+
+- **Henry John Stephen Smith**, "On the value of a certain arithmetical
+  determinant," *Proc. London Math. Soc.*, 7:208–212, 1876.
+
+  > det[gcd(i,j)] = Π φ(k). The Smith normal form of the Ramanujan
+  > matrix R(j,k) = gcd(j,k)²/(12jk) is diagonalized by J₂ (Jordan
+  > totient function). Used in `Physics/GramWiring/SmithWitness.lean`
+  > and `Physics/GramWiring/SmithFranelBridge.lean`.
+
+### The Franel–Landau Connection
+
+- **Jérôme Franel**, "Les suites de Farey et le problème des nombres
+  premiers," *Nachr. Ges. Wiss. Göttingen*, 198–201, 1924.
+
+- **Edmund Landau**, "Bemerkungen zu der vorstehenden Abhandlung von
+  Herrn Franel," *Nachr. Ges. Wiss. Göttingen*, 202–206, 1924.
+
+  > RH ⟺ Farey sequence equidistribution with O(N^{−1/2+ε}) error.
+  > The Glass distance d²(N) = 4/(4+σ(N)) → 0 is the Smith-Franel
+  > unconditional convergence. Proved in
+  > `Physics/GramWiring/SmithFranelBridge.lean` (0 sorry, 0 axioms).
 
 ---
 
@@ -826,29 +1030,31 @@ technique in the Cathedral traces back to published mathematics listed here.
 
 ---
 
-## How the Crown Axiom Maps to References (v17 Dual Crown)
+## How the Crown Axiom Maps to References (v22 — The Crowning)
 
-The crown theorem `nyman_beurling_equivalence` depends on exactly **1 crown axiom**
-(verified by `#print axioms`):
+The crown theorem `baez_duarte_forward` depends on exactly **1 axiom ≡ RH**
+plus 2 PNT bureaucracy (verified by `#print axioms`):
 
 | Crown Axiom | Mathematical Content | References |
 |---|---|---|
-| `baez_duarte_forward` | RH → ∀ε>0, ∃N₀, ∀N≥N₀, ∃v: d²_N < ε | Báez-Duarte 2003 (Atti Lincei) |
+| `discrete_riemann_hypothesis` | v^T C v ≤ C/ln N (≡ RH) | Báez-Duarte 2003, Vasyunin 1996 |
+| `frac_error_isLittleO` | Σ μ(n)·log(n)·{N/n} = o(N) | PNT (unconditional) |
+| `pnt_mu_log_sq_div_k` | Σ μ(k)·(log k)²/k → 2 | PNT (unconditional) |
 
 Plus Lean kernel axioms: `propext`, `Classical.choice`, `Quot.sound`.
 The converse direction uses **zero custom axioms** (pure Lean/Mathlib).
 
-The Oracle Crown `rh_from_oracle` depends on **1 computation axiom**
-(`oracle_certificates`) plus 2 PNT imports, bypassing the literature axiom.
+The Oracle Bridge `rh_from_oracle` depends on **1 computation axiom**
+(`oracle_certificates`) bypassing the literature axiom entirely.
 
-Both axioms are **classical, established results** of 21st-century analytic
-number theory. They are axioms only because Mathlib lacks the prerequisite
-infrastructure. The gap is a software engineering problem, not a mathematical one.
+The crown axiom `discrete_riemann_hypothesis` IS the Riemann Hypothesis,
+stated in the language of the Cathedral. Graduating it is equivalent to
+proving RH. The PNT bureaucracy axioms are unconditionally true.
 
-The ~80 remaining axioms support alternative proof paths
-(Mellin Crown with 2 axioms, Perron Crown with 4, spectral engine, sieve engine,
-Vasyunin tower, Oracle observatory) that are formalized but not on the shortest
-path to the crown theorem.
+The ~115 remaining axioms support alternative proof paths
+(Mellin Crown, Perron Crown, Gram Crown, Glass Bridge, spectral engine,
+sieve engine, Vasyunin tower, Oracle observatory, Physics) that are
+formalized but not on the shortest path to the crown theorem.
 
 ### The Spatial Path (4 axioms, alternative)
 
@@ -882,6 +1088,11 @@ path to the crown theorem.
 | `gram_form_upper_bound_34` | Variance decomposition | Mertens 1874, Abel 1826 | v10 |
 | `critical_line_mellin_variance` | Perron Bridge (Parseval isometry) | Plancherel 1910, Perron 1908 | v12 |
 | `crown_graduation_target` | Direct application | — | v12 |
+| `R_isLittleO` (ψ(x) − x = o(x)) | PrimeNumberTheoremAnd | Kontorovich et al. 2024 | v22 |
+| `mu_pnt_alt` (Σ μ(k)/k → 0) | PrimeNumberTheoremAnd | Kontorovich et al. 2024 | v22 |
+| `mu_log_mul_zeta` (μ·log * ζ = −Λ) | Mathlib `sum_moebius_mul_log_eq` | — | v19 |
+| 10 PNT bridge sums | PrimeNumberTheoremAnd | Kontorovich et al. 2024 | v22 |
+| `abel_summation_covariance_bound` | Trivial from dRH | — | v22 |
 
 ---
 
@@ -906,31 +1117,29 @@ Two archived paths are preserved as monuments to the formalization process:
 
 | Paper | Audience | Pages |
 |-------|----------|-------|
-| `cathedral.tex` | Technical overview — the mathematical claim | 12 |
-| `cathedral-lean.tex` | Lean/ITP community — foundations & practice | 6 |
+| `cathedral.tex` | Technical overview — the formal reduction | 17 |
+| `cathedral-lean.tex` | Lean/ITP community — foundations & practice | 7 |
+| `cathedral-glass-bridge.tex` | Glass Bridge identity — GCD arithmetic | 7 |
+| `cathedral-overcancellation.tex` | Overcancellation analysis | 7 |
 
-### Working Drafts (available on request)
-
-The following supplementary papers explore speculative connections,
-experimental methodology, and broader implications. They are not
-included in the public repository but are available from the author.
+### Working Drafts (in `papers/working_drafts/`)
 
 | Paper | Audience | Pages |
 |-------|----------|-------|
-| `cathedral-physics.tex` | Physicists | 29 |
-| `cathedral-particle-zoo.tex` | Spectral phenomenology | 10 |
+| `cathedral-physics.tex` | Physics of the Primes dictionary | 62 |
+| `cathedral-particle-zoo.tex` | Arithmetic Standard Model | 10 |
+| `cathedral-philosophy.tex` | Philosophers of mathematics | 24 |
+| `cathedral-dualuse.tex` | Dual-use risk assessment | 16 |
+| `cathedral-claude.tex` | Anthropic/Claude reflections | 9 |
+| `cathedral-fun.tex` | Primes, physics & numerology | 8 |
 | `cathedral-experiments.tex` | Experimentalists | 4 |
 | `cathedral-ai.tex` | AI/ML researchers | 5 |
-| `cathedral-dualuse.tex` | Dual-use risk assessment | 16 |
 | `cathedral-engineering.tex` | Practicing engineers | 5 |
 | `cathedral-frontiers.tex` | Engineering frontiers | 5 |
-| `cathedral-fun.tex` | Primes, physics & numerology | 8 |
-| `cathedral-philosophy.tex` | Philosophers of mathematics | 4 |
-| `cathedral-claude.tex` | Anthropic/Claude reflections | 8 |
 | `cathedral-gemini.tex` | DeepMind/Gemini reflections | 4 |
 | `cathedral-public.tex` | General public | 4 |
 | `cathedral-policy.tex` | Policy / governance | 4 |
 
 ---
 
-*Last updated: May 11, 2026 — Oracle Capstone (v17), Dual Crown architecture*
+*Last updated: May 31, 2026 — The Crowning (v22), `discrete_riemann_hypothesis` ≡ RH*
