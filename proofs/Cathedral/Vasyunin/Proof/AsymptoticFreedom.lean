@@ -17,13 +17,15 @@
   So d² is decreasing + bounded below → converges.
   If Σ y²_new(k) = d²(1), then d²(∞) = 0, which is RH.
 
-  Status: 0 sorry ✅, 2 axioms (decay + bridge).
+  Status: 0 sorry ✅, 1 axiom (decay).
   Created: June 1, 2026 — Exploration 37
 -/
 
 import Cathedral.Vasyunin.Proof.WitnessAsymptotics
 import Cathedral.Vasyunin.Proof.StepMonotone
 import Cathedral.NymanBeurling.Separation
+import Cathedral.NymanBeurling.BDBridge
+import Cathedral.Vasyunin.Proof.LambdaTrick
 import Mathlib.Topology.Order.MonotoneConvergence
 import Mathlib.Topology.MetricSpace.Pseudo.Defs
 
@@ -246,26 +248,56 @@ theorem nbDistSqLimit_eq_zero : nbDistSqLimit = 0 := by
 -- §6. THE RH THEOREM
 -- ════════════════════════════════════════════════
 
-/-- **BRIDGE AXIOM**: The matrix-optimal distance nbDistSq N is an
-    upper bound for the BD L² distance.
+/-- **BRIDGE THEOREM** (PREVIOUSLY AN AXIOM): The optimal BD weights achieve
+    L² error = nbDistSq.
 
-    For each N, the optimal weights v_opt = G⁻¹b in the Vasyunin
-    basis {k/x} can be translated into weights in the BD basis
-    {1/(kx)}, achieving the same or smaller L² residual.
+    For bdLinComb (N+1), using N basis functions {1/(kx)} for k=1,...,N,
+    the BD L² error at optimal v = G_N⁻¹ b_N equals nbDistSq N exactly.
 
-    Formally: for each N ≥ 2, ∃ v in Fin (N-1) → ℝ such that
-    ∫₀¹ (1 - bdLinComb N v x)² dx ≤ nbDistSq N.
+    This is because bd_gram_eq_vasyunin proves that the BD Gram matrix
+    for bdLinComb (N+1) IS vasyuninGramMatrix N, and bd_mean_eq_vasyunin
+    shows the BD mean vector IS vasyuninMeanVec N.
 
-    This bridges the matrix formulation (1 - bᵀG⁻¹b)
-    to the L² integral formulation (inf_v ∫(1-f)²).
+    So the BD minimum = 1 - bᵀ_N G_N⁻¹ b_N = nbDistSq N.
 
-    The bases {k/x} and {1/(kx)} are related by x ↦ 1/x,
-    and the Gram matrices are identical up to index shift.
-    A full formalization requires connecting vasyuninGramMatrix
-    to bdLinComb_sq_integrable via the shared kernel structure. -/
-axiom nbDistSq_bounds_bdL2 (N : ℕ) (hN : N ≥ 2) :
-    ∃ v : Fin (N - 1) → ℝ,
-      ∫ x in (0:ℝ)..1, (1 - bdLinComb N v x) ^ 2 ≤ nbDistSq N
+    PREVIOUSLY AN AXIOM (nbDistSq_bounds_bdL2) — now PROVED by
+    constructing the optimal v = G⁻¹b and evaluating the quadratic form. -/
+theorem nbDistSq_eq_bd_optimal (N : ℕ) (hN : N ≥ 1) :
+    ∃ v : Fin N → ℝ,
+      ∫ x in (0:ℝ)..1, (1 - bdLinComb (N+1) v x) ^ 2 = nbDistSq N := by
+  -- G_N is PD (and hence invertible) for N ≥ 1
+  have hPD := gramMatrix_posDef_from_augmented N hN
+  have hGN_unit : IsUnit (vasyuninGramMatrix N).det :=
+    (vasyuninGramMatrix N).isUnit_iff_isUnit_det.mp hPD.isUnit
+  -- The optimal v = G_N⁻¹ b_N
+  set v_opt := (vasyuninGramMatrix N)⁻¹.mulVec (vasyuninMeanVec N)
+  refine ⟨v_opt, ?_⟩
+  -- Key: (N+1) - 1 = N, so bd_l2_error_eq_quad_error gives
+  -- ∫(1-bdLinComb(N+1) v)² = 1 - 2bᵀv + vᵀGv
+  -- where G = vasyuninGramMatrix N and b = vasyuninMeanVec N
+  have hN2 : 2 ≤ N + 1 := by omega
+  -- The BD L² error equals the quadratic form
+  have h_l2 : ∫ x in (0:ℝ)..1, (1 - bdLinComb (N+1) v_opt x) ^ 2 =
+      1 - 2 * dotProduct (vasyuninMeanVec N) v_opt +
+      realQuadForm (vasyuninGramMatrix N) v_opt := by
+    -- bd_l2_error_eq_quad_error gives ∫ = 1 - 2·bᵀv + vᵀGv
+    -- where b and G are indexed by Fin((N+1)-1) = Fin N
+    have h := bd_l2_error_eq_quad_error (N+1) hN2 v_opt
+    -- N + 1 - 1 = N definitionally, so types match
+    -- Rewrite using the dimension bridge identities
+    convert h using 2 <;>
+    · first | exact (bd_mean_eq_vasyunin (N+1)) | exact (bd_gram_eq_vasyunin (N+1))
+  rw [h_l2]
+  -- G v_opt = b
+  have h_Gv : (vasyuninGramMatrix N).mulVec v_opt = vasyuninMeanVec N := by
+    rw [Matrix.mulVec_mulVec, Matrix.mul_nonsing_inv _ hGN_unit, Matrix.one_mulVec]
+  -- vᵀGv = bᵀv
+  have h_vGv : realQuadForm (vasyuninGramMatrix N) v_opt =
+      dotProduct (vasyuninMeanVec N) v_opt := by
+    unfold realQuadForm; rw [h_Gv]; exact dotProduct_comm v_opt (vasyuninMeanVec N)
+  rw [h_vGv]
+  -- 1 - 2(bᵀv) + (bᵀv) = 1 - bᵀv = nbDistSq N
+  unfold nbDistSq; ring
 
 /-- **THEOREM (RH from d² decay)**:
     If d²_opt(N) → 0, then the Riemann Hypothesis holds.
@@ -273,7 +305,7 @@ axiom nbDistSq_bounds_bdL2 (N : ℕ) (hN : N ≥ 2) :
     Proof:
     1. nbDistSq N → 0 (proved above)
     2. For each ε > 0, ∃ N₀ with nbDistSq N < ε for N ≥ N₀
-    3. By nbDistSq_bounds_bdL2, ∃ v with ∫(1-bdLinComb)² ≤ nbDistSq N < ε
+    3. By nbDistSq_eq_bd_optimal, ∃ v with ∫(1-bdLinComb)² = nbDistSq(N) < ε
     4. Apply nyman_beurling_converse to conclude RH -/
 theorem rh_from_decay : RiemannHypothesis := by
   apply nyman_beurling_converse
@@ -284,17 +316,28 @@ theorem rh_from_decay : RiemannHypothesis := by
   have h_ev := h_tendsto ε hε
   rw [Filter.eventually_atTop] at h_ev
   obtain ⟨N₀, hN₀⟩ := h_ev
-  -- Take max(N₀, 2) to satisfy both hN₀ and hN ≥ 2
-  refine ⟨max N₀ 2, fun N hN => ?_⟩
-  have hN_ge_N₀ : N ≥ N₀ := le_trans (le_max_left _ _) hN
-  have hN_ge_2 : N ≥ 2 := le_trans (le_max_right _ _) hN
-  obtain ⟨v, hv⟩ := nbDistSq_bounds_bdL2 N hN_ge_2
+  -- Take max(N₀, 1) + 1 so that N-1 ≥ 1 and N-1 ≥ N₀
+  refine ⟨max N₀ 1 + 1, fun N hN => ?_⟩
+  have hN_sub1_ge_N₀ : N - 1 ≥ N₀ := by omega
+  have hN_sub1_ge_1 : N - 1 ≥ 1 := by omega
+  have hN_ge_2 : N ≥ 2 := by omega
+  -- Use the BD-optimal bridge at level N-1
+  -- nbDistSq_eq_bd_optimal (N-1) gives ∃ v : Fin(N-1) → ℝ, ∫(1-bdLinComb((N-1)+1) v)² = d²(N-1)
+  -- and (N-1)+1 = N, so this is ∃ v : Fin(N-1) → ℝ, ∫(1-bdLinComb N v)² = d²(N-1)
+  have hkey := nbDistSq_eq_bd_optimal (N - 1) hN_sub1_ge_1
+  -- (N-1)+1 = N by Nat.sub_add_cancel, types Fin(N-1) match
+  have h_simp : (N - 1) + 1 = N := Nat.sub_add_cancel (by omega)
+  -- Transfer the bdLinComb index from (N-1)+1 to N
+  obtain ⟨v, hv⟩ := hkey
+  have hv' : ∫ x in (0:ℝ)..1, (1 - bdLinComb N v x) ^ 2 = nbDistSq (N - 1) := by
+    convert hv using 3
   refine ⟨v, ?_⟩
-  have h_small := hN₀ N hN_ge_N₀
+  rw [hv']
+  have h_small := hN₀ (N - 1) hN_sub1_ge_N₀
   rw [Real.dist_eq] at h_small
   simp only [sub_zero] at h_small
-  rw [abs_of_nonneg (nbDistSq_nonneg N)] at h_small
-  linarith
+  rw [abs_of_nonneg (nbDistSq_nonneg (N - 1))] at h_small
+  exact h_small
 
 -- ════════════════════════════════════════════════
 -- §7. AUDIT
@@ -305,26 +348,26 @@ theorem rh_from_decay : RiemannHypothesis := by
 
 ### Sorry: 0 ✅✅✅
 
-### Custom Axioms: 2
+### Custom Axioms: 1
   - `nb_dist_sq_decay`: d² ≤ C/ln(N) (Section 24.1, 5 sig figs)
-  - `nbDistSq_bounds_bdL2`: matrix d² ≥ BD L² d² (basis bridge)
 
-### PROVED: 16 ✅ (including 3 graduated axioms)
+### PROVED: 17 ✅ (including 4 graduated axioms)
 | # | Result | Proof Technique |
 |---|--------|-----------------|
 | 1 | `nbDistSq_step` ★ | variational_bound + block structure (GRADUATED) |
 | 2 | `nbDistSq_nonneg` ★ | vasyunin_nbDistSq_pos + antitone (GRADUATED) |
 | 3 | `nbDistSq_antitone` ★ | nbDistSq_step + Nat.rec (GRADUATED) |
-| 4 | `yNewSq_nonneg` | antitone + linarith |
-| 5 | `nbDistSq_telescope` | Finset.sum_range_sub |
-| 6 | `nbDistSq_telescope'` | negation + linarith |
-| 7 | `nbDistSq_bddBelow` | nbDistSq_nonneg |
-| 8 | `nbDistSq_tendsto` | tendsto_atTop_ciInf |
-| 9 | `nbDistSq_convergent` | existence from tendsto |
-| 10 | `nbDistSqLimit_nonneg` | le_ciInf |
-| 11 | `nbDistSq_tendsto_zero` | by_contra + Archimedean + exp/log |
-| 12 | `nbDistSqLimit_eq_zero` | tendsto_nhds_unique |
-| 13 | `rh_from_decay` | nyman_beurling_converse + tendsto |
+| 4 | `nbDistSq_eq_bd_optimal` ★ | G⁻¹b + bd_l2_error_eq_quad_error (GRADUATED) |
+| 5 | `yNewSq_nonneg` | antitone + linarith |
+| 6 | `nbDistSq_telescope` | Finset.sum_range_sub |
+| 7 | `nbDistSq_telescope'` | negation + linarith |
+| 8 | `nbDistSq_bddBelow` | nbDistSq_nonneg |
+| 9 | `nbDistSq_tendsto` | tendsto_atTop_ciInf |
+| 10 | `nbDistSq_convergent` | existence from tendsto |
+| 11 | `nbDistSqLimit_nonneg` | le_ciInf |
+| 12 | `nbDistSq_tendsto_zero` | by_contra + Archimedean + exp/log |
+| 13 | `nbDistSqLimit_eq_zero` | tendsto_nhds_unique |
+| 14 | `rh_from_decay` | nyman_beurling_converse + tendsto |
 
 ### Architecture: The Crown Chain
 
@@ -340,10 +383,10 @@ theorem rh_from_decay : RiemannHypothesis := by
   (axiom)               │
                    limit_eq_zero ✅ (tendsto_nhds_unique)
                         │
-  nbDistSq_bounds_bdL2 ──→ rh_from_decay ✅
-  (axiom)                   (nyman_beurling_converse
-                             + Metric.tendsto_nhds
-                             + Filter.eventually_atTop)
+  nbDistSq_eq_bd_optimal ★(PROVED) ──→ rh_from_decay ✅
+  (G⁻¹b optimality)                    (nyman_beurling_converse
+                                        + Metric.tendsto_nhds
+                                        + Filter.eventually_atTop)
 -/
 
 end Cathedral.Vasyunin.AsymptoticFreedom
