@@ -3,84 +3,85 @@
 Thank you for your interest in contributing to the Cathedral — a machine-verified
 reduction of the Riemann Hypothesis in Lean 4.
 
-## Current Status (v17 — Oracle Capstone, Dual Crown)
+## Current Status (v22 — The Crowning, May 31 2026)
 
-The crown theorem `nyman_beurling_equivalence` depends on **1 literature axiom**
-(verified by `#print axioms`). The forward chain from RH to d²_N → 0 is a
-continuous, compiler-verified path with **zero sorry** and **zero warning**.
+The crown theorem `baez_duarte_forward` depends on **1 axiom**
+(`discrete_riemann_hypothesis`, formally equivalent to RH) plus
+2 PNT bureaucracy axioms (unconditional, provable from Mathlib's PNT infrastructure).
+The forward chain has **zero sorry** and **zero warning**.
 
 ## How Can I Help?
 
 ### 1. Close the Crown Axiom
 
-The crown path depends on **1 axiom**. Closing it makes the reduction
-fully machine-verified (zero axioms).
+The crown path depends on **1 axiom ≡ RH**. Closing it is equivalent to
+proving the Riemann Hypothesis itself.
 
 | # | Axiom | Content | Difficulty |
 |---|-------|---------|------------|
-| 1 | `baez_duarte_forward` | RH → ∀ε>0, ∃N₀, ∀N≥N₀, ∃v: d²_N < ε | ⭐⭐⭐⭐ |
+| 1 | `discrete_riemann_hypothesis` | v^T C v ≤ C/ln N | ⭐⭐⭐⭐⭐ (≡ RH) |
 
-See [BOUNTY_BOARD.md](BOUNTY_BOARD.md) for detailed specifications with
-existing infrastructure, Mathlib status, and graduation paths.
+Promising angles:
+- **Fourth moment of zeta** — unconditional L⁴ control on the critical line
+- **Bombieri–Vinogradov** — "RH on average" over arithmetic progressions
+- **Cholesky divergence** — proving the sum Σ y²_new = d²₂ diverges
+- **GCD stratum analysis** — Möbius stratum sign agreement via Glass Bridge
 
-### 2. Close an Alternative-Path Axiom
+See [BOUNTY_BOARD.md](BOUNTY_BOARD.md) for detailed specifications.
 
-The alternative forward paths use **2–4 axioms** each. Closing these strengthens
-the alternative chains:
+### 2. Close PNT Bureaucracy Axioms
 
-- `critical_line_mellin_variance` — Mellin Crown (⭐⭐⭐⭐)
-- `rh_zeta_lower_bound_from_zero_counting` — shared Hadamard bound (⭐⭐⭐⭐⭐)
-- `covariance_bound` — Virial theorem (⭐⭐⭐)
-- `pnt_mu_log_div_k` — Σ μ(k)log(k)/k → -1 (⭐⭐, 95% complete)
-- `partial_integral_tends_to_formula` — Vasyunin convergence (⭐⭐⭐⭐)
+Two unconditional PNT axioms remain:
+
+| # | Axiom | Content | Difficulty |
+|---|-------|---------|------------|
+| 2 | `frac_error_isLittleO` | Fractional-part error | ⭐⭐ (PNT infrastructure) |
+| 3 | `pnt_mu_log_sq_div_k` | Möbius log-squared sum | ⭐⭐ (PNT infrastructure) |
+
+These are unconditionally true and provable from Mathlib's PNT + PrimeNumberTheoremAnd.
+Closing them is a formalization exercise, not a mathematical one.
 
 ### 3. Close Off-Path Sorries
 
-17 `sorry` markers remain in the active tree, all off the crown path:
+3 `sorry` markers remain in the active tree, all off the crown path:
 
-- `PNT/Bridge.lean` (2) — Forward Tauberian gap (needs Mathlib)
-- `PNT/LogBridge.lean` (1) — Same Tauberian gap
-- `PNT/UnconditionalMertens.lean` (8) — Scaffold for unconditional Mertens
-- `Covariance/CovarianceAbel.lean` (2) — Deprecated spatial integrals
-- `Covariance/AbelCovarianceBound.lean` (1) — Off-path Abel covariance
-- `Covariance/EulerProduct.lean` (1) — Off-path Mertens third
-- `Covariance/MertensBridge.lean` (1) — Off-path Mertens bridge
-- `Assembly/QualitativeForward.lean` (1) — Off-path PNT convergence
+- `Assembly/DirectMellinBound.lean` (2) — Exploratory direct path
+- `Physics/Bridges/DedekindBridge.lean` (1) — Dedekind bridge
 
 ### 4. Contribute to Mathlib
 
-Several Mathlib PRs would unlock axiom closures:
+Several Mathlib PRs would unlock further improvements:
 
 - **Gauss digamma formula** at rational arguments (`ψ(p/q)`)
 - **Hadamard factorization** for entire functions of order 1
-- **Weierstrass canonical product**
 - **Riemann–von Mangoldt formula** N(T) for ζ
 - **Signed Wiener-Ikehara theorem** (extension of PrimeNumberTheoremAnd)
+- **Fourth moment of zeta** (Ingham, Heath-Brown)
 
 ### 5. Run Experiments
 
-- Extend `hilbert-spectral` to larger N (512-bit MPFR, massively parallel)
-- Extend `siegel-walfisz` beyond N = 10⁹
-- Run `character-spectral` Mersenne probe to higher N (currently N = 10⁹)
-- Explore new spectral diagnostics
+- Extend `nb-witness-scan` to N = 120,000+ (DD-precision)
+- Explore Möbius stratum convergence at large HC numbers
+- Validate Cholesky extraction scaling y²_new(k) ~ c/k² ln k
+- Run spectral diagnostics beyond N = 55,440
 
 ## Building
 
 ```bash
 # Lean proofs
-cd proofs && lake build
+cd proofs && lake build    # 381 files, 8485 jobs
+
+# Papers (all 17)
+cd papers && ./build.sh
 
 # Rust experiments (any one)
 cd experiments/hilbert-spectral && cargo run --release -- --N 1000
-
-# Papers
-cd papers && ./build.sh
 ```
 
 ## Requirements
 
 - **Lean 4**: v4.29.0 or later
-- **Mathlib**: via lakefile
+- **Mathlib**: via lakefile (includes PrimeNumberTheoremAnd)
 - **Rust**: 1.75+ (for experiments, with `rug` crate for MPFR)
 - **LaTeX**: pdflatex (for papers)
 

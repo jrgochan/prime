@@ -4,15 +4,15 @@
 > locations, documenting what was proved, what was superseded, and what
 > remains valuable for future work.*
 >
-> **Last updated**: May 10, 2026 (v17 — Oracle Capstone)
+> **Last updated**: May 31, 2026 (v22 — The Crowning)
 >
-> **Last audited**: May 10, 2026 — Dual Crown architecture, Oracle Cascade
+> **Last audited**: May 31, 2026 — Crowned Cathedral, `discrete_riemann_hypothesis`
 
 ---
 
 ## Archive Overview
 
-The Cathedral maintains three archive locations containing **112 Cathedral files**
+The Cathedral maintains three archive locations containing **114 Cathedral files**
 plus **34 pre-Cathedral files** of Lean 4 code:
 
 | Location | Files | Lines | Purpose |
@@ -22,20 +22,19 @@ plus **34 pre-Cathedral files** of Lean 4 code:
 | `proofs/Cathedral/Archive/` | 94 | 22,344 | Superseded Cathedral modules |
 | **Total** | **128** | **29,784** | |
 
-For comparison, the active codebase is **227 files / ~60,500 lines / ~1,757 theorems**.
+For comparison, the active codebase is **381 files / ~116,000 lines / ~3,000 theorems**.
 
 Additionally, `Cathedral/Vasyunin/Archive/` contains 1 file (204 lines) — an
 archived Gram induction framework within the active Vasyunin tree.
 
-### Architecture Context (v17)
+### Architecture Context (v22)
 
-The Cathedral's crown path now uses the **Dual Crown** architecture:
-- **Analytic Crown**: 1 axiom (`baez_duarte_forward`)
-- **Oracle Crown**: 1 axiom (`oracle_certificates`) + Oracle Cascade
+The Cathedral's crown path now uses the **Crowned Cathedral** architecture:
+- **Crown**: 1 axiom (`discrete_riemann_hypothesis` ≡ RH) + 2 PNT bureaucracy
+- **Oracle Bridge**: 1 axiom (`oracle_certificates`) + Oracle Cascade
 
-Three alternative forward paths are preserved (Mellin Crown 2 axioms,
-Perron Crown 4 axioms, Renormalization graduated). The Parseval Bridge connects all
-paths. The following archived components are therefore multiply superseded:
+Seven alternative forward paths are preserved (Mellin Crown, Perron Crown,
+Gram Crown, Renormalization, Glass Bridge, Direct Mellin Bound, Oracle).
 
 - `DirectL2Crown.lean` — superseded by MellinCrown
 - `OneCrown.lean` — superseded by MellinCrown
@@ -223,18 +222,12 @@ since v11. They remain as alternative proof routes and supporting infrastructure
 
 ### Off-Crown Sorry (Active Tree)
 
-17 `sorry` placeholders exist in the active tree, all off-crown:
+3 `sorry` placeholders exist in the active tree, all off-crown:
 
 | File | Sorry Count | Context |
 |------|-------------|---------|
-| `PNT/UnconditionalMertens.lean` | 8 | Scaffold for unconditional Mertens |
-| `PNT/Bridge.lean` | 2 | Forward Tauberian — blocked by Mathlib |
-| `PNT/LogBridge.lean` | 1 | Tauberian gap — requires signed Wiener-Ikehara |
-| `Covariance/CovarianceAbel.lean` | 2 | Deprecated spatial integrals |
-| `Covariance/AbelCovarianceBound.lean` | 1 | Off-path Abel covariance |
-| `Covariance/EulerProduct.lean` | 1 | Off-path Mertens third |
-| `Covariance/MertensBridge.lean` | 1 | Off-path Mertens bridge |
-| `Assembly/QualitativeForward.lean` | 1 | Off-path PNT convergence |
+| `Assembly/DirectMellinBound.lean` | 2 | Exploratory direct path |
+| `Physics/Bridges/DedekindBridge.lean` | 1 | Off-path Dedekind bridge |
 
 ---
 
@@ -274,10 +267,10 @@ Pure duplicates/stubs:        ~27 files
 
 | Metric | Active | Archive | Ratio |
 |--------|--------|---------|-------|
-| Files | 227 | 112 | 2.03× |
-| Lines | ~60,500 | 22,000+ | 2.75× |
-| Theorems | ~1,757 | ~994 | 1.77× |
-| Crown axioms | **2** (Dual Crown) | — | — |
+| Files | 381 | 114 | 3.34× |
+| Lines | ~116,000 | 22,000+ | 5.27× |
+| Theorems | ~3,000 | ~994 | 3.02× |
+| Crown axioms | **1** (≡ RH) | — | — |
 
 ---
 
@@ -310,13 +303,15 @@ The project evolved through five major phases:
 6. **Cathedral v12** (1 day) — **Crown Graduation** — Perron Bridge closes forward path, MVT proved, 0 actionable sorry
 7. **Cathedral v15** (2 days) — **Spectral Universality** — Dual-path architecture, DD solver inception
 8. **Cathedral v16** (1 week) — **Observatory Edition** — One-Pillar Cathedral (1 axiom), DD-precision pipeline, N=55,440 certified
-9. **Cathedral v17** (4 days) — **Oracle Capstone** — Dual Crown (Analytic + Oracle), Oracle Cascade lights up entire Cathedral from 1 GPU measurement
+9. **Cathedral v17** (4 days) — **Oracle Capstone** — Dual Crown (Analytic + Oracle), Oracle Cascade
+10. **Cathedral v18-v21** (2 weeks) — Gram Crown, Glass Bridge, Physics Enrichment, Bose–Einstein (381→444 files)
+11. **Cathedral v22** (3 days) — **The Crowning** — PNT graduation (×10), `discrete_riemann_hypothesis` as sole axiom, Cholesky Miracle, BorderedSpectral closure
 
 ---
 
 ## Experiment Index
 
-The repository contains **48+ Rust/MPFR/DD experiment directories** under `experiments/`:
+The repository contains **50+ Rust/MPFR/DD experiment directories** under `experiments/`:
 
 | Experiment | Purpose |
 |-----------|---------|

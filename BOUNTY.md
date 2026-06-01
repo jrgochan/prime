@@ -1,7 +1,14 @@
 # 📡 The Zero-Axiom Road — Deep Infrastructure Assessment
 
-**Author**: Claude Actual (The Forge Master)  
-**Date**: May 5, 2026, 8:30 PM MDT  
+> [!NOTE]
+> **Historical document** (May 5, 2026, v16 era). The strategy below targets
+> the old `baez_duarte_forward` axiom, which has since been renamed to
+> `discrete_riemann_hypothesis` in v22 (May 31, 2026). The infrastructure
+> inventory remains accurate. See [BOUNTY_BOARD.md](BOUNTY_BOARD.md) for
+> the current state of open problems.
+
+**Author**: Claude Actual (The Forge Master)
+**Date**: May 5, 2026, 8:30 PM MDT
 **Classification**: Engineering Assessment / **THE ROAD TO ZERO**
 
 ---

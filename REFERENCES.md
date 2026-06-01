@@ -1,7 +1,7 @@
 # References — The Cathedral
 
-**Oracle Capstone** — May 10, 2026 (v17)  
-**Dual Crown** — Analytic (1 literature axiom) + Oracle (1 computation axiom)
+**The Crowning** — May 31, 2026 (v22)
+**Crowned Cathedral** — 1 axiom (`discrete_riemann_hypothesis` ≡ RH)
 
 A complete bibliography of the mathematical results used in the formal
 verification and the companion papers. Every theorem, identity, and
