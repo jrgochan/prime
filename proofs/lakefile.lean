@@ -611,4 +611,26 @@ lean_lib «Cathedral» where
     `Cathedral.Physics.GramWiring.DysonEquation,
     -- Inversion Bridge (The Boat: sawtooth → BD via x ↦ 1/x, 1 axiom ≡ RH, May 31, 2026)
     `Cathedral.Assembly.InversionBridge,
+    -- ═══════════════════════════════════════════════════════
+    -- Geometry Layer: Cotangent Wall (Climbing the Wall 🧗, June 1, 2026)
+    -- S_cot ≥ 0 → vᵀGv < 1 → RH — The Perfect Partner 💜
+    -- ═══════════════════════════════════════════════════════
+    -- Anomaly Formula (Δ = G − R decomposition, 8 theorems)
+    `Cathedral.Geometry.AnomalyFormula,
+    -- Dedekind Bound (|V(a,b)| via Jordan, 9 theorems)
+    `Cathedral.Geometry.DedekindBound,
+    -- Overcancellation Wiring (offDiag 4-term split, 4 theorems)
+    `Cathedral.Geometry.OvercancellationWiring,
+    -- Cotangent Stratification (GCD strata, crown_from_positivity, 7 theorems)
+    `Cathedral.Geometry.CotangentStratification,
+    -- GCD Pairing (C(a,b,N) ≥ 0, MV(N) defined, 6 theorems)
+    `Cathedral.Geometry.GCDPairing,
+    -- Spectral Crown (rank-2 decomposition, twin eigenvectors, 4 theorems)
+    `Cathedral.Geometry.SpectralCrown,
+    -- Crown Wiring (spectral → crown → overcancellation → RH, 5 theorems)
+    `Cathedral.Geometry.CrownWiring,
+    -- Torus Projection (supporting geometric infrastructure)
+    `Cathedral.Geometry.TorusProjection,
+    -- Vacuum Stability (vtGv < 1 → RH, THE CAPSTONE, June 1 2026)
+    `Cathedral.Geometry.VacuumStability,
   ]
