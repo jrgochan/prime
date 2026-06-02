@@ -487,6 +487,28 @@ technique in the Cathedral traces back to published mathematics listed here.
   > The Cathedral's Gram matrix G_N is the finite-dimensional shadow of
   > this conjectured operator, evaluated in the Báez-Duarte basis.
 
+### The Atiyah TQFT Axioms
+
+- **Michael Atiyah**, "Topological quantum field theories,"
+  *Publ. Math. IHES*, 68:175–186, 1988.
+
+- **Michael Atiyah**, "New invariants of 3- and 4-dimensional manifolds,"
+  in *The Mathematical Heritage of Hermann Weyl*, Proc. Sympos. Pure Math.,
+  48:285–299, AMS, 1988.
+
+  > Atiyah's axioms define a TQFT as a functor from cobordisms to vector spaces:
+  > (1) Space axiom: each manifold Σ maps to a Hilbert space H(Σ);
+  > (2) Cobordism axiom: each cobordism M maps to a linear operator Z(M);
+  > (3) Gluing axiom: Z(M₁ ∪_Σ M₂) = Z(M₂) ∘ Z(M₁) (functoriality);
+  > (4) Vacuum axiom: Z(∅) = ℂ.
+  >
+  > The Cathedral instantiates these axioms arithmetically:
+  > N → H_N (resolution Hilbert space), G_N as propagator,
+  > Cholesky decrement as gluing (functoriality), and
+  > d²_N = partition function with RH = triviality in the infrared limit.
+  > The axiom vtGv ≤ 1 is **vacuum stability**: the vacuum energy is bounded.
+  > See: `docs/ai/antigravity/torus-projection/RE: ATIYAH & THE TOPOLOGY OF THE PRIMES.md`
+
 ### The Bartlett Window
 
 - **Maurice S. Bartlett**, "Smoothing periodograms from time-series with
