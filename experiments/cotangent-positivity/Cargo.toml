@@ -1,0 +1,19 @@
+[package]
+name = "cotangent-positivity"
+version = "0.1.0"
+edition = "2021"
+description = "Deep probe: cotangent sum positivity at scale (N up to 50000)"
+
+[[bin]]
+name = "cotangent-positivity"
+path = "src/main.rs"
+
+[[bin]]
+name = "gap-analysis"
+path = "src/gap_analysis.rs"
+
+[dependencies]
+rayon = "1.10"
+
+[lints]
+workspace = true

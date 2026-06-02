@@ -51,6 +51,7 @@ members = [
     "experiments/dark-gram-spectroscopy",
     "experiments/dark-gram-spectroscopy-gpu",
     "experiments/prime-harmonics",
+    "experiments/cotangent-positivity",
 
     # ═══════════════════════════════════════════════
     # Archive (preserved for reproducibility)
