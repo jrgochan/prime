@@ -186,6 +186,20 @@ required-features = ["hpdf"]
 name = "torus-projection"
 path = "src/bin/torus_projection.rs"
 
+[[bin]]
+name = "weight-family-explorer"
+path = "src/bin/weight_family_explorer.rs"
+required-features = ["hpdf"]
+
+[[bin]]
+name = "double-abel-probe"
+path = "src/bin/double_abel_probe.rs"
+required-features = ["hpdf"]
+
+[[bin]]
+name = "dense-anatomy"
+path = "src/bin/dense_anatomy.rs"
+
 [profile.release]
 opt-level = 3
 lto = true

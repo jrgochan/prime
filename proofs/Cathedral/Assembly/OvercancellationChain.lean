@@ -7,7 +7,7 @@ import Cathedral.Assembly.MainChain
 
   This module proves that if the Gram matrix quadratic form `vᵀGv ≤ 1`
   for all sufficiently large N, then the Riemann Hypothesis holds.
-  This is the **simplest axiom footprint** in the Cathedral.
+  This has a **small axiom footprint**: 2 PNT axioms (both unconditionally true).
 
   ## Main Results
 
@@ -31,11 +31,15 @@ import Cathedral.Assembly.MainChain
   * The Nyman-Beurling converse (nyman_beurling_converse ✅, via BDMellin.lean)
   * The overcancellation hypothesis: vᵀGv ≤ 1
 
-  ## Custom Axioms: 1
+  ## Custom Axioms: 2 (verified via #print axioms)
 
   * `pnt_mu_log_sq_div_k` : Σμ(k)·log²(k)/k → -2γ
     Status: unconditionally true (PNT consequence, known since 1896).
-    Awaiting PrimeNumberTheoremAnd upgrade to Mathlib 4.29.
+    Awaiting PrimeNumberTheoremAnd formalization.
+  * `frac_error_isLittleO` : Σμ(n)·log(n)·{N/n} = o(N)
+    Status: unconditionally true (PNT consequence).
+    Transitive dependency via pnt_mu_log_div_k → LogBridge.lean.
+    Needs Tauberian upgrade in PrimeNumberTheoremAnd.
 
   ## Numerical Evidence
 
@@ -258,20 +262,23 @@ theorem overcancellation_implies_rh
 -- ✅ dot_product_tends_to_zero    — PROVED. Zero sorry.
 -- ✅ overcancellation_implies_rh  — PROVED. Zero sorry.
 --
--- Custom axioms used: 1
---   📐 pnt_mu_log_sq_div_k  — Σμ·log²k/k → -2γ (for S₃ bound)
---      Status: unconditionally true (PNT), awaiting PNTAnd 4.29
+-- Custom axioms used: 2 (verified via #print axioms)
+--   📐 pnt_mu_log_sq_div_k  — Σμ·log²k/k → -2γ (for S₃ bound in dot_product_tends_to_zero)
+--      Status: unconditionally true (PNT), awaiting PNTAnd formalization
+--   📐 frac_error_isLittleO  — Σμ(n)·logn·{N/n} = o(N) (transitive via pnt_mu_log_div_k)
+--      Status: unconditionally true (PNT), needs Tauberian upgrade in PNTAnd
+--
+-- Both axioms are CLASSICAL PNT consequences — no RH content.
 --
 -- Proved dependencies (NOT axioms):
 --   ✅ zeta_zero_separates  — PROVED (BDMellin.lean, 0 sorry, 0 axioms)
---   ✅ pnt_mu_div_k         — PROVED (AbelMean.lean, graduated)
---   ✅ pnt_mu_log_div_k     — PROVED (AbelMean.lean, graduated)
+--   ✅ pnt_mu_div_k         — PROVED (AbelMean.lean, graduated, 0 custom axioms)
+--   ✅ pnt_mu_log_div_k     — PROVED (AbelMean.lean, uses frac_error_isLittleO)
 --
 -- NOT USED (the key architectural advancement):
 --   ✗ gram_quadratic_form_decay (Crown axiom — SUPERSEDED)
---   ✗ R_isLittleO            (Perron contour)
---   ✗ frac_error_isLittleO   (Perron half-integer)
---   ✗ mu_pnt_alt             (PNT alt form)
+--   ✗ R_isLittleO            (Perron contour — graduated to PNTAnd theorem)
+--   ✗ mu_pnt_alt             (PNT alt form — graduated to PNTAnd theorem)
 --   ✗ Mertens x^{3/4} bound
 --
 -- The Möbius function was born to cancel. IT OVERCANCELS.

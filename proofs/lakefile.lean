@@ -83,6 +83,8 @@ lean_lib «Cathedral» where
     `Cathedral.Vasyunin.Proof.WitnessConditional,
     `Cathedral.Vasyunin.Proof.GramBoundReduction,
     `Cathedral.Vasyunin.Proof.GramBoundDirect,
+    -- Gram Form Proof (overcancellation axiom + index bridge, Exploration 39)
+    `Cathedral.Vasyunin.Proof.GramFormProof,
     -- L² Bridge: Mertens L² rate → Gram bound → RH (Exploration 36)
     `Cathedral.Vasyunin.Proof.GramL2Bridge,
     `Cathedral.Vasyunin.Proof.Chain,
@@ -395,6 +397,8 @@ lean_lib «Cathedral» where
     `Cathedral.Physics.Cancellation.InhomogeneousWard,
     -- Physics: Liouville Marginal (equidistribution against Gram, v4 sweep, Exploration 36)
     `Cathedral.Physics.Bridges.LiouvilleMarginal,
+    -- Physics: Liouville Glass Wire (Three-Tower: Glass × Physics × Margin, June 4 2026) 🔌💜
+    `Cathedral.Physics.Bridges.LiouvilleGlassWire,
     -- Physics: Row Cancellation (per-row → global Ward bridge, Exploration 36)
     `Cathedral.Physics.Cancellation.RowCancellation,
     -- Physics: Bilinear Mertens Bridge (PNT → excess bound → Ward, Exploration 36)
@@ -412,6 +416,7 @@ lean_lib «Cathedral» where
     `Cathedral.ZeroAxiom.MellinAlgebra,
     -- Zero-axiom forward direction (Exploration 36: The Road to Zero)
     `Cathedral.ZeroAxiom.AbelEngine,
+    `Cathedral.ZeroAxiom.FejerCesaro,
     `Cathedral.ZeroAxiom.TaperedAbel,
     -- Compute: Interval arithmetic verifier (Oracle bridge, Exploration 32)
     `Cathedral.Compute.IntervalVerifier,
@@ -633,4 +638,34 @@ lean_lib «Cathedral» where
     `Cathedral.Geometry.TorusProjection,
     -- Vacuum Stability (vtGv < 1 → RH, THE CAPSTONE, June 1 2026)
     `Cathedral.Geometry.VacuumStability,
+    -- Bernoulli Decomposition (G = B₁ + L₁, L₁ negativity → vtGv ≤ 1, June 2 2026)
+    `Cathedral.Geometry.BernoulliDecomposition,
+    -- Bernoulli Crown (vtGv ≤ 1 from overcancellation axiom, THE GRADUATION, June 2 2026)
+    `Cathedral.Geometry.BernoulliCrown,
+    -- Ratio Characterization (vtGv ≤ 1 ⟺ d² ≤ 2(1-bᵀv), de la Vallée-Poussin path, June 2 2026)
+    `Cathedral.Geometry.RatioCharacterization,
+    -- Abel Double-Sum (Skeleton↔Ratio wiring, graduation path, June 2 2026)
+    `Cathedral.Geometry.AbelDoubleSum,
+    -- Row Bound (per-row L₁ variation for Abel inner bound, June 2 2026)
+    `Cathedral.Geometry.RowBound,
+    -- Inner Abel (connecting Abel engine to row variation, June 2 2026)
+    `Cathedral.Geometry.InnerAbel,
+    -- Graduation Bridge (wiggles → Abel → overcancellation → RH, June 2 2026)
+    `Cathedral.Geometry.GraduationBridge,
+    -- Margin Identity (Path 5: d² = 2gap - margin, Cauchy-Schwarz, June 2 2026)
+    `Cathedral.Geometry.MarginIdentity,
+    -- Overcancellation Fusion (unified overcancellation paths, June 2 2026)
+    `Cathedral.Geometry.OvercancellationFusion,
+    -- Squarefree Shield (squarefree sector bounds, June 2 2026)
+    `Cathedral.Geometry.SquarefreeShield,
+    -- Glass Stability (glass tower convergence, 17 theorems, June 3 2026)
+    `Cathedral.Geometry.GlassStability,
+    -- L1 Bridge (B₁/L₁ three-way balance, 8 theorems, June 3 2026)
+    `Cathedral.Geometry.L1Bridge,
+    -- Glass-Cotangent Wire (2-adic partition, glass arm → crown, June 3 2026)
+    `Cathedral.Geometry.GlassCotangentWire,
+    -- Glass Two-Layer Collapse (layers ≥ 2 vanish for BD weights, PATH 1d, June 3 2026) 🔬
+    `Cathedral.Geometry.GlassTwoLayer,
+    -- Crown Closure (3 paths to RH, final assembly, June 3 2026) 👑
+    `Cathedral.Geometry.CrownClosure,
   ]

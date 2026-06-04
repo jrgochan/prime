@@ -382,6 +382,49 @@ theorem b1_skeleton_psd (N : ℕ) (z : Fin N → ℝ) :
   · norm_num
   · exact smith_gcd2_matrix_psd N w
 
+/-- The gcd-squared Smith identity (equality form, for upper bounds).
+
+    Σᵢⱼ gcd(i+1,j+1)² · xᵢ · xⱼ = Σ_{d∈Icc 1 N} J₂(d) · y_d²
+
+    where y_d = Σ_{d|i+1} x_i.
+
+    This is the same identity used in `smith_gcd2_matrix_psd`,
+    exported as an equality for use in upper bound proofs. -/
+theorem smith_gcd2_identity (N : ℕ) (x : Fin N → ℝ) :
+    ∑ i : Fin N, ∑ j : Fin N,
+      (Nat.gcd (i.val + 1) (j.val + 1) : ℝ) ^ 2 * x i * x j =
+    ∑ d ∈ Finset.Icc 1 N, jordanTotient2 d *
+      ((∑ i : Fin N, if d ∣ (i.val + 1) then x i else 0) ^ 2) := by
+  -- Define the indicator-weighted divisor sum
+  set y : ℕ → ℝ := fun d => ∑ i : Fin N, if d ∣ (i.val + 1) then x i else 0
+  -- Expand y_d² as double sum
+  have ysq : ∀ d, (∑ i : Fin N, if d ∣ (i.val + 1) then x i else 0) ^ 2 =
+      ∑ i : Fin N, ∑ j : Fin N,
+        (if d ∣ (i.val + 1) then x i else 0) * (if d ∣ (j.val + 1) then x j else 0) := by
+    intro d
+    rw [sq]
+    exact Fintype.sum_mul_sum _ _
+  simp_rw [ysq, Finset.mul_sum]
+  -- Swap sums: bring i,j outside, d inside
+  rw [Finset.sum_comm (s := Finset.Icc 1 N) (t := Finset.univ)]
+  simp_rw [Finset.sum_comm (s := Finset.Icc 1 N) (t := Finset.univ)]
+  -- Now match pointwise
+  congr 1; ext i; congr 1; ext j
+  rw [show (Nat.gcd (i.val + 1) (j.val + 1) : ℝ) ^ 2 * x i * x j =
+    (∑ d ∈ (Nat.gcd (i.val + 1) (j.val + 1)).divisors, jordanTotient2 d) * x i * x j from by
+      rw [j2_dirichlet_identity _ (Nat.gcd_pos_of_pos_left _ (by omega))]]
+  rw [j2_sum_as_filter (i.val + 1) (j.val + 1) (by omega) (by omega)
+      (Finset.Icc 1 N)
+      (fun d hd => by
+        rw [Finset.mem_Icc]
+        have hd_pos := Nat.pos_of_mem_divisors hd
+        have hd_le : d ≤ i.val + 1 := Nat.le_of_dvd (by omega)
+          (dvd_trans (Nat.dvd_of_mem_divisors hd) (Nat.gcd_dvd_left _ _))
+        exact ⟨hd_pos, by omega⟩)]
+  rw [Finset.sum_mul, Finset.sum_mul]
+  congr 1; ext d
+  split_ifs <;> simp_all <;> ring
+
 end SmithPSD
 
 -- ════════════════════════════════════════════════════════════════

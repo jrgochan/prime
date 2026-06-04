@@ -12,6 +12,14 @@ path = "src/main.rs"
 name = "gap-analysis"
 path = "src/gap_analysis.rs"
 
+[[bin]]
+name = "f1-decomp"
+path = "src/f1_decomp.rs"
+
+[[bin]]
+name = "overcancellation"
+path = "src/overcancellation.rs"
+
 [dependencies]
 rayon = "1.10"
 
