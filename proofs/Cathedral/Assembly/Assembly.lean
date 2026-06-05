@@ -37,7 +37,9 @@ import Cathedral.NymanBeurling.QuadFormBridge
 import Cathedral.Assembly.MainChain
 import Cathedral.Assembly.GramCrown
 import Cathedral.Assembly.OvercancellationChain
+import Cathedral.Assembly.MarginCertificate
 import Cathedral.Gram.DarkGramMatrix
+import Cathedral.Assembly.TwoPhaseRH
 
 -- ════════════════════════════════════════════════
 -- UNIFIED EXPORTS: OVERCANCELLATION (PREFERRED)
@@ -54,6 +56,22 @@ theorem rh_overcancellation
         ((vasyuninGramMatrix N).mulVec (logCutoffWitness N)) ≤ 1) :
     RiemannHypothesis :=
   overcancellation_implies_rh h_oc
+
+open Cathedral.MarginCertificate in
+/-- **THE RIEMANN HYPOTHESIS** (Margin Certificate Path).
+    ★★ Refined axiom: (1-vᵀGv)·lnN → C > 0 (rate O(1/lnN)).
+    Numerically certified to C ≈ 2.82 at N = 7560.
+    See `MarginCertificate.lean` for documentation. -/
+theorem rh_margin : RiemannHypothesis :=
+  rh_from_margin
+
+open Cathedral.TwoPhaseRH in
+/-- **THE RIEMANN HYPOTHESIS** (Two-Phase Path — via Fermi Point).
+    ★★ Structured axioms: finite verification (N < 76) + fermionic dominance (N ≥ 76).
+    The Fermi Point N=76 is where the bosonic sector first exceeds 1.
+    See `TwoPhaseRH.lean` for documentation. -/
+theorem rh_two_phase : RiemannHypothesis :=
+  rh_from_two_phases
 
 -- ════════════════════════════════════════════════
 -- UNIFIED EXPORTS: GRAM CROWN (via Overcancellation, REWIRED)

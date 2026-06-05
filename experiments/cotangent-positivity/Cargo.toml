@@ -20,6 +20,10 @@ path = "src/f1_decomp.rs"
 name = "overcancellation"
 path = "src/overcancellation.rs"
 
+[[bin]]
+name = "path-1e-analytics"
+path = "src/path_1e_analytics.rs"
+
 [dependencies]
 rayon = "1.10"
 

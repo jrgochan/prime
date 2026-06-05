@@ -2,10 +2,11 @@ import Cathedral.Defs
 import Cathedral.NymanBeurling.BDMellin
 
 /-!
-  # Axiom Registry (v17 — Oracle Capstone, Dual Crown)
+  # Axiom Registry (v18 — Wall Consolidation)
 
-  Central hub for axiom documentation. This file contains no axiom
-  declarations — all axioms are declared in their respective modules.
+  Central hub for axiom documentation. The single non-PNT axiom
+  (`overcancellation_axiom`) is declared in `Cathedral.Wall`.
+  All other modules import it via `import Cathedral.Wall`.
 
   ## Dual Crown Architecture
 

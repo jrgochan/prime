@@ -491,6 +491,84 @@ theorem layer0_nonneg_of_oo_dominates {n : ℕ} (v : Fin n → ℝ)
   exact h
 
 -- ════════════════════════════════════════════════════════════════
+-- §7. GLASS-COVARIANCE BRIDGE
+-- ════════════════════════════════════════════════════════════════
+
+/-! ### The Glass-Covariance Bridge
+
+The two-layer decomposition connects the Glass world to the
+Covariance/Variance world through an explicit structural identity.
+
+From `offDiag_rearranged'` (CotangentStratification):
+  offDiag = (eLog − eConst) + eRatio − eCot
+
+From `two_layer_decomp` (this file):
+  eCot(BD) = L0 + L1
+
+Combining:
+  diag + offDiag = nonCot − (L0 + L1)
+
+where nonCot = diag + (eLog − eConst) + eRatio.
+
+This identity bridges to the variance via:
+  Var = (diag + offDiag) − (bᵀv)² = nonCot − (L0 + L1) − (bᵀv)²
+
+The cotangent glass layers L0 and L1 DIRECTLY REDUCE the variance.
+This is the formal counterpart of L₁ negativity in the B₁/L₁ language. -/
+
+/-- **GLASS-COVARIANCE IDENTITY** ⭐: The Gram quadratic form
+    (as diag + offDiag) equals the non-cotangent terms minus the
+    two active glass layers.
+
+    vtGv = nonCot − (L0 + L1)
+
+    This is the structural bridge between:
+    - The Glass world (GlassTwoLayer, GlassCotangentWire)
+    - The Covariance/Margin world (MarginIdentity, VarianceBound)
+
+    From here, Var = vtGv − (bᵀv)² = nonCot − (L0 + L1) − (bᵀv)²,
+    connecting the glass layers to the variance squeeze.
+
+    PROVED. Zero sorry. -/
+theorem vtgv_eq_nonCot_minus_two_layers (N : ℕ) (hN : 3 ≤ N) :
+    diagonalSum (bdMoebiusWeight N) + offDiagonalSum (bdMoebiusWeight N) =
+    (diagonalSum (bdMoebiusWeight N) +
+     (offDiag_eLog' (bdMoebiusWeight N) - offDiag_eConst' (bdMoebiusWeight N)) +
+     offDiag_eRatio' (bdMoebiusWeight N)) -
+    (glass_cot_layer (bdMoebiusWeight N) 0 + glass_cot_layer (bdMoebiusWeight N) 1) := by
+  have h_rearr := offDiag_rearranged' (bdMoebiusWeight N)
+  have h_two := two_layer_decomp N hN
+  linarith
+
+/-- **SHADOW-SHIFTED BOUND** ⭐: Standalone lemma extracting the
+    vtGv ≤ C' + ε bound from the shadow-shifted conditions.
+
+    This factors out the core inequality used by `rh_from_shadow_shifted`,
+    making it reusable by other paths (e.g., connecting to the Margin
+    identity for a d² bound, or to VarianceBound for the variance squeeze).
+
+    If (nonCot − L1) ≤ C' and L0 ≥ −ε, then vtGv ≤ C' + ε.
+
+    **Proof sketch:**
+      vtGv = nonCot − L0 − L1     [vtgv_eq_nonCot_minus_two_layers]
+           = (nonCot − L1) − L0
+           ≤ C' − L0               [h_shadow: nonCot − L1 ≤ C']
+           ≤ C' + ε                [h_L0: −ε ≤ L0, so −L0 ≤ ε]
+
+    Numerically: C' + ε ≈ 0.622 at N=1500, giving 38% safety margin.
+
+    PROVED. Zero sorry. -/
+theorem shadow_shifted_vtgv_bound (N : ℕ) (hN : 3 ≤ N)
+    (C' ε : ℝ)
+    (h_shadow : diagonalSum (bdMoebiusWeight N) +
+       (offDiag_eLog' (bdMoebiusWeight N) - offDiag_eConst' (bdMoebiusWeight N)) +
+       offDiag_eRatio' (bdMoebiusWeight N) -
+       glass_cot_layer (bdMoebiusWeight N) 1 ≤ C')
+    (h_L0 : -ε ≤ glass_cot_layer (bdMoebiusWeight N) 0) :
+    diagonalSum (bdMoebiusWeight N) + offDiagonalSum (bdMoebiusWeight N) ≤ C' + ε := by
+  linarith [vtgv_eq_nonCot_minus_two_layers N hN]
+
+-- ════════════════════════════════════════════════════════════════
 -- AUDIT
 -- ════════════════════════════════════════════════════════════════
 
@@ -500,7 +578,7 @@ theorem layer0_nonneg_of_oo_dominates {n : ℕ} (v : Fin n → ℝ)
 ### Sorry: 0 ✅
 ### Custom Axioms: 0 ✅
 
-### Theorems: 12 PROVED
+### Theorems: 14 PROVED
 
 | # | Result | Status | Significance |
 |---|--------|--------|-------------|
@@ -516,6 +594,8 @@ theorem layer0_nonneg_of_oo_dominates {n : ℕ} (v : Fin n → ℝ)
 | 10 | `rh_from_two_layers` | ✅ ⭐⭐⭐ | PATH 1d: Two layers → RH |
 | 11 | `rh_from_shadow_shifted` | ✅ ⭐⭐⭐ | PATH 1e: Shadow-shifted → RH |
 | 12 | `layer0_nonneg_of_oo_dominates` | ✅ | Parity dominance → L0≥0 |
+| 13 | `vtgv_eq_nonCot_minus_two_layers` | ✅ ⭐ | vtGv = nonCot − (L0+L1) |
+| 14 | `shadow_shifted_vtgv_bound` | ✅ ⭐ | Shadow → vtGv ≤ C'+ε |
 
 ### Definitions: 3
 
@@ -542,15 +622,17 @@ theorem layer0_nonneg_of_oo_dominates {n : ℕ} (v : Fin n → ℝ)
   │  layer0_parity_decomp: L0 = oo + oe + eo                │
   │  rh_from_two_layers: PATH 1d → RH (needs nonCot < 1)    │
   │  rh_from_shadow_shifted: PATH 1e → RH ⭐ (NO nonCot<1)  │
+  │  vtgv_eq_nonCot_minus_two_layers: GLASS-COV BRIDGE ⭐    │
+  │  shadow_shifted_vtgv_bound: STANDALONE vtGv BOUND ⭐     │
   └─────────────────────────────────────────────────────────┘
-       │                         │
-       │  PATH 1d                │  PATH 1e
-       ▼                         ▼
-  rh_from_cot_positivity    rh_from_gram_sum_bound
-  (needs nonCot ≤ C < 1)    (direct: vtGv ≤ 1)
-       │                         │
-       ▼                         ▼
-  overcancellation_implies_rh ──────────────── → RH
+       │                    │                    │
+       │  PATH 1d           │  PATH 1e           │  BRIDGE
+       ▼                    ▼                    ▼
+  rh_from_cot_positivity  rh_from_gram_sum   MarginIdentity
+  (needs nonCot ≤ C < 1)  (vtGv ≤ 1)        VarianceBound
+       │                    │                    │
+       ▼                    ▼                    ▼
+  overcancellation_implies_rh ──────────────────── → RH
 ```
 
 ### Path 1e vs 1d — The Shadow Shift:

@@ -43,6 +43,7 @@ import Cathedral.Physics.Bridges.BernoulliSkeleton
 import Cathedral.PNT.AbelMean
 import Cathedral.ZeroAxiom.AbelEngine
 import Cathedral.ZeroAxiom.FejerCesaro
+import Cathedral.Wall
 
 noncomputable section
 open Real Finset Cathedral.Vasyunin
@@ -106,18 +107,23 @@ Numerical certificate: HPDF-validated for ALL N ≤ 55,440.
 vᵀGv ranges from 0.39 (N=60) to 0.65 (N=2520), always < 1.
 -/
 
-/-- **THE WALL**: The overcancellation bound vᵀGv ≤ 1
-    for all sufficiently large N.
+/-- **THE WALL** (local form): The overcancellation bound vᵀGv ≤ 1
+    for all sufficiently large N, expressed via `gramQuadForm`.
 
     This states that the Möbius log-cutoff witness achieves
     overcancellation in the Vasyunin Gram quadratic form:
     the sum of all pairwise Gram couplings stays below 1.
 
+    CONSOLIDATED (June 4, 2026): Derived from the canonical
+    `overcancellation_axiom` in Cathedral.Wall.
+    `gramQuadForm` unfolds to the same `dotProduct` expression.
+
     Numerical certificate: HPDF-validated for ALL N ≤ 55,440.
     Margin: vᵀGv ≤ 0.65 (35% below the threshold). -/
-axiom overcancellation_axiom :
+theorem overcancellation_axiom_local :
     ∃ N₀ : ℕ, ∀ N : ℕ, N ≥ N₀ → N ≥ 3 →
-      gramQuadForm N ≤ 1
+      gramQuadForm N ≤ 1 := by
+  exact overcancellation_axiom
 
 -- ════════════════════════════════════════════════
 -- §4. ENTRY BOUNDS (PROVED)
@@ -380,7 +386,7 @@ private theorem smith_coordinate_tendsto_zero (d : ℕ) (hd : 1 ≤ d) :
 theorem vtGv_from_bernoulli_decomp :
     ∃ N₀ : ℕ, ∀ N : ℕ, N ≥ N₀ → N ≥ 3 →
       gramQuadForm N ≤ 1 :=
-  overcancellation_axiom
+  overcancellation_axiom_local
 
 -- ════════════════════════════════════════════════
 -- §6. AUDIT
@@ -390,14 +396,18 @@ theorem vtGv_from_bernoulli_decomp :
 ## Audit (Updated June 2, 2026 — Session 7: Sorry Half-Graduated)
 
 ### Sorry: 1 (restricted Mertens d>1 squarefree only — standard, NOT on critical path)
-### Custom Axioms: 1 (`overcancellation_axiom` — THE WALL)
+### Custom Axioms: 1 (`overcancellation_axiom` from Cathedral.Wall — THE WALL)
+
+CONSOLIDATED (June 4, 2026): The local axiom declaration has been
+removed. `overcancellation_axiom_local` derives the `gramQuadForm`
+form from the canonical `overcancellation_axiom` in Cathedral.Wall.
 
 Note: For d not squarefree, the sorry is ELIMINATED (μ(k)=0 for all d|k).
 The remaining sorry is ONLY for squarefree d ≥ 2 (multiplicativity + coprime Mertens).
 
 | # | Item | Nature | Status |
 |---|------|--------|--------|
-| 1 | `overcancellation_axiom` | AXIOM: vᵀGv ≤ 1 | HPDF: N ≤ 55,440 |
+| 1 | `overcancellation_axiom` | AXIOM: vᵀGv ≤ 1 | Cathedral.Wall, HPDF: N ≤ 55,440 |
 | 2 | `restricted_mertens_tendsto_zero` (d>1) | sorry | NOT on RH path |
 
 ### Architecture Fix (June 2, 2026)
@@ -421,7 +431,7 @@ Removed: `b1QuadForm_tendsto_zero` (FALSE), `b1_skeleton_bound` (FALSE)
 | 2 | `gcd_sq_le_mul` | ✅ PROVED |
 | 3 | `bernoulliSkeleton_le_twelfth` | ✅ PROVED |
 | 4 | `witness_abs_le_one` | ✅ PROVED |
-| 5 | `vtGv_from_bernoulli_decomp` | ✅ PROVED (= axiom) |
+| 5 | `vtGv_from_bernoulli_decomp` | ✅ PROVED (from canonical axiom) |
 | 6 | `overcancellation_implies_rh` | ✅ PROVED |
 | 7 | `riemann_hypothesis` | ✅ PROVED (from 1 axiom) |
 | 8 | `restricted_mertens_tendsto_zero` (d=1) | ✅ PROVED from PNT |
@@ -432,10 +442,11 @@ Removed: `b1QuadForm_tendsto_zero` (FALSE), `b1_skeleton_bound` (FALSE)
 ### The Chain:
 
 ```
-overcancellation_axiom             (1 axiom: vᵀGv ≤ 1, HPDF-certified)
-  → vtGv_from_bernoulli_decomp      (PROVED: = axiom)
-    → overcancellation_implies_rh     (PROVED)
-      → riemann_hypothesis             (PROVED)
+overcancellation_axiom             (Cathedral.Wall — 1 axiom: vᵀGv ≤ 1)
+  → overcancellation_axiom_local     (PROVED: unfolds gramQuadForm)
+    → vtGv_from_bernoulli_decomp       (PROVED: = local axiom)
+      → overcancellation_implies_rh     (PROVED)
+        → riemann_hypothesis             (PROVED)
 ```
 
 ### Independent Infrastructure (not on critical path):
@@ -447,10 +458,10 @@ pnt_mu_div_k                         (PROVED: PNT)
       [y_d(N) → 0 — proves convergence, does not feed into RH chain]
 ```
 
-### The ONE Axiom:
+### The ONE Axiom (now in Cathedral.Wall):
 
 ```
-overcancellation_axiom : ∃ N₀, ∀ N ≥ N₀, N ≥ 3 → gramQuadForm N ≤ 1
+overcancellation_axiom : ∃ N₀, ∀ N ≥ N₀, N ≥ 3 → vᵀGv ≤ 1
 ```
 
 The Möbius log-cutoff witness overcancels in the Vasyunin Gram

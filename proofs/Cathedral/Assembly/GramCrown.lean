@@ -51,6 +51,7 @@
 
 import Cathedral.Vasyunin.Proof.GramBoundDirect
 import Cathedral.Assembly.OvercancellationChain
+import Cathedral.Wall
 
 noncomputable section
 open Matrix Cathedral.Vasyunin
@@ -88,11 +89,11 @@ open Matrix Cathedral.Vasyunin
     ### Status
     This axiom encodes the single non-PNT assumption in the
     Cathedral's proof of RH. It may be graduated in the future
-    via direct computation or analytical bounds. -/
-axiom overcancellation_hypothesis :
-    ∃ N₀ : ℕ, ∀ N : ℕ, N ≥ N₀ → N ≥ 3 →
-      dotProduct (logCutoffWitness N)
-        ((vasyuninGramMatrix N).mulVec (logCutoffWitness N)) ≤ 1
+    via direct computation or analytical bounds.
+
+    CONSOLIDATED (June 4, 2026): Now imported from Cathedral.Wall.
+    The canonical declaration is `overcancellation_axiom`. -/
+def overcancellation_hypothesis := overcancellation_axiom
 
 -- ════════════════════════════════════════════════
 -- PRIMARY EXPORT: THE GRAM CROWN (Overcancellation Path)
@@ -101,7 +102,7 @@ axiom overcancellation_hypothesis :
 /-- **THE RIEMANN HYPOTHESIS** (Overcancellation Path — PREFERRED).
 
     Proved from:
-    1. `overcancellation_hypothesis` (vᵀGv ≤ 1 for all large N)
+    1. `overcancellation_axiom` (vᵀGv ≤ 1 for all large N, Cathedral.Wall)
     2. PNT (unconditional — bureaucratic axioms awaiting Mathlib port)
 
     Zero sorries. Zero covariance axioms.
@@ -116,7 +117,7 @@ axiom overcancellation_hypothesis :
     on May 26, 2026. The overcancellation hypothesis is strictly
     weaker (no K/ln(N) slack needed). -/
 theorem riemann_hypothesis_from_gram_global : RiemannHypothesis :=
-  overcancellation_implies_rh overcancellation_hypothesis
+  overcancellation_implies_rh overcancellation_axiom
 
 -- ════════════════════════════════════════════════
 -- LEGACY EXPORTS (for reference)
@@ -140,22 +141,14 @@ theorem riemann_hypothesis_from_gram_subseq : RiemannHypothesis :=
 -- ════════════════════════════════════════════════
 --
 -- #print axioms riemann_hypothesis_from_gram_global
---   TARGET:
---   [R_isLittleO, frac_error_isLittleO, mu_pnt_alt,
+--   EXPECTED (after consolidation, June 4, 2026):
+--   [frac_error_isLittleO,
 --    pnt_mu_log_sq_div_k,
---    overcancellation_hypothesis,
+--    overcancellation_axiom,          ← CANONICAL (from Cathedral.Wall)
 --    propext, Classical.choice, Quot.sound]
 --
--- The key change vs. the old GramCrown:
---   REMOVED: Cathedral.Vasyunin.gram_form_upper_bound_direct
---   ADDED:   overcancellation_hypothesis
---
--- The PNT axioms (R_isLittleO, etc.) are transitively imported
--- via MainChain and are unconditional consequences of PNT.
--- They will be graduated when PrimeNumberTheoremAnd upgrades.
---
--- The overcancellation_hypothesis is the SINGLE non-PNT axiom.
--- It states: "the Möbius function overcancels in the Gram form."
--- This IS the Riemann Hypothesis in its cleanest form.
+-- CONSOLIDATED (June 4, 2026):
+--   overcancellation_hypothesis is now a def aliasing overcancellation_axiom
+--   from Cathedral.Wall — the single source of truth.
 
 -- #print axioms riemann_hypothesis_from_gram_global

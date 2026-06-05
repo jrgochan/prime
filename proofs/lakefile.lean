@@ -28,6 +28,8 @@ lean_lib «Cathedral» where
     `Cathedral.Defs,
     -- Axiom registry
     `Cathedral.Axioms,
+    -- THE WALL: single canonical overcancellation axiom (June 4, 2026)
+    `Cathedral.Wall,
     -- Linear algebra (abstract, zero sorry)
     `Cathedral.LinearAlgebra.ShermanMorrison,
     `Cathedral.LinearAlgebra.Variational,
@@ -203,6 +205,12 @@ lean_lib «Cathedral» where
     `Cathedral.Assembly.GramCrown,
     -- Overcancellation: Crown-free path to RH (Exploration 39)
     `Cathedral.Assembly.OvercancellationChain,
+    -- Margin Certificate: (1-vᵀGv)·lnN → C > 0, refined overcancellation (June 4 2026) 📐
+    `Cathedral.Assembly.MarginCertificate,
+    -- Margin Decomposition: 2-component boson/fermion split, SUSY breaking (June 4 2026) 🧬
+    `Cathedral.Assembly.MarginDecomposition,
+    -- Bosonic Graduation: algebraic collapse identity + upper bound (June 4 2026) 🔬
+    `Cathedral.Assembly.BosonicGraduation,
     `Cathedral.Assembly.FejerMellinBound,
     `Cathedral.Assembly.Assembly,
     -- PNT bridge (re-enabled via local PNTAnd clone with v4.29 fix)
@@ -472,6 +480,14 @@ lean_lib «Cathedral» where
     `Cathedral.Physics.Glass.CotResQuadBridge,
     -- Bose-Einstein Primes (File #444: ζ(s) as partition function, Fermi-Dirac = squarefree)
     `Cathedral.Physics.Glass.BoseEinsteinPrimes,
+    -- Fermi Tower (Möbius layers by ω(n), the wave that never stops, June 4 2026) ⚛️
+    `Cathedral.Physics.Glass.FermiTower,
+    -- Fermi Block Decomposition (diagonal blocks = perfect squares, June 4 2026) 🪜
+    `Cathedral.Physics.Glass.FermiBlockDecomposition,
+    -- Fermi Confinement (3-layer ceiling, Leibniz shells, layer 4+ tightening, June 4 2026) ⚛️⚖️
+    `Cathedral.Physics.Confinement.FermiConfinement,
+    -- Mertens-Confinement Bridge (layer sum ↔ Mertens infrastructure, Path C, June 5 2026) 💍
+    `Cathedral.Physics.Confinement.MertensConfinement,
     -- Möbius-Smith Bridge (connects SOS decomposition to Möbius weights)
     `Cathedral.Physics.GramWiring.MoebiusSmithBridge,
     `Cathedral.Physics.Cancellation.WoodburyCondensate,
@@ -642,6 +658,24 @@ lean_lib «Cathedral» where
     `Cathedral.Geometry.BernoulliDecomposition,
     -- Bernoulli Crown (vtGv ≤ 1 from overcancellation axiom, THE GRADUATION, June 2 2026)
     `Cathedral.Geometry.BernoulliCrown,
+    -- Bernoulli Diagonal (vtB₁v = ||v||²/12 + offDiag, ζ anatomy, June 5 2026) 🔬
+    `Cathedral.Geometry.BernoulliDiagonal,
+    -- Overcancellation Decomposition (Glass Boxes: offDiag ≤ 0 + perturbation, June 5 2026) 🔬🔍
+    `Cathedral.Geometry.OvercancellationDecomposition,
+    -- Glass Box 1 Graduation (Bessel inequality → offDiag ≤ 0, June 5 2026) 🎓
+    `Cathedral.Geometry.GlassBox1Graduation,
+    -- Restricted Bessel Graduation (divisor coeff bound → Bessel, June 5 2026) 🎓
+    `Cathedral.Geometry.RestrictedBesselGraduation,
+    -- Glass Box 2 Graduation (bosonic bound + fermionic dominance → vtGv ≤ 1, June 5 2026) 🎓⚛️
+    `Cathedral.Geometry.GlassBox2Graduation,
+    -- Norm Lower Bound (||v||² ≥ c₀·N/ln²N, squarefree density + Abel, June 5 2026) 🎓📐
+    `Cathedral.Geometry.NormLowerBound,
+    -- Divisor Coeff Graduation (|y_d| ≤ C/(d·lnN), multiplicative reduction, June 5 2026) 🎓🔢
+    `Cathedral.Geometry.DivisorCoeffGraduation,
+    -- Bosonic Upper Bound Graduation (bosonic ≤ 1+K/lnN, eRatio+poly, June 5 2026) 🎓⚡
+    `Cathedral.Geometry.BosonicUpperBoundGraduation,
+    -- Fermionic Lower Bound Graduation (fermion ≥ bosonExcess, unified axiom, June 5 2026) 🎓🔥
+    `Cathedral.Geometry.FermionicLowerBoundGraduation,
     -- Ratio Characterization (vtGv ≤ 1 ⟺ d² ≤ 2(1-bᵀv), de la Vallée-Poussin path, June 2 2026)
     `Cathedral.Geometry.RatioCharacterization,
     -- Abel Double-Sum (Skeleton↔Ratio wiring, graduation path, June 2 2026)
@@ -654,6 +688,8 @@ lean_lib «Cathedral» where
     `Cathedral.Geometry.GraduationBridge,
     -- Margin Identity (Path 5: d² = 2gap - margin, Cauchy-Schwarz, June 2 2026)
     `Cathedral.Geometry.MarginIdentity,
+    -- Variance Bound (Path 5f: Var·ln²N ≤ C_V, the width of the leash, June 4 2026) 🎯
+    `Cathedral.Geometry.VarianceBound,
     -- Overcancellation Fusion (unified overcancellation paths, June 2 2026)
     `Cathedral.Geometry.OvercancellationFusion,
     -- Squarefree Shield (squarefree sector bounds, June 2 2026)
@@ -668,4 +704,12 @@ lean_lib «Cathedral» where
     `Cathedral.Geometry.GlassTwoLayer,
     -- Crown Closure (3 paths to RH, final assembly, June 3 2026) 👑
     `Cathedral.Geometry.CrownClosure,
+    -- Axiom Audit (definitive #print axioms trace, June 4 2026) 📋
+    `Cathedral.Audit.AxiomTrace,
+    -- Fermionic Graduation (connects fermionic sector to crown, June 4 2026) 🔬
+    `Cathedral.Assembly.FermionicGraduation,
+    -- Two-Phase RH (Fermi Point N=76: subcritical + fermionic dominance, June 4 2026) ⚛️
+    `Cathedral.Assembly.TwoPhaseRH,
+    -- Finite Phase Proof (Phase 1 graduated: oracle vtGv ≤ 0.42 for N < 76, June 4 2026)
+    `Cathedral.Assembly.FinitePhaseProof,
   ]

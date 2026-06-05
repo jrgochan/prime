@@ -200,6 +200,10 @@ required-features = ["hpdf"]
 name = "dense-anatomy"
 path = "src/bin/dense_anatomy.rs"
 
+[[bin]]
+name = "fermi-tower"
+path = "src/bin/fermi_tower.rs"
+
 [profile.release]
 opt-level = 3
 lto = true

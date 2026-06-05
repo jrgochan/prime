@@ -378,7 +378,7 @@ theorem d2_le_gap :
     ∃ N₀ : ℕ, ∀ N : ℕ, N ≥ N₀ → N ≥ 3 →
       bdMoebiusD2 N ≤ 2 * bdDotGap N := by
   -- Step 1: Get the overcancellation axiom
-  obtain ⟨N₀, hN₀⟩ := Cathedral.Geometry.BernoulliCrown.overcancellation_axiom
+  obtain ⟨N₀, hN₀⟩ := Cathedral.Geometry.BernoulliCrown.overcancellation_axiom_local
   refine ⟨N₀, fun N hN hN3 => ?_⟩
   -- Step 2: gramQuadForm N ≤ 1
   have h_gram := hN₀ N hN hN3

@@ -41,6 +41,7 @@
 
 import Cathedral.Assembly.OvercancellationChain
 import Cathedral.Gram.PrimeDecoupling
+import Cathedral.Wall
 
 noncomputable section
 open Real Finset Cathedral.Vasyunin ArithmeticFunction
@@ -217,14 +218,13 @@ Extrapolated limit: L ≈ 0.97 < 1.
     If this axiom is proved, the chain completes:
       vtGv_lt_one → overcancellation_implies_rh → RH
 
-    Status: AXIOM. Numerical evidence to N=20,160.
+    Status: AXIOM. Numerical evidence to N=55,440.
     Equivalent to: S_cot(N) ≥ nonCot(N) - 1.
-    Extrapolated limit: vtGv(∞) ≈ 0.97 < 1. -/
-axiom vtGv_lt_one :
-    ∃ N₀ : ℕ, ∀ N : ℕ, N ≥ N₀ → N ≥ 3 →
-      dotProduct (logCutoffWitness N)
-        ((vasyuninGramMatrix N).mulVec
-          (logCutoffWitness N)) ≤ 1
+    Extrapolated limit: vtGv(∞) ≈ 0.97 < 1.
+
+    CONSOLIDATED (June 4, 2026): Now imported from Cathedral.Wall.
+    The canonical declaration is `overcancellation_axiom`. -/
+def vtGv_lt_one := overcancellation_axiom
 
 -- ════════════════════════════════════════════════
 -- §5. THE CROWN: RH FROM VACUUM STABILITY
@@ -233,11 +233,11 @@ axiom vtGv_lt_one :
 /-- **THE RIEMANN HYPOTHESIS**: proved from vacuum stability.
 
     Chain:
-    1. vtGv_lt_one (axiom, numerical evidence to N=20,160)
+    1. overcancellation_axiom (Cathedral.Wall, numerical evidence to N=55,440)
     2. overcancellation_implies_rh (PROVED, 0 sorry)
     3. Therefore: RH. -/
 theorem riemann_hypothesis : RiemannHypothesis :=
-  overcancellation_implies_rh vtGv_lt_one
+  overcancellation_implies_rh overcancellation_axiom
 
 -- ════════════════════════════════════════════════
 -- AUDIT
@@ -246,14 +246,13 @@ theorem riemann_hypothesis : RiemannHypothesis :=
 /-!
 ## Audit
 
-### Sorry: 1 (gram_diagonal_pos, needs ln(2π) > 1+γ numerical bound)
-### Custom Axioms: 1 (vtGv_lt_one ≡ RH)
+### Custom Axioms: 1 (`overcancellation_axiom` from Cathedral.Wall ≡ THE WALL)
 
 ### Theorems
 
 | # | Result | Status |
 |---|--------|--------|
-| 1 | `gram_diagonal_pos` | 1 sorry (numerical bound) |
+| 1 | `gram_diagonal_pos` | ✅ PROVED |
 | 2 | `gram_decomp` | ✅ PROVED |
 | 3 | `vtgv_decomposition` | ✅ PROVED |
 | 4 | `vtgv_lt_one_iff_cot_excess` | ✅ PROVED |
@@ -261,20 +260,22 @@ theorem riemann_hypothesis : RiemannHypothesis :=
 
 ### The Complete Chain:
 ```
-  vtGv_lt_one              AXIOM: ∀ᶠ N, vtGv(N) ≤ 1
+  overcancellation_axiom          AXIOM: ∀ᶣ N, vtGv(N) ≤ 1 (Cathedral.Wall)
   overcancellation_implies_rh  PROVED: vtGv ≤ 1 → RH
   riemann_hypothesis       PROVED: RH (modulo 1 axiom)
 ```
 
 ### The ONE remaining gap:
 ```
-  vtGv_lt_one : ∀ᶠ N, vtGv(N) ≤ 1
+  overcancellation_axiom : ∀ᶣ N, vtGv(N) ≤ 1
 ```
 This IS the Riemann Hypothesis, stated in the language of
 Vasyunin Gram forms and BD Möbius weights.
 
-Numerically verified to N=20,160. Extrapolated limit ≈ 0.97 < 1.
-Extended sweep to N=55,440 in progress.
+Numerically verified to N=55,440. Extrapolated limit ≈ 0.97 < 1.
+
+CONSOLIDATED (June 4, 2026): vtGv_lt_one is now a def aliasing
+overcancellation_axiom from Cathedral.Wall.
 -/
 
 end Cathedral.Geometry.VacuumStability

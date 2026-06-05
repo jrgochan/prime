@@ -199,16 +199,12 @@ theorem proof_chain_exists :
     the single overcancellation axiom, which the wiggle detection
     unit aims to graduate.
 
-    This is not a new theorem — it re-exports the existing
-    chain with explicit dependency on our new infrastructure. -/
+    CONSOLIDATED (June 4, 2026): The canonical `overcancellation_axiom`
+    in Cathedral.Wall already uses the `dotProduct` form, so this is
+    now a direct application of `overcancellation_implies_rh`. -/
 theorem rh_from_overcancellation_axiom :
     RiemannHypothesis :=
-  overcancellation_implies_rh
-    (BernoulliCrown.overcancellation_axiom.imp fun N₀ h =>
-      fun N hN hN3 => by
-        have := h N hN hN3
-        unfold BernoulliCrown.gramQuadForm at this
-        exact this)
+  overcancellation_implies_rh overcancellation_axiom
 
 -- ════════════════════════════════════════════════
 -- AUDIT
