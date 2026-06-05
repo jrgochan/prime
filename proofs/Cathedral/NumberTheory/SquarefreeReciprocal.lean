@@ -288,7 +288,7 @@ private lemma sum_telescoping_le_one (S : Finset ℕ) (hS : ∀ m ∈ S, 1 ≤ m
       _ = 1 - 1 / ((S.max' hne : ℝ) + 1) := telescoping_eq _
       _ ≤ 1 := by linarith [show (0 : ℝ) ≤ 1 / ((S.max' hne : ℝ) + 1) from by positivity]
 
-private lemma prime_sq_reciprocal_le_half (N : ℕ) :
+lemma prime_sq_reciprocal_le_half (N : ℕ) :
     ∑ p ∈ (Icc 2 N).filter Nat.Prime, (1 : ℝ) / (p : ℝ) ^ 2 ≤ 1 / 2 := by
   set S := (Icc 2 N).filter Nat.Prime with hS_def
   -- Step 1: Split off p = 2
