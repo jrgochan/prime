@@ -155,7 +155,61 @@ axiom restricted_mertens_bound :
           K / ((d : ℝ) * Real.log ↑N)
 
 -- ════════════════════════════════════════════════════════════════
--- §4. THE GRADUATION
+-- §4. THE NON-SQUAREFREE VANISHING LEMMA
+-- ════════════════════════════════════════════════════════════════
+
+/-! ### The Non-Squarefree Vanishing Lemma
+
+  The key insight: if d is not squarefree (some prime p with p²|d),
+  then for every k with d|k, we have p²|k, so k is not squarefree,
+  so μ(k) = 0, so v_k = -μ(k)·w(k) = 0, so v_k/k = 0.
+
+  Therefore divisorCoeff N v d = Σ_{d|k} (v_k/k) = 0.
+
+  This uses:
+  - Squarefree.squarefree_of_dvd (Mathlib): if n squarefree and d|n, then d squarefree
+  - Contrapositive: ¬sqfree d and d|k → ¬sqfree k → μ(k) = 0 → v_k = 0 -/
+
+/-- **LEMMA**: If d is not squarefree, then μ(k) = 0 for all multiples k of d.
+    This is the contrapositive of Squarefree.squarefree_of_dvd. -/
+theorem moebius_zero_of_dvd_not_squarefree {d k : ℕ} (hd : ¬Squarefree d) (hdk : d ∣ k) :
+    ArithmeticFunction.moebius k = 0 := by
+  apply ArithmeticFunction.moebius_eq_zero_of_not_squarefree
+  intro hsf_k
+  exact hd (hsf_k.squarefree_of_dvd hdk)
+
+/-- **LEMMA**: The logCutoffWitness vanishes at non-squarefree indices.
+    If i+1 is not squarefree, then v_i = -μ(i+1)·w(i+1) = 0. -/
+theorem witness_zero_of_not_squarefree (N : ℕ) (i : Fin N)
+    (h : ¬Squarefree (i.val + 1)) :
+    logCutoffWitness N i = 0 := by
+  unfold logCutoffWitness moebiusFn
+  rw [ArithmeticFunction.moebius_eq_zero_of_not_squarefree h]
+  simp
+
+/-- **LEMMA**: For non-squarefree d, the divisor coefficient is zero.
+
+    divisorCoeff N (logCutoffWitness N) d = 0  when ¬Squarefree d.
+
+    Proof: every term in the sum has d | (i+1), so by the contrapositive
+    of Squarefree.squarefree_of_dvd, i+1 is not squarefree, so
+    v_i = 0 (via witness_zero_of_not_squarefree). -/
+theorem divisorCoeff_zero_of_not_squarefree (N : ℕ) (d : ℕ) (hd : ¬Squarefree d) :
+    divisorCoeff N (logCutoffWitness N) d = 0 := by
+  unfold divisorCoeff
+  apply Finset.sum_eq_zero
+  intro i _
+  split_ifs with h_dvd
+  · -- d | (i.val + 1), and ¬Squarefree d, so ¬Squarefree (i.val + 1)
+    have h_not_sf : ¬Squarefree (i.val + 1) := by
+      intro hsf
+      exact hd (hsf.squarefree_of_dvd h_dvd)
+    rw [witness_zero_of_not_squarefree N i h_not_sf]
+    simp
+  · rfl
+
+-- ════════════════════════════════════════════════════════════════
+-- §5. THE GRADUATION
 -- ════════════════════════════════════════════════════════════════
 
 /-- **GRADUATED THEOREM**: The divisor coefficient bound.
@@ -163,10 +217,11 @@ axiom restricted_mertens_bound :
     For the BD log-cutoff witness:
       |y_d| ≤ C_M / (d · lnN)
 
-    for all squarefree d ≤ N and all large N.
+    for all d ≤ N and all large N.
 
-    Chain: s1_le_const_div_log (d=1) + restricted_mertens_bound (d≥2)
-    → divisor_coeff_bound
+    Chain:
+    - Squarefree d: restricted_mertens_bound gives the bound directly
+    - Non-squarefree d: divisorCoeff = 0 ≤ K/(d·logN) trivially
 
     This replaces the axiom from RestrictedBesselGraduation.lean,
     extending the ALL-d bound from the PROVED d=1 case. -/
@@ -175,34 +230,22 @@ theorem divisor_coeff_bound_graduated :
       ∀ d : ℕ, 1 ≤ d → d ≤ N →
         |divisorCoeff N (logCutoffWitness N) d| ≤
           C_M / ((d : ℝ) * Real.log ↑N) := by
-  -- The restricted_mertens_bound gives the bound for squarefree d.
-  -- For non-squarefree d: μ(k)=0 whenever d²|k, so the divisor
-  -- coefficient involves only terms where k/d has a factor coprime to d.
-  -- But μ(k) = 0 when k is not squarefree, so the sum is automatically 0
-  -- for non-squarefree d (all multiples of d that are ≤ N have μ = 0
-  -- contribution from the squared factor of d).
-  -- Actually: non-squarefree d can still have nonzero y_d if some
-  -- multiples of d are squarefree. E.g., d=4: 4|k doesn't mean μ(k)=0,
-  -- only that 4|k. But μ(k) depends on k, not d.
-  -- However, the key property is that the sum over multiples of d is
-  -- still bounded by a Mertens-type sum with fewer terms.
-  -- For simplicity, we bound ALL d using the restricted bound.
+  -- Get the restricted Mertens bound for squarefree d
   obtain ⟨K, hK, N₀, hRM⟩ := restricted_mertens_bound
   use K, hK, N₀
   intro N hN hN3 d hd hdN
-  -- For squarefree d: use restricted_mertens_bound directly
-  -- For non-squarefree d: the divisor coefficient may be nonzero,
-  -- but it's bounded by a sum with fewer terms (μ(k)=0 for many k).
-  -- We use the universal bound from restricted_mertens_bound which
-  -- handles all d uniformly.
-  exact hRM N hN hN3 d hd hdN (by
-    -- Need Squarefree d. For the general case, we note that
-    -- if d is not squarefree, then all k=dm have d²|k·(something),
-    -- making the sum even smaller. The axiom handles this.
-    sorry)
+  -- Case split: is d squarefree?
+  by_cases hsf : Squarefree d
+  · -- Case 1: d is squarefree → use restricted_mertens_bound directly
+    exact hRM N hN hN3 d hd hdN hsf
+  · -- Case 2: d is NOT squarefree → divisorCoeff = 0
+    rw [divisorCoeff_zero_of_not_squarefree N d hsf, abs_zero]
+    apply div_nonneg (le_of_lt hK)
+    apply mul_nonneg (Nat.cast_nonneg _)
+    exact le_of_lt (Real.log_pos (by exact_mod_cast show 1 < N by omega))
 
 -- ════════════════════════════════════════════════════════════════
--- §5. THE FULL GLASS BOX 1 GRADUATION
+-- §6. THE FULL GLASS BOX 1 GRADUATION
 -- ════════════════════════════════════════════════════════════════
 
 /-! ### Wiring to Glass Box 1
@@ -227,13 +270,13 @@ The chain:
 -/
 
 -- ════════════════════════════════════════════════════════════════
--- §6. AUDIT
+-- §7. AUDIT
 -- ════════════════════════════════════════════════════════════════
 
 /-!
-## Audit (June 5, 2026 — The Final Five: Axiom 2)
+## Audit (June 5, 2026 — Sorry Elimination 🎯)
 
-### Sorry: 1 (squarefree case filter in graduation theorem)
+### Sorry: 0 ✅ (was 1, fixed by case-splitting on Squarefree d)
 
 ### Custom Axioms: 1
   - `restricted_mertens_bound`: Coprime-filtered Mertens sum ≤ K/(d·lnN)
@@ -241,19 +284,27 @@ The chain:
 ### Theorems PROVED:
 | # | Result | Status | Content |
 |---|--------|--------|---------|
-| 1 | `y1_le_const_div_log` | ✅ | d=1 case = s1_le_const_div_log |
-| 2 | `sqfree_divisor_count` | ✅ | #divisors = 2^ω(d) for sqfree d |
-| 3 | `divisor_coeff_bound_graduated` | ✅* | |y_d| ≤ C_M/(d·lnN) |
+| 1 | `moebius_zero_of_dvd_not_squarefree` | ✅ | μ(k)=0 when ¬sqfree d and d|k |
+| 2 | `witness_zero_of_not_squarefree` | ✅ | v_i=0 when i+1 not squarefree |
+| 3 | `divisorCoeff_zero_of_not_squarefree` | ✅ | y_d=0 for non-squarefree d |
+| 4 | `divisor_coeff_bound_graduated` | ✅ | |y_d| ≤ C_M/(d·lnN) for ALL d |
 
-*: modulo squarefree filter sorry (non-squarefree d trivially bounded)
+### The Fix:
+The original proof tried to call restricted_mertens_bound for ALL d,
+but that axiom requires Squarefree d. The fix case-splits:
+
+  - **Squarefree d**: use restricted_mertens_bound directly ✅
+  - **Non-squarefree d**: prove divisorCoeff = 0 because every
+    multiple k of d has p²|k (contrapositive of Squarefree.squarefree_of_dvd),
+    so μ(k) = 0, so v_k = 0, so y_d = Σ 0 = 0 ≤ K/(d·logN) ✅
 
 ### The Chain:
 ```
 s1_le_const_div_log: |S₁| ≤ K/logN               [PROVED: d=1]
     ↓ inclusion-exclusion on prime factors of d
 restricted_mertens_bound: coprime Mertens ≤ K/logN  [AXIOM]
-    ↓
-divisor_coeff_bound_graduated: |y_d| ≤ C/(d·logN)  [PROVED*]
+    ↓ + divisorCoeff_zero_of_not_squarefree [PROVED]
+divisor_coeff_bound_graduated: |y_d| ≤ C/(d·logN)  [PROVED ✅]
 ```
 
 ### Graduation Impact:
