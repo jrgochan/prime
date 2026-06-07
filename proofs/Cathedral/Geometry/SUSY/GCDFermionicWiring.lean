@@ -1,5 +1,5 @@
 /-
-  Cathedral/Geometry/GCDFermionicWiring.lean
+  Cathedral/Geometry/SUSY/GCDFermionicWiring.lean
 
   ## WIRING: GCD ARCHITECTURE → FERMIONIC DOMINANCE
 

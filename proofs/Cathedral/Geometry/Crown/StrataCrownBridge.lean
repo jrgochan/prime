@@ -1,5 +1,5 @@
 /-
-  Cathedral/Geometry/StrataCrownBridge.lean
+  Cathedral/Geometry/Crown/StrataCrownBridge.lean
 
   ## BRIDGE: Strata Convergence → Crown Closure
 

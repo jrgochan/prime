@@ -1,5 +1,5 @@
 /-
-  Cathedral/Geometry/PolynomialPartGraduation.lean
+  Cathedral/Geometry/Bounds/PolynomialPartGraduation.lean
 
   ## GRADUATING polynomial_part_bound: |c·S·T − T²| ≤ K_p/logN
 

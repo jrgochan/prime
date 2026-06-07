@@ -1,5 +1,5 @@
 /-
-  Cathedral/Geometry/RestrictedMertensBound.lean
+  Cathedral/Geometry/Bounds/RestrictedMertensBound.lean
 
   ## GRADUATING restricted_mertens_bound
 

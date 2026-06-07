@@ -1,5 +1,5 @@
 /-
-  Cathedral/Geometry/GlassStability.lean
+  Cathedral/Geometry/GlassBox/GlassStability.lean
 
   ## THE GLASS ARM: vtGv ≤ 1 from Glass Tower Convergence
 

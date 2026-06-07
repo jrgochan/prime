@@ -1,5 +1,5 @@
 /-
-  Cathedral/Geometry/RowBound.lean
+  Cathedral/Geometry/Bounds/RowBound.lean
 
   ## THE INNER ABEL BOUND: Per-Row L₁ Variation
 

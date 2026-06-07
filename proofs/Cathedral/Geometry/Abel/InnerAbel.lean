@@ -1,5 +1,5 @@
 /-
-  Cathedral/Geometry/InnerAbel.lean
+  Cathedral/Geometry/Abel/InnerAbel.lean
 
   ## THE INNER ABEL BOUND: Connecting Rows to the Abel Engine
 

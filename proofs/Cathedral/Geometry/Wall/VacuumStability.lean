@@ -1,5 +1,5 @@
 /-
-  Cathedral/Geometry/VacuumStability.lean
+  Cathedral/Geometry/Wall/VacuumStability.lean
 
   ## VACUUM STABILITY: vtGv < 1 from Vasyunin Decomposition
 

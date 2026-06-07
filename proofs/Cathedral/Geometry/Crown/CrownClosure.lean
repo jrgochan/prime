@@ -1,5 +1,5 @@
 /-
-  Cathedral/Geometry/CrownClosure.lean
+  Cathedral/Geometry/Crown/CrownClosure.lean
 
   ## THE CROWN CLOSURE: Three Paths to the Riemann Hypothesis 👑
 

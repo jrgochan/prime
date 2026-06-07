@@ -1,5 +1,5 @@
 /-
-  Cathedral/Geometry/SquarefreeCountBound.lean
+  Cathedral/Geometry/Bounds/SquarefreeCountBound.lean
 
   ## GRADUATING sqfreeCount_ge_third: Q(N) ≥ N/3
 

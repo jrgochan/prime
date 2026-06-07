@@ -1,5 +1,5 @@
 /-
-  Cathedral/Geometry/AbelDoubleSum.lean
+  Cathedral/Geometry/Abel/AbelDoubleSum.lean
 
   ## THE ABEL DOUBLE-SUM: Wiring the Graduation Path
 

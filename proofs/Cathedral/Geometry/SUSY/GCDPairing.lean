@@ -1,5 +1,5 @@
 /-
-  Cathedral/Geometry/GCDPairing.lean
+  Cathedral/Geometry/SUSY/GCDPairing.lean
 
   ## GCD PAIRING: THE STRUCTURAL SIGN THEOREM
 

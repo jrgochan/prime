@@ -1,5 +1,5 @@
 /-
-  Cathedral/Geometry/FiniteBaseCaseVerification.lean
+  Cathedral/Geometry/Bounds/FiniteBaseCaseVerification.lean
 
   ## FINITE BASE CASE: fermion ≥ bosonExcess for N ≤ 76
 

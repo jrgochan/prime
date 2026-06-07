@@ -1,5 +1,5 @@
 /-
-  Cathedral/Geometry/GramGraduation.lean
+  Cathedral/Geometry/Renormalization/GramGraduation.lean
 
   ## GRADUATION OF gram_limit — Algebraic Reduction
 

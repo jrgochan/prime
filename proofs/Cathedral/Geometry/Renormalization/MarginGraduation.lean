@@ -1,5 +1,5 @@
 /-
-  Cathedral/Geometry/MarginGraduation.lean
+  Cathedral/Geometry/Renormalization/MarginGraduation.lean
 
   GRADUATION OF euler_mascheroni_rate: (1 - bv) lnN -> gamma + 1
 

@@ -1,5 +1,5 @@
 /-
-  Cathedral/Geometry/GlassTwoLayer.lean
+  Cathedral/Geometry/GlassBox/GlassTwoLayer.lean
 
   ## THE TWO-LAYER COLLAPSE: Möbius Kills the Deep Glass 🔬
 

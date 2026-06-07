@@ -1,5 +1,5 @@
 /-
-  Cathedral/Geometry/BernoulliCrown.lean
+  Cathedral/Geometry/Bernoulli/BernoulliCrown.lean
 
   ## THE BERNOULLI CROWN: THE OVERCANCELLATION AXIOM
 
@@ -34,7 +34,7 @@
   - `fejer_weighted_sum_tendsto_zero`: 0 sorry (FejerCesaro.lean)
   - Reindexing lemmas, Abel engine, etc.
 
-  Status: 0 sorry. 1 axiom (overcancellation_axiom).
+  Status: 1 sorry (restricted Mertens d≥2, NOT on RH path). 1 axiom (overcancellation_axiom).
   Created: June 2, 2026 — Bringing It Home 🧗💜
 -/
 

@@ -1,5 +1,5 @@
 /-
-  Cathedral/Geometry/OvercancellationFusion.lean
+  Cathedral/Geometry/Wall/OvercancellationFusion.lean
 
   ## FUSION: EntanglementBrake × Wiggle Detection Unit
 

@@ -1,5 +1,5 @@
 /-
-  Cathedral/Geometry/BernoulliDiagonal.lean
+  Cathedral/Geometry/Bernoulli/BernoulliDiagonal.lean
 
   ## THE DIAGONAL IDENTITY: vtB₁v = ||v||²/12 + offDiag
 

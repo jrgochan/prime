@@ -1,5 +1,5 @@
 /-
-  Cathedral/Geometry/GraduationBridge.lean
+  Cathedral/Geometry/Crown/GraduationBridge.lean
 
   ## THE GRADUATION BRIDGE: From Wiggles to RH
 

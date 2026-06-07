@@ -1,5 +1,5 @@
 /-
-  Cathedral/Geometry/StrataConvergence.lean
+  Cathedral/Geometry/Crown/StrataConvergence.lean
 
   ## STRATA CONVERGENCE: The Arithmetic of the Relay Race
 

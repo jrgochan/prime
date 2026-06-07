@@ -1,5 +1,5 @@
 /-
-  Cathedral/Geometry/DedekindBound.lean
+  Cathedral/Geometry/Bernoulli/DedekindBound.lean
 
   ## PER-ENTRY BOUNDS ON THE VASYUNIN COTANGENT SUM
 
@@ -12,7 +12,7 @@
 
   This feeds into per-entry anomaly bounds for the Crown Axiom.
 
-  Status: Building...
+  Status: 0 sorry. 0 axioms. 9 theorems proved.
   Created: June 1, 2026
 -/
 

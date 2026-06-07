@@ -1,5 +1,5 @@
 /-
-  Cathedral/Geometry/DivisorCoeffGraduation.lean
+  Cathedral/Geometry/Bounds/DivisorCoeffGraduation.lean
 
   ## GRADUATING divisor_coeff_bound: |y_d| ≤ C_M / (d · lnN)
 

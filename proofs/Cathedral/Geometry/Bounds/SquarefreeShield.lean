@@ -1,5 +1,5 @@
 /-
-  Cathedral/Geometry/SquarefreeShield.lean
+  Cathedral/Geometry/Bounds/SquarefreeShield.lean
 
   ## THE SQUAREFREE SHIELD: Möbius Filtering of GCD Strata
 

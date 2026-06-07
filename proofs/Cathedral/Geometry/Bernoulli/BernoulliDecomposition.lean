@@ -1,5 +1,5 @@
 /-
-  Cathedral/Geometry/BernoulliDecomposition.lean
+  Cathedral/Geometry/Bernoulli/BernoulliDecomposition.lean
 
   ## THE 𝔽₁ DECOMPOSITION: G = B₁ + L₁
 

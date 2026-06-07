@@ -1,5 +1,5 @@
 /-
-  Cathedral/Geometry/AbelFilterBound.lean
+  Cathedral/Geometry/Abel/AbelFilterBound.lean
 
   ## GRADUATING witnessNormSq_ge_third_unfiltered — FULLY PROVED
 

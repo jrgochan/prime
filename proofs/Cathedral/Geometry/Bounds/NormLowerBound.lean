@@ -1,5 +1,5 @@
 /-
-  Cathedral/Geometry/NormLowerBound.lean
+  Cathedral/Geometry/Bounds/NormLowerBound.lean
 
   ## GRADUATING norm_lower_bound: ||v||² ≥ c₀ · N / ln²N
 
@@ -246,16 +246,9 @@ a LOWER bound on ||v||².
 -- documented in §3 above. The primary graduation path uses
 -- the Abel summation chain in §5-§6 below.
 
--- For now, we provide the norm_lower_bound as a theorem with the
--- computational content encapsulated in a sorry, pending the
--- full Abel summation formalization.
-
--- The key axiom from RestrictedBesselGraduation is:
--- axiom norm_lower_bound :
---     ∃ c₀ : ℝ, c₀ > 0 ∧ ∃ N₀ : ℕ, ∀ N : ℕ, N ≥ N₀ →
---       c₀ * ↑N / (Real.log ↑N) ^ 2 ≤ witnessNormSq N
-
--- We will replace this axiom with the following theorem chain:
+-- The axiom `norm_lower_bound` from RestrictedBesselGraduation is decomposed
+-- into three more elementary axioms (sqfreeCount_ge_third, unfilteredTaperSum_lower,
+-- witnessNormSq_ge_third_unfiltered), then reassembled in `norm_lower_bound_graduated`.
 
 -- ════════════════════════════════════════════════════════════════
 -- §5. THE INTEGRAL LOWER BOUND

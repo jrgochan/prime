@@ -1,5 +1,5 @@
 /-
-  Cathedral/Geometry/GlassBox1Graduation.lean
+  Cathedral/Geometry/GlassBox/GlassBox1Graduation.lean
 
   ## GRADUATING GLASS BOX 1: offDiag ≤ 0
 

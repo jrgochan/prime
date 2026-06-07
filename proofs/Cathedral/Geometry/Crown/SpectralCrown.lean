@@ -1,5 +1,5 @@
 /-
-  Cathedral/Geometry/SpectralCrown.lean
+  Cathedral/Geometry/Crown/SpectralCrown.lean
 
   ## SPECTRAL CROWN: THE TWIN EIGENVECTOR THEOREM
 

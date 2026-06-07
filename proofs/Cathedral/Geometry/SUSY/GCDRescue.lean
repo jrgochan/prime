@@ -1,5 +1,5 @@
 /-
-  Cathedral/Geometry/GCDRescue.lean
+  Cathedral/Geometry/SUSY/GCDRescue.lean
 
   ## THE d=2 RESCUE MECHANISM
 

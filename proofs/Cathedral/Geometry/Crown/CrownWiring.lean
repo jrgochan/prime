@@ -1,5 +1,5 @@
 /-
-  Cathedral/Geometry/CrownWiring.lean
+  Cathedral/Geometry/Crown/CrownWiring.lean
 
   ## CROWN WIRING: Three-Way Cancellation → Overcancellation → RH
 

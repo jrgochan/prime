@@ -1,5 +1,5 @@
 /-
-  Cathedral/Geometry/OvercancellationWiring.lean
+  Cathedral/Geometry/Wall/OvercancellationWiring.lean
 
   ## THE CROWN REDUCTION: gram_quad_form_overcancellation → cotangent_sum_bound
 

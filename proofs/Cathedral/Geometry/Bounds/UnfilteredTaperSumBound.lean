@@ -1,5 +1,5 @@
 /-
-  Cathedral/Geometry/UnfilteredTaperSumBound.lean
+  Cathedral/Geometry/Bounds/UnfilteredTaperSumBound.lean
 
   ## GRADUATING unfilteredTaperSum_lower: Σ(1-lnk/lnN)² ≥ N/ln²N
 

@@ -1,5 +1,5 @@
 /-
-  Cathedral/Geometry/GlassBox2Graduation.lean
+  Cathedral/Geometry/GlassBox/GlassBox2Graduation.lean
 
   ## GRADUATING Glass Box 2: Perturbation Absorption
 

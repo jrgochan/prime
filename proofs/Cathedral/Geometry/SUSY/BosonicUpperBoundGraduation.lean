@@ -1,5 +1,5 @@
 /-
-  Cathedral/Geometry/BosonicUpperBoundGraduation.lean
+  Cathedral/Geometry/SUSY/BosonicUpperBoundGraduation.lean
 
   ## GRADUATING bosonic_upper_bound: bosonicSector ≤ 1 + K_B/logN
 

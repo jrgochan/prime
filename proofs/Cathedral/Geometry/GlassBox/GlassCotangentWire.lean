@@ -1,5 +1,5 @@
 /-
-  Cathedral/Geometry/GlassCotangentWire.lean
+  Cathedral/Geometry/GlassBox/GlassCotangentWire.lean
 
   ## THE GLASS-COTANGENT WIRE
 

@@ -1,5 +1,5 @@
 /-
-  Cathedral/Geometry/MarginIdentity.lean
+  Cathedral/Geometry/Renormalization/MarginIdentity.lean
 
   ## The Margin Identity: Path 5 to the Overcancellation Axiom
 

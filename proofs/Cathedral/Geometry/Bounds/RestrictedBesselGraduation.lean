@@ -1,5 +1,5 @@
 /-
-  Cathedral/Geometry/RestrictedBesselGraduation.lean
+  Cathedral/Geometry/Bounds/RestrictedBesselGraduation.lean
 
   ## GRADUATING restricted_bessel: Σ J₂·M₁² ≤ ||v||²
 

@@ -1,5 +1,5 @@
 /-
-  Cathedral/Geometry/EulerMascheroniRate.lean
+  Cathedral/Geometry/Renormalization/EulerMascheroniRate.lean
 
   ## THE EULER-MASCHERONI RATE: (1 - bᵀv)·lnN → γ + 1
 

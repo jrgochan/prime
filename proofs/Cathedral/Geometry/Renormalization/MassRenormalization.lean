@@ -1,5 +1,5 @@
 /-
-  Cathedral/Geometry/MassRenormalization.lean
+  Cathedral/Geometry/Renormalization/MassRenormalization.lean
 
   ## THE MASS RENORMALIZATION THEOREM
 

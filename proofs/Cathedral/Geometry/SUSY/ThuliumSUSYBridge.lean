@@ -1,5 +1,5 @@
 /-
-  Cathedral/Geometry/ThuliumSUSYBridge.lean
+  Cathedral/Geometry/SUSY/ThuliumSUSYBridge.lean
 
   ## THE THULIUM–SUSY BRIDGE: CotRes ≡ Fermion
 

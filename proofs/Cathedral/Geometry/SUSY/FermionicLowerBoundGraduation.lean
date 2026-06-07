@@ -1,5 +1,5 @@
 /-
-  Cathedral/Geometry/FermionicLowerBoundGraduation.lean
+  Cathedral/Geometry/SUSY/FermionicLowerBoundGraduation.lean
 
   ## GRADUATING fermionic_overcancellation 🎓
 

@@ -1,5 +1,5 @@
 /-
-  Cathedral/Geometry/VarianceBound.lean
+  Cathedral/Geometry/Bounds/VarianceBound.lean
 
   ## THE VARIANCE SQUEEZE THEOREM: Var · ln²N ≤ C_V
 

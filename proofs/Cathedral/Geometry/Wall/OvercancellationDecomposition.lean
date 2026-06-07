@@ -1,5 +1,5 @@
 /-
-  Cathedral/Geometry/OvercancellationDecomposition.lean
+  Cathedral/Geometry/Wall/OvercancellationDecomposition.lean
 
   ## THE THREE GLASS BOXES: Decomposing vtGv ≤ 1
 

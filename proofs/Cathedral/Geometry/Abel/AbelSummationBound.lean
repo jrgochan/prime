@@ -1,5 +1,5 @@
 /-
-  Cathedral/Geometry/AbelSummationBound.lean
+  Cathedral/Geometry/Abel/AbelSummationBound.lean
 
   ## GRADUATING witnessNormSq_ge_third_unfiltered
 

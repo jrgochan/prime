@@ -1,5 +1,5 @@
 /-
-  Cathedral/Geometry/CotangentStratification.lean
+  Cathedral/Geometry/Bernoulli/CotangentStratification.lean
 
   ## GCD STRATIFICATION OF THE COTANGENT SUM
 
