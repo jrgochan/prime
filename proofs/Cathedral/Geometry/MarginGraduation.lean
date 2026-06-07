@@ -270,22 +270,51 @@ theorem margin_limit_graduated :
     simp only [zero_add] at h_sum
     refine h_sum.congr (fun N => ?_)
     ring
-  -- Part B → 0 (already proved, uses MertensS2/S3 which are defeq to S₂/S₃)
-  -- Assembly: Eventually bdDotGap N * logN = Part_A·logN - Part_B + (1+γ)
-  -- Part_A·logN → 0 and Part_B → 0, so the sum → 1+γ
-  --
-  -- The proof chain:
-  --   dotGap_eq_expansion: bdDotGap N = 1 - expansion (for N ≥ 10)
-  --   three_part_algebra: (1 - expansion) * logN = Part_A*logN - Part_B + (1+γ)
-  --   Part_A*logN → 0 (S1_times_log_tendsto + S2_shift_times_log_tendsto)
-  --   Part_B → 0 (part_b_tendsto)
-  --
-  -- Remaining sorry: connect MertensS2/S3 ↔ S₂/S₃ (definitionally equal)
-  -- and compose Filter.Tendsto.congr with the eventually-equal chain.
-  sorry
+  -- Part B → 0 (part_b_tendsto uses MertensS2/S3 ≡ S₂/S₃)
+  have hPartB : Tendsto (fun N : ℕ =>
+      (1 - eulerMascheroniConstant) * (S₂ (N - 1) + 1) +
+        (S₃ (N - 1) + 2 * eulerMascheroniConstant))
+      atTop (nhds 0) := part_b_tendsto
+  -- g(N) = Part_A·logN - Part_B + (1+γ) → 0-0+(1+γ) = (1+γ)
+  have hg : Tendsto (fun N : ℕ =>
+      ((1 - eulerMascheroniConstant) * S₁ (N - 1) + (S₂ (N - 1) + 1)) *
+        Real.log (N : ℝ) -
+      ((1 - eulerMascheroniConstant) * (S₂ (N - 1) + 1) +
+        (S₃ (N - 1) + 2 * eulerMascheroniConstant)) +
+      (1 + eulerMascheroniConstant))
+      atTop (nhds (1 + eulerMascheroniConstant)) := by
+    have h_diff := hPartA.sub hPartB
+    have h_zero : (0 : ℝ) - 0 = 0 := sub_self 0
+    rw [h_zero] at h_diff
+    have h_add := h_diff.add_const (1 + eulerMascheroniConstant)
+    have h_eq : 0 + (1 + eulerMascheroniConstant) = 1 + eulerMascheroniConstant := zero_add _
+    rw [h_eq] at h_add
+    refine h_add.congr (fun N => ?_)
+    ring
+  -- bdDotGap N · logN =ᶠ g(N) for N ≥ 10, so Tendsto g → Tendsto bdDotGap*log
+  apply hg.congr'
+  filter_upwards [Filter.eventually_ge_atTop 10] with N hN
+  have hLN_ne : Real.log (N : ℝ) ≠ 0 :=
+    ne_of_gt (Real.log_pos (by exact_mod_cast (show 1 < N by omega)))
+  -- g(N) = bdDotGap N * logN by dotGap_eq_expansion + three_part_algebra
+  calc ((1 - eulerMascheroniConstant) * S₁ (N - 1) + (S₂ (N - 1) + 1)) *
+        Real.log (N : ℝ) -
+      ((1 - eulerMascheroniConstant) * (S₂ (N - 1) + 1) +
+        (S₃ (N - 1) + 2 * eulerMascheroniConstant)) +
+      (1 + eulerMascheroniConstant)
+    _ = (1 - (-(1 - eulerMascheroniConstant) * S₁ (N - 1) -
+          S₂ (N - 1) +
+          ((1 - eulerMascheroniConstant) * S₂ (N - 1) + S₃ (N - 1)) /
+            Real.log (N : ℝ))) * Real.log ↑N :=
+        (three_part_algebra (S₁ (N - 1)) (S₂ (N - 1)) (S₃ (N - 1))
+          (Real.log ↑N) eulerMascheroniConstant hLN_ne).symm
+    _ = bdDotGap N * Real.log ↑N := by rw [dotGap_eq_expansion N hN]
 
 end Cathedral.Geometry.MarginGraduation
 
 end
+
+
+
 
 
