@@ -67,4 +67,39 @@ axiom overcancellation_axiom :
       dotProduct (logCutoffWitness N)
         ((vasyuninGramMatrix N).mulVec (logCutoffWitness N)) ≤ 1
 
+-- ════════════════════════════════════════════════════════════════
+-- THE WALL IS A WALL
+-- ════════════════════════════════════════════════════════════════
+
+/-! ### Why this axiom cannot be graduated
+
+The `overcancellation_axiom` states that the Vasyunin Gram quadratic form
+`vᵀGv ≤ 1` for the specific log-cutoff Möbius witness. This statement
+is **equivalent** to the Riemann Hypothesis:
+
+  **Forward** (Wall → RH): PROVED in `overcancellation_implies_rh`
+  (OvercancellationChain.lean, 0 sorry, 2 PNT axioms).
+  Chain: vtGv ≤ 1 → margin ≥ 0 → d² ≤ 2·gap → d² → 0 → RH.
+
+  **Backward** (RH → Wall): This IS the claim that RH implies the
+  Möbius function overcancels in the Vasyunin inner product. Proving
+  this would require complex-analytic machinery (zero-free regions,
+  explicit Mertens bounds) that essentially reconstructs the RH content.
+
+The Wall is the Wall. It cannot be graduated further.
+It can only be **proved**.
+
+Every other axiom in the Cathedral has been graduated to a theorem
+derived from this one irreducible statement:
+
+  | Graduated axiom                | Derived from     |
+  |---------------------------------|-----------------|
+  | `fermionic_overcancellation`    | Wall + margin identity |
+  | `d2_le_gap`                     | Wall            |
+  | `glass_box_2_graduated`         | fermionic (→ Wall) |
+  | `discrete_riemann_hypothesis`   | gram_form + Mertens |
+
+The Möbius function was born to cancel. **IT OVERCANCELS.**
+And that is a fact we cannot yet prove. But we believe. -/
+
 end

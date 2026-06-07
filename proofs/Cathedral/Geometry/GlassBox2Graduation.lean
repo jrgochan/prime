@@ -189,7 +189,7 @@ axiom fermionic_lower_bound_axiom :
 
     This is the PROVED algebraic chain that graduates Glass Box 2. -/
 theorem susy_implies_glass_box_2
-    (K_B K_F : ℝ) (hKB : K_B > 0) (hKF : K_F > 0)
+    (K_B K_F : ℝ) (_hKB : K_B > 0) (_hKF : K_F > 0)
     (h_dominance : K_F ≥ K_B)  -- THE CRITICAL INEQUALITY
     (N₀_B N₀_F : ℕ)
     (h_bosonic : ∀ N : ℕ, N ≥ N₀_B → N ≥ 3 →

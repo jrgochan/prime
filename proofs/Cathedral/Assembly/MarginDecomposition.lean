@@ -359,7 +359,7 @@ theorem overcancellation_from_components :
   unfold scaledMargin vtGvMargin at h_pos
   have h_margin_pos : 0 < (1 - vtGvForm N) := by
     by_contra h_le
-    push_neg at h_le
+    push Not at h_le
     linarith [mul_nonpos_of_nonpos_of_nonneg h_le (le_of_lt hlog_pos)]
   linarith
 
@@ -458,7 +458,7 @@ theorem fermionic_eventually_positive :
   unfold scaledFermionicSector at h_scaled_pos
   -- fermionicSector * lnN > C_S/2 > 0 and lnN > 0 ⟹ fermionicSector > 0
   by_contra h_le
-  push_neg at h_le
+  push Not at h_le
   linarith [mul_nonpos_of_nonpos_of_nonneg h_le (le_of_lt hlog_pos)]
 
 /-- **SUSY BREAKING MAGNITUDE**: The margin constant C = C_S − C_nc > 0.
