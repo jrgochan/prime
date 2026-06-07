@@ -212,38 +212,80 @@ theorem dotGap_eq_expansion (N : ℕ) (hN : 10 ≤ N) :
     simp only [vasyuninMeanEntry]
   simp_rw [this]
   exact h_exp
-
 -- THE GRADUATION: (1 - bᵀv) · logN → 1 + γ
+
+-- Helper: S₁(N-1) · logN → 0
+private theorem S1_times_log_tendsto
+    (C : ℝ) (hC : 0 < C)
+    (h_tail : ∀ N : ℕ, 2 ≤ N →
+      |S₁ N| ≤ C * (N : ℝ) ^ (-(1:ℝ)/4) ∧
+      |S₂ N - (-1)| ≤ C * (N : ℝ) ^ (-(1:ℝ)/4) * Real.log (N : ℝ) ∧
+      |S₃ N - (-2 * Real.eulerMascheroniConstant)| ≤
+        C * (N : ℝ) ^ (-(1:ℝ)/4) * (Real.log (N : ℝ)) ^ 2) :
+    Tendsto (fun N : ℕ => S₁ (N - 1) * Real.log (N : ℝ))
+      atTop (nhds 0) := by
+  -- |S₁(N-1)| ≤ C·(N-1)^{-1/4} and (N-1)^{-1/4}·logN → 0
+  -- Squeeze: |S₁(N-1)·logN| ≤ C·(N-1)^{-1/4}·logN → 0
+  -- Since (N-1)^{-1/4} ≤ 2·N^{-1/4} for large N, and N^{-1/4}·logN → 0
+  sorry -- Squeeze with rpow_neg_quarter_log_tendsto and h_tail
+
+-- Helper: (S₂(N-1)+1) · logN → 0
+private theorem S2_shift_times_log_tendsto
+    (C : ℝ) (hC : 0 < C)
+    (h_tail : ∀ N : ℕ, 2 ≤ N →
+      |S₁ N| ≤ C * (N : ℝ) ^ (-(1:ℝ)/4) ∧
+      |S₂ N - (-1)| ≤ C * (N : ℝ) ^ (-(1:ℝ)/4) * Real.log (N : ℝ) ∧
+      |S₃ N - (-2 * Real.eulerMascheroniConstant)| ≤
+        C * (N : ℝ) ^ (-(1:ℝ)/4) * (Real.log (N : ℝ)) ^ 2) :
+    Tendsto (fun N : ℕ => (S₂ (N - 1) + 1) * Real.log (N : ℝ))
+      atTop (nhds 0) := by
+  -- |S₂(N-1)+1| ≤ C·(N-1)^{-1/4}·log(N-1) and (N-1)^{-1/4}·log(N-1)·logN → 0
+  -- ≤ C·(N-1)^{-1/4}·(logN)² → 0 by rpow_neg_quarter_log_sq_tendsto
+  sorry -- Squeeze with rpow_neg_quarter_log_sq_tendsto and h_tail
 
 /-- **GRADUATION THEOREM**: bdDotGap N * logN → 1 + γ.
 
     This GRADUATES the euler_mascheroni_rate axiom.
     The proof assembles:
     1. dotGap_eq_expansion: bdDotGap = 1 - expansion (from AbelMean)
-    2. three_part_algebra: (1-expansion)·logN = Part A + Part B + (1+γ)
+    2. three_part_algebra: (1-expansion)·logN = Part A·logN - Part B + (1+γ)
     3. part_b_tendsto: Part B → 0 (Tendsto arithmetic)
-    4. Part A → 0: from quantitative bounds + rpow decay
-
-    PROVED. Zero sorry. Zero new axioms. -/
+    4. Part A·logN → 0: from quantitative bounds + rpow decay -/
 theorem margin_limit_graduated :
     Tendsto (fun N : ℕ => bdDotGap N * Real.log ↑N)
       atTop (nhds (1 + eulerMascheroniConstant)) := by
-  -- Step 1: Get the Mertens function bound from the Cathedral
   obtain ⟨C_m, hC_pos, hMertens⟩ := Cathedral.Vasyunin.mertens_34_unconditional
-  -- Step 2: Get quantitative tail bounds from abel_mertens_tail_raw
   obtain ⟨C_tail, hC_tail_pos, h_tail⟩ := abel_mertens_tail_raw C_m hC_pos hMertens
     pnt_mu_div_k pnt_mu_log_div_k pnt_mu_log_sq_div_k
-  -- Step 3: For N ≥ 10, bdDotGap N = 1 - expansion, so
-  -- bdDotGap N * logN = Part_A*logN - Part_B + (1+γ)
-  -- where Part A → 0 and Part B → 0, leaving 1+γ.
-  -- This requires: eventually rewriting bdDotGap via dotGap_eq_expansion,
-  -- applying three_part_algebra, and showing Parts A,B → 0.
-  sorry  -- Lean-level assembly of proved pieces. Requires:
-         -- 1. Filter.Tendsto.congr (for N ≥ 10 eventually)
-         -- 2. Squeeze Part A using h_tail + rpow_neg_quarter_log_sq_tendsto
-         -- 3. Tendsto.add + Tendsto.sub for Part B (part_b_tendsto)
-         -- All mathematical content is PROVED above.
+  -- Part A · logN → 0
+  have hPartA : Tendsto (fun N : ℕ =>
+      ((1 - eulerMascheroniConstant) * S₁ (N - 1) + (S₂ (N - 1) + 1)) *
+        Real.log (N : ℝ))
+      atTop (nhds 0) := by
+    have h1 := (S1_times_log_tendsto C_tail hC_tail_pos h_tail).const_mul
+      (1 - eulerMascheroniConstant)
+    simp only [mul_zero] at h1
+    have h2 := S2_shift_times_log_tendsto C_tail hC_tail_pos h_tail
+    have h_sum := h1.add h2
+    simp only [zero_add] at h_sum
+    refine h_sum.congr (fun N => ?_)
+    ring
+  -- Part B → 0 (already proved, uses MertensS2/S3 which are defeq to S₂/S₃)
+  -- Assembly: Eventually bdDotGap N * logN = Part_A·logN - Part_B + (1+γ)
+  -- Part_A·logN → 0 and Part_B → 0, so the sum → 1+γ
+  --
+  -- The proof chain:
+  --   dotGap_eq_expansion: bdDotGap N = 1 - expansion (for N ≥ 10)
+  --   three_part_algebra: (1 - expansion) * logN = Part_A*logN - Part_B + (1+γ)
+  --   Part_A*logN → 0 (S1_times_log_tendsto + S2_shift_times_log_tendsto)
+  --   Part_B → 0 (part_b_tendsto)
+  --
+  -- Remaining sorry: connect MertensS2/S3 ↔ S₂/S₃ (definitionally equal)
+  -- and compose Filter.Tendsto.congr with the eventually-equal chain.
+  sorry
 
 end Cathedral.Geometry.MarginGraduation
 
 end
+
+
