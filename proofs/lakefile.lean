@@ -740,4 +740,6 @@ lean_lib «Cathedral» where
     `Cathedral.Geometry.L1TrackingLemma,
     -- Mass Renormalization (d²(v)·logN → c_holes = 2+γ−log4π, algebraic glue, June 7 2026) 🌀⚛️
     `Cathedral.Geometry.MassRenormalization,
+    -- Margin Graduation (N^{-1/4}·log²N → 0, Part B Tendsto, three-part algebra, June 7 2026) 🎓
+    `Cathedral.Geometry.MarginGraduation,
   ]
