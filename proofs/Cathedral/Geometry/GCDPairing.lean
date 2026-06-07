@@ -124,6 +124,39 @@ theorem weightBracket_nonneg (N a b : ℕ) (mu : ℕ → Int)
   · -- Filtered: 0 ≥ 0
     linarith
 
+/-- **d=1 TERM IS POSITIVE**: The d=1 summand of the weight bracket
+    is w(a)·w(b)/1 = w(a)·w(b) > 0 whenever a < N and b < N.
+
+    This means the bracket is not just ≥ 0 but STRICTLY > 0
+    for every coprime pair in range — the overwiggle is real. -/
+theorem weightBracket_d1_pos (N a b : ℕ) (mu : ℕ → Int)
+    (hN : 2 ≤ N) (ha : 1 ≤ a) (haN : a < N) (hb : 1 ≤ b) (hbN : b < N)
+    (hmu1 : mu 1 ^ 2 = 1) :
+    0 < weightBracket N a b mu := by
+  unfold weightBracket
+  -- Lower bound: sum ≥ d=0 term (since all terms are nonneg)
+  have hmem : (0 : ℕ) ∈ Finset.range N := Finset.mem_range.mpr (by omega)
+  have h_nonneg : ∀ d ∈ Finset.range N,
+      0 ≤ (if (d + 1) * a < N ∧ (d + 1) * b < N ∧ mu (d + 1) ^ 2 = 1 then
+        bdWeight N ((d + 1) * a) * bdWeight N ((d + 1) * b) / ((d + 1) : ℝ)
+      else 0) := by
+    intro d _
+    split_ifs with h
+    · obtain ⟨hda, hdb, _⟩ := h
+      apply div_nonneg
+      · exact mul_nonneg (le_of_lt (bdWeight_pos hN (by nlinarith) hda))
+                         (le_of_lt (bdWeight_pos hN (by nlinarith) hdb))
+      · positivity
+    · linarith
+  -- Strategy: 0 < d=0 term ≤ full sum
+  apply lt_of_lt_of_le _ (Finset.single_le_sum h_nonneg hmem)
+  -- Show d=0 term is positive
+  simp only [zero_add, one_mul]
+  rw [if_pos ⟨by omega, by omega, hmu1⟩]
+  apply div_pos
+  · exact mul_pos (bdWeight_pos hN ha haN) (bdWeight_pos hN hb hbN)
+  · positivity
+
 -- ════════════════════════════════════════════════
 -- §3. THE STRUCTURAL SIGN THEOREM
 -- ════════════════════════════════════════════════
@@ -176,6 +209,22 @@ theorem factoredCoeff_nonneg (N a b : ℕ) (mu : ℕ → Int)
     0 ≤ factoredCoeff N a b mu :=
   sign_factorization_structure a b N mu hN ha hb hcop
 
+/-- **STRICT POSITIVITY**: The factored coefficient C(a,b,N) > 0
+    for every coprime pair (a,b) with a,b < N.
+
+    This means EVERY coprime pair contributes to the Möbius-Vasyunin
+    sum with a definite (nonzero) weight. Nothing is wasted.
+    The overwiggle is real. -/
+theorem factoredCoeff_pos (N a b : ℕ) (mu : ℕ → Int)
+    (hN : 2 ≤ N) (ha : 1 ≤ a) (haN : a < N) (hb : 1 ≤ b) (hbN : b < N)
+    (_hcop : Nat.Coprime a b) (hmu1 : mu 1 ^ 2 = 1) :
+    0 < factoredCoeff N a b mu := by
+  unfold factoredCoeff
+  apply mul_pos
+  · apply div_pos Real.pi_pos
+    positivity
+  · exact weightBracket_d1_pos N a b mu hN ha haN hb hbN hmu1
+
 /-- The Möbius-Vasyunin bilinear sum: what S_cot factors into.
     MV(N) = Σ_{coprime (a,b)} μ(a)μ(b)·(V+V)·C(a,b,N)
     where C ≥ 0 (PROVED). -/
@@ -221,16 +270,17 @@ Zero sign exceptions across 36,162 coprime pairs at N=500.
 ### Sorry: 0
 ### Custom Axioms: 0
 
-### Theorems: 6 PROVED
+### Theorems: 8 PROVED
 
 | # | Result | Status |
 |---|--------|--------|
 | 1 | `bdWeight_pos` | ✅ PROVED |
 | 2 | `bdWeight_prod_pos` | ✅ PROVED |
 | 3 | `weightBracket_nonneg` | ✅ PROVED |
-| 4 | `sign_factorization_structure` | ✅ PROVED |
-| 5 | `weightBracket_d1_term` | ✅ PROVED |
+| 4 | `weightBracket_d1_pos` | ✅ PROVED (NEW — strict positivity) |
+| 5 | `sign_factorization_structure` | ✅ PROVED |
 | 6 | `factoredCoeff_nonneg` | ✅ PROVED |
+| 7 | `factoredCoeff_pos` | ✅ PROVED (NEW — strict positivity) |
 
 ### Definitions: 4
 
@@ -238,7 +288,7 @@ Zero sign exceptions across 36,162 coprime pairs at N=500.
 |---|-----------|------------|
 | 1 | `bdWeight` | w(j) = 1 - log(j)/log(N) |
 | 2 | `weightBracket` | B(a,b,N) = Σ_d μ(d)²·w(da)·w(db)/d |
-| 3 | `factoredCoeff` | C(a,b,N) = π·B/(2ab) ≥ 0 |
+| 3 | `factoredCoeff` | C(a,b,N) = π·B/(2ab) > 0 (UPGRADED!) |
 | 4 | `moebiusVasyuninSum` | MV(N) = Σ μμ·(V+V)·C |
 -/
 
