@@ -484,19 +484,83 @@ theorem double_abel_bound {N : ℕ} (v : Fin N → ℝ) (K : Fin N → Fin N →
     -- Outer partial sums: tapered Mertens is bounded
     (h_partial : ∀ M : Fin N, |∑ k ∈ Finset.filter (fun x => x ≤ M) Finset.univ, v k| ≤ C_partial) :
     |∑ i : Fin N, ∑ j : Fin N, v i * K i j * v j| ≤
-    C_inner * (C_partial * N) := by
+    C_inner * (2 * C_partial * N) := by
   -- Use bilinear_row_bound with C = C_inner
   have h_brb := bilinear_row_bound v K C_inner hCi h_inner
-  -- Bound Σ|v_k| using N × max|v_k|, or more precisely using partial sum bound
-  -- For now, use the triangle inequality: Σ|v_k| ≤ N (crude)
   calc |∑ i : Fin N, ∑ j : Fin N, v i * K i j * v j|
       ≤ C_inner * ∑ k : Fin N, |v k| := h_brb
-    _ ≤ C_inner * (C_partial * N) := by
+    _ ≤ C_inner * (2 * C_partial * N) := by
         apply mul_le_mul_of_nonneg_left _ hCi
-        -- Σ|v_k| ≤ C_partial × N is a crude bound;
-        -- the TIGHT double Abel would replace this with
-        -- C_partial × (1 + TV(inner)/C_inner)
-        sorry  -- This is where the tight double Abel lives
+        -- Key: each |v k| ≤ 2·C_partial (by telescope: v(k) = A(k) - A(k-1))
+        have hv_pointwise : ∀ k : Fin N, |v k| ≤ 2 * C_partial := by
+          intro k
+          by_cases hk0 : k.val = 0
+          · -- k = 0: A(0) = v(0), so |v(0)| ≤ C_partial ≤ 2·C_partial
+            have h_filt : Finset.filter (fun x : Fin N => x ≤ k) Finset.univ = {k} := by
+              ext j; simp only [Finset.mem_filter, Finset.mem_univ, true_and,
+                Finset.mem_singleton]; constructor
+              · intro hle; exact Fin.le_antisymm hle (by rw [Fin.le_iff_val_le_val]; omega)
+              · intro heq; rw [heq]
+            have hAk := h_partial k
+            rw [h_filt, Finset.sum_singleton] at hAk
+            linarith
+          · -- k > 0: v(k) = A(k) - A(k-1), so |v(k)| ≤ |A(k)| + |A(k-1)| ≤ 2·C_partial
+            have hkpos : 0 < k.val := Nat.pos_of_ne_zero hk0
+            let k' : Fin N := ⟨k.val - 1, by omega⟩
+            have hk'_val : k'.val = k.val - 1 := rfl
+            have hAk := h_partial k
+            have hAk' := h_partial k'
+            -- Split: filter (· ≤ k) = filter (· ≤ k') ∪ {k}
+            have h_filt_eq : Finset.filter (fun x : Fin N => x ≤ k) Finset.univ =
+                Finset.filter (fun x : Fin N => x ≤ k') Finset.univ ∪ {k} := by
+              ext j; simp only [Finset.mem_filter, Finset.mem_univ, true_and,
+                Finset.mem_union, Finset.mem_singleton]
+              constructor
+              · intro hle
+                by_cases hjk : j = k
+                · right; exact hjk
+                · left; rw [Fin.le_iff_val_le_val] at hle ⊢
+                  show j.val ≤ k.val - 1; omega
+              · intro hjk
+                rcases hjk with h | h
+                · have hh := h; rw [Fin.le_iff_val_le_val] at hh
+                  rw [Fin.le_iff_val_le_val]; rw [hk'_val] at hh; omega
+                · rw [h]
+            have h_disj : Disjoint (Finset.filter (fun x : Fin N => x ≤ k') Finset.univ) {k} := by
+              rw [Finset.disjoint_singleton_right]
+              intro hmem
+              rw [Finset.mem_filter] at hmem
+              have hle := hmem.2
+              rw [Fin.le_iff_val_le_val] at hle
+              rw [hk'_val] at hle; omega
+            -- A(k) = A(k') + v(k)
+            have h_split : (∑ j ∈ Finset.filter (fun x : Fin N => x ≤ k) Finset.univ, v j) =
+                (∑ j ∈ Finset.filter (fun x : Fin N => x ≤ k') Finset.univ, v j) + v k := by
+              rw [h_filt_eq, Finset.sum_union h_disj, Finset.sum_singleton]
+            -- v(k) = A(k) - A(k')
+            have hv_eq : v k =
+                (∑ j ∈ Finset.filter (fun x : Fin N => x ≤ k) Finset.univ, v j) -
+                (∑ j ∈ Finset.filter (fun x : Fin N => x ≤ k') Finset.univ, v j) := by
+              linarith [h_split]
+            -- |v(k)| = |A(k) - A(k')| ≤ |A(k)| + |A(k')| ≤ 2C_partial
+            rw [hv_eq]
+            have h_tri : ∀ a b : ℝ, |a - b| ≤ |a| + |b| := fun a b => by
+              rcases le_or_gt 0 (a - b) with h | h
+              · rw [abs_of_nonneg h]
+                linarith [le_abs_self a, neg_abs_le b]
+              · rw [abs_of_neg h]
+                linarith [neg_abs_le a, le_abs_self b]
+            linarith [h_tri
+              (∑ j ∈ Finset.filter (fun x : Fin N => x ≤ k) Finset.univ, v j)
+              (∑ j ∈ Finset.filter (fun x : Fin N => x ≤ k') Finset.univ, v j),
+              hAk, hAk']
+        -- Sum: Σ|v k| ≤ Σ(2·C_partial) = 2·C_partial·N
+        calc ∑ k : Fin N, |v k|
+            ≤ ∑ _k : Fin N, (2 * C_partial) :=
+              Finset.sum_le_sum (fun k _ => hv_pointwise k)
+          _ = 2 * C_partial * ↑N := by
+              rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
+              ring
 
 /-- **THE TIGHT DOUBLE ABEL** (structural theorem):
 
@@ -638,14 +702,13 @@ Where max|A(M)| depends on the Mertens function behavior.
 -- ════════════════════════════════════════════════
 
 /-!
-## Audit — AbelDoubleSum.lean (June 2, 2026)
+## Audit — AbelDoubleSum.lean (June 7, 2026 — Zero Sorry Update)
 
-### Sorry: 1
-- `double_abel_bound`: Σ|v_k| ≤ C_partial × N (crude, needs tight Abel)
+### Sorry: 0 ✅
 
 ### Custom Axioms: 0 ✅
 
-### Theorems: 10
+### Theorems: 10+
 
 | # | Result | Status |
 |---|--------|--------|
@@ -656,23 +719,19 @@ Where max|A(M)| depends on the Mertens function behavior.
 | 5 | `abel_double_sum_template` | ✅ PROVED (placeholder) |
 | 6 | `bilinear_row_bound` | ✅ PROVED (zero sorry) |
 | 7 | `outer_abel_bound` | ✅ PROVED (structural) |
-| 8 | `double_abel_bound` | ⚠️ 1 sorry (Σ|v| ≤ C·N) |
+| 8 | `double_abel_bound` | ✅ PROVED (telescope: |v(k)| ≤ 2C from partial sums) |
 | 9 | `tight_double_abel_structural` | ✅ PROVED |
 | 10 | `mertens_beats_variation` | ✅ PROVED (tautology) |
 
-### The Remaining 1 sorry:
+### double_abel_bound — Now Proved
 
-The sorry in `double_abel_bound` is CRUDE — it uses Σ|v_k| ≤ C·N
-which doesn't capture the Möbius cancellation. The TIGHT version
-would use outer Abel summation by parts to replace Σ|v_k| with
-max|A(M)| × (1 + TV(inner)/C_inner), giving:
+The bound is `|Σᵢⱼ vᵢKvⱼ| ≤ C_inner × (2·C_partial·N)` where:
+- C_inner bounds each inner row sum
+- C_partial bounds each partial sum of v
+- Factor of 2 comes from telescope: v(k) = A(k) - A(k-1), |v(k)| ≤ 2C_partial
 
-  |vtGv| ≤ C_inner × max|A| × (1 + TV/C_inner)
-         = max|A| × (C_inner + TV)
-
-This is `tight_double_abel_structural` (proved structurally).
-The sorry lives in connecting the abstract bound to the specific
-Abel summation with our concrete weight and kernel functions.
+The TIGHT double Abel (`tight_double_abel_structural`) replaces the N factor
+with (1 + TV(inner)/C_inner), capturing column smoothness of the kernel.
 -/
 
 end Cathedral.Geometry.AbelDoubleSum
