@@ -154,14 +154,14 @@ axiom pnt_mu_log_sq_div_k :
 -- ════════════════════════════════════════════════
 
 -- Define the PNT sub-sums for the algebraic expansion
-private def S₁ (M : ℕ) : ℝ :=
+def S₁ (M : ℕ) : ℝ :=
   ∑ k ∈ Finset.Icc 1 M, (↑(ArithmeticFunction.moebius k) : ℝ) / (k : ℝ)
 
-private def S₂ (M : ℕ) : ℝ :=
+def S₂ (M : ℕ) : ℝ :=
   ∑ k ∈ Finset.Icc 1 M, (↑(ArithmeticFunction.moebius k) : ℝ) *
     Real.log (k : ℝ) / (k : ℝ)
 
-private def S₃ (M : ℕ) : ℝ :=
+def S₃ (M : ℕ) : ℝ :=
   ∑ k ∈ Finset.Icc 1 M, (↑(ArithmeticFunction.moebius k) : ℝ) *
     (Real.log (k : ℝ)) ^ 2 / (k : ℝ)
 
@@ -435,7 +435,7 @@ private lemma bd_summand_algebra (M Lk LN K G : ℝ) :
     1. bd_summand_algebra with ring (dummy variables)
     2. Pointwise substitution via sum_congr
     3. Sum shattering via sum_add_distrib + mul_sum -/
-private lemma mean_algebraic_expansion (N : ℕ) (hN : 10 ≤ N) :
+lemma mean_algebraic_expansion (N : ℕ) (hN : 10 ≤ N) :
     ∑ i : Fin (N - 1), bdMoebiusWeight N i *
       ((Real.log ↑(i.val + 1) + 1 - Real.eulerMascheroniConstant) /
         ↑(i.val + 1)) =
@@ -489,7 +489,7 @@ private lemma mean_algebraic_expansion (N : ℕ) (hN : 10 ≤ N) :
   -- Step 4: The algebra ((1-γ)/L·S₂ + 1/L·S₃ = ((1-γ)·S₂ + S₃)/L) follows by ring
   ring
 /-- THE FORGE: Regroup expanded expression into error terms (Theorist directive). -/
-private lemma mean_error_shift (S1 S2 S3 LN G : ℝ) :
+lemma mean_error_shift (S1 S2 S3 LN G : ℝ) :
     -(1 - G) * S1 - S2 + ((1 - G) * S2 + S3) / LN - 1 =
     -(1 - G) * S1 - (S2 + 1) + ((1 - G) * (S2 + 1) + (S3 + 2 * G) - (1 + G)) / LN := by
   ring
