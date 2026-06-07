@@ -224,10 +224,66 @@ private theorem S1_times_log_tendsto
         C * (N : ℝ) ^ (-(1:ℝ)/4) * (Real.log (N : ℝ)) ^ 2) :
     Tendsto (fun N : ℕ => S₁ (N - 1) * Real.log (N : ℝ))
       atTop (nhds 0) := by
-  -- |S₁(N-1)| ≤ C·(N-1)^{-1/4} and (N-1)^{-1/4}·logN → 0
-  -- Squeeze: |S₁(N-1)·logN| ≤ C·(N-1)^{-1/4}·logN → 0
-  -- Since (N-1)^{-1/4} ≤ 2·N^{-1/4} for large N, and N^{-1/4}·logN → 0
-  sorry -- Squeeze with rpow_neg_quarter_log_tendsto and h_tail
+  -- Strategy: |S₁(N-1)·logN| ≤ C·(N-1)^{-1/4}·logN
+  -- and (N-1)^{-1/4}·logN = (N-1)^{-1/4}·log(N-1) · (logN/log(N-1))
+  -- First factor → 0, second factor → 1, so product → 0.
+  -- Simpler: use rpow_neg_quarter_log_tendsto composed with fun N => N-1
+  -- to get (N-1)^{-1/4}·log(N-1) → 0, then multiply by logN/log(N-1) → 1.
+  -- But the cleanest proof: the sequence is dominated by a sequence → 0.
+  rw [Metric.tendsto_atTop]
+  intro ε hε
+  -- Get the rpow decay for (N-1)
+  have h_rpow := rpow_neg_quarter_log_tendsto
+  rw [Metric.tendsto_atTop] at h_rpow
+  obtain ⟨N₁, hN₁⟩ := h_rpow (ε / (4 * C)) (div_pos hε (mul_pos (by norm_num : (0:ℝ) < 4) hC))
+  refine ⟨max (N₁ + 1) 3, fun N hN_ge => ?_⟩
+  simp only [dist_zero_right]
+  have hN3 : 3 ≤ N := by omega
+  have hN1_ge2 : 2 ≤ N - 1 := by omega
+  have hN1_geN1 : N₁ ≤ N - 1 := by omega
+  obtain ⟨hS1, _, _⟩ := h_tail (N - 1) hN1_ge2
+  have hN1_pos : (0:ℝ) < ((N - 1 : ℕ) : ℝ) := Nat.cast_pos.mpr (by omega)
+  have hlogN_pos : 0 < Real.log (N : ℝ) :=
+    Real.log_pos (by exact_mod_cast show 1 < N by omega)
+  have hlogN1_pos : 0 < Real.log ((N - 1 : ℕ) : ℝ) :=
+    Real.log_pos (by exact_mod_cast show 1 < N - 1 by omega)
+  -- |S₁(N-1)·logN| ≤ C·(N-1)^{-1/4}·logN
+  have h_rpow_pos : 0 < ((N - 1 : ℕ) : ℝ) ^ (-(1:ℝ)/4) :=
+    Real.rpow_pos_of_pos hN1_pos _
+  have h_bound : ‖S₁ (N - 1) * Real.log ↑N‖ ≤
+      C * ((N - 1 : ℕ) : ℝ) ^ (-(1:ℝ)/4) * Real.log ↑N := by
+    rw [Real.norm_eq_abs, abs_mul, abs_of_pos hlogN_pos]
+    exact mul_le_mul_of_nonneg_right hS1 hlogN_pos.le
+  -- logN ≤ 2·log(N-1) for N ≥ 3 (because N ≤ (N-1)² for N ≥ 3)
+  have hN1_cast_add : (N : ℝ) = ((N - 1 : ℕ) : ℝ) + 1 := by
+    have h1 : 1 ≤ N := by omega
+    rw [Nat.cast_sub h1]; ring
+  have hlog_ratio : Real.log (N : ℝ) ≤ 2 * Real.log ((N - 1 : ℕ) : ℝ) := by
+    have hN1_ge : (2 : ℝ) ≤ ((N - 1 : ℕ) : ℝ) := by exact_mod_cast hN1_ge2
+    have hN_le_sq : (N : ℝ) ≤ ((N - 1 : ℕ) : ℝ) ^ 2 := by
+      rw [hN1_cast_add]; nlinarith [sq_nonneg (((N - 1 : ℕ) : ℝ) - 2)]
+    calc Real.log (N : ℝ) ≤ Real.log (((N - 1 : ℕ) : ℝ) ^ 2) :=
+          Real.log_le_log (by rw [hN1_cast_add]; linarith) hN_le_sq
+      _ = 2 * Real.log ((N - 1 : ℕ) : ℝ) := by rw [Real.log_pow]; ring
+  -- Combine: C·(N-1)^{-1/4}·logN ≤ 2C·(N-1)^{-1/4}·log(N-1)
+  have h_prod_bound : C * ((N - 1 : ℕ) : ℝ) ^ (-(1:ℝ)/4) * Real.log ↑N ≤
+      2 * C * ((N - 1 : ℕ) : ℝ) ^ (-(1:ℝ)/4) * Real.log ((N - 1 : ℕ) : ℝ) := by
+    have : 0 ≤ C * ((N - 1 : ℕ) : ℝ) ^ (-(1:ℝ)/4) :=
+      mul_nonneg hC.le h_rpow_pos.le
+    nlinarith
+  -- (N-1)^{-1/4}·log(N-1) < ε/(4C) (from rpow decay at N-1 ≥ N₁)
+  have h_rpow_at : dist (((N - 1 : ℕ) : ℝ) ^ (-(1:ℝ)/4) *
+      Real.log ((N - 1 : ℕ) : ℝ)) 0 < ε / (4 * C) := hN₁ (N - 1) hN1_geN1
+  rw [dist_zero_right, Real.norm_eq_abs, abs_of_nonneg
+    (mul_nonneg h_rpow_pos.le hlogN1_pos.le)] at h_rpow_at
+  -- Final chain
+  calc ‖S₁ (N - 1) * Real.log ↑N‖
+    _ ≤ C * ((N - 1 : ℕ) : ℝ) ^ (-(1:ℝ)/4) * Real.log ↑N := h_bound
+    _ ≤ 2 * C * ((N - 1 : ℕ) : ℝ) ^ (-(1:ℝ)/4) * Real.log ((N - 1 : ℕ) : ℝ) :=
+        h_prod_bound
+    _ < 2 * C * (ε / (4 * C)) := by nlinarith
+    _ = ε / 2 := by field_simp; ring
+    _ < ε := half_lt_self hε
 
 -- Helper: (S₂(N-1)+1) · logN → 0
 private theorem S2_shift_times_log_tendsto
@@ -239,9 +295,72 @@ private theorem S2_shift_times_log_tendsto
         C * (N : ℝ) ^ (-(1:ℝ)/4) * (Real.log (N : ℝ)) ^ 2) :
     Tendsto (fun N : ℕ => (S₂ (N - 1) + 1) * Real.log (N : ℝ))
       atTop (nhds 0) := by
-  -- |S₂(N-1)+1| ≤ C·(N-1)^{-1/4}·log(N-1) and (N-1)^{-1/4}·log(N-1)·logN → 0
-  -- ≤ C·(N-1)^{-1/4}·(logN)² → 0 by rpow_neg_quarter_log_sq_tendsto
-  sorry -- Squeeze with rpow_neg_quarter_log_sq_tendsto and h_tail
+  -- |S₂(N-1)+1| ≤ C·(N-1)^{-1/4}·log(N-1)
+  -- |(S₂(N-1)+1)·logN| ≤ C·(N-1)^{-1/4}·log(N-1)·logN
+  -- log(N-1) ≤ logN, so log(N-1)·logN ≤ (logN)² ≤ 4·(log(N-1))²
+  -- (N-1)^{-1/4}·(log(N-1))² < ε from rpow_neg_quarter_log_sq_tendsto
+  rw [Metric.tendsto_atTop]
+  intro ε hε
+  have h_rpow := rpow_neg_quarter_log_sq_tendsto
+  rw [Metric.tendsto_atTop] at h_rpow
+  obtain ⟨N₁, hN₁⟩ := h_rpow (ε / (8 * C)) (div_pos hε (mul_pos (by norm_num : (0:ℝ) < 8) hC))
+  refine ⟨max (N₁ + 1) 3, fun N hN_ge => ?_⟩
+  simp only [dist_zero_right]
+  have hN3 : 3 ≤ N := by omega
+  have hN1_ge2 : 2 ≤ N - 1 := by omega
+  have hN1_geN1 : N₁ ≤ N - 1 := by omega
+  obtain ⟨_, hS2, _⟩ := h_tail (N - 1) hN1_ge2
+  have hN1_pos : (0:ℝ) < ((N - 1 : ℕ) : ℝ) := Nat.cast_pos.mpr (by omega)
+  have hlogN_pos : 0 < Real.log (N : ℝ) :=
+    Real.log_pos (by exact_mod_cast show 1 < N by omega)
+  have hlogN1_pos : 0 < Real.log ((N - 1 : ℕ) : ℝ) :=
+    Real.log_pos (by exact_mod_cast show 1 < N - 1 by omega)
+  have h_rpow_pos : 0 < ((N - 1 : ℕ) : ℝ) ^ (-(1:ℝ)/4) :=
+    Real.rpow_pos_of_pos hN1_pos _
+  -- |S₂(N-1)+1| = |S₂(N-1)-(-1)|
+  have hS2_eq : |S₂ (N - 1) + 1| = |S₂ (N - 1) - (-1)| := by ring_nf
+  -- log(N-1) ≤ logN
+  have hlogN1_le : Real.log ((N - 1 : ℕ) : ℝ) ≤ Real.log (N : ℝ) :=
+    Real.log_le_log hN1_pos (by exact_mod_cast show (N - 1 : ℕ) ≤ N by omega)
+  -- logN ≤ 2·log(N-1)
+  have hN1_cast_add : (N : ℝ) = ((N - 1 : ℕ) : ℝ) + 1 := by
+    have h1 : 1 ≤ N := by omega
+    rw [Nat.cast_sub h1]; ring
+  have hlog_ratio : Real.log (N : ℝ) ≤ 2 * Real.log ((N - 1 : ℕ) : ℝ) := by
+    have hN1_ge : (2 : ℝ) ≤ ((N - 1 : ℕ) : ℝ) := by exact_mod_cast hN1_ge2
+    have hN_le_sq : (N : ℝ) ≤ ((N - 1 : ℕ) : ℝ) ^ 2 := by
+      rw [hN1_cast_add]; nlinarith [sq_nonneg (((N - 1 : ℕ) : ℝ) - 2)]
+    calc Real.log (N : ℝ) ≤ Real.log (((N - 1 : ℕ) : ℝ) ^ 2) :=
+          Real.log_le_log (by rw [hN1_cast_add]; linarith) hN_le_sq
+      _ = 2 * Real.log ((N - 1 : ℕ) : ℝ) := by rw [Real.log_pow]; ring
+  -- |(S₂(N-1)+1)·logN| ≤ C·(N-1)^{-1/4}·log(N-1)·logN
+  have h_bound : ‖(S₂ (N - 1) + 1) * Real.log ↑N‖ ≤
+      C * ((N - 1 : ℕ) : ℝ) ^ (-(1:ℝ)/4) * Real.log ((N - 1 : ℕ) : ℝ) *
+        Real.log ↑N := by
+    rw [Real.norm_eq_abs, abs_mul, abs_of_pos hlogN_pos, hS2_eq]
+    exact mul_le_mul_of_nonneg_right hS2 hlogN_pos.le
+  -- log(N-1)·logN ≤ 2·(log(N-1))² (since logN ≤ 2·log(N-1))
+  have h_log_prod : C * ((N - 1 : ℕ) : ℝ) ^ (-(1:ℝ)/4) *
+      Real.log ((N - 1 : ℕ) : ℝ) * Real.log ↑N ≤
+      2 * C * ((N - 1 : ℕ) : ℝ) ^ (-(1:ℝ)/4) *
+      (Real.log ((N - 1 : ℕ) : ℝ)) ^ 2 := by
+    have : 0 ≤ C * ((N - 1 : ℕ) : ℝ) ^ (-(1:ℝ)/4) * Real.log ((N - 1 : ℕ) : ℝ) :=
+      mul_nonneg (mul_nonneg hC.le h_rpow_pos.le) hlogN1_pos.le
+    nlinarith
+  -- (N-1)^{-1/4}·(log(N-1))² < ε/(8C)
+  have h_rpow_at : dist (((N - 1 : ℕ) : ℝ) ^ (-(1:ℝ)/4) *
+      (Real.log ((N - 1 : ℕ) : ℝ)) ^ 2) 0 < ε / (8 * C) := hN₁ (N - 1) hN1_geN1
+  rw [dist_zero_right, Real.norm_eq_abs, abs_of_nonneg
+    (mul_nonneg h_rpow_pos.le (sq_nonneg _))] at h_rpow_at
+  -- Final chain
+  calc ‖(S₂ (N - 1) + 1) * Real.log ↑N‖
+    _ ≤ C * ((N - 1 : ℕ) : ℝ) ^ (-(1:ℝ)/4) * Real.log ((N - 1 : ℕ) : ℝ) *
+        Real.log ↑N := h_bound
+    _ ≤ 2 * C * ((N - 1 : ℕ) : ℝ) ^ (-(1:ℝ)/4) *
+        (Real.log ((N - 1 : ℕ) : ℝ)) ^ 2 := h_log_prod
+    _ < 2 * C * (ε / (8 * C)) := by nlinarith
+    _ = ε / 4 := by field_simp; ring
+    _ < ε := by linarith
 
 /-- **GRADUATION THEOREM**: bdDotGap N * logN → 1 + γ.
 
