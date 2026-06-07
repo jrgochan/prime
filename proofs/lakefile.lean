@@ -738,4 +738,6 @@ lean_lib «Cathedral» where
     `Cathedral.Geometry.StrataCrownBridge,
     -- L₁ Tracking Lemma (two infinities cancel: tracking ↔ overcancellation → RH, June 6 2026) 🏔️🌉🏛️
     `Cathedral.Geometry.L1TrackingLemma,
+    -- Mass Renormalization (d²(v)·logN → c_holes = 2+γ−log4π, algebraic glue, June 7 2026) 🌀⚛️
+    `Cathedral.Geometry.MassRenormalization,
   ]
