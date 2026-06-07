@@ -8,7 +8,7 @@
 #   make setup   — install everything
 # ============================================
 
-.PHONY: help build papers verify axioms cascade crown-audit clock
+.PHONY: help build papers verify axioms rh cascade crown-audit clock
 .PHONY: hyperzeta hyperzeta-origin hyperzeta-explorer particle-zoo
 .PHONY: check setup setup-lean setup-rust setup-node setup-python setup-latex setup-gmp
 .PHONY: experiment-vasyunin experiment-covariance experiment-bd
@@ -46,6 +46,57 @@ axioms: ## List all axioms in the Cathedral
 	@echo ""
 	@echo "  Plus Lean kernel: propext, Classical.choice, Quot.sound"
 	@echo "  ═══════════════════════════════════════════"
+	@echo ""
+
+rh: ## 🌟 Show what axioms the compiler needs for theorem RiemannHypothesis
+	@$(ENV) require lean
+	@echo ""
+	@echo "  🏛️  The Riemann Hypothesis — Axiom Requirements"
+	@echo "  ═══════════════════════════════════════════════════"
+	@echo ""
+	@echo "  Building the Cathedral..."
+	@cd proofs && lake build 2>&1 | tail -1
+	@echo ""
+	@echo "  ┌─────────────────────────────────────────────────┐"
+	@echo "  │  PATH 1: Overcancellation (2 PNT axioms)       │"
+	@echo "  │  overcancellation_implies_rh                    │"
+	@echo "  └─────────────────────────────────────────────────┘"
+	@cd proofs && printf '%s\n' \
+		'import Cathedral.Assembly.OvercancellationChain' \
+		'#print axioms overcancellation_implies_rh' \
+		| lake env lean --stdin 2>&1 | grep -v "^warning:" | grep -v "^info:" | grep -v "^Note:" | grep -v "^$$" | sed 's/^/  /' || true
+	@echo ""
+	@echo "  ┌─────────────────────────────────────────────────┐"
+	@echo "  │  PATH 2: Unified Fermionic (1 axiom + 2 PNT)   │"
+	@echo "  │  rh_from_unified_fermionic                      │"
+	@echo "  └─────────────────────────────────────────────────┘"
+	@cd proofs && printf '%s\n' \
+		'import Cathedral.Geometry.FermionicLowerBoundGraduation' \
+		'#print axioms Cathedral.Geometry.FermionicLowerBoundGraduation.rh_from_unified_fermionic' \
+		| lake env lean --stdin 2>&1 | grep -v "^warning:" | grep -v "^info:" | grep -v "^Note:" | grep -v "^$$" | sed 's/^/  /' || true
+	@echo ""
+	@echo "  ┌─────────────────────────────────────────────────┐"
+	@echo "  │  PATH 3: Vacuum Stability (1 wall axiom + PNT) │"
+	@echo "  │  VacuumStability.riemann_hypothesis             │"
+	@echo "  └─────────────────────────────────────────────────┘"
+	@cd proofs && printf '%s\n' \
+		'import Cathedral.Geometry.VacuumStability' \
+		'#print axioms Cathedral.Geometry.VacuumStability.riemann_hypothesis' \
+		| lake env lean --stdin 2>&1 | grep -v "^warning:" | grep -v "^info:" | grep -v "^Note:" | grep -v "^$$" | sed 's/^/  /' || true
+	@echo ""
+	@echo "  ┌─────────────────────────────────────────────────┐"
+	@echo "  │  PATH 4: Nyman-Beurling Equivalence (4 PNT)    │"
+	@echo "  │  nyman_beurling_equivalence                     │"
+	@echo "  └─────────────────────────────────────────────────┘"
+	@cd proofs && printf '%s\n' \
+		'import Cathedral.Assembly.MainChain' \
+		'#print axioms nyman_beurling_equivalence' \
+		| lake env lean --stdin 2>&1 | grep -v "^warning:" | grep -v "^info:" | grep -v "^Note:" | grep -v "^$$" | sed 's/^/  /' || true
+	@echo ""
+	@echo "  ═══════════════════════════════════════════════════"
+	@echo "  Lean kernel axioms (always present, non-mathematical):"
+	@echo "    propext, Classical.choice, Quot.sound"
+	@echo "  ═══════════════════════════════════════════════════"
 	@echo ""
 
 papers: ## Build the companion papers
@@ -325,7 +376,7 @@ help: ## Show this help message
 	@echo "  Usage: make <target>"
 	@echo ""
 	@echo "  ─── THE CATHEDRAL ────────────────────────────────────────"
-	@grep -E '^(build|verify|axioms|cascade|crown-audit|papers|clock|hyperzeta[a-z-]*|particle-zoo):.*##' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  %-24s %s\n", $$1, $$2}'
+	@grep -E '^(build|verify|axioms|rh|cascade|crown-audit|papers|clock|hyperzeta[a-z-]*|particle-zoo):.*##' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  %-24s %s\n", $$1, $$2}'
 	@echo ""
 	@echo "  ─── EXPERIMENTS & AUDITING ───────────────────────────────"
 	@grep -E '^(audit|experiment-[a-z]+|stats):.*##' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  %-24s %s\n", $$1, $$2}'

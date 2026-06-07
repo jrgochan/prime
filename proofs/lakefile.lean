@@ -688,6 +688,10 @@ lean_lib «Cathedral» where
     `Cathedral.Geometry.GraduationBridge,
     -- Margin Identity (Path 5: d² = 2gap - margin, Cauchy-Schwarz, June 2 2026)
     `Cathedral.Geometry.MarginIdentity,
+    -- Pythagorean Strike (d² = d²_opt + ‖v−v_opt‖²_G, Wall budget, June 6 2026) ⚡🏛️
+    `Cathedral.Geometry.PythagoreanStrike,
+    -- Euler-Mascheroni Rate ((1-bᵀv)·lnN → γ+1, the (γ+1) Discovery, June 6 2026) 🏛️
+    `Cathedral.Geometry.EulerMascheroniRate,
     -- Variance Bound (Path 5f: Var·ln²N ≤ C_V, the width of the leash, June 4 2026) 🎯
     `Cathedral.Geometry.VarianceBound,
     -- Overcancellation Fusion (unified overcancellation paths, June 2 2026)
@@ -712,4 +716,26 @@ lean_lib «Cathedral» where
     `Cathedral.Assembly.TwoPhaseRH,
     -- Finite Phase Proof (Phase 1 graduated: oracle vtGv ≤ 0.42 for N < 76, June 4 2026)
     `Cathedral.Assembly.FinitePhaseProof,
+    -- Squarefree Count Bound (Q(N) ≥ N/3, prime sieve, June 5 2026) 🎓
+    `Cathedral.Geometry.SquarefreeCountBound,
+    -- Unfiltered Taper Sum Bound (Σ(1-lnk/lnN)² ≥ N/ln²N, integral comparison, June 5 2026) 🎓
+    `Cathedral.Geometry.UnfilteredTaperSumBound,
+    -- Abel Filter Bound (||v||² ≥ unfilteredTaperSum/3, Abel+density, June 6 2026) 🎓
+    `Cathedral.Geometry.AbelFilterBound,
+    -- Polynomial Part Graduation (T²·logN→0 PROVED, c·S·T−T² analysis, June 6 2026) 🎓
+    `Cathedral.Geometry.PolynomialPartGraduation,
+    -- Finite Base Case (fermion ≥ bosonExcess for N ≤ 76, Clean Room oracle, June 6 2026) 🧹
+    `Cathedral.Geometry.FiniteBaseCaseVerification,
+    -- Thulium-SUSY Bridge (CotRes ≡ fermion, LogCorr ≡ eRatio, Mas Que Nada Session 🎵 June 6 2026)
+    `Cathedral.Geometry.ThuliumSUSYBridge,
+    -- GCD Rescue (μ(2k)=−μ(k), d=2 kernel halving, rescue framework, June 6 2026) 🌀
+    `Cathedral.Geometry.GCDRescue,
+    -- GCD Fermionic Wiring (GCDRescue + GCDPairing + Stratification → crown, June 6 2026) 🌊
+    `Cathedral.Geometry.GCDFermionicWiring,
+    -- Strata Convergence (N²>N, margin decomposition, rebel bound, f(1)=PNT, June 6 2026) 🏔️
+    `Cathedral.Geometry.StrataConvergence,
+    -- Strata Crown Bridge (strata budget → crown closure, relay fuel, margin certificate, June 6 2026) 🌉
+    `Cathedral.Geometry.StrataCrownBridge,
+    -- L₁ Tracking Lemma (two infinities cancel: tracking ↔ overcancellation → RH, June 6 2026) 🏔️🌉🏛️
+    `Cathedral.Geometry.L1TrackingLemma,
   ]
