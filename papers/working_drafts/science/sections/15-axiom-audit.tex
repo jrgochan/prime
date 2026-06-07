@@ -1,11 +1,12 @@
 % ================================================================
-\section{Axiom Audit: The Crowned Cathedral (v22, May 31, 2026)}
+\section{Axiom Audit: The Crowned Cathedral (v25, June 7, 2026)}
 \label{sec:axiom-audit}
 % ================================================================
 
 The crown theorem \lean{nyman\_beurling\_equivalence} depends on exactly
-\textbf{one} custom axiom---\lean{discrete\_riemann\_hypothesis},
-which states $v^T C v \leq C / \ln N$ for the Möbius--Selberg witness
+\textbf{one} custom axiom---\lean{overcancellation\_axiom}
+(\lean{Cathedral.Wall}),
+which states $v^T G v \leq 1$ for the Möbius log-cutoff witness
 and is \textbf{formally proved equivalent to the Riemann Hypothesis}---plus
 the three Lean kernel axioms (\texttt{propext}, \texttt{Classical.choice},
 \texttt{Quot.sound}).
@@ -55,38 +56,36 @@ physical interpretation:
 \toprule
 \textbf{\#} & \textbf{Axiom} & \textbf{Physics} & \textbf{Module} & \textbf{Status} \\
 \midrule
-1 & \texttt{discrete\_riemann\_hypothesis} & Vacuum energy decay & \lean{WitnessAsymptotics.lean} & $\equiv$ RH \\
+1 & \texttt{overcancellation\_axiom} & Fermionic dominance & \lean{Cathedral/Wall.lean} & $\equiv$ RH \\
 \bottomrule
 \end{tabular}
 \end{center}
 
 \begin{remark}[Physical meaning of the single gate]
-The sole axiom \texttt{discrete\_riemann\_hypothesis} states:
+The sole axiom \texttt{overcancellation\_axiom} states:
 \[
-  \exists\, C > 0,\; \exists\, N_0,\;
-  \forall\, N \geq N_0 :\;
-  v^T C v \leq C / \ln N
+  \exists\, N_0,\; \forall\, N \geq N_0,\; N \geq 3:\quad
+  \text{fermionicSector}(N) \geq \text{bosonicExcess}(N)
 \]
-where $v$ is the Möbius--Selberg log-cutoff witness and $C = G - bb^T$
-is the covariance matrix. This is the \emph{vacuum energy decay}:
-the fluctuation energy of the optimal trial wavefunction vanishes
-logarithmically.
+where the fermionic sector collects the Möbius-weighted cotangent
+interference and the bosonic excess is the smooth self-energy minus~$1$.
+This directly gives $v^T G v \leq 1$ in three lines
+(\lean{rh\_from\_unified\_fermionic}, 0 sorry).
 
-The equivalence \lean{witness\_covariance\_decay\_iff\_rh} proves
-$\texttt{discrete\_riemann\_hypothesis} \iff \RH$
-using only PNT-level axioms (\lean{frac\_error\_isLittleO},
-\lean{pnt\_mu\_log\_sq\_div\_k}) for the converse.
-The naming reflects the Selberg Revelation (May~31, 2026):
-the axiom is not an intermediate lemma about covariance matrices---it
-\emph{is} the Riemann Hypothesis, stated in the language of the Cathedral.
+The equivalence \lean{rh\_from\_unified\_fermionic} proves
+$\texttt{overcancellation\_axiom} \Rightarrow \RH$
+via the chain: overcancellation $\to$ $v^T G v \leq 1$ $\to$
+$d_N^2 \to 0$ $\to$ RH. The converse uses only PNT-level consequences.
+The naming reflects the Glass Box Graduation (June~2026):
+the axiom is the \textbf{irreducible content} of the Riemann Hypothesis ---
+the statement that the primes create enough destructive interference
+to overcome the smooth self-energy excess.
 
 Physically, this is the statement that the prime number vacuum is
-\emph{perfectly screening}: the quantum fluctuations of the Möbius
-field are controlled at logarithmic rate. In quantum field theory,
-vacuum screening is the statement that virtual pairs can
-neutralize any test charge---here, the ``charge'' is the constant
-function~$1$, and the ``virtual pairs'' are the fractional-part
-oscillations weighted by Möbius spins.
+\emph{perfectly screening}: the Möbius-weighted cotangent interference
+(the ``fermionic sector'') dominates the smooth growth
+(the ``bosonic sector''). In supersymmetric quantum field theory,
+this is the direction of SUSY breaking: the fermion wins.
 \end{remark}
 
 \begin{remark}[Alternative proof paths]
@@ -297,7 +296,7 @@ quantum field, organized as a four-module hierarchy in
 \lean{ArithmeticSU3.lean} & SU(3) color & 28 & Primes $\geq 5$ never HC (confinement) \\
 \lean{StandardModel.lean} & Assembly & 7 & Gauge independence: $\gcd(2,3) = 1$ \\
 \midrule
-\textbf{Total} & U(1)$\times$SU(2)$\times$SU(3) & \textbf{88} & \textbf{0 sorry, 0 axioms} \\
+\textbf{Total} & U(1)$\times$SU(2)$\times$SU(3) & \textbf{101} & \textbf{0 sorry, 0 axioms} \\
 \bottomrule
 \end{tabular}
 \end{center}

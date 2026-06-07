@@ -370,4 +370,40 @@ at doubled indices is exactly half the interaction at the original
 indices.
 \end{correspondence}
 
+\subsection{The GCD Rescue: The Relay Race (v25, June 7, 2026)}
+\label{sec:gcd-rescue}
+
+The GCD Rescue mechanism (\lean{GCDRescue.lean}, 15~theorems,
+zero sorry, zero axioms) reveals the {\em dynamical} structure
+underlying the parity anatomy: the $d = 2$ stratum
+\textbf{rescues} the coprime ($d = 1$) sector.
+
+\begin{principle}[The Relay Race]
+The coprime cotangent energy $E_{\mathrm{cot}}^{d=1}$ and the
+$d=2$ cotangent energy $E_{\mathrm{cot}}^{d=2}$ are linked by
+three structural identities:
+\begin{enumerate}
+  \item \textbf{Sign flip} (\lean{mu\_double\_neg}, proved):
+    $\mu(2k) = -\mu(k)$ for odd~$k$.
+    The M\"obius weights at even indices are the sign-reverse
+    of their odd preimages --- the $d=2$ stratum inherits the
+    odd--odd interference with opposite sign.
+  \item \textbf{Kernel scaling} (\lean{eCot\_scale\_half}, proved):
+    $e_{\mathrm{Cot}}(2j, 2k) = \tfrac{1}{2}\, e_{\mathrm{Cot}}(j, k)$.
+    The cotangent interaction at doubled indices is exactly half
+    the interaction at the original indices.
+  \item \textbf{Harmonic divergence} (\lean{relay\_never\_ends}, proved):
+    The stratum sum $\sum_d 1/d$ diverges --- the relay race of
+    coprime rescue $\to$ $d=2$ rescue $\to$ $d=6$ rescue $\to \cdots$
+    never terminates. Each successive GCD stratum provides a
+    fraction of the rescue, and the harmonic series ensures
+    infinitely many strata contribute.
+\end{enumerate}
+In quantum field theory, this is a {\em cascade of screening layers}:
+the coprime sector is the ``bare charge,'' and each successive GCD
+stratum provides an additional screening correction with magnitude
+$\propto 1/d$. The total screening is the harmonic series ---
+logarithmically divergent, but summing to a finite physical result
+via the Euler product.
+\end{principle}
 
