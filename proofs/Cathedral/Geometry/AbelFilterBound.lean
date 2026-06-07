@@ -243,7 +243,7 @@ theorem taper_antitone_range (N : ℕ) (hN : 3 ≤ N)
 -- ════════════════════════════════════════════════════════════════
 
 /-- Each term of the witness norm equals the squarefree-indicator form. -/
-private lemma witness_term_eq_indicator (N : ℕ) (hN : 3 ≤ N) (i : Fin N) :
+private lemma witness_term_eq_indicator (N : ℕ) (_hN : 3 ≤ N) (i : Fin N) :
     (logCutoffWitness N i) ^ 2 =
     if Squarefree (i.val + 1) then
       (1 - Real.log ↑(i.val + 1) / Real.log ↑N) ^ 2

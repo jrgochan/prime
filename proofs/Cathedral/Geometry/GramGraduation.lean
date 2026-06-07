@@ -267,6 +267,80 @@ theorem rh_from_gram_graduation : RiemannHypothesis :=
   Cathedral.Vasyunin.gram_bound_implies_rh gram_form_upper_bound_graduated
 
 -- ════════════════════════════════════════════════════════════════
+-- §6½. THE TRENCH COAT REVERSAL: d2_logN_limit → Wall
+-- ════════════════════════════════════════════════════════════════
+
+/-- **THE WALL FROM THE TRENCH COAT**: d2_logN_limit → overcancellation_axiom.
+
+    This is STRONGER than gram_form_upper_bound_graduated (which gives
+    vᵀGv ≤ 1 + K/logN). Here we prove vᵀGv ≤ 1 — the Wall itself.
+
+    Proof: gram_limit_graduated gives (vᵀGv-1)·logN → L₁ where
+    L₁ = -γ - log4π ≈ -3.108 < 0.
+
+    Since L₁ < 0, the Tendsto extracts: eventually (vᵀGv-1)·logN < 0.
+    Since logN > 0 for N ≥ 3, this gives vᵀGv < 1 ≤ 1.
+
+    Combined with overcancellation_implies_rh (Wall → RH, PROVED),
+    this closes half the ↔:  d2_logN_limit → Wall → RH.
+
+    The remaining half (RH → d2_logN_limit) requires formalizing
+    Báez-Duarte's (2003) conditional theorem. -/
+theorem wall_from_d2_limit :
+    ∃ N₀ : ℕ, ∀ N : ℕ, N ≥ N₀ → N ≥ 3 →
+      dotProduct (Cathedral.Vasyunin.logCutoffWitness N)
+        ((Cathedral.Vasyunin.vasyuninGramMatrix N).mulVec
+          (Cathedral.Vasyunin.logCutoffWitness N)) ≤ 1 := by
+  -- Step 1: gram_limit_graduated gives Tendsto ... (nhds L₁)
+  set L₁ := -eulerMascheroniConstant - Real.log (4 * Real.pi) with hL₁_def
+  have h_tend := gram_limit_graduated
+  -- Step 2: L₁ < 0 (since γ > 0 and log4π > 0)
+  have hL₁_neg : L₁ < 0 := by
+    simp only [hL₁_def]
+    have hγ_pos : (0 : ℝ) < eulerMascheroniConstant := by
+      linarith [one_half_lt_eulerMascheroniConstant]
+    have hlog_pos : (0 : ℝ) < Real.log (4 * Real.pi) :=
+      Real.log_pos (by linarith [Real.pi_gt_three] : (1 : ℝ) < 4 * Real.pi)
+    linarith
+  -- Step 3: Extract N₀ from Tendsto with ε = |L₁|
+  rw [Metric.tendsto_atTop] at h_tend
+  obtain ⟨N₀, hN₀⟩ := h_tend |L₁| (abs_pos.mpr (ne_of_lt hL₁_neg))
+  -- Step 4: For N ≥ max N₀ 3, prove vᵀGv ≤ 1
+  refine ⟨max N₀ 3, fun N hN hN3 => ?_⟩
+  have hN_ge : N ≥ N₀ := by omega
+  -- Step 5: |(bdQuadForm N - 1) * logN - L₁| < |L₁|
+  have h_dist := hN₀ N hN_ge
+  rw [Real.dist_eq] at h_dist
+  -- This gives: L₁ - |L₁| < (bdQuadForm N - 1) * logN < L₁ + |L₁|
+  -- Since L₁ < 0: |L₁| = -L₁, so L₁ + |L₁| = 0
+  -- Therefore: (bdQuadForm N - 1) * logN < 0
+  have h_upper := (abs_lt.mp h_dist).2
+  have h_neg : (bdQuadForm N - 1) * Real.log ↑N < 0 := by
+    have : L₁ + |L₁| = 0 := by
+      rw [abs_of_neg hL₁_neg]; ring
+    linarith
+  -- Step 6: logN > 0 for N ≥ 3
+  have hlogN_pos : (0 : ℝ) < Real.log ↑N :=
+    Real.log_pos (by exact_mod_cast (show 1 < N by omega))
+  -- Step 7: (bdQuadForm N - 1) * logN < 0 and logN > 0 → bdQuadForm N < 1
+  have h_bd_lt : bdQuadForm N < 1 := by
+    by_contra h
+    push Not at h
+    have : (bdQuadForm N - 1) * Real.log ↑N ≥ 0 :=
+      mul_nonneg (by linarith) hlogN_pos.le
+    linarith
+  -- Step 8: Bridge to vᵀGv via quadForm_bridge_aux
+  have h_N_sub : (N-1) + 1 = N := Nat.sub_add_cancel (by omega : 1 ≤ N)
+  have h_bridge : dotProduct (Cathedral.Vasyunin.logCutoffWitness N)
+      ((Cathedral.Vasyunin.vasyuninGramMatrix N).mulVec
+        (Cathedral.Vasyunin.logCutoffWitness N)) =
+      bdQuadForm N := by
+    unfold bdQuadForm
+    exact h_N_sub ▸ quadForm_bridge_aux (N-1) (by omega : 2 ≤ N-1)
+  rw [h_bridge]
+  linarith
+
+-- ════════════════════════════════════════════════════════════════
 -- §7. AUDIT
 -- ════════════════════════════════════════════════════════════════
 
@@ -288,6 +362,7 @@ theorem rh_from_gram_graduation : RiemannHypothesis :=
 | 4 | **`gram_limit_graduated`** | ✅ PROVED | **THE MAIN THEOREM** |
 | 5 | `d2_limit_from_axiom` | ✅ PROVED | Direct from axiom |
 | 6 | `mass_renormalization_assembled` | ✅ PROVED | d²·logN → c_holes |
+| 7 | **`wall_from_d2_limit`** | ✅ PROVED | **THE WALL** (vᵀGv ≤ 1) |
 
 ### Axiom Budget
 
@@ -299,6 +374,17 @@ Everything else is PROVED:
   - `margin_limit_graduated` (from #1): (1-bᵀv)·logN → 1+γ
   - `gram_limit_graduated` (from #1 + #2): (vᵀGv-1)·logN → -γ-log4π
   - `mass_renormalization_assembled` (from #1 + #2): d²·logN → c_holes
+  - `wall_from_d2_limit` (from #1 + #2): vᵀGv ≤ 1 (THE WALL) ⭐
+
+### The Trench Coat Reversal: d2_logN_limit → Wall → RH
+
+  The chain is now closed in one direction:
+    d2_logN_limit → gram_limit_graduated → wall_from_d2_limit → overcancellation_implies_rh → RH
+
+  The proof: L₁ = -γ - log4π ≈ -3.108 < 0, so eventually
+  (vᵀGv-1)·logN < 0. Since logN > 0, vᵀGv < 1. QED.
+
+  Missing link for Wall ↔ RH: RH → d2_logN_limit (Báez-Duarte 2003 conditional).
 
 ### The Physics: Mass Renormalization Complete
 
