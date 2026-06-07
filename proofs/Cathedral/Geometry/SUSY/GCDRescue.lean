@@ -33,7 +33,11 @@
 import Mathlib.Data.Real.Basic
 import Mathlib.Data.Nat.GCD.Basic
 import Mathlib.Data.Nat.Prime.Basic
-import Mathlib.NumberTheory.ArithmeticFunction
+import Mathlib.NumberTheory.ArithmeticFunction.Defs
+import Mathlib.NumberTheory.ArithmeticFunction.Misc
+import Mathlib.NumberTheory.ArithmeticFunction.Moebius
+import Mathlib.NumberTheory.ArithmeticFunction.VonMangoldt
+import Mathlib.NumberTheory.ArithmeticFunction.Zeta
 import Mathlib.Analysis.PSeries
 
 noncomputable section

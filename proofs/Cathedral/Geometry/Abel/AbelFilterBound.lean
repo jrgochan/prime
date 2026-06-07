@@ -61,7 +61,7 @@ private lemma sqfree_indicator_sum_eq_count (n : ℕ) :
     ∑ k ∈ Icc 1 n, (if Squarefree k then (1 : ℝ) else 0) =
     ↑(NormLowerBound.sqfreeCount n) := by
   unfold NormLowerBound.sqfreeCount
-  push_cast; simp [Finset.sum_boole]
+  simp [Finset.sum_boole]
 
 /-- sqfreeCount recurrence: Q(n+1) = Q(n) + indicator(n+1). -/
 private lemma sqfreeCount_succ (n : ℕ) :

@@ -155,7 +155,7 @@ axiom gram_limit (vtGv_seq : ℕ → ℝ) (γ_val : ℝ)
 theorem mass_renormalization
     (btv_seq vtGv_seq d2_seq : ℕ → ℝ)
     (γ_val : ℝ)
-    (hγ : γ_val = Real.eulerMascheroniConstant)
+    (_hγ : γ_val = Real.eulerMascheroniConstant)
     (h_d2 : ∀ N, d2_seq N = 1 - 2 * btv_seq N + vtGv_seq N)
     (h_margin : Filter.Tendsto (fun N => (1 - btv_seq N) * Real.log ↑N)
                   Filter.atTop (nhds (1 + γ_val)))
