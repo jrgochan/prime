@@ -52,15 +52,20 @@ open Cathedral.Geometry.MarginGraduation
 
     d²(v) · logN → c_holes = 2 + γ - log(4π)
 
-    This is a known unconditional result (Báez-Duarte 2003):
-    the log-cutoff Möbius witness achieves the optimal distance
-    rate for the Nyman-Beurling approximation.
+    ⚠️ TRENCH COAT WARNING (June 7, 2026 — per Theorist review):
+    This result is proved by Báez-Duarte (2003) CONDITIONALLY on RH.
+    Since d²·logN → c_holes implies d² → 0, which implies RH via
+    nyman_beurling_converse, this axiom IS EQUIVALENT TO RH.
+    It is NOT an unconditional result — if it were, it would
+    prove the Riemann Hypothesis and win the Millennium Prize.
 
     The constant c_holes = 2 + γ - log4π ≈ 0.0462 arises from
     the Mellin transform of the residual 1 - D_N(s) evaluated
     against 1/ζ(s) on the critical line.
 
-    STATUS: Axiomatized. Provable via Mellin analysis. -/
+    STATUS: Axiom (≡ RH). The algebraic reduction is correct:
+    d2_logN_limit + mertens_34 ⟹ gram_form_upper_bound.
+    But this is an inter-RH-equivalent exchange, not a graduation. -/
 axiom d2_logN_limit :
     Tendsto (fun N : ℕ => bdMoebiusD2 N * Real.log ↑N)
       atTop (nhds (2 + eulerMascheroniConstant - Real.log (4 * Real.pi)))
@@ -194,10 +199,12 @@ open Cathedral.Vasyunin in
 
     The quadForm_bridge_aux (PROVED) converts to Vasyunin form.
 
-    AXIOM REDUCTION:
-      BEFORE: gram_form_upper_bound_direct (≡ RH, 1 Crown axiom)
-      AFTER:  d2_logN_limit + mertens_34 (2 known unconditional results)
-      The Crown axiom is GRADUATED. RH follows from known number theory. -/
+    AXIOM EXCHANGE (not graduation — per Theorist review, June 7):
+      BEFORE: gram_form_upper_bound_direct (≡ RH)
+      AFTER:  d2_logN_limit (≡ RH) + mertens_34 (unconditional)
+      This is an inter-RH-equivalent exchange: we traded one RH-equivalent
+      axiom for another. The algebraic bridge is correct and beautiful
+      (Conservation of Difficulty), but d2_logN_limit IS RH in a trench coat. -/
 theorem gram_form_upper_bound_graduated :
     ∃ K_G : ℝ, K_G > 0 ∧ ∃ N₀ : ℕ, ∀ N : ℕ, N ≥ N₀ →
       N ≥ 3 →
@@ -239,21 +246,23 @@ theorem gram_form_upper_bound_graduated :
   -- h_bridge : vᵀGv(logCutoff, N) = bdQuadForm N
   linarith
 
-/-- **COROLLARY**: The Riemann Hypothesis follows from 2 known unconditional axioms.
+/-- **COROLLARY**: RH from the Mass Renormalization axioms.
 
-    Proof chain:
+    ⚠️ TRENCH COAT (per Theorist review, June 7, 2026):
+    This does NOT prove RH unconditionally. The axiom d2_logN_limit
+    is itself equivalent to RH (since d²·logN → finite ⟹ d² → 0 ⟹ RH).
+
+    What IS proved unconditionally:
+    • The algebraic identity: gram_limit ↔ d2_logN_limit + margin_limit
+    • The Mass Renormalization: two divergent quantities cancel exactly
+    • The Conservation of Difficulty: RH cannot leak out of the algebra
+
+    Proof chain (conditional on d2_logN_limit ≡ RH):
       mertens_34_unconditional  →  margin_limit_graduated  (PROVED)
-      d2_logN_limit             →  gram_limit_graduated    (PROVED)
-                                →  gram_form_upper_bound   (PROVED — above)
-                                →  gram_bound_implies_rh   (PROVED — GramBoundDirect)
-                                →  RiemannHypothesis
-
-    The 2 remaining axioms:
-      1. mertens_34_unconditional: Quantitative Mertens (PNT, proved 1896)
-      2. d2_logN_limit: d²·logN → c_holes (Báez-Duarte 2003)
-
-    Neither is equivalent to RH. Both are known unconditional results.
-    The Crown axiom (gram_form_upper_bound_direct ≡ RH) is GRADUATED. -/
+      d2_logN_limit (≡ RH)      →  gram_limit_graduated    (PROVED)
+                                →  gram_form_upper_bound   (PROVED)
+                                →  gram_bound_implies_rh   (PROVED)
+                                →  RiemannHypothesis -/
 theorem rh_from_gram_graduation : RiemannHypothesis :=
   Cathedral.Vasyunin.gram_bound_implies_rh gram_form_upper_bound_graduated
 
