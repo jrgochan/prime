@@ -167,9 +167,24 @@ theorem sqfreeCount_ge_third_proved :
   have hnsf := nonsqfreeCount_le_half N
   omega
 
--- ════════════════════════════════════════════════════════════════
--- §6. AUDIT
--- ════════════════════════════════════════════════════════════════
+/-- **REAL-VALUED COROLLARY**: ↑N / 3 ≤ ↑Q(N) in ℝ.
+
+    From the ℕ proof: Q(N) = N - Q̄(N) ≥ N - N/2, so 3·Q(N) ≥ N,
+    hence ↑N ≤ 3·↑Q(N) in ℝ.
+
+    This graduates the axiom `sqfreeCount_ge_third_real` from
+    NormLowerBound.lean. -/
+theorem sqfreeCount_ge_third_real_proved :
+    ∀ N : ℕ, 1 ≤ N → (↑N : ℝ) / 3 ≤ ↑(NormLowerBound.sqfreeCount N) := by
+  intro N hN
+  have hpart := sqfree_partition N hN
+  have hnsf := nonsqfreeCount_le_half N
+  -- In ℕ: Q + Q̄ = N and Q̄ ≤ N/2, so Q ≥ N - N/2, so 3·Q ≥ N
+  have h3 : N ≤ 3 * NormLowerBound.sqfreeCount N := by omega
+  -- Cast to ℝ: ↑N ≤ 3 * ↑Q(N)
+  have h3r : (↑N : ℝ) ≤ 3 * ↑(NormLowerBound.sqfreeCount N) := by exact_mod_cast h3
+  linarith
+
 
 /-!
 ## Audit (June 5, 2026 — Sub-Axiom Graduation: sqfreeCount)
@@ -192,7 +207,8 @@ theorem sqfreeCount_ge_third_proved :
 | 3 | `nonsqfreeCount_le_sum` | ✅ | union bound on counts |
 | 4 | `sum_div_sq_le_half` | ✅ | Σ N/p² ≤ N/2 |
 | 5 | `nonsqfreeCount_le_half` | ✅ | #{non-sqfree} ≤ N/2 |
-| 6 | `sqfreeCount_ge_third_proved` | ✅ | N/3 ≤ Q(N) |
+| 6 | `sqfreeCount_ge_third_proved` | ✅ | N/3 ≤ Q(N) (ℕ) |
+| 7 | `sqfreeCount_ge_third_real_proved` | ✅ | ↑N/3 ≤ ↑Q(N) (ℝ) |
 
 ### The Chain:
 ```
@@ -205,6 +221,8 @@ sum_div_sq_le_half: Σ N/p² ≤ N/2              [PROVED]
 nonsqfreeCount_le_half: #{non-sqfree} ≤ N/2    [PROVED]
     ↓ + sqfree_partition [PROVED]
 sqfreeCount_ge_third_proved: Q(N) ≥ N/3        [PROVED ✅]
+    ↓ exact_mod_cast + linarith
+sqfreeCount_ge_third_real_proved: ↑N/3 ≤ ↑Q(N) [PROVED ✅]
 ```
 -/
 

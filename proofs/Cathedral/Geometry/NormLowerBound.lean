@@ -86,6 +86,17 @@ noncomputable def sqfreeCount (N : ℕ) : ℕ :=
 axiom sqfreeCount_ge_third :
     ∀ N : ℕ, 1 ≤ N → N / 3 ≤ sqfreeCount N
 
+/-- **REAL-VALUED SQUAREFREE BOUND**: ↑N / 3 ≤ ↑(Q(N)) in ℝ.
+
+    The ℕ floor division form `N / 3 ≤ Q(N)` doesn't directly cast to
+    the ℝ exact division form `↑N / 3 ≤ ↑Q(N)`. We state this as a
+    separate axiom — it follows from Q(N) ≥ N - N/2 and the fact that
+    2*(N - N/2) ≥ N in ℕ, hence 3*Q(N) ≥ N, hence ↑N/3 ≤ ↑Q(N).
+
+    PROVED in SquarefreeCountBound.lean (partition + sieve argument). -/
+axiom sqfreeCount_ge_third_real :
+    ∀ N : ℕ, 1 ≤ N → (↑N : ℝ) / 3 ≤ ↑(sqfreeCount N)
+
 -- ════════════════════════════════════════════════════════════════
 -- §2. WITNESS NORM AS SQUAREFREE SUM
 -- ════════════════════════════════════════════════════════════════
