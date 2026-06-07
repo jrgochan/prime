@@ -45,7 +45,7 @@
   to the cathedral. 🏔️🌉🏛️
 -/
 
-import Cathedral.Geometry.BernoulliCrown
+import Cathedral.Geometry.Bernoulli.BernoulliCrown
 import Cathedral.Geometry.L1Bridge
 
 noncomputable section
@@ -53,9 +53,9 @@ open Real Finset Cathedral.Vasyunin
 
 namespace Cathedral.Geometry.L1TrackingLemma
 
-open Cathedral.Geometry.BernoulliCrown
+open Cathedral.Geometry.Bernoulli.BernoulliCrown
 open Cathedral.Geometry.L1Bridge
-open Cathedral.Geometry.BernoulliDecomposition
+open Cathedral.Geometry.Bernoulli.BernoulliDecomposition
 
 -- ════════════════════════════════════════════════════════════════
 -- §1. THE TRACKING CONDITION

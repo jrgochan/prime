@@ -44,7 +44,7 @@
   Created: June 2, 2026 — The Ratio Path
 -/
 
-import Cathedral.Geometry.BernoulliCrown
+import Cathedral.Geometry.Bernoulli.BernoulliCrown
 
 noncomputable section
 open Real Finset Cathedral.Vasyunin

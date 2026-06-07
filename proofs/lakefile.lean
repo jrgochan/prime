@@ -639,75 +639,75 @@ lean_lib «Cathedral» where
     -- Anomaly Formula (Δ = G − R decomposition, 8 theorems)
     `Cathedral.Geometry.AnomalyFormula,
     -- Dedekind Bound (|V(a,b)| via Jordan, 9 theorems)
-    `Cathedral.Geometry.DedekindBound,
+    `Cathedral.Geometry.Bernoulli.DedekindBound,
     -- Overcancellation Wiring (offDiag 4-term split, 4 theorems)
-    `Cathedral.Geometry.OvercancellationWiring,
+    `Cathedral.Geometry.Wall.OvercancellationWiring,
     -- Cotangent Stratification (GCD strata, crown_from_positivity, 7 theorems)
-    `Cathedral.Geometry.CotangentStratification,
+    `Cathedral.Geometry.Bernoulli.CotangentStratification,
     -- GCD Pairing (C(a,b,N) ≥ 0, MV(N) defined, 6 theorems)
-    `Cathedral.Geometry.GCDPairing,
+    `Cathedral.Geometry.SUSY.GCDPairing,
     -- Spectral Crown (rank-2 decomposition, twin eigenvectors, 4 theorems)
-    `Cathedral.Geometry.SpectralCrown,
+    `Cathedral.Geometry.Crown.SpectralCrown,
     -- Crown Wiring (spectral → crown → overcancellation → RH, 5 theorems)
-    `Cathedral.Geometry.CrownWiring,
+    `Cathedral.Geometry.Crown.CrownWiring,
     -- Torus Projection (supporting geometric infrastructure)
     `Cathedral.Geometry.TorusProjection,
     -- Vacuum Stability (vtGv < 1 → RH, THE CAPSTONE, June 1 2026)
-    `Cathedral.Geometry.VacuumStability,
+    `Cathedral.Geometry.Wall.VacuumStability,
     -- Bernoulli Decomposition (G = B₁ + L₁, L₁ negativity → vtGv ≤ 1, June 2 2026)
-    `Cathedral.Geometry.BernoulliDecomposition,
+    `Cathedral.Geometry.Bernoulli.BernoulliDecomposition,
     -- Bernoulli Crown (vtGv ≤ 1 from overcancellation axiom, THE GRADUATION, June 2 2026)
-    `Cathedral.Geometry.BernoulliCrown,
+    `Cathedral.Geometry.Bernoulli.BernoulliCrown,
     -- Bernoulli Diagonal (vtB₁v = ||v||²/12 + offDiag, ζ anatomy, June 5 2026) 🔬
-    `Cathedral.Geometry.BernoulliDiagonal,
+    `Cathedral.Geometry.Bernoulli.BernoulliDiagonal,
     -- Overcancellation Decomposition (Glass Boxes: offDiag ≤ 0 + perturbation, June 5 2026) 🔬🔍
-    `Cathedral.Geometry.OvercancellationDecomposition,
+    `Cathedral.Geometry.Wall.OvercancellationDecomposition,
     -- Glass Box 1 Graduation (Bessel inequality → offDiag ≤ 0, June 5 2026) 🎓
-    `Cathedral.Geometry.GlassBox1Graduation,
+    `Cathedral.Geometry.GlassBox.GlassBox1Graduation,
     -- Restricted Bessel Graduation (divisor coeff bound → Bessel, June 5 2026) 🎓
-    `Cathedral.Geometry.RestrictedBesselGraduation,
+    `Cathedral.Geometry.Bounds.RestrictedBesselGraduation,
     -- Glass Box 2 Graduation (bosonic bound + fermionic dominance → vtGv ≤ 1, June 5 2026) 🎓⚛️
-    `Cathedral.Geometry.GlassBox2Graduation,
+    `Cathedral.Geometry.GlassBox.GlassBox2Graduation,
     -- Norm Lower Bound (||v||² ≥ c₀·N/ln²N, squarefree density + Abel, June 5 2026) 🎓📐
-    `Cathedral.Geometry.NormLowerBound,
+    `Cathedral.Geometry.Bounds.NormLowerBound,
     -- Divisor Coeff Graduation (|y_d| ≤ C/(d·lnN), multiplicative reduction, June 5 2026) 🎓🔢
-    `Cathedral.Geometry.DivisorCoeffGraduation,
+    `Cathedral.Geometry.Bounds.DivisorCoeffGraduation,
     -- Bosonic Upper Bound Graduation (bosonic ≤ 1+K/lnN, eRatio+poly, June 5 2026) 🎓⚡
-    `Cathedral.Geometry.BosonicUpperBoundGraduation,
+    `Cathedral.Geometry.SUSY.BosonicUpperBoundGraduation,
     -- Fermionic Lower Bound Graduation (fermion ≥ bosonExcess, unified axiom, June 5 2026) 🎓🔥
-    `Cathedral.Geometry.FermionicLowerBoundGraduation,
+    `Cathedral.Geometry.SUSY.FermionicLowerBoundGraduation,
     -- Ratio Characterization (vtGv ≤ 1 ⟺ d² ≤ 2(1-bᵀv), de la Vallée-Poussin path, June 2 2026)
     `Cathedral.Geometry.RatioCharacterization,
     -- Abel Double-Sum (Skeleton↔Ratio wiring, graduation path, June 2 2026)
-    `Cathedral.Geometry.AbelDoubleSum,
+    `Cathedral.Geometry.Abel.AbelDoubleSum,
     -- Row Bound (per-row L₁ variation for Abel inner bound, June 2 2026)
-    `Cathedral.Geometry.RowBound,
+    `Cathedral.Geometry.Bounds.RowBound,
     -- Inner Abel (connecting Abel engine to row variation, June 2 2026)
-    `Cathedral.Geometry.InnerAbel,
+    `Cathedral.Geometry.Abel.InnerAbel,
     -- Graduation Bridge (wiggles → Abel → overcancellation → RH, June 2 2026)
-    `Cathedral.Geometry.GraduationBridge,
+    `Cathedral.Geometry.Crown.GraduationBridge,
     -- Margin Identity (Path 5: d² = 2gap - margin, Cauchy-Schwarz, June 2 2026)
-    `Cathedral.Geometry.MarginIdentity,
+    `Cathedral.Geometry.Renormalization.MarginIdentity,
     -- Pythagorean Strike (d² = d²_opt + ‖v−v_opt‖²_G, Wall budget, June 6 2026) ⚡🏛️
     `Cathedral.Geometry.PythagoreanStrike,
     -- Euler-Mascheroni Rate ((1-bᵀv)·lnN → γ+1, the (γ+1) Discovery, June 6 2026) 🏛️
-    `Cathedral.Geometry.EulerMascheroniRate,
+    `Cathedral.Geometry.Renormalization.EulerMascheroniRate,
     -- Variance Bound (Path 5f: Var·ln²N ≤ C_V, the width of the leash, June 4 2026) 🎯
-    `Cathedral.Geometry.VarianceBound,
+    `Cathedral.Geometry.Bounds.VarianceBound,
     -- Overcancellation Fusion (unified overcancellation paths, June 2 2026)
-    `Cathedral.Geometry.OvercancellationFusion,
+    `Cathedral.Geometry.Wall.OvercancellationFusion,
     -- Squarefree Shield (squarefree sector bounds, June 2 2026)
-    `Cathedral.Geometry.SquarefreeShield,
+    `Cathedral.Geometry.Bounds.SquarefreeShield,
     -- Glass Stability (glass tower convergence, 17 theorems, June 3 2026)
-    `Cathedral.Geometry.GlassStability,
+    `Cathedral.Geometry.GlassBox.GlassStability,
     -- L1 Bridge (B₁/L₁ three-way balance, 8 theorems, June 3 2026)
     `Cathedral.Geometry.L1Bridge,
     -- Glass-Cotangent Wire (2-adic partition, glass arm → crown, June 3 2026)
-    `Cathedral.Geometry.GlassCotangentWire,
+    `Cathedral.Geometry.GlassBox.GlassCotangentWire,
     -- Glass Two-Layer Collapse (layers ≥ 2 vanish for BD weights, PATH 1d, June 3 2026) 🔬
-    `Cathedral.Geometry.GlassTwoLayer,
+    `Cathedral.Geometry.GlassBox.GlassTwoLayer,
     -- Crown Closure (3 paths to RH, final assembly, June 3 2026) 👑
-    `Cathedral.Geometry.CrownClosure,
+    `Cathedral.Geometry.Crown.CrownClosure,
     -- Axiom Audit (definitive #print axioms trace, June 4 2026) 📋
     `Cathedral.Audit.AxiomTrace,
     -- Fermionic Graduation (connects fermionic sector to crown, June 4 2026) 🔬
@@ -717,29 +717,29 @@ lean_lib «Cathedral» where
     -- Finite Phase Proof (Phase 1 graduated: oracle vtGv ≤ 0.42 for N < 76, June 4 2026)
     `Cathedral.Assembly.FinitePhaseProof,
     -- Squarefree Count Bound (Q(N) ≥ N/3, prime sieve, June 5 2026) 🎓
-    `Cathedral.Geometry.SquarefreeCountBound,
+    `Cathedral.Geometry.Bounds.SquarefreeCountBound,
     -- Unfiltered Taper Sum Bound (Σ(1-lnk/lnN)² ≥ N/ln²N, integral comparison, June 5 2026) 🎓
-    `Cathedral.Geometry.UnfilteredTaperSumBound,
+    `Cathedral.Geometry.Bounds.UnfilteredTaperSumBound,
     -- Abel Filter Bound (||v||² ≥ unfilteredTaperSum/3, Abel+density, June 6 2026) 🎓
-    `Cathedral.Geometry.AbelFilterBound,
+    `Cathedral.Geometry.Abel.AbelFilterBound,
     -- Polynomial Part Graduation (T²·logN→0 PROVED, c·S·T−T² analysis, June 6 2026) 🎓
-    `Cathedral.Geometry.PolynomialPartGraduation,
+    `Cathedral.Geometry.Bounds.PolynomialPartGraduation,
     -- Finite Base Case (fermion ≥ bosonExcess for N ≤ 76, Clean Room oracle, June 6 2026) 🧹
-    `Cathedral.Geometry.FiniteBaseCaseVerification,
+    `Cathedral.Geometry.Bounds.FiniteBaseCaseVerification,
     -- Thulium-SUSY Bridge (CotRes ≡ fermion, LogCorr ≡ eRatio, Mas Que Nada Session 🎵 June 6 2026)
-    `Cathedral.Geometry.ThuliumSUSYBridge,
+    `Cathedral.Geometry.SUSY.ThuliumSUSYBridge,
     -- GCD Rescue (μ(2k)=−μ(k), d=2 kernel halving, rescue framework, June 6 2026) 🌀
-    `Cathedral.Geometry.GCDRescue,
+    `Cathedral.Geometry.SUSY.GCDRescue,
     -- GCD Fermionic Wiring (GCDRescue + GCDPairing + Stratification → crown, June 6 2026) 🌊
-    `Cathedral.Geometry.GCDFermionicWiring,
+    `Cathedral.Geometry.SUSY.GCDFermionicWiring,
     -- Strata Convergence (N²>N, margin decomposition, rebel bound, f(1)=PNT, June 6 2026) 🏔️
-    `Cathedral.Geometry.StrataConvergence,
+    `Cathedral.Geometry.Crown.StrataConvergence,
     -- Strata Crown Bridge (strata budget → crown closure, relay fuel, margin certificate, June 6 2026) 🌉
-    `Cathedral.Geometry.StrataCrownBridge,
+    `Cathedral.Geometry.Crown.StrataCrownBridge,
     -- L₁ Tracking Lemma (two infinities cancel: tracking ↔ overcancellation → RH, June 6 2026) 🏔️🌉🏛️
     `Cathedral.Geometry.L1TrackingLemma,
     -- Mass Renormalization (d²(v)·logN → c_holes = 2+γ−log4π, algebraic glue, June 7 2026) 🌀⚛️
-    `Cathedral.Geometry.MassRenormalization,
+    `Cathedral.Geometry.Renormalization.MassRenormalization,
     -- Margin Graduation (N^{-1/4}·log²N → 0, Part B Tendsto, three-part algebra, June 7 2026) 🎓
-    `Cathedral.Geometry.MarginGraduation,
+    `Cathedral.Geometry.Renormalization.MarginGraduation,
   ]

@@ -81,8 +81,8 @@
   Created: June 4, 2026 — The SUSY Breaking Session 🔬
 -/
 
-import Cathedral.Geometry.GlassTwoLayer
-import Cathedral.Geometry.CrownClosure
+import Cathedral.Geometry.GlassBox.GlassTwoLayer
+import Cathedral.Geometry.Crown.CrownClosure
 import Cathedral.Assembly.MarginCertificate
 
 set_option maxHeartbeats 800000
@@ -90,10 +90,10 @@ set_option maxHeartbeats 800000
 noncomputable section
 open Real Finset Filter
 open Cathedral.Vasyunin Cathedral.Vasyunin.RatioVanishing
-open Cathedral.Geometry.CotangentStratification
-open Cathedral.Geometry.GlassCotangentWire
-open Cathedral.Geometry.GlassTwoLayer
-open Cathedral.Geometry.CrownClosure
+open Cathedral.Geometry.Bernoulli.CotangentStratification
+open Cathedral.Geometry.GlassBox.GlassCotangentWire
+open Cathedral.Geometry.GlassBox.GlassTwoLayer
+open Cathedral.Geometry.Crown.CrownClosure
 open Cathedral.MarginCertificate
 
 namespace Cathedral.MarginDecomposition

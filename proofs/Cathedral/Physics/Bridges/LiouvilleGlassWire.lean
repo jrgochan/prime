@@ -36,10 +36,10 @@
   Created: June 4, 2026 — The Three-Tower Session 🏗️💜🔌
 -/
 
-import Cathedral.Geometry.GlassCotangentWire
+import Cathedral.Geometry.GlassBox.GlassCotangentWire
 import Cathedral.Physics.Cancellation.CancellationEfficacy
 import Cathedral.Physics.Bridges.LiouvilleMarginal
-import Cathedral.Geometry.BernoulliCrown
+import Cathedral.Geometry.Bernoulli.BernoulliCrown
 
 noncomputable section
 open Real Finset ArithmeticFunction
@@ -48,9 +48,9 @@ open scoped ArithmeticFunction.Moebius ArithmeticFunction.Omega
 namespace Cathedral.Physics.LiouvilleGlassWire
 
 open Cathedral.Vasyunin Cathedral.Vasyunin.RatioVanishing
-open Cathedral.Geometry.CotangentStratification
-open Cathedral.Geometry.GlassCotangentWire
-open Cathedral.Geometry.BernoulliCrown
+open Cathedral.Geometry.Bernoulli.CotangentStratification
+open Cathedral.Geometry.GlassBox.GlassCotangentWire
+open Cathedral.Geometry.Bernoulli.BernoulliCrown
 open Cathedral.Physics.GaugeCancellation
 open Cathedral.Physics.WardIdentity
 open Cathedral.Physics.CancellationEfficacy

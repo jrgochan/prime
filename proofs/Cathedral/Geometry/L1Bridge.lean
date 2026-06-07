@@ -49,12 +49,15 @@
   Created: June 3, 2026 — The L₁ Bridge
 -/
 
-import Cathedral.Geometry.BernoulliDecomposition
-import Cathedral.Geometry.BernoulliCrown
+import Cathedral.Geometry.Bernoulli.BernoulliDecomposition
+import Cathedral.Geometry.Bernoulli.BernoulliCrown
 import Cathedral.Assembly.OvercancellationChain
 
 noncomputable section
 open Real Finset Cathedral.Vasyunin
+open Cathedral.Geometry.Bernoulli.BernoulliCrown
+open Cathedral.Geometry.Bernoulli
+open Cathedral.Geometry.Bernoulli.BernoulliDecomposition
 
 namespace Cathedral.Geometry.L1Bridge
 

@@ -38,10 +38,10 @@ set_option maxHeartbeats 400000
 noncomputable section
 open Real Finset Filter
 open Cathedral.Vasyunin Cathedral.Vasyunin.RatioVanishing
-open Cathedral.Geometry.CotangentStratification
-open Cathedral.Geometry.GlassCotangentWire
-open Cathedral.Geometry.GlassTwoLayer
-open Cathedral.Geometry.CrownClosure
+open Cathedral.Geometry.Bernoulli.CotangentStratification
+open Cathedral.Geometry.GlassBox.GlassCotangentWire
+open Cathedral.Geometry.GlassBox.GlassTwoLayer
+open Cathedral.Geometry.Crown.CrownClosure
 open Cathedral.MarginCertificate
 open Cathedral.MarginDecomposition
 

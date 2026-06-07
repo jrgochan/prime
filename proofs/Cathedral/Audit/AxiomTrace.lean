@@ -1,7 +1,7 @@
 -- Import the three RH-producing assemblies
-import Cathedral.Geometry.VacuumStability
+import Cathedral.Geometry.Wall.VacuumStability
 import Cathedral.Assembly.GramCrown
-import Cathedral.Geometry.BernoulliCrown
+import Cathedral.Geometry.Bernoulli.BernoulliCrown
 
 /-!
   # Cathedral Axiom Audit — Definitive Trace
@@ -29,7 +29,7 @@ import Cathedral.Geometry.BernoulliCrown
 -- §1. PRIMARY PATH: VacuumStability
 -- ════════════════════════════════════════════════
 
-#print axioms Cathedral.Geometry.VacuumStability.riemann_hypothesis
+#print axioms Cathedral.Geometry.Wall.VacuumStability.riemann_hypothesis
 
 -- ════════════════════════════════════════════════
 -- §2. PRIMARY PATH: GramCrown (Overcancellation)
@@ -83,7 +83,7 @@ import Cathedral.Geometry.BernoulliCrown
 -- §10. BERNOULLI CROWN: vtGv_from_bernoulli_decomp
 -- ════════════════════════════════════════════════
 
-#print axioms Cathedral.Geometry.BernoulliCrown.vtGv_from_bernoulli_decomp
+#print axioms Cathedral.Geometry.Bernoulli.BernoulliCrown.vtGv_from_bernoulli_decomp
 
 -- ════════════════════════════════════════════════
 -- §11. SMITH WITNESS (zero-axiom forward)
@@ -110,9 +110,9 @@ import Cathedral.Geometry.BernoulliCrown
 -- ════════════════════════════════════════════════
 
 -- BEFORE: Three separate axiom declarations (semantically identical):
---   Cathedral.Geometry.BernoulliCrown.overcancellation_axiom  (local gramQuadForm)
+--   Cathedral.Geometry.Bernoulli.BernoulliCrown.overcancellation_axiom  (local gramQuadForm)
 --   overcancellation_hypothesis                                (GramCrown)
---   Cathedral.Geometry.VacuumStability.vtGv_lt_one             (VacuumStability)
+--   Cathedral.Geometry.Wall.VacuumStability.vtGv_lt_one             (VacuumStability)
 --
 -- AFTER: Single canonical axiom in Cathedral.Wall:
 --   overcancellation_axiom : ∃ N₀, ∀ N ≥ N₀, N ≥ 3 → vᵀGv ≤ 1
@@ -127,5 +127,5 @@ import Cathedral.Geometry.BernoulliCrown
 
 -- Verify aliases resolve to the same canonical axiom:
 #print axioms overcancellation_hypothesis
-#print axioms Cathedral.Geometry.VacuumStability.vtGv_lt_one
-#print axioms Cathedral.Geometry.BernoulliCrown.overcancellation_axiom_local
+#print axioms Cathedral.Geometry.Wall.VacuumStability.vtGv_lt_one
+#print axioms Cathedral.Geometry.Bernoulli.BernoulliCrown.overcancellation_axiom_local

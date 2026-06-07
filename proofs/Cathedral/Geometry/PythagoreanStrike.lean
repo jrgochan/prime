@@ -36,7 +36,7 @@
   Created: June 6, 2026 — The Pythagorean Strike 🏛️⚡
 -/
 
-import Cathedral.Geometry.MarginIdentity
+import Cathedral.Geometry.Renormalization.MarginIdentity
 import Cathedral.Vasyunin.Augmented.Rayleigh
 
 noncomputable section

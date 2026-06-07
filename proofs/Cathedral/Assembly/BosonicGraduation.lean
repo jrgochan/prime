@@ -57,7 +57,7 @@ set_option maxHeartbeats 800000
 noncomputable section
 open Real Finset Filter
 open Cathedral.Vasyunin Cathedral.Vasyunin.RatioVanishing
-open Cathedral.Geometry.CotangentStratification
+open Cathedral.Geometry.Bernoulli.CotangentStratification
 open Cathedral.MarginDecomposition
 
 namespace Cathedral.BosonicGraduation
