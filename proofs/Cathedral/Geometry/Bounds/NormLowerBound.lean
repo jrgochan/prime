@@ -153,7 +153,7 @@ But N^{2/3}/27 < N/ln²N for large N, so this is too weak!
 **Better approach**: Use the FULL Abel summation, or a direct
 integration argument. We axiomatize the core computation. -/
 
-/-- **THE NORM LOWER BOUND (graduated)**.
+/- **THE NORM LOWER BOUND — proof strategy notes**.
 
     For the log-cutoff BD witness:
       ||v||² ≥ c₀ · N / ln²N
@@ -182,26 +182,10 @@ integration argument. We axiomatize the core computation. -/
     This Riemann sum converges to (1/3) ∫₀¹ (1-t)² · N^t ln(N) dt
     = (1/3) · 2N/ln²N = 2N/(3ln²N).
 
-    For the formal proof, we encapsulate the summation result. -/
-theorem norm_lower_bound_proof :
-    ∃ c₀ : ℝ, c₀ > 0 ∧ ∃ N₀ : ℕ, ∀ N : ℕ, N ≥ N₀ →
-      c₀ * ↑N / (Real.log ↑N) ^ 2 ≤ witnessNormSq N := by
-  -- We prove with c₀ = 1/2 (very conservative; true limit is 12/π² ≈ 1.22)
-  use 1/2
-  constructor
-  · norm_num
-  -- The proof splits into:
-  -- 1. ||v||² ≥ Σ_{k sqfree, k≤√N} (1-ln(k)/ln(N))² (drop terms)
-  -- 2. For k ≤ √N: taper ≥ 1/2, so taper² ≥ 1/4
-  -- 3. #{sqfree k ≤ √N} ≥ √N/3
-  -- 4. ||v||² ≥ √N/12
-  -- 5. √N/12 ≥ (1/2) · N/ln²N for N ≥ N₀ (since √N · ln²N ≥ 6N... NO!)
-  --
-  -- ISSUE: √N/12 < N/(2ln²N) for large N. The partial-range approach fails!
-  --
-  -- CORRECT APPROACH: Use the full sum with Abel summation.
-  -- We axiomatize the core integral computation for now.
-  sorry
+    A direct proof `norm_lower_bound_proof` was attempted using the
+    partial-range approach (restrict to k ≤ √N), but √N/12 < N/(2ln²N)
+    for large N, so the approach is too weak. The correct path uses the full
+    Abel summation chain in §5-§6 below, resulting in `norm_lower_bound_graduated`. -/
 
 -- ════════════════════════════════════════════════════════════════
 -- §4. DIRECT SUMMATION LOWER BOUND
@@ -415,7 +399,7 @@ theorem norm_lower_bound_graduated :
 /-!
 ## Audit (June 5, 2026 — The Final Five: Axiom 1)
 
-### Sorry: 1 (norm_lower_bound_proof — subsumed by graduated version)
+### Sorry: 0 ✅ (norm_lower_bound_proof removed — subsumed by graduated version)
 
 ### Custom Axioms: 2
   - `sqfreeCount_ge_third`: Q(N) ≥ N/3 (squarefree density lower bound)
