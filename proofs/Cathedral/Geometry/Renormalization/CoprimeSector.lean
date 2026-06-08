@@ -257,7 +257,7 @@ theorem d2_bound_from_variance
 
     Numerically: C_V ≈ 0.49, B ≈ 2, threshold N ≥ exp((B²+C_V)/2) ≈ 10. -/
 theorem rh_from_one_estimate
-    (C_V B : ℝ) (hCV : 0 ≤ C_V) (_hB : 0 < B)
+    (C_V B : ℝ) (_hCV : 0 ≤ C_V) (_hB : 0 < B)
     (h_var_bound : ∃ N₀, ∀ N, N ≥ N₀ → N ≥ 3 →
       (bdQuadForm N - (1 - bdDotGap N) ^ 2) * (Real.log ↑N) ^ 2 ≤ C_V)
     (h_gap_lower : ∃ N₁, ∀ N, N ≥ N₁ → N ≥ 3 →

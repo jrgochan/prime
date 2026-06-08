@@ -606,7 +606,7 @@ Data:
     This is the bridge from the variance estimate to the cushion. -/
 theorem cushion_from_variance
     (vtGv gap Var : ℕ → ℝ) (K₁ C_var : ℝ)
-    (hK₁_pos : 0 < K₁)
+    (_hK₁_pos : 0 < K₁)
     -- Structure: vᵀGv = (1-gap)² + Var = 1 - 2gap + gap² + Var
     (h_decomp : ∀ N, vtGv N = 1 - 2 * gap N + gap N ^ 2 + Var N)
     -- PNT: gap·lnN ≥ K₁
@@ -614,7 +614,7 @@ theorem cushion_from_variance
     -- THE ONE ESTIMATE: Var·lnN ≤ C_var
     (h_var : ∀ N, Var N * Real.log ↑N ≤ C_var)
     -- gap ≥ 0
-    (h_gap_nn : ∀ N, 0 ≤ gap N) :
+    (_h_gap_nn : ∀ N, 0 ≤ gap N) :
     ∀ N : ℕ, 0 < Real.log ↑N →
       1 - vtGv N ≥ (2 * K₁ - C_var) / Real.log ↑N
         - (gap N) ^ 2 := by
@@ -649,9 +649,9 @@ theorem cushion_from_variance
 theorem capstone_wall
     (vtGv gap Var : ℕ → ℝ)
     (K₁ C_var C_w : ℝ) (N₀ : ℕ)
-    (hK₁ : 0 < K₁) (hCw : 0 < C_w)
+    (hK₁ : 0 < K₁) (_hCw : 0 < C_w)
     -- The arithmetic: 2K₁ > C_var (ensures positive cushion)
-    (h_arith : C_var < 2 * K₁)
+    (_h_arith : C_var < 2 * K₁)
     -- Structure
     (h_decomp : ∀ N, vtGv N = 1 - 2 * gap N + gap N ^ 2 + Var N)
     (h_gap_nn : ∀ N, 0 ≤ gap N)
@@ -676,7 +676,7 @@ theorem capstone_wall
   -- Need: lnN > 0. From gap ≥ 0 and gap·lnN ≥ K₁ > 0:
   have hlnN_pos : 0 < Real.log ↑N := by
     by_contra h
-    push_neg at h
+    push Not at h
     have : gap N * Real.log ↑N ≤ 0 := mul_nonpos_of_nonneg_of_nonpos (h_gap_nn N) h
     linarith [h_gap N hN]
   -- gap and var bounds (multiplied by lnN)
