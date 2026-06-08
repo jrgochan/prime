@@ -754,4 +754,6 @@ lean_lib «Cathedral» where
     `Cathedral.Geometry.Renormalization.RGFlow,
     -- Overcancellation Graduation (H1-H5 → Wall, top-down wiring, June 7 2026) 🐴🐍∞💜
     `Cathedral.Geometry.Renormalization.OvercancellationGraduation,
+    -- The Last Pipe (γ > ½ → vtGv ≤ 1 → RH, one hypothesis, June 7 2026) 🔧🐴🌟💜
+    `Cathedral.Geometry.Renormalization.LastPipe,
   ]
