@@ -756,4 +756,19 @@ lean_lib «Cathedral» where
     `Cathedral.Geometry.Renormalization.OvercancellationGraduation,
     -- The Last Pipe (γ > ½ → vtGv ≤ 1 → RH, one hypothesis, June 7 2026) 🔧🐴🌟💜
     `Cathedral.Geometry.Renormalization.LastPipe,
+    -- ═══════════════════════════════════════════════════════
+    -- Diamond 53 Bridge: Digamma ↔ Vasyunin ↔ Gram ↔ RH
+    -- ═══════════════════════════════════════════════════════
+    -- Off-Diagonal Wiring (full↔offDiag, Step 4, June 8 2026) 🔧
+    `Cathedral.Geometry.Renormalization.OffDiagWiring,
+    -- Cotangent Wiring (master overcancellation engine, Step 5, June 8 2026) 🔧
+    `Cathedral.Geometry.Renormalization.CotangentWiring,
+    -- Ratio Remainder Bound (Cauchy-Schwarz infrastructure, June 8 2026) 📐
+    `Cathedral.Geometry.Renormalization.RatioRemainderBound,
+    -- Diagonal Cancellation (G(k,k)+correction=0 EXACTLY, June 8 2026) ⚡💎
+    `Cathedral.Geometry.Renormalization.DiagonalCancellation,
+    -- Final Assembly (vtGv < 1 → RH via linarith, June 8 2026) 🏛️🌟
+    `Cathedral.Geometry.Renormalization.FinalAssembly,
+    -- Vasyunin-Digamma Bridge (V(a,b) = (1/π)·Σ{mb/a}·(ψ-ψ), June 8 2026) 🌉💎🐴
+    `Cathedral.Vasyunin.Cotangent.VasyuninDigammaBridge,
   ]
