@@ -31,6 +31,7 @@
 -/
 
 import Cathedral.Geometry.Renormalization.MarginGraduation
+import Cathedral.Geometry.Renormalization.MarginIdentity
 import Cathedral.Geometry.SUSY.GCDRescue
 
 noncomputable section
@@ -249,30 +250,142 @@ theorem d2_bound_from_variance
     then combining with the PROVED gap·lnN → 1+γ,
     we get d²·ln²N ≤ C_d (bounded), which gives RH.
 
-    Numerically: C_V ≈ 0.49, C_d ≈ 2.98, threshold N ≥ 3. -/
+    Hypotheses:
+    - h_var_bound: Var·ln²N ≤ C_V (the ONE estimate)
+    - h_gap_lower: gap·lnN ≥ 1 (from PNT, PROVED)
+    - h_gap_upper: gap·lnN ≤ B (from PNT, PROVED — gap·lnN → 1+γ)
+
+    Numerically: C_V ≈ 0.49, B ≈ 2, threshold N ≥ exp((B²+C_V)/2) ≈ 10. -/
 theorem rh_from_one_estimate
-    (C_V : ℝ) (hCV : 0 ≤ C_V)
+    (C_V B : ℝ) (hCV : 0 ≤ C_V) (_hB : 0 < B)
     (h_var_bound : ∃ N₀, ∀ N, N ≥ N₀ → N ≥ 3 →
       (bdQuadForm N - (1 - bdDotGap N) ^ 2) * (Real.log ↑N) ^ 2 ≤ C_V)
-    (h_gap_bound : ∃ N₁, ∀ N, N ≥ N₁ → N ≥ 3 →
-      bdDotGap N * Real.log ↑N ≥ 1) :
+    (h_gap_lower : ∃ N₁, ∀ N, N ≥ N₁ → N ≥ 3 →
+      bdDotGap N * Real.log ↑N ≥ 1)
+    (h_gap_upper : ∃ N₂, ∀ N, N ≥ N₂ → N ≥ 3 →
+      bdDotGap N * Real.log ↑N ≤ B) :
     ∃ N₀, ∀ N, N ≥ N₀ → N ≥ 3 →
       bdMoebiusD2 N ≤ 2 * bdDotGap N := by
   obtain ⟨N₀v, hN₀v⟩ := h_var_bound
-  obtain ⟨N₁g, hN₁g⟩ := h_gap_bound
-  -- Find N₂ large enough that (C_V + gap²·ln²N) / lnN ≤ 2·gap·lnN
-  -- i.e., (C_V + (gap·lnN)²) ≤ 2·(gap·lnN)·lnN
-  -- Since gap·lnN ≥ 1 and lnN grows, this holds for large N
-  -- Use: d²·ln²N = gap²·ln²N + Var·ln²N ≤ (gap·lnN)² + C_V
-  -- Need: (gap·lnN)² + C_V ≤ 2·(gap·lnN)·lnN
-  -- Since gap·lnN ≥ 1: 1 + C_V ≤ (gap·lnN)² + C_V ≤ 2·gap·lnN·lnN
-  -- This holds when lnN ≥ (1 + C_V)/2 (very mild!)
-  -- But we need a clean proof. Use: for lnN ≥ max(gap·lnN, C_V+1):
-  --   d²·ln²N ≤ (gap·lnN)² + C_V ≤ (gap·lnN)·lnN + C_V
-  --   and C_V ≤ lnN ≤ gap·lnN·lnN (since gap·lnN ≥ 1)
-  --   So d²·ln²N ≤ 2·gap·lnN·lnN = 2·gap·ln²N
-  --   Hence d² ≤ 2·gap
-  sorry
+  obtain ⟨N₁g, hN₁g⟩ := h_gap_lower
+  obtain ⟨N₂g, hN₂g⟩ := h_gap_upper
+  -- Need N large enough that lnN ≥ (B² + C_V) / 2
+  -- For simplicity, find N₃ with ln(N₃) > B² + C_V
+  -- Use filter_upwards style: pick a concrete threshold
+  -- The key algebraic fact:
+  --   d² = gap² + Var ≤ 2·gap
+  --   ↔ Var ≤ 2·gap - gap² = gap·(2-gap)
+  --
+  -- We show: Var ≤ C_V/ln²N and gap·(2-gap) ≥ (2lnN - B²)/ln²N
+  -- So it suffices to show C_V ≤ 2·lnN - B², i.e., lnN ≥ (B²+C_V)/2
+  --
+  -- Use the d2_variance_decomp from MarginIdentity:
+  --   bdMoebiusD2 N = bdDotGap N ^ 2 + (bdQuadForm N - (1-bdDotGap N)²)
+  --
+  -- Then: bdMoebiusD2 N ≤ 2·bdDotGap N
+  --   ↔ gap² + Var ≤ 2·gap
+  --   ↔ Var ≤ gap·(2-gap)
+  -- We need the margin_identity to connect bdMoebiusD2 to the other quantities
+  have h_margin : ∀ N, 1 - bdQuadForm N = 2 * bdDotGap N - bdMoebiusD2 N :=
+    margin_identity
+  -- Equivalently: bdMoebiusD2 N = bdQuadForm N - 1 + 2·bdDotGap N
+  -- So: bdMoebiusD2 N ≤ 2·bdDotGap N ↔ bdQuadForm N ≤ 1
+  -- Wait — this is just the margin identity!
+  -- bdMoebiusD2 ≤ 2·gap ↔ 1 - bdQuadForm ≥ 0 ↔ bdQuadForm ≤ 1
+  --
+  -- So we need: bdQuadForm N ≤ 1, which is: Var ≤ gap·(2-gap)
+  -- From h_margin: bdMoebiusD2 = 2gap - (1-vGv), so d²≤2gap ↔ 1-vGv≥0 ↔ vGv≤1
+  --
+  -- OK so we need to show vᵀGv ≤ 1 from the variance bound.
+  -- vGv = 1 - 2gap + d² = 1 - 2gap + gap² + Var = (1-gap)² + Var
+  -- vGv ≤ 1 ↔ (1-gap)² + Var ≤ 1 ↔ Var ≤ 1 - (1-gap)² = gap·(2-gap)
+  --
+  -- Var ≤ C_V/ln²N (from hypothesis, dividing by ln²N > 0)
+  -- gap·(2-gap) = 2gap - gap²
+  -- gap ≥ 1/lnN and gap ≤ B/lnN
+  -- So 2gap - gap² ≥ 2/lnN - B²/ln²N = (2lnN - B²)/ln²N
+  -- Need: C_V ≤ 2lnN - B², i.e., lnN ≥ (B²+C_V)/2
+
+  -- Pick threshold: we need lnN > (B² + C_V)/2 + 1 (with margin)
+  -- Since lnN → ∞, ∃ N₃ with this property
+  -- Use Nat.ceil to get N₃
+  refine ⟨max (max N₀v N₁g) (max N₂g (Nat.ceil (Real.exp ((B^2 + C_V)/2 + 1)) + 1)),
+    fun N hN hN3 => ?_⟩
+  have hN_v : N ≥ N₀v := by omega
+  have hN_g : N ≥ N₁g := by omega
+  have hN_u : N ≥ N₂g := by omega
+  -- Get our bounds at N
+  have hVar := hN₀v N hN_v hN3
+  have hGapLo := hN₁g N hN_g hN3
+  have hGapUp := hN₂g N hN_u hN3
+  -- logN > 0
+  have hlnN_pos : 0 < Real.log ↑N :=
+    Real.log_pos (by exact_mod_cast show 1 < N by omega)
+  have hln2_pos : 0 < (Real.log ↑N) ^ 2 := pow_pos hlnN_pos 2
+  -- Use margin identity: d² ≤ 2gap ↔ vGv ≤ 1
+  have h_m := h_margin N
+  -- Goal: bdMoebiusD2 N ≤ 2 * bdDotGap N
+  -- From margin: bdMoebiusD2 = 2·gap - (1-vGv)
+  -- So d² ≤ 2gap ↔ 1-vGv ≥ 0 ↔ vGv ≤ 1
+  suffices h_vgv : bdQuadForm N ≤ 1 by linarith
+  -- vGv = (1-gap)² + Var, where Var = vGv - (1-gap)²
+  -- So vGv ≤ 1 ↔ Var ≤ gap(2-gap)
+  set gap := bdDotGap N
+  set Var := bdQuadForm N - (1 - gap) ^ 2
+  -- Need: (1-gap)² + Var ≤ 1, i.e., Var ≤ 1-(1-gap)² = gap(2-gap) = 2gap-gap²
+  suffices h_var_le : Var ≤ 2 * gap - gap ^ 2 by nlinarith [sq_nonneg gap]
+  -- From hVar: Var · ln²N ≤ C_V, so Var ≤ C_V / ln²N
+  have h_var_div : Var * (Real.log ↑N) ^ 2 ≤ C_V := hVar
+  -- From hGapLo: gap · lnN ≥ 1, so gap ≥ 1/lnN
+  have h_gap_ge : 1 ≤ gap * Real.log ↑N := hGapLo
+  -- From hGapUp: gap · lnN ≤ B, so gap ≤ B/lnN
+  have h_gap_le : gap * Real.log ↑N ≤ B := hGapUp
+  -- 2gap - gap² ≥ 2/lnN - B²/ln²N = (2·lnN - B²)/ln²N
+  -- We need: C_V/ln²N ≤ (2·lnN - B²)/ln²N, i.e., C_V ≤ 2·lnN - B²
+  -- i.e., lnN ≥ (B²+C_V)/2
+  -- This holds since N ≥ ceil(exp((B²+C_V)/2 + 1)) + 1
+  have h_lnN_big : Real.log ↑N > (B ^ 2 + C_V) / 2 := by
+    have hN_big : (N : ℝ) > Real.exp ((B ^ 2 + C_V) / 2 + 1) := by
+      have : N ≥ Nat.ceil (Real.exp ((B^2 + C_V)/2 + 1)) + 1 := by omega
+      calc (N : ℝ) ≥ ↑(Nat.ceil (Real.exp ((B^2 + C_V)/2 + 1)) + 1) := by
+              exact_mod_cast this
+        _ > Real.exp ((B^2 + C_V)/2 + 1) := by
+              push_cast
+              linarith [Nat.le_ceil (Real.exp ((B^2 + C_V)/2 + 1))]
+    have hN_pos' : (0:ℝ) < N := by exact_mod_cast show 0 < N by omega
+    calc Real.log ↑N > Real.log (Real.exp ((B^2+C_V)/2+1)) :=
+          Real.log_lt_log (Real.exp_pos _) hN_big
+      _ = (B^2+C_V)/2 + 1 := Real.log_exp _
+      _ > (B^2+C_V)/2 := by linarith
+  -- Step 1: C_V ≤ 2·lnN - B²
+  have h_cv_le : C_V ≤ 2 * Real.log ↑N - B ^ 2 := by linarith
+  -- Now chain: Var·ln²N ≤ C_V ≤ 2lnN - B², and
+  -- gap²·ln²N ≤ B² (from gap·lnN ≤ B), and 2gap·ln²N ≥ 2lnN (from gap·lnN ≥ 1)
+  -- So: Var·ln²N ≤ 2lnN - B² ≤ 2·gap·ln²N/lnN - gap²·ln²N/... 
+  -- Cleaner: multiply everything by ln²N and work with products.
+  -- Need: Var ≤ 2gap - gap²
+  -- Multiply by ln²N > 0: Var·ln²N ≤ (2gap - gap²)·ln²N = 2gap·ln²N - gap²·ln²N
+  -- = 2·(gap·lnN)·lnN - (gap·lnN)² 
+  -- ≥ 2·1·lnN - B² = 2lnN - B² ≥ C_V ≥ Var·ln²N ✓
+  -- So: (2gap-gap²)·ln²N ≥ 2lnN - B² ≥ C_V ≥ Var·ln²N
+  -- Divide by ln²N: 2gap - gap² ≥ Var
+  -- 
+  -- Formally: show (2gap - gap²) * ln²N ≥ Var * ln²N
+  -- Then divide by ln²N > 0.
+  suffices h_prod : Var * (Real.log ↑N) ^ 2 ≤
+      (2 * gap - gap ^ 2) * (Real.log ↑N) ^ 2 by
+    exact le_of_mul_le_mul_right h_prod hln2_pos
+  -- Var·ln²N ≤ C_V (from h_var_div)
+  -- (2gap-gap²)·ln²N = 2·(gap·lnN)·lnN - (gap·lnN)²
+  -- ≥ 2·1·lnN - B² = 2lnN - B² ≥ C_V
+  calc Var * (Real.log ↑N) ^ 2 ≤ C_V := h_var_div
+    _ ≤ 2 * Real.log ↑N - B ^ 2 := h_cv_le
+    _ ≤ 2 * (gap * Real.log ↑N) * Real.log ↑N -
+        (gap * Real.log ↑N) ^ 2 := by
+        have := sq_nonneg (gap * Real.log ↑N - 1)
+        have := sq_nonneg (B - gap * Real.log ↑N)
+        nlinarith
+    _ = (2 * gap - gap ^ 2) * (Real.log ↑N) ^ 2 := by ring
 
 -- ════════════════════════════════════════════════════════════════
 -- AUDIT
