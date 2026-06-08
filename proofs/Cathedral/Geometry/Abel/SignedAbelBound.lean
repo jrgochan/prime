@@ -34,6 +34,7 @@
 import Mathlib.Analysis.SpecificLimits.Basic
 import Mathlib.Topology.Order.Basic
 import Mathlib.Analysis.SpecialFunctions.Log.Basic
+import Cathedral.Analysis.DirichletTest
 
 noncomputable section
 open Finset
@@ -54,75 +55,56 @@ then:
 In our notation: a = f (decreasing), b = v (weights),
 B = A (partial sums), M = A_max, a₁ = f(0). -/
 
-/-- **ABEL'S INEQUALITY**: Non-negative decreasing weights × bounded
-    partial sums → bounded bilinear sum.
 
-    If f : Fin N → ℝ is non-negative and (weakly) decreasing,
-    and A(k) = Σ_{j≤k} v(j) satisfies 0 ≤ A(k) ≤ A_max,
-    then Σ v(k)·f(k) ≤ A_max · f(0). -/
-theorem abel_inequality {N : ℕ} (hN : 0 < N)
-    (v f : Fin N → ℝ)
+
+/-- **ABEL'S INEQUALITY** (range-indexed version, using DirichletTest machinery):
+    If b is non-negative and antitone, and partial sums of a
+    satisfy 0 ≤ A(k) ≤ A_max, then Σ a(k)·b(k) ≤ A_max · b(0).
+
+    This follows from abel_summation_range + abel_transform_abs_bound
+    (both PROVED in DirichletTest.lean). -/
+theorem abel_inequality (a b : ℕ → ℝ) (n : ℕ) (hn : 0 < n)
     (A_max : ℝ) (hAmax : 0 ≤ A_max)
-    -- f is non-negative
-    (hf_pos : ∀ k : Fin N, 0 ≤ f k)
-    -- f is decreasing
-    (hf_decr : ∀ k : Fin N, ∀ l : Fin N, k ≤ l → f l ≤ f k)
-    -- partial sums are non-negative and bounded
-    (hA_pos : ∀ M : Fin N,
-      0 ≤ ∑ k ∈ filter (fun x => x ≤ M) univ, v k)
-    (hA_bound : ∀ M : Fin N,
-      ∑ k ∈ filter (fun x => x ≤ M) univ, v k ≤ A_max) :
-    ∑ k : Fin N, v k * f k ≤ A_max * f ⟨0, hN⟩ := by
-  -- The proof uses Abel summation by parts.
-  -- Key idea: rewrite v(k) = A(k) - A(k-1), then
-  -- Σ v(k)·f(k) = Σ (A(k)-A(k-1))·f(k)
-  --             = Σ A(k)·(f(k)-f(k+1)) + A(N)·f(N)
-  -- Since f(k)-f(k+1) ≥ 0 and 0 ≤ A(k) ≤ A_max:
-  --   Σ A(k)·(f(k)-f(k+1)) ≤ A_max · Σ(f(k)-f(k+1)) = A_max·(f(0)-f(N))
-  -- And A(N)·f(N) ≤ A_max·f(N).
-  -- Total: ≤ A_max·(f(0)-f(N)) + A_max·f(N) = A_max·f(0).
-  sorry
-
--- ════════════════════════════════════════════════════════════════
--- §2. SIGNED ABEL FOR BILINEAR FORMS
--- ════════════════════════════════════════════════════════════════
-
-/-! ### Application to Bilinear Forms
-
-For the Gram quadratic form vᵀGv = Σ_k v(k)·inner(k):
-
-  inner(k) = Σ_j v(j)·G(j,k) = (Gv)_k
-
-Abel's inequality applies when:
-  (A) inner(k) is non-negative and decreasing [Gram decay]
-  (B) A(k) = Σ_{j≤k} v(j) ≥ 0              [tapered Mertens positivity]
-
-Both hold from PNT + structural properties. -/
-
-/-- **BILINEAR ABEL BOUND**: If the inner products are non-negative
-    and decreasing, and the partial sums are bounded,
-    then the bilinear form is bounded by A_max · inner(0).
-
-    Applied to the Gram form: vᵀGv ≤ max(A(k)) · inner(1).
-    From numerical data: ≈ 2.0 × 0.30 = 0.60 ≤ 1. ✅ -/
-theorem bilinear_signed_abel {N : ℕ} (hN : 0 < N)
-    (v : Fin N → ℝ) (inner : Fin N → ℝ)
-    (A_max : ℝ) (_hAmax : 0 ≤ A_max)
-    -- inner products are non-negative
-    (_h_inner_pos : ∀ k : Fin N, 0 ≤ inner k)
-    -- inner products are decreasing
-    (_h_inner_decr : ∀ k l : Fin N, k ≤ l → inner l ≤ inner k)
-    -- partial sums are bounded
-    (_hA_pos : ∀ M : Fin N,
-      0 ≤ ∑ k ∈ filter (fun x => x ≤ M) univ, v k)
-    (_hA_bound : ∀ M : Fin N,
-      ∑ k ∈ filter (fun x => x ≤ M) univ, v k ≤ A_max)
-    -- the bilinear form equals the sum
-    (h_bilinear : ∀ vtGv : ℝ,
-      vtGv = ∑ k : Fin N, v k * inner k → vtGv ≤ A_max * inner ⟨0, hN⟩) :
-    ∀ vtGv : ℝ,
-      vtGv = ∑ k : Fin N, v k * inner k → vtGv ≤ A_max * inner ⟨0, hN⟩ :=
-  h_bilinear
+    (hb_nn : ∀ m, 0 ≤ b m)
+    (hb_anti : Antitone b)
+    (hA_pos : ∀ k, 0 ≤ Cathedral.Analysis.DirichletTest.partialSum₀ a k)
+    (hA_bound : ∀ k, Cathedral.Analysis.DirichletTest.partialSum₀ a k ≤ A_max) :
+    ∑ m ∈ Finset.range n, a m * b m ≤ A_max * b 0 := by
+  open Cathedral.Analysis.DirichletTest in
+  -- Step 1: Abel summation by parts (PROVED)
+  rw [abel_summation_range a b n]
+  -- Goal: S(n)·b(n) - Σ S(m+1)·(b(m+1)-b(m)) ≤ A_max·b(0)
+  -- Rewrite: Σ S(m+1)·(b(m+1)-b(m)) = -Σ S(m+1)·(b(m)-b(m+1))
+  have h_neg : ∀ m, a m * b m = a m * b m := fun _ => rfl
+  -- S(n)·b(n) ≤ A_max·b(n) since 0 ≤ S(n) ≤ A_max and b(n) ≥ 0
+  have hSn_bound : partialSum₀ a n * b n ≤ A_max * b n := by
+    exact mul_le_mul_of_nonneg_right (hA_bound n) (hb_nn n)
+  -- The Abel transform sum: Σ S(m+1)·(b(m+1)-b(m))
+  -- Since b is antitone: b(m+1)-b(m) ≤ 0
+  -- Since S(m+1) ≥ 0: S(m+1)·(b(m+1)-b(m)) ≤ 0
+  -- So -Σ ≥ 0, i.e., the transform sum contributes non-negatively
+  -- Bound: -Σ S(m+1)·(b(m+1)-b(m)) = Σ S(m+1)·(b(m)-b(m+1))
+  --        ≤ A_max · Σ(b(m)-b(m+1)) = A_max·(b(0)-b(n))
+  have h_transform : -(∑ m ∈ Finset.range n,
+      partialSum₀ a (m + 1) * (b (m + 1) - b m)) ≤
+      A_max * (b 0 - b n) := by
+    rw [show -(∑ m ∈ Finset.range n,
+        partialSum₀ a (m + 1) * (b (m + 1) - b m)) =
+        ∑ m ∈ Finset.range n,
+        partialSum₀ a (m + 1) * (b m - b (m + 1)) from by
+      rw [← Finset.sum_neg_distrib]; congr 1; ext m; ring]
+    calc ∑ m ∈ Finset.range n,
+          partialSum₀ a (m + 1) * (b m - b (m + 1))
+        ≤ ∑ m ∈ Finset.range n, A_max * (b m - b (m + 1)) := by
+          apply Finset.sum_le_sum; intro m _
+          exact mul_le_mul_of_nonneg_right (hA_bound (m + 1))
+            (antitone_diff_nonneg b hb_anti m)
+      _ = A_max * ∑ m ∈ Finset.range n, (b m - b (m + 1)) := by
+          rw [Finset.mul_sum]
+      _ = A_max * (b 0 - b n) := by
+          rw [telescope_antitone_sum b n]
+  -- Combine: S(n)·b(n) - Σ S(m+1)·Δb ≤ A_max·b(n) + A_max·(b(0)-b(n)) = A_max·b(0)
+  linarith
 
 -- ════════════════════════════════════════════════════════════════
 -- §3. THE SPLIT THEOREM — Finite + Asymptotic
