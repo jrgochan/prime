@@ -493,7 +493,7 @@ For small N: verified numerically. -/
     This is UNCONDITIONAL — it doesn't depend on vᵀGv < 1.
     It's a property of the Fejér taper and the Gram matrix. -/
 theorem taper_gradient_bound
-    (vtGv : ℕ → ℝ) (C : ℝ) (hC : 0 < C)
+    (vtGv : ℕ → ℝ) (C : ℝ) (_hC : 0 < C)
     (h_bound : ∀ N : ℕ, 3 ≤ N →
       |vtGv (N + 1) - vtGv N| ≤ C * Real.log ↑N / ↑N) :
     ∀ N : ℕ, 3 ≤ N →
@@ -505,19 +505,41 @@ theorem taper_gradient_bound
     This is the key asymptotic: the wiggle-to-cushion ratio
     vanishes because polynomial growth (ln²N) loses to linear (N).
 
-    Proof: For any ε > 0, choose N₀ = ⌈(C/ε)²⌉. Then for N ≥ N₀:
-    C·ln²N/N ≤ C·N/N = C → this doesn't work directly.
-    Better: lnN ≤ N^{1/3} for all N ≥ 1, so ln²N/N ≤ N^{-1/3} → 0. -/
+    Proof: Mathlib's `isLittleO_pow_log_id_atTop` gives log²(x) = o(x),
+    meaning log²(x)/x → 0. Scale by C and transfer from ℝ to ℕ. -/
 theorem ratio_vanishes
     (C : ℝ) (hC : 0 < C) (ε : ℝ) (hε : 0 < ε) :
     ∃ N₀ : ℕ, ∀ N : ℕ, N ≥ N₀ →
       C * (Real.log ↑N)^2 / ↑N < ε := by
-  -- There exists N₀ such that C·ln²N/N < ε for all N ≥ N₀
-  -- This follows from lim_{N→∞} ln²N/N = 0
-  -- For now: this is an analytic fact that can be proved from
-  -- Real.tendsto_log_div_rpow_atTop
-  exact ⟨max 3 (Nat.ceil (2 * C / ε) ^ 3), fun N hN => by
-    sorry⟩  -- analytic limit: ln²N/N → 0
+  -- log²(x)/x → 0 from Mathlib
+  -- Use tendsto_pow_log_div_mul_add_atTop with a=1, b=0, n=2
+  have h_tend : Tendsto (fun x : ℝ => Real.log x ^ 2 / (1 * x + 0)) atTop (nhds 0) :=
+    Real.tendsto_pow_log_div_mul_add_atTop 1 0 2 one_ne_zero
+  simp only [one_mul, add_zero] at h_tend
+  -- h_tend : Tendsto (fun x => log x ^ 2 / x) atTop (nhds 0)
+  -- So C · (log x ^ 2 / x) → 0, eventually < ε
+  rw [Metric.tendsto_atTop] at h_tend
+  obtain ⟨M, hM⟩ := h_tend (ε / C) (div_pos hε hC)
+  refine ⟨max 1 (Nat.ceil M), fun N hN => ?_⟩
+  have hN1 : 1 ≤ N := le_trans (le_max_left 1 _) hN
+  have hN_pos : (0 : ℝ) < ↑N := by positivity
+  have hN_ge : (↑N : ℝ) ≥ M := by
+    calc (↑N : ℝ) ≥ ↑(max 1 (Nat.ceil M)) := Nat.cast_le.mpr hN
+      _ ≥ ↑(Nat.ceil M) := Nat.cast_le.mpr (le_max_right 1 _)
+      _ ≥ M := Nat.le_ceil M
+  have h_dist := hM ↑N hN_ge
+  rw [Real.dist_eq] at h_dist
+  -- |log²N/N - 0| < ε/C
+  simp only [sub_zero] at h_dist
+  have h_log_sq_nonneg : 0 ≤ Real.log ↑N ^ 2 := sq_nonneg _
+  have h_div_nonneg : 0 ≤ Real.log ↑N ^ 2 / ↑N := div_nonneg h_log_sq_nonneg hN_pos.le
+  rw [abs_of_nonneg h_div_nonneg] at h_dist
+  -- h_dist : log²N / N < ε/C
+  -- Goal: C · log²N / N < ε
+  calc C * (Real.log ↑N) ^ 2 / ↑N
+      = C * (Real.log ↑N ^ 2 / ↑N) := by ring
+    _ < C * (ε / C) := by nlinarith
+    _ = ε := mul_div_cancel₀ ε (ne_of_gt hC)
 
 /-- **THE COMPLETE WALL THEOREM**: If the taper gradient bound holds
     and the wiggle-to-cushion ratio is eventually < 1,
@@ -528,10 +550,10 @@ theorem ratio_vanishes
     2. For N > N₀: wiggle < cushion by ratio_vanishes
     3. wall_from_wiggle_cushion does the induction
 
-    This theorem has ONE sorry (ratio_vanishes), which is
-    a standard calculus fact: ln²N/N → 0. -/
+    All hypotheses are dischargeable. ratio_vanishes is PROVED
+    via Mathlib's isLittleO_pow_log_id_atTop. -/
 theorem wall_from_taper_gradient
-    (vtGv : ℕ → ℝ) (C : ℝ) (hC : 0 < C)
+    (vtGv : ℕ → ℝ) (C : ℝ) (_hC : 0 < C)
     (N₀ : ℕ)
     (h_base : vtGv N₀ < 1)
     -- Taper gradient: |Δ| ≤ C·lnN/N (unconditional)
@@ -555,7 +577,7 @@ theorem wall_from_taper_gradient
 /-!
 ## Audit — RGFlow.lean (June 7, 2026 — Mountain Session 🏔️)
 
-### Sorry: 1 (ratio_vanishes — standard calculus: ln²N/N → 0)
+### Sorry: 0 ✅ (ratio_vanishes CLOSED via Mathlib isLittleO_pow_log_id_atTop)
 ### Custom Axioms: 0 ✅
 
 ### Theorems: 18
@@ -578,7 +600,7 @@ theorem wall_from_taper_gradient
 | 14 | `wall_from_wiggle_cushion` | ⭐ |Δ|<cushion → Wall (KEY) |
 | 15 | `wiggle_decay_implies_wall` | wiggle<δ ∧ cushion≥δ → Wall |
 | 16 | `taper_gradient_bound` | |Δ(vᵀGv)| ≤ C·lnN/N (unconditional) |
-| 17 | `ratio_vanishes` | C·ln²N/N → 0 (1 sorry) |
+| 17 | `ratio_vanishes` | C·ln²N/N → 0 ✅ PROVED |
 | 18 | `wall_from_taper_gradient` | ⭐⭐ Gradient + cushion → Wall |
 
 ### The Complete Architecture:
