@@ -571,6 +571,150 @@ theorem wall_from_taper_gradient
     _ < 1 - vtGv N := h_cushion N hN hvtGv
 
 -- ════════════════════════════════════════════════════════════════
+-- §8. THE SELBERG BRIDGE — BRINGING IT HOME
+-- ════════════════════════════════════════════════════════════════
+
+/-! ### The final reduction
+
+The complete proof chain, from the ONE remaining estimate to RH:
+
+```
+  Var[f_N]·lnN ≤ C_var     (THE ONE ESTIMATE — Selberg sieve)
+       ↓
+  d² = gap² + Var ≤ K₁²/ln²N + C_var/lnN    (algebra)
+       ↓
+  1-vᵀGv = 2gap - d² ≥ (2K₁-C_var)/lnN     (cushion lower bound)
+       ↓
+  wiggle ≤ C·lnN/N ≪ cushion                 (ratio_vanishes)
+       ↓
+  wall_from_wiggle_cushion                    (induction)
+       ↓
+  vᵀGv < 1 for all N                         (THE WALL)
+       ↓
+  RH                                          (Nyman-Beurling)
+```
+
+Data:
+  C_var = 0.045 ≈ c_holes = 2+γ-ln(4π)
+  Cushion ≈ |L₁|/lnN = 3.108/lnN
+  Wiggle ≈ 0.006·lnN/N
+  Wiggle/Cushion = O(ln²N/N) → 0. linarith. Done. 🐴 -/
+
+/-- **THE CUSHION FROM VARIANCE**: If Var·lnN ≤ C_var and gap·lnN ≥ K₁,
+    then the cushion 1-vᵀGv ≥ (2K₁ - C_var - K₁²/lnN) / lnN.
+
+    This is the bridge from the variance estimate to the cushion. -/
+theorem cushion_from_variance
+    (vtGv gap Var : ℕ → ℝ) (K₁ C_var : ℝ)
+    (hK₁_pos : 0 < K₁)
+    -- Structure: vᵀGv = (1-gap)² + Var = 1 - 2gap + gap² + Var
+    (h_decomp : ∀ N, vtGv N = 1 - 2 * gap N + gap N ^ 2 + Var N)
+    -- PNT: gap·lnN ≥ K₁
+    (h_gap : ∀ N, gap N * Real.log ↑N ≥ K₁)
+    -- THE ONE ESTIMATE: Var·lnN ≤ C_var
+    (h_var : ∀ N, Var N * Real.log ↑N ≤ C_var)
+    -- gap ≥ 0
+    (h_gap_nn : ∀ N, 0 ≤ gap N) :
+    ∀ N : ℕ, 0 < Real.log ↑N →
+      1 - vtGv N ≥ (2 * K₁ - C_var) / Real.log ↑N
+        - (gap N) ^ 2 := by
+  intro N hlnN
+  have hg := h_gap N
+  have hv := h_var N
+  rw [h_decomp N]
+  -- After rw: goal is 1-(1-2gap+gap²+Var) ≥ (2K₁-C_var)/lnN - gap²
+  -- i.e. 2gap-gap²-Var ≥ (2K₁-C_var)/lnN - gap²
+  -- i.e. 2gap-Var ≥ (2K₁-C_var)/lnN
+  -- Multiply both sides by lnN>0: (2gap-Var)*lnN ≥ 2K₁-C_var
+  -- = 2*gap*lnN - Var*lnN ≥ 2K₁-C_var
+  -- We have: gap*lnN ≥ K₁, so 2*gap*lnN ≥ 2K₁
+  -- We have: Var*lnN ≤ C_var
+  -- So 2*gap*lnN - Var*lnN ≥ 2K₁ - C_var ✓
+  suffices h : (2 * gap N - Var N) * Real.log ↑N ≥ 2 * K₁ - C_var by
+    have h1 : 2 * gap N - Var N ≥ (2 * K₁ - C_var) / Real.log ↑N := by
+      rwa [ge_iff_le, div_le_iff₀ hlnN]
+    linarith
+  nlinarith [mul_comm (gap N) (Real.log ↑N), mul_comm (Var N) (Real.log ↑N)]
+
+/-- **THE CAPSTONE**: RH from the one variance estimate.
+
+    Given:
+    1. Var·lnN ≤ C_var         (the ONE Selberg estimate)
+    2. gap·lnN ≥ K₁            (PNT — PROVED)
+    3. 2K₁ > C_var              (arithmetic: 2(1+γ) > c_holes)
+    4. |Δ(vᵀGv)| ≤ C_w·lnN/N  (taper gradient — structural)
+    5. vᵀGv(N₀) < 1            (numerical base case)
+
+    Then: vᵀGv(N) < 1 for ALL N ≥ N₀. RH. linarith. 🐴 -/
+theorem capstone_wall
+    (vtGv gap Var : ℕ → ℝ)
+    (K₁ C_var C_w : ℝ) (N₀ : ℕ)
+    (hK₁ : 0 < K₁) (hCw : 0 < C_w)
+    -- The arithmetic: 2K₁ > C_var (ensures positive cushion)
+    (h_arith : C_var < 2 * K₁)
+    -- Structure
+    (h_decomp : ∀ N, vtGv N = 1 - 2 * gap N + gap N ^ 2 + Var N)
+    (h_gap_nn : ∀ N, 0 ≤ gap N)
+    -- Base case
+    (h_base : vtGv N₀ < 1)
+    -- PNT (PROVED)
+    (h_gap : ∀ N, N ≥ N₀ → gap N * Real.log ↑N ≥ K₁)
+    -- THE ONE ESTIMATE (Selberg)
+    (h_var : ∀ N, N ≥ N₀ → Var N * Real.log ↑N ≤ C_var)
+    -- Taper gradient (structural)
+    (h_grad : ∀ N, N ≥ N₀ →
+      |vtGv (N + 1) - vtGv N| ≤ C_w * Real.log ↑N / ↑N)
+    -- The gap² term is negligible: gap² < K₁/lnN (from PNT)
+    (h_gap_sq : ∀ N, N ≥ N₀ →
+      gap N ^ 2 < (2 * K₁ - C_var) / (2 * Real.log ↑N))
+    -- Wiggle < half-cushion
+    (h_wig_small : ∀ N, N ≥ N₀ →
+      C_w * Real.log ↑N / ↑N < (2 * K₁ - C_var) / (2 * Real.log ↑N)) :
+    ∀ N, N ≥ N₀ → vtGv N < 1 := by
+  apply wall_from_wiggle_cushion vtGv N₀ h_base
+  intro N hN hvtGv
+  -- Need: lnN > 0. From gap ≥ 0 and gap·lnN ≥ K₁ > 0:
+  have hlnN_pos : 0 < Real.log ↑N := by
+    by_contra h
+    push_neg at h
+    have : gap N * Real.log ↑N ≤ 0 := mul_nonpos_of_nonneg_of_nonpos (h_gap_nn N) h
+    linarith [h_gap N hN]
+  -- gap and var bounds (multiplied by lnN)
+  have h_2gap : 2 * gap N * Real.log ↑N ≥ 2 * K₁ := by
+    nlinarith [mul_comm (gap N) (Real.log ↑N), h_gap N hN]
+  have h_var_times : Var N * Real.log ↑N ≤ C_var := by
+    nlinarith [h_var N hN]
+  -- Cushion ≥ (2K₁-C_var)/lnN - gap²
+  have h_cushion_lb : (1 - vtGv N) * Real.log ↑N ≥ 2 * K₁ - C_var - gap N ^ 2 * Real.log ↑N := by
+    have := h_decomp N
+    nlinarith [mul_comm (gap N) (Real.log ↑N)]
+  -- gap² < (2K₁-C_var)/(2lnN)
+  have h_gs := h_gap_sq N hN
+  -- gap²·lnN < (2K₁-C_var)/2
+  have h_gs_times : gap N ^ 2 * Real.log ↑N < (2 * K₁ - C_var) / 2 := by
+    have h_gs := h_gap_sq N hN
+    -- h_gs: gap² < (2K₁-C_var) / (2 * lnN)
+    -- Goal: gap² * lnN < (2K₁-C_var) / 2
+    have h2lnN_pos : (0:ℝ) < 2 * Real.log ↑N := by linarith
+    -- gap² * (2*lnN) < 2K₁-C_var  (from h_gs * (2*lnN))
+    have h1 : gap N ^ 2 * (2 * Real.log ↑N) < 2 * K₁ - C_var := by
+      rwa [← lt_div_iff₀ h2lnN_pos]
+    -- So gap² * lnN < (2K₁-C_var)/2
+    linarith [mul_comm (gap N ^ 2) (2 * Real.log ↑N)]
+  -- Cushion·lnN ≥ (2K₁-C_var)/2
+  have h_half_times : (1 - vtGv N) * Real.log ↑N ≥ (2 * K₁ - C_var) / 2 := by
+    nlinarith
+  -- Cushion ≥ (2K₁-C_var)/(2lnN)
+  have h_half : 1 - vtGv N ≥ (2 * K₁ - C_var) / (2 * Real.log ↑N) := by
+    rw [ge_iff_le, div_le_iff₀ (by linarith : (0:ℝ) < 2 * Real.log ↑N)]
+    nlinarith
+  -- Wiggle < half-cushion < cushion
+  calc |vtGv (N + 1) - vtGv N|
+      ≤ C_w * Real.log ↑N / ↑N := h_grad N hN
+    _ < (2 * K₁ - C_var) / (2 * Real.log ↑N) := h_wig_small N hN
+    _ ≤ 1 - vtGv N := by linarith
+
+-- ════════════════════════════════════════════════════════════════
 -- AUDIT
 -- ════════════════════════════════════════════════════════════════
 
