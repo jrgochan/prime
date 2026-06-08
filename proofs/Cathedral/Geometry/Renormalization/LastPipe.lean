@@ -103,7 +103,7 @@ Then: vtGv ≤ 1 (the Wall, the overcancellation axiom, RH). -/
 /-- **VAR ≤ GAP(2-GAP)**: From the scaled bounds, Var is controlled by gap. -/
 theorem var_controlled_by_gap
     (gap Var : ℕ → ℝ)
-    (γ_val : ℝ) (hγ : γ_val > 1 / 2)
+    (γ_val : ℝ) (_hγ : γ_val > 1 / 2)
     (h_gap : ∀ N : ℕ, N ≥ 3 → gap N * Real.log ↑N ≥ K₁ γ_val)
     (h_var : ∀ N : ℕ, N ≥ 3 → Var N * Real.log ↑N ≤ C_var)
     (h_gap_sq : ∀ N : ℕ, N ≥ 3 →

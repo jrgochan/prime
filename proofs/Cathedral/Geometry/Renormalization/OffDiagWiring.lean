@@ -40,7 +40,7 @@ theorem double_sum_split {n : ℕ} (f : Fin n → Fin n → ℝ) :
         congr 1; ext k; split_ifs <;> simp]
     rw [Finset.sum_add_distrib]
     congr 1
-    simp [Finset.sum_ite_eq']
+    simp []
   simp_rw [key]
   rw [Finset.sum_add_distrib]
 
