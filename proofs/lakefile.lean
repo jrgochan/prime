@@ -742,4 +742,16 @@ lean_lib «Cathedral» where
     `Cathedral.Geometry.Renormalization.MassRenormalization,
     -- Margin Graduation (N^{-1/4}·log²N → 0, Part B Tendsto, three-part algebra, June 7 2026) 🎓
     `Cathedral.Geometry.Renormalization.MarginGraduation,
+    -- Abel Summation Bound (||v||² ≥ ⅓·unfilteredTaperSum, strengthened induction, June 5 2026) 🎓
+    `Cathedral.Geometry.Abel.AbelSummationBound,
+    -- Signed Abel Bound (Abel inequality → overcancellation_graduated, June 7 2026) 🌟🏔️
+    `Cathedral.Geometry.Abel.SignedAbelBound,
+    -- Coprime Sector (RG flow: vtGv ≤ 1-cushion, gap-variance, June 7 2026) 🌟
+    `Cathedral.Geometry.Renormalization.CoprimeSector,
+    -- Selberg Bridge (taper_mertens_limit, var → overcancellation, June 7 2026) 🌟🏔️
+    `Cathedral.Geometry.Renormalization.SelbergBridge,
+    -- RG Flow (wiggle bound, cushion, capstone, 20 theorems, June 7 2026) 🌟🏔️
+    `Cathedral.Geometry.Renormalization.RGFlow,
+    -- Overcancellation Graduation (H1-H5 → Wall, top-down wiring, June 7 2026) 🐴🐍∞💜
+    `Cathedral.Geometry.Renormalization.OvercancellationGraduation,
   ]
