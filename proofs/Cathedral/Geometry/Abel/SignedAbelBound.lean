@@ -63,11 +63,11 @@ B = A (partial sums), M = A_max, a₁ = f(0). -/
 
     This follows from abel_summation_range + abel_transform_abs_bound
     (both PROVED in DirichletTest.lean). -/
-theorem abel_inequality (a b : ℕ → ℝ) (n : ℕ) (hn : 0 < n)
-    (A_max : ℝ) (hAmax : 0 ≤ A_max)
+theorem abel_inequality (a b : ℕ → ℝ) (n : ℕ) (_hn : 0 < n)
+    (A_max : ℝ) (_hAmax : 0 ≤ A_max)
     (hb_nn : ∀ m, 0 ≤ b m)
     (hb_anti : Antitone b)
-    (hA_pos : ∀ k, 0 ≤ Cathedral.Analysis.DirichletTest.partialSum₀ a k)
+    (_hA_pos : ∀ k, 0 ≤ Cathedral.Analysis.DirichletTest.partialSum₀ a k)
     (hA_bound : ∀ k, Cathedral.Analysis.DirichletTest.partialSum₀ a k ≤ A_max) :
     ∑ m ∈ Finset.range n, a m * b m ≤ A_max * b 0 := by
   open Cathedral.Analysis.DirichletTest in
