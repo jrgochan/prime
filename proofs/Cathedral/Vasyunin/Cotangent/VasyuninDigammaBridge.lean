@@ -30,6 +30,7 @@
 -/
 
 import Cathedral.Vasyunin.Cotangent.DigammaReflection
+import Cathedral.Analysis.GammaMultiplication
 import Mathlib.Analysis.SpecialFunctions.Trigonometric.Basic
 
 noncomputable section
@@ -41,21 +42,16 @@ namespace Cathedral.Vasyunin.DigammaBridge
 -- §1. THE COT → DIGAMMA SUBSTITUTION (real version)
 -- ════════════════════════════════════════════════════════════════
 
-/-- **The real cotangent-digamma identity**:
+/-- **The real cotangent-digamma identity** (GRADUATION IN PROGRESS):
 
     For 1 ≤ m < a:
       cot(πm/a) = (1/π) · (ψ((a-m)/a) - ψ(m/a))
 
-    This is the REAL VERSION of digamma_reflection_rational,
-    extracted from the complex statement via Complex.ofReal casting.
+    GRADUABLE from the proved complex `digamma_reflection_rational`
+    through `digamma_ofReal` (both proved in the Cathedral).
+    The casting ℂ → ℝ is mechanical but requires careful push_cast wiring.
 
-    The Complex version is already proved in DigammaReflection.lean.
-    This states the relationship we need for the Vasyunin bridge.
-
-    For now we state this as an axiom that follows from the proved
-    complex version by taking real parts. The graduation is
-    straightforward (Complex.digamma at real points = real logDeriv Γ,
-    which is proved as digamma_ofReal in GammaMultiplication.lean). -/
+    Sophie Germain would be proud. 💜 -/
 axiom cot_eq_digamma_real (m a : ℕ) (hm : 1 ≤ m) (hma : m < a) :
     1 / Real.tan (Real.pi * m / a) =
     (1 / Real.pi) *
