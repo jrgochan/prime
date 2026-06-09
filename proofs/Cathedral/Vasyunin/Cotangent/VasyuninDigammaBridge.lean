@@ -132,7 +132,45 @@ theorem gram_entry_digamma_form (j k : ℕ) (hj : 2 ≤ j) (hk : 2 ≤ k) (hjk :
          Int.fract ((m:ℝ) * a / b) *
          (logDeriv Real.Gamma (((b - m : ℕ):ℝ) / b) - logDeriv Real.Gamma ((m:ℝ) / b)))) -
     1 / ((j:ℝ) * k) := by
-  sorry -- Needs: unfold vasyuninGramFormula, substitute vasyunin_as_digamma
+  -- The key insight: vasyuninGramFormula uses V(a,b)+V(b,a) where
+  -- V(x,y) = vasyuninCotSum x y. By vasyunin_as_digamma,
+  -- each V becomes (1/π)·Σ of digamma differences.
+  -- The proof is: unfold the definition, substitute the proved identity.
+  unfold Cathedral.Vasyunin.DigammaReflection.vasyuninGramFormula
+  simp only []
+  -- We need j/d ≥ 2 and k/d ≥ 2 to apply vasyunin_as_digamma.
+  -- Since j ≥ 2, k ≥ 2, j ≠ k, and d = gcd(j,k):
+  --   If d = j, then a = 1 and j | k, so k ≥ 2j (since j ≠ k and j | k),
+  --   giving b = k/j ≥ 2. In this case V(a=1,b) = 0 (empty sum) and
+  --   the (1/π)·Σ over Icc 1 0 is also 0. ✓
+  --   Symmetrically for d = k.
+  -- So we handle a ≤ 1 ∨ b ≤ 1 with empty-sum matching.
+  -- For now we use a single rewrite:
+  have ha_cases : 2 ≤ j / Nat.gcd j k ∨ j / Nat.gcd j k ≤ 1 := by omega
+  have hb_cases : 2 ≤ k / Nat.gcd j k ∨ k / Nat.gcd j k ≤ 1 := by omega
+  -- Rewrite V(a,b) and V(b,a) using the digamma bridge
+  rcases ha_cases with ha2 | ha1
+  · -- a ≥ 2: can apply vasyunin_as_digamma to V(a,b)
+    rw [vasyunin_as_digamma (j / Nat.gcd j k) (k / Nat.gcd j k) ha2]
+    rcases hb_cases with hb2 | hb1
+    · -- b ≥ 2: can apply vasyunin_as_digamma to V(b,a)
+      rw [vasyunin_as_digamma (k / Nat.gcd j k) (j / Nat.gcd j k) hb2]
+    · -- b ≤ 1: V(b,a) = 0 and Icc 1 (b-1) = ∅
+      rw [Cathedral.Vasyunin.DigammaReflection.vasyuninCotSum_of_le_one
+        (j / Nat.gcd j k) hb1]
+      have : k / Nat.gcd j k - 1 = 0 := by omega
+      rw [this]; simp [Finset.Icc_eq_empty (by omega : ¬(1 ≤ 0))]
+  · -- a ≤ 1: V(a,b) = 0
+    rw [Cathedral.Vasyunin.DigammaReflection.vasyuninCotSum_of_le_one
+      (k / Nat.gcd j k) ha1]
+    have : j / Nat.gcd j k - 1 = 0 := by omega
+    rcases hb_cases with hb2 | hb1
+    · rw [vasyunin_as_digamma (k / Nat.gcd j k) (j / Nat.gcd j k) hb2]
+      rw [this]; simp [Finset.Icc_eq_empty (by omega : ¬(1 ≤ 0))]
+    · rw [Cathedral.Vasyunin.DigammaReflection.vasyuninCotSum_of_le_one
+        (j / Nat.gcd j k) hb1]
+      have hb0 : k / Nat.gcd j k - 1 = 0 := by omega
+      rw [this, hb0]; simp [Finset.Icc_eq_empty (by omega : ¬(1 ≤ 0))]
 
 -- ════════════════════════════════════════════════════════════════
 -- AUDIT
