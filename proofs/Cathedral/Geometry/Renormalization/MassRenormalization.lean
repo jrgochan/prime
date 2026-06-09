@@ -33,6 +33,8 @@
 import Cathedral.Vasyunin.Defs
 import Cathedral.Vasyunin.Witness
 import Cathedral.Geometry.Bernoulli.BernoulliDiagonal
+import Cathedral.Geometry.Renormalization.MarginGraduation
+import Cathedral.NymanBeurling.VasyuninBypass
 
 set_option maxHeartbeats 800000
 
@@ -101,23 +103,52 @@ theorem limit_sum_eq {f g : ℕ → ℝ} {a b : ℝ}
   exact hf.add (hg.const_mul 2)
 
 -- ════════════════════════════════════════════════════════════════
--- §4. THE AXIOMS (analytic lemmas, to be graduated)
+-- §4. GRADUATED THEOREMS (were axioms)
 -- ════════════════════════════════════════════════════════════════
 
-/-- **MERTENS LEMMA (Lemma 1)**:
+/-- **MERTENS LEMMA (Lemma 1)** — GRADUATED 🎓:
     (1 - bᵀv) · logN → K₁ = 1 + γ
 
     This follows from:
     bᵀv = -Σ μ(k)/k · (logk + 1 - γ) · (1 - logk/logN)
     and the Mertens estimates Σ μ(k)logk/k → -1, Σ μ(k)/k → 0.
 
-    STATUS: Axiomatized. Requires PNT-level Mertens estimates. -/
-axiom margin_limit (btv_seq : ℕ → ℝ) (γ_val : ℝ)
+    GRADUATED: June 8, 2026 — proved via margin_limit_graduated
+    and dotProduct_bridge_aux (index bridge). 💎 -/
+theorem margin_limit (btv_seq : ℕ → ℝ) (γ_val : ℝ)
     (hγ : γ_val = Real.eulerMascheroniConstant)
     (h_btv : ∀ N : ℕ, 3 ≤ N → btv_seq N =
       ∑ i : Fin N, logCutoffWitness N i * vasyuninMeanEntry (i.val + 1)) :
     Filter.Tendsto (fun N => (1 - btv_seq N) * Real.log ↑N)
-      Filter.atTop (nhds (1 + γ_val))
+      Filter.atTop (nhds (1 + γ_val)) := by
+  subst hγ
+  -- margin_limit_graduated proves bdDotGap N * log N → 1 + γ
+  -- We need: (1 - btv_seq N) * log N → 1 + γ
+  -- Key: for N ≥ 3, btv_seq N = bᵀv over Fin N = bᵀv over Fin (N-1) = 1 - bdDotGap N
+  -- via dotProduct_bridge_aux
+  refine (MarginGraduation.margin_limit_graduated).congr' ?_
+  filter_upwards [Filter.eventually_ge_atTop 10] with N hN
+  congr 1
+  -- Goal: 1 - btv_seq N = bdDotGap N
+  have hN3 : 3 ≤ N := by omega
+  rw [h_btv N hN3]
+  -- Goal: 1 - Σ_{Fin N} (w_i * b_i) = bdDotGap N
+  -- bdDotGap N = 1 - dotProduct b w [Fin (N-1)]
+  unfold bdDotGap
+  congr 1
+  -- Goal: Σ_{Fin N} (logCutoffWitness * meanEntry) = dotProduct meanEntry bdMoebiusWeight
+  -- Bridge: dotProduct_bridge_aux converts Fin N to Fin (N-1)
+  have h_N_sub : (N - 1) + 1 = N := Nat.sub_add_cancel (by omega : 1 ≤ N)
+  have h_bridge := dotProduct_bridge_aux (N - 1) (by omega : 2 ≤ N - 1)
+  -- h_bridge : dotProduct meanVec (logCutoffWitness N) = dotProduct (fun i => meanEntry (i+1)) (bdMoebiusWeight N)
+  -- (after substituting (N-1)+1 = N via h_N_sub)
+  -- Convert sum to dotProduct form then apply bridge
+  have h_sum_eq : ∑ i : Fin N, logCutoffWitness N i * vasyuninMeanEntry (i.val + 1) =
+      dotProduct (vasyuninMeanVec N) (logCutoffWitness N) := by
+    unfold dotProduct vasyuninMeanVec
+    apply Finset.sum_congr rfl; intro i _; ring
+  rw [h_sum_eq, show N = (N - 1) + 1 from h_N_sub.symm]
+  exact h_bridge.symm
 
 /-- **GRAM ASYMPTOTICS (Lemma 2)**:
     (vᵀGv - 1) · logN → L₁ = -γ - log(4π)
