@@ -115,7 +115,7 @@ theorem vasyunin_as_digamma (a b : ℕ) (ha : 2 ≤ a) :
     the log terms in the Gauss digamma formula.
 
     This is where γ + ln(4π) comes from. 💎 -/
-theorem gram_entry_digamma_form (j k : ℕ) (hj : 2 ≤ j) (hk : 2 ≤ k) (hjk : j ≠ k) :
+theorem gram_entry_digamma_form (j k : ℕ) (_hj : 2 ≤ j) (_hk : 2 ≤ k) (_hjk : j ≠ k) :
     let d := Nat.gcd j k
     let a := j / d
     let b := k / d
@@ -159,18 +159,18 @@ theorem gram_entry_digamma_form (j k : ℕ) (hj : 2 ≤ j) (hk : 2 ≤ k) (hjk :
       rw [Cathedral.Vasyunin.DigammaReflection.vasyuninCotSum_of_le_one
         (j / Nat.gcd j k) hb1]
       have : k / Nat.gcd j k - 1 = 0 := by omega
-      rw [this]; simp [Finset.Icc_eq_empty (by omega : ¬(1 ≤ 0))]
+      rw [this]; simp []
   · -- a ≤ 1: V(a,b) = 0
     rw [Cathedral.Vasyunin.DigammaReflection.vasyuninCotSum_of_le_one
       (k / Nat.gcd j k) ha1]
     have : j / Nat.gcd j k - 1 = 0 := by omega
     rcases hb_cases with hb2 | hb1
     · rw [vasyunin_as_digamma (k / Nat.gcd j k) (j / Nat.gcd j k) hb2]
-      rw [this]; simp [Finset.Icc_eq_empty (by omega : ¬(1 ≤ 0))]
+      rw [this]; simp []
     · rw [Cathedral.Vasyunin.DigammaReflection.vasyuninCotSum_of_le_one
         (j / Nat.gcd j k) hb1]
       have hb0 : k / Nat.gcd j k - 1 = 0 := by omega
-      rw [this, hb0]; simp [Finset.Icc_eq_empty (by omega : ¬(1 ≤ 0))]
+      rw [this, hb0]; simp []
 
 -- ════════════════════════════════════════════════════════════════
 -- AUDIT
