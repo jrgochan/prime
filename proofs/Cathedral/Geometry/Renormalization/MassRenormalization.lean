@@ -34,6 +34,7 @@ import Cathedral.Vasyunin.Defs
 import Cathedral.Vasyunin.Witness
 import Cathedral.Geometry.Bernoulli.BernoulliDiagonal
 import Cathedral.Geometry.Renormalization.MarginGraduation
+import Cathedral.Geometry.Renormalization.GramGraduation
 import Cathedral.NymanBeurling.VasyuninBypass
 
 set_option maxHeartbeats 800000
@@ -150,22 +151,60 @@ theorem margin_limit (btv_seq : ℕ → ℝ) (γ_val : ℝ)
   rw [h_sum_eq, show N = (N - 1) + 1 from h_N_sub.symm]
   exact h_bridge.symm
 
-/-- **GRAM ASYMPTOTICS (Lemma 2)**:
+/-- **GRAM ASYMPTOTICS (Lemma 2)** — GRADUATED 🎓:
     (vᵀGv - 1) · logN → L₁ = -γ - log(4π)
 
     This follows from analyzing the double Möbius sum
     vᵀGv = Σ_{j,k} μ(j)μ(k)·taper(j)·taper(k)·G(j,k)
     using GCD stratification and Euler products.
 
-    STATUS: Axiomatized. Requires Gram quadratic form analysis. -/
-axiom gram_limit (vtGv_seq : ℕ → ℝ) (γ_val : ℝ)
+    GRADUATED: June 8, 2026 — proved via gram_limit_graduated
+    (GramGraduation.lean) and quadForm_bridge_aux (index bridge).
+
+    ⚠️ NOTE: gram_limit_graduated depends on d2_logN_limit (≡ RH).
+    This graduation is an inter-axiom exchange, not an unconditional proof. 💎 -/
+theorem gram_limit (vtGv_seq : ℕ → ℝ) (γ_val : ℝ)
     (hγ : γ_val = Real.eulerMascheroniConstant)
     (h_vtGv : ∀ N : ℕ, 3 ≤ N → vtGv_seq N =
       ∑ i : Fin N, ∑ j : Fin N,
         logCutoffWitness N i * vasyuninGramEntry (i.val + 1) (j.val + 1) *
         logCutoffWitness N j) :
     Filter.Tendsto (fun N => (vtGv_seq N - 1) * Real.log ↑N)
-      Filter.atTop (nhds (-γ_val - Real.log (4 * Real.pi)))
+      Filter.atTop (nhds (-γ_val - Real.log (4 * Real.pi))) := by
+  subst hγ
+  -- gram_limit_graduated proves (bdQuadForm N - 1) * log N → -γ - log(4π)
+  -- We need: (vtGv_seq N - 1) * log N → -γ - log(4π)
+  -- Key: for N ≥ 3, vtGv_seq N = vᵀGv over Fin N = bdQuadForm N
+  -- via quadForm_bridge_aux
+  refine (GramGraduation.gram_limit_graduated).congr' ?_
+  filter_upwards [Filter.eventually_ge_atTop 10] with N hN
+  congr 1
+  -- Goal: vtGv_seq N = bdQuadForm N
+  have hN3 : 3 ≤ N := by omega
+  rw [h_vtGv N hN3]
+  -- vtGv_seq N = ΣΣ w_i G(i,j) w_j [Fin N]
+  -- bdQuadForm N = realQuadForm G w [Fin (N-1)]
+  -- quadForm_bridge_aux: vᵀGv [Fin N] = realQuadForm [Fin (N-1)]
+  -- Need: ΣΣ w_i G(i,j) w_j = dotProduct w (G.mulVec w) [Fin N]
+  have h_N_sub : (N - 1) + 1 = N := Nat.sub_add_cancel (by omega : 1 ≤ N)
+  have h_bridge := quadForm_bridge_aux (N - 1) (by omega : 2 ≤ N - 1)
+  -- h_bridge : dotProduct logCutoff (G.mulVec logCutoff) [Fin N] = bdQuadForm [Fin (N-1)]
+  -- Convert the double sum to dotProduct/mulVec form
+  have h_sum_eq : ∑ i : Fin N, ∑ j : Fin N,
+      logCutoffWitness N i * vasyuninGramEntry (i.val + 1) (j.val + 1) *
+      logCutoffWitness N j =
+      dotProduct (logCutoffWitness N)
+        ((vasyuninGramMatrix N).mulVec (logCutoffWitness N)) := by
+    -- dotProduct w (G.mulVec w) = Σ_i w_i * (Σ_j G_ij * w_j) = Σ_i Σ_j w_i * G_ij * w_j
+    simp only [dotProduct, Matrix.mulVec, vasyuninGramMatrix, Matrix.of_apply, dotProduct]
+    apply Finset.sum_congr rfl; intro i _
+    rw [Finset.mul_sum]
+    apply Finset.sum_congr rfl; intro j _
+    ring
+  rw [h_sum_eq, show N = (N - 1) + 1 from h_N_sub.symm]
+  unfold bdQuadForm
+  congr 1
+  exact h_bridge.symm
 
 -- ════════════════════════════════════════════════════════════════
 -- §5. THE MAIN THEOREM
@@ -238,12 +277,15 @@ theorem approx_error_vanishes
 -- ════════════════════════════════════════════════════════════════
 
 /-!
-## Audit (June 7, 2026 — Mass Renormalization Theorem)
+## Audit (June 8, 2026 — Mass Renormalization Theorem)
 
 ### Sorry: 0 ✅
-### Custom Axioms: 2
-  - `margin_limit`: (1-bᵀv)·logN → 1+γ (Mertens-type, needs PNT)
-  - `gram_limit`: (vᵀGv-1)·logN → -γ-log4π (Gram asymptotics)
+### Custom Axioms: 0 🎓🎓 (BOTH GRADUATED!)
+  - `margin_limit`: GRADUATED → theorem (via margin_limit_graduated + dotProduct_bridge_aux)
+  - `gram_limit`: GRADUATED → theorem (via gram_limit_graduated + quadForm_bridge_aux)
+
+### Inherited Axiom: 1
+  - `d2_logN_limit` (GramGraduation.lean): d²·logN → c_holes (≡ RH, Báez-Duarte)
 
 ### Theorems PROVED:
 | # | Result | Status | Content |
@@ -252,8 +294,10 @@ theorem approx_error_vanishes
 | 2 | `distance_sq_scaled_decomposition` | ✅ | Scaled version |
 | 3 | `c_holes_decomposition` | ✅ | c = L₁ + 2K₁ |
 | 4 | `limit_sum_eq` | ✅ | Sum of limits |
-| 5 | `mass_renormalization` | ✅ | THE MAIN THEOREM |
-| 6 | `approx_error_vanishes` | ✅ | ‖δ‖²_G·logN → 0 |
+| 5 | `margin_limit` | 🎓 | (1-bᵀv)·logN → 1+γ (GRADUATED) |
+| 6 | `gram_limit` | 🎓 | (vᵀGv-1)·logN → -γ-log4π (GRADUATED) |
+| 7 | `mass_renormalization` | ✅ | THE MAIN THEOREM |
+| 8 | `approx_error_vanishes` | ✅ | ‖δ‖²_G·logN → 0 |
 -/
 
 end Cathedral.Geometry.Renormalization.MassRenormalization
