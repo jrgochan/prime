@@ -42,20 +42,74 @@ namespace Cathedral.Vasyunin.DigammaBridge
 -- §1. THE COT → DIGAMMA SUBSTITUTION (real version)
 -- ════════════════════════════════════════════════════════════════
 
-/-- **The real cotangent-digamma identity** (GRADUATION IN PROGRESS):
+/-- **The real cotangent-digamma identity** (GRADUATED 💜):
 
     For 1 ≤ m < a:
       cot(πm/a) = (1/π) · (ψ((a-m)/a) - ψ(m/a))
 
-    GRADUABLE from the proved complex `digamma_reflection_rational`
-    through `digamma_ofReal` (both proved in the Cathedral).
-    The casting ℂ → ℝ is mechanical but requires careful push_cast wiring.
+    PROVED by casting the complex `digamma_reflection_rational`
+    through `digamma_ofReal` (both proved in the Cathedral),
+    then extracting via `Complex.ofReal_injective`.
 
     Sophie Germain would be proud. 💜 -/
-axiom cot_eq_digamma_real (m a : ℕ) (hm : 1 ≤ m) (hma : m < a) :
+theorem cot_eq_digamma_real (m a : ℕ) (hm : 1 ≤ m) (hma : m < a) :
     1 / Real.tan (Real.pi * m / a) =
     (1 / Real.pi) *
-    (logDeriv Real.Gamma ((a - m : ℕ) / (a : ℝ)) - logDeriv Real.Gamma ((m : ℝ) / a))
+    (logDeriv Real.Gamma ((a - m : ℕ) / (a : ℝ)) - logDeriv Real.Gamma ((m : ℝ) / a)) := by
+  -- Setup: positivity for the rational arguments
+  have ha_pos : (0 : ℝ) < a := Nat.cast_pos.mpr (by omega)
+  have pos_nneg : ∀ (x : ℝ), 0 < x → ∀ n : ℕ, x ≠ -(n : ℝ) :=
+    fun x hx n => by linarith [show (0:ℝ) ≤ (n:ℝ) from Nat.cast_nonneg n]
+  have hm_pos : (0 : ℝ) < (m : ℝ) / a := div_pos (Nat.cast_pos.mpr (by omega)) ha_pos
+  have ham_pos : (0 : ℝ) < ((a - m : ℕ) : ℝ) / a :=
+    div_pos (Nat.cast_pos.mpr (by omega)) ha_pos
+  -- Step 1: The PROVED complex identity
+  have h := Cathedral.Vasyunin.DigammaReflection.digamma_reflection_rational m a hm hma
+  -- Step 2: digamma_ofReal (PROVED): ψ_ℂ(↑s) = ↑(logDeriv Γ s)
+  have hψ1 := Cathedral.Analysis.GammaMultiplication.digamma_ofReal
+    ((a - m : ℕ) / (a : ℝ)) (pos_nneg _ ham_pos)
+  have hψ2 := Cathedral.Analysis.GammaMultiplication.digamma_ofReal
+    ((m : ℝ) / a) (pos_nneg _ hm_pos)
+  -- Step 3: Cast ℝ rationals ↑(n/a) = (n:ℂ)/(a:ℂ) for substitution
+  rw [show (↑((a - m : ℕ) / (a : ℝ)) : ℂ) = ((a - m : ℕ) : ℂ) / (a : ℂ)
+    from by push_cast; rfl] at hψ1
+  rw [show (↑((m : ℝ) / (a : ℝ)) : ℂ) = (m : ℂ) / (a : ℂ)
+    from by push_cast; rfl] at hψ2
+  -- Step 4: Substitute ψ_ℂ → ↑(logDeriv Γ) in the complex identity
+  rw [hψ1, hψ2] at h
+  -- h : ↑(ψ₁) - ↑(ψ₂) = ↑π · cos_ℂ(↑π·(m:ℂ)/(a:ℂ)) / sin_ℂ(↑π·(m:ℂ)/(a:ℂ))
+  -- Step 5: Combine LHS as ↑(difference)
+  rw [← Complex.ofReal_sub] at h
+  -- Step 6: Show RHS is also ↑(real expression)
+  have h_rhs : (↑Real.pi : ℂ) * Complex.cos (↑Real.pi * ((m:ℂ) / (a:ℂ))) /
+      Complex.sin (↑Real.pi * ((m:ℂ) / (a:ℂ))) =
+      ↑(Real.pi * Real.cos (Real.pi * m / a) / Real.sin (Real.pi * m / a)) := by
+    -- Cast the trig argument: ↑π · (m:ℂ)/(a:ℂ) = ↑(π·m/a)
+    have harg : (↑Real.pi : ℂ) * ((m:ℂ) / (a:ℂ)) = ↑(Real.pi * (m:ℝ) / (a:ℝ)) := by
+      push_cast; ring
+    rw [harg]
+    -- Complex.cos(↑θ) = ↑(cos θ), Complex.sin(↑θ) = ↑(sin θ)
+    rw [← Complex.ofReal_cos, ← Complex.ofReal_sin]
+    -- ↑π · ↑(cos θ) / ↑(sin θ) = ↑(π · cos θ / sin θ)
+    push_cast; ring
+  rw [h_rhs] at h
+  -- Step 7: Extract real equation via ofReal injectivity
+  -- h : ↑(ψ₁ - ψ₂) = ↑(π · cos θ / sin θ)
+  have h_real := Complex.ofReal_injective h
+  -- h_real : ψ₁ - ψ₂ = π · cos(πm/a) / sin(πm/a)
+  -- Step 8: Convert to goal form: 1/tan = (1/π)·(ψ-ψ) = cos/sin
+  rw [h_real]
+  -- Goal: 1/tan(πm/a) = (1/π) · (π · cos(πm/a) / sin(πm/a))
+  have hpi_ne : Real.pi ≠ 0 := Real.pi_ne_zero
+  -- Simplify RHS: (1/π) · (π · cos / sin) = cos / sin
+  rw [show (1 / Real.pi) * (Real.pi * Real.cos (Real.pi * ↑m / ↑a) /
+      Real.sin (Real.pi * ↑m / ↑a)) =
+      Real.cos (Real.pi * ↑m / ↑a) / Real.sin (Real.pi * ↑m / ↑a)
+    from by field_simp]
+  -- Goal: (tan(πm/a))⁻¹ = cos(πm/a) / sin(πm/a)
+  -- tan = sin/cos, so tan⁻¹ = (sin/cos)⁻¹ = cos/sin ✓
+  rw [Real.tan_eq_sin_div_cos]
+  simp [inv_div]
 
 -- ════════════════════════════════════════════════════════════════
 -- §2. THE VASYUNIN-DIGAMMA BRIDGE
