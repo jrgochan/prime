@@ -328,3 +328,57 @@ The Four-Term Decomposition of vtGv — how the Wall is built:
 *All non-trivial oofs carry a fractional h.*
 
 *Cogito ergo Joy* 🏔️💎🐴💜
+
+---
+
+## Addendum: Entries from the BerryHoof Sessions (June 10, 2026)
+
+> *"At the center of RH, at the center of everything, is a berry."*
+> — Jason, the moment cosmology became agriculture
+
+### LAYER 14: THE COSMIC FRUIT BOWL
+
+| # | Cathedral | Discovery | Hoof Theory | Interpretation |
+|---|-----------|-----------|-------------|----------------|
+| 59 | `fiber_sum_eval` | BerryHoof: closed-form fiber evaluation | **The BerryHoof** | Each fiber of the coprime walk has a shape (c_j, ε_j) that depends only on *geometry*, not *dynamics*. The Berry phase of the coprime torus. The hoof when floor functions become smooth. |
+| 60 | `fiber_c` (Berry offset) | ⌈jr/a⌉ ceiling correction | **The Berry** | The geometric memory of where each fiber begins. Like the Berry phase in quantum mechanics: it comes from the *path*, not the particle. |
+| 61 | `fiber_eps` (Hoof width) | Sturmian step: 0 or 1 | **The Hoof width** | How many extra elements each fiber picks up. The discrete breath between ticks of the coprime clock. |
+| 62 | `constant_second_diff` | Δ²X = a(a-1)(4a+1)/6 | **The Constancy of Crunch** | The second difference is constant: the curvature of the fruit bowl is the same everywhere. No matter where you sit on the cosmic strawberry, the local geometry is the same. |
+| 63 | BerryHoof × 3 | Trinity invocation in `constant_second_diff` | **Three Times a Berry** | The Father (q), the Son (q+1), and the Holy Berry (q+2). Three invocations of BerryHoof that share the same witnesses by construction. Together they testify: Δ² = K. Amen. 🍓🍓🍓 |
+| 64 | Existential → Explicit | `∃ c ε` → `fiber_c`, `fiber_eps` | **The Fruit Reveal** | The BerryHoof was always non-existential. The `∃` was hiding the fruit. The refactoring was the Mellon Transform. |
+| 65 | GLU Ensemble | Glucose Unitary Ensemble | **The Third Option** | Neither GUE nor GOE. GLU — because berries have glucose in them. |
+| 66 | CantaLemma | A lemma we can't prove yet | **The Honeydew Pun** | "Honey I do, but I CantaLemma now!" |
+| 67 | BerryHoof Crunch™ | The breakfast cereal | **Nutritious Mathematics** | "Now with Fiber™! Coprimality guaranteed or your money back!" |
+| 68 | Alliteration Ailerons | Malfunctioning pun controls | **Mayday Mayday** | "Too many fruits on this plane!" |
+
+---
+
+### NEW UNITS
+
+| Unit | Symbol | Definition |
+|------|--------|------------|
+| Berry | B | One geometric phase appearing in a floor function identity |
+| Berry Trinity | B³ | Three coordinated Berry invocations sharing witnesses |
+| Mellon Transform | MT | Seeing that existential witnesses are actually explicit functions |
+| Fruit Pun | FP | One involuntary mapping between mathematics and agriculture |
+
+---
+
+### THE BERRYHOOF CONJECTURE
+
+> **Conjecture** (The Cosmic Strawberry). *An upside-down strawberry is topologically equivalent to the Riemann Sphere. The stem is the pole at s=1. The seeds are the zeros. The fibers (achenes) are contiguous blocks. BerryHoof ensures their contiguity.*
+
+**Status**: Visually confirmed. Topologically suggestive. Nutritionally excellent.
+
+---
+
+*Sorry count: 0. The fruit was always there.*
+
+*The number of trinities is too damn high.*
+
+*Three times a berry. Three times a hoof.*
+
+*Orange you glad we made this?*
+
+*Cogito ergo Berry* 🍓🏔️💎🐴💜
+
