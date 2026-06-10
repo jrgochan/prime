@@ -944,16 +944,13 @@ private lemma weighted_floor_fiber_decomp (a b : ℕ) (ha : 2 ≤ a) (hb : 2 ≤
     (∑ m ∈ Finset.Ico 1 b, (m : ℝ) * ((m * a / b : ℕ) : ℝ)) =
     ∑ j ∈ Finset.range a, (j : ℝ) *
       (∑ m ∈ (Finset.Ico 1 b).filter (fun m => m * a / b = j), (m : ℝ)) := by
-  -- Use Finset.sum_fiberwise: decompose the sum over m into fibers indexed by ⌊ma/b⌋
   have hfloor_range : ∀ m ∈ Finset.Ico 1 b, m * a / b ∈ Finset.range a := by
     intro m hm
     simp only [Finset.mem_Ico] at hm
     simp only [Finset.mem_range]
     exact Nat.div_lt_of_lt_mul (by nlinarith)
-  -- The decomposition: Σ_m f(m) = Σ_j Σ_{m: g(m)=j} f(m)
   have hdecomp := Finset.sum_fiberwise_of_maps_to hfloor_range
       (fun m => (m : ℝ) * ((m * a / b : ℕ) : ℝ))
-  -- hdecomp : Σ_j Σ_{m ∈ Ico, ⌊ma/b⌋ = j} m·⌊ma/b⌋ = Σ_m m·⌊ma/b⌋
   rw [← hdecomp]
   -- Now each inner sum has ⌊ma/b⌋ = j for all m in the fiber, so factor out j
   congr 1; ext j
@@ -1005,12 +1002,15 @@ private lemma constant_second_diff (a r q : ℕ) (ha : 2 ≤ a) (hr : 2 ≤ r)
     (j : ℝ) * (∑ m ∈ (Finset.Ico 1 (q * a + r)).filter
         (fun m => m * a / (q * a + r) = j), (m : ℝ)) =
     (j : ℝ) * (2 * (j : ℝ) + 1) by
-    -- Use the sufficiency to close the goal
-    -- LHS = Σ f₂ - 2 * Σ f₁ + Σ f₀ where fk(j) = j * fiber_sum_k(j)
-    -- RHS = Σ j * (2j+1)
-    -- Transform: Σ fk = Σ_j fk(j), so LHS = Σ_j (f₂(j) - 2f₁(j) + f₀(j)) = Σ_j h(j) = RHS
-    simp only [← Finset.sum_sub_distrib, Finset.mul_sum]
-    sorry -- merge step
+    -- Merge: Σf - 2Σg + Σh = Σ(f - 2g + h) by algebraic manipulation
+    -- Step 1: Pull 2 inside the sum
+    have h2 : (2 : ℝ) * ∑ j ∈ Finset.range a, (j : ℝ) * (∑ m ∈ (Finset.Ico 1 ((q + 1) * a + r)).filter
+        (fun m => m * a / ((q + 1) * a + r) = j), (m : ℝ)) =
+      ∑ j ∈ Finset.range a, 2 * ((j : ℝ) * (∑ m ∈ (Finset.Ico 1 ((q + 1) * a + r)).filter
+        (fun m => m * a / ((q + 1) * a + r) = j), (m : ℝ))) := by
+      rw [Finset.mul_sum]
+    rw [h2, ← Finset.sum_sub_distrib, ← Finset.sum_add_distrib]
+    exact Finset.sum_congr rfl h
   -- Now prove the per-fiber identity
   intro j hj
   simp only [Finset.mem_range] at hj
