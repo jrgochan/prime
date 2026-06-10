@@ -665,6 +665,7 @@ private lemma sum_Ico_arithmetic (s n : ℕ) :
     push_cast
     ring
 
+set_option maxHeartbeats 400000 in
 /-- **FIBER SUM EVALUATION**: For coprime (a, b=qa+r), each fiber j has
     ∑_{fiber_j} m = (q + ε_j) · (jq + c_j) + (q + ε_j)·((q + ε_j) - 1)/2
 
@@ -744,7 +745,135 @@ private lemma fiber_sum_eval (a r q j : ℕ) (ha : 2 ≤ a) (hr : 2 ≤ r)
       exact sum_Ico_arithmetic _ _
     · -- CASE 1 ≤ j ≤ a-2: generic fiber
       refine ⟨(j * r + a - 1) / a, (j + 1) * r / a - j * r / a, ?_⟩
-      sorry
+      -- Non-divisibility
+      have hndvd_jr : ¬ (a ∣ j * r) := by
+        intro hdvd; have := hcop.dvd_of_dvd_mul_right hdvd
+        exact absurd (Nat.le_of_dvd (by omega) this) (by omega)
+      have hrem_jr_pos : j * r % a > 0 :=
+        Nat.pos_of_ne_zero (fun h => hndvd_jr ⟨j * r / a, by omega⟩)
+      -- Ceiling: (jr + a - 1) / a = jr/a + 1
+      have hc_val : (j * r + a - 1) / a = j * r / a + 1 := by
+        set Q := j * r / a with hQ_def
+        set R := j * r % a with hR_def
+        have h1 : a * Q + R = j * r := Nat.div_add_mod (j * r) a
+        have h2 : R < a := Nat.mod_lt (j * r) ha_pos
+        -- hrem_jr_pos : R > 0
+        change R > 0 at hrem_jr_pos
+        -- Goal: (Q * a + R + a - 1) / a = Q + 1
+        -- = (R - 1 + (Q + 1) * a) / a
+        -- = (R - 1) / a + Q + 1
+        -- = 0 + Q + 1
+        refine Nat.div_eq_of_lt_le ?lo ?hi
+        case lo =>
+          -- Goal: (Q + 1) * a ≤ Q * a + R + a - 1
+          -- i.e., Q * a + a ≤ Q * a + R + a - 1, i.e., 0 ≤ R - 1
+          simp only [show (Q + 1) * a = a * Q + a from by ring]
+          omega
+        case hi =>
+          -- Goal: Q * a + R + a - 1 < (Q + 1 + 1) * a
+          -- i.e., Q * a + R + a - 1 < Q * a + 2 * a, i.e., R - 1 < a
+          simp only [show (Q + 1 + 1) * a = a * Q + 2 * a from by ring]
+          omega
+      -- Non-divisibility for j*b and (j+1)*b
+      have hndvd_j : ¬ (a ∣ j * b) := by
+        intro hdvd; have := hcop_ab.dvd_of_dvd_mul_right hdvd
+        exact absurd (Nat.le_of_dvd (by omega) this) (by omega)
+      have hndvd_j1 : ¬ (a ∣ (j + 1) * b) := by
+        intro hdvd; have := hcop_ab.dvd_of_dvd_mul_right hdvd
+        exact absurd (Nat.le_of_dvd (by omega) this) (by omega)
+      -- jb/a = jq + jr/a via Euclidean decomposition
+      have hjb_div : j * b / a = j * q + j * r / a := by
+        rw [hb_def, show j * (q * a + r) = j * r + j * q * a from by ring]
+        rw [Nat.add_mul_div_right _ _ ha_pos]; omega
+      have hj1b_div : (j + 1) * b / a = (j + 1) * q + (j + 1) * r / a := by
+        rw [hb_def, show (j + 1) * (q * a + r) = (j + 1) * r + (j + 1) * q * a from by ring]
+        rw [Nat.add_mul_div_right _ _ ha_pos]; omega
+      -- Mod positivity for jb and (j+1)b
+      have hrem_jb_pos : j * b % a > 0 :=
+        Nat.pos_of_ne_zero (fun h => hndvd_j ⟨j * b / a, by omega⟩)
+      have hrem_j1b_pos : (j + 1) * b % a > 0 :=
+        Nat.pos_of_ne_zero (fun h => hndvd_j1 ⟨(j + 1) * b / a, by omega⟩)
+      -- Endpoints
+      have h_start : j * q + (j * r + a - 1) / a = j * b / a + 1 := by
+        rw [hc_val, hjb_div]; omega
+      have hd_le : j * r / a ≤ (j + 1) * r / a := Nat.div_le_div_right (Nat.mul_le_mul_right r (by omega : j ≤ j + 1))
+      have h_end : j * q + (j * r + a - 1) / a + (q + ((j + 1) * r / a - j * r / a)) =
+          (j + 1) * b / a + 1 := by
+        rw [hc_val, hj1b_div]
+        have : (j + 1) * q = j * q + q := by ring
+        omega
+      -- Filter = Ico
+      have h_filter : (Finset.Ico 1 b).filter (fun m => m * a / b = j) =
+          Finset.Ico (j * q + (j * r + a - 1) / a)
+                     (j * q + (j * r + a - 1) / a + (q + ((j + 1) * r / a - j * r / a))) := by
+        ext m; simp only [Finset.mem_filter, Finset.mem_Ico]; constructor
+        · -- Forward: m*a/b = j → m ∈ Ico
+          intro ⟨⟨hm1, hmb⟩, hf⟩
+          have hlb : j * b ≤ m * a := by
+            have := Nat.div_mul_le_self (m * a) b; rw [hf] at this; linarith
+          have hub : m * a < (j + 1) * b := by
+            have h1 := Nat.div_add_mod (m * a) b
+            have h2 := Nat.mod_lt (m * a) hb_pos; rw [hf] at h1; linarith
+          constructor
+          · -- Lower bound
+            rw [h_start]; by_contra h_neg; push_neg at h_neg
+            have hle' : m ≤ j * b / a := by omega
+            have h1 : m * a ≤ (j * b / a) * a := Nat.mul_le_mul_right a hle'
+            have h1' : (j * b / a) * a = a * (j * b / a) := by ring
+            have h2 := Nat.div_add_mod (j * b) a; linarith
+          · -- Upper bound
+            rw [h_end]; by_contra h_neg; push_neg at h_neg
+            have hge : (j + 1) * b / a + 1 ≤ m := by omega
+            have h1 : ((j + 1) * b / a + 1) * a ≤ m * a := Nat.mul_le_mul_right a hge
+            have h1' : ((j + 1) * b / a + 1) * a = a * ((j + 1) * b / a) + a := by ring
+            have h2 := Nat.div_add_mod ((j + 1) * b) a
+            -- Derive: a * ((j+1)*b/a) + a ≤ m*a < (j+1)*b = a*((j+1)*b/a) + (j+1)*b%a
+            -- So a < (j+1)*b%a, but (j+1)*b%a < a. Contradiction.
+            have h3 := Nat.mod_lt ((j + 1) * b) ha_pos
+            linarith
+        · -- Backward: m ∈ Ico → m ∈ filter
+          intro ⟨hm_lo, hm_hi⟩
+          refine ⟨⟨?_, ?_⟩, ?_⟩
+          · -- 1 ≤ m
+            have hj_ge : 1 ≤ j := by omega
+            have hjr_ge : j * r ≥ 2 := by nlinarith
+            have hbound : j * r + a - 1 ≥ a := by omega
+            have : (j * r + a - 1) / a ≥ 1 := by
+              calc (j * r + a - 1) / a ≥ a / a := Nat.div_le_div_right hbound
+                _ = 1 := Nat.div_self ha_pos
+            omega
+          · -- m < b
+            rw [h_end] at hm_hi; rw [hj1b_div] at hm_hi
+            have hj1_bound : (j + 1) * r / a < r := by
+              apply Nat.div_lt_of_lt_mul
+              have : (j + 1) < a := by omega
+              show (j + 1) * r < a * r
+              exact Nat.mul_lt_mul_of_pos_right this (by omega : 0 < r)
+            have hexp : (j + 1) * q = j * q + q := by ring
+            -- m < (j+1)*q + (j+1)*r/a + 1 ≤ (j+1)*q + r ≤ a*q + r = b
+            have hq_bound : (j + 1) * q ≤ a * q := Nat.mul_le_mul_right q (by omega)
+            have haq : a * q = q * a := by ring
+            omega
+          · -- m*a/b = j
+            apply floor_in_fiber a b m j hb_pos
+            · -- j*b ≤ m*a
+              rw [h_start] at hm_lo
+              have h1 : (j * b / a + 1) * a ≤ m * a := Nat.mul_le_mul_right a hm_lo
+              have h1' : (j * b / a + 1) * a = a * (j * b / a) + a := by ring
+              have h2 := Nat.div_add_mod (j * b) a
+              have h3 := Nat.mod_lt (j * b) ha_pos
+              -- From h1' and h1: a*(j*b/a) + a ≤ m*a
+              -- From h2: j*b = a*(j*b/a) + j*b%a
+              -- From h3: j*b%a < a ≤ a
+              -- So j*b = a*(j*b/a) + j*b%a ≤ a*(j*b/a) + a ≤ m*a
+              linarith
+            · -- m*a < (j+1)*b
+              rw [h_end] at hm_hi
+              have hle' : m ≤ (j + 1) * b / a := by omega
+              have h1 : m * a ≤ ((j + 1) * b / a) * a := Nat.mul_le_mul_right a hle'
+              have h1' : ((j + 1) * b / a) * a = a * ((j + 1) * b / a) := by ring
+              have h2 := Nat.div_add_mod ((j + 1) * b) a; linarith
+      rw [h_filter, sum_Ico_arithmetic]
 
 /-- **STEPPING LEMMA**: When the denominator increases from b to b+a (with b = qa+r),
     the weighted floor sum X(a,n) changes by a LINEAR function of q:
