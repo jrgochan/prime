@@ -636,6 +636,116 @@ private lemma weighted_floor_sum_bij (a q : ℕ) (ha : 2 ≤ a) (hq : 1 ≤ q) :
     simp only; congr 1
     exact_mod_cast (base_div_r1 a q j t ha hp.1 hp.2.1 (by omega : t ≤ q)).symm
 
+-- ═══════════════════════════════════════════════════════════════════════════
+-- FIBER DECOMPOSITION INFRASTRUCTURE
+-- ═══════════════════════════════════════════════════════════════════════════
+
+/-- **FIBER MEMBERSHIP**: If j*b ≤ m*a < (j+1)*b then ⌊ma/b⌋ = j. -/
+private lemma floor_in_fiber (a b m j : ℕ) (hb : 0 < b)
+    (hlb : j * b ≤ m * a) (hub : m * a < (j + 1) * b) :
+    m * a / b = j := by
+  rw [Nat.div_eq_of_lt_le] <;> omega
+
+/-- **FIBER CONTIGUITY**: The map m ↦ ⌊ma/b⌋ is non-decreasing on {1,...,b-1}. -/
+private lemma floor_div_mono (a b m₁ m₂ : ℕ) (_hb : 0 < b)
+    (hle : m₁ ≤ m₂) :
+    m₁ * a / b ≤ m₂ * a / b :=
+  Nat.div_le_div_right (Nat.mul_le_mul_right a hle)
+
+/-- **ARITHMETIC SUM OVER Ico**: ∑_{m ∈ Ico s (s+n)} m = n·s + n·(n-1)/2 -/
+private lemma sum_Ico_arithmetic (s n : ℕ) :
+    (∑ m ∈ Finset.Ico s (s + n), (m : ℝ)) =
+    (n : ℝ) * (s : ℝ) + (n : ℝ) * ((n : ℝ) - 1) / 2 := by
+  induction n with
+  | zero => simp
+  | succ n ih =>
+    rw [show s + (n + 1) = (s + n) + 1 from by omega]
+    rw [Finset.sum_Ico_succ_top (by omega : s ≤ s + n)]
+    rw [ih]
+    push_cast
+    ring
+
+/-- **FIBER SUM EVALUATION**: For coprime (a, b=qa+r), each fiber j has
+    ∑_{fiber_j} m = (q + ε_j) · (jq + c_j) + (q + ε_j)·((q + ε_j) - 1)/2
+
+    where c_j = ⌈jr/a⌉ and ε_j = ⌊(j+1)r/a⌋ - ⌊jr/a⌋.
+    The fiber is a contiguous Ico interval of size q + ε_j starting at jq + c_j. -/
+private lemma fiber_sum_eval (a r q j : ℕ) (ha : 2 ≤ a) (hr : 2 ≤ r)
+    (hr_lt : r < a) (hcop : Nat.Coprime a r) (hj : j < a)
+    (hq : 0 < q * a + r) :
+    ∃ (c_j ε_j : ℕ),
+    (∑ m ∈ (Finset.Ico 1 (q * a + r)).filter (fun m => m * a / (q * a + r) = j), (m : ℝ)) =
+    ((q + ε_j : ℕ) : ℝ) * ((j * q + c_j : ℕ) : ℝ) +
+    ((q + ε_j : ℕ) : ℝ) * (((q + ε_j : ℕ) : ℝ) - 1) / 2 := by
+  set b := q * a + r with hb_def
+  have hb_pos : 0 < b := hq
+  have ha_pos : 0 < a := by omega
+  have hcop_ab : Nat.Coprime a b := by
+    unfold Nat.Coprime
+    rw [hb_def, show q * a + r = r + a * q from by ring, Nat.gcd_add_mul_left_right]
+    exact hcop
+  -- Case split on j
+  by_cases hj0 : j = 0
+  · -- CASE j = 0: fiber = Ico(1, q+1), c=1, ε=0
+    subst hj0; refine ⟨1, 0, ?_⟩; simp only [Nat.add_zero, Nat.zero_mul, Nat.zero_add]
+    have h_filter : (Finset.Ico 1 b).filter (fun m => m * a / b = 0) = Finset.Ico 1 (q + 1) := by
+      ext m; simp only [Finset.mem_filter, Finset.mem_Ico]; constructor
+      · intro ⟨⟨hm1, hmb⟩, hf⟩
+        refine ⟨hm1, ?_⟩
+        have h1 := Nat.div_add_mod (m * a) b; rw [hf] at h1
+        have h2 := Nat.mod_lt (m * a) hb_pos
+        nlinarith
+      · intro ⟨hm1, hmq1⟩
+        refine ⟨⟨hm1, by nlinarith⟩, ?_⟩
+        apply Nat.div_eq_of_lt
+        show m * a < b; nlinarith
+    rw [h_filter, show q + 1 = 1 + q from by omega]; exact sum_Ico_arithmetic 1 q
+  · by_cases hjlast : j + 1 = a
+    · -- CASE j = a-1: fiber = Ico(jq+r, b), c=r, ε=0
+      refine ⟨r, 0, ?_⟩; simp only [Nat.add_zero]
+      have h_filter : (Finset.Ico 1 b).filter (fun m => m * a / b = j) =
+          Finset.Ico (j * q + r) b := by
+        ext m; simp only [Finset.mem_filter, Finset.mem_Ico]; constructor
+        · intro ⟨⟨hm1, hmb⟩, hf⟩
+          refine ⟨?_, hmb⟩
+          have hlb : j * b ≤ m * a := by
+            have := Nat.div_mul_le_self (m * a) b; rw [hf] at this; linarith
+          have hndvd : ¬ (a ∣ j * b) := by
+            intro hdvd
+            have := hcop_ab.dvd_of_dvd_mul_right hdvd
+            have := Nat.le_of_dvd (by omega) this; omega
+          have hjb_div : j * b / a = j * q + j * r / a := by
+            rw [hb_def, show j * (q * a + r) = j * r + j * q * a from by ring]
+            rw [Nat.add_mul_div_right _ _ ha_pos]; omega
+          have hmod : j * b % a > 0 :=
+            Nat.pos_of_ne_zero (fun h => hndvd ⟨j * b / a, by omega⟩)
+          have hm_ge : m ≥ j * b / a + 1 := by
+            by_contra h_neg; push_neg at h_neg
+            have hm_le : m ≤ j * b / a := by omega
+            have h1 : m * a ≤ j * b / a * a := Nat.mul_le_mul_right a hm_le
+            have h2 := Nat.div_add_mod (j * b) a
+            nlinarith [Nat.div_mul_le_self (j * b) a]
+          have hjr_div : j * r / a = r - 1 := by
+            have hj_eq : j = a - 1 := by omega
+            subst hj_eq
+            have h_decomp : (a - 1) * r = (a - r) + (r - 1) * a := by
+              zify [show 1 ≤ a from by omega, show r ≤ a from by omega, show 1 ≤ r from by omega]
+              ring
+            conv_lhs => rw [h_decomp]
+            rw [Nat.add_mul_div_right _ _ ha_pos, Nat.div_eq_of_lt (by omega : a - r < a)]
+            simp
+          omega
+        · intro ⟨hm_lo, hm_hi⟩
+          have hj_eq : j = a - 1 := by omega
+          refine ⟨⟨by omega, hm_hi⟩, ?_⟩
+          subst hj_eq
+          rw [Nat.div_eq_of_lt_le] <;> nlinarith
+      rw [h_filter, show b = j * q + r + q from by nlinarith]
+      exact sum_Ico_arithmetic _ _
+    · -- CASE 1 ≤ j ≤ a-2: generic fiber
+      refine ⟨(j * r + a - 1) / a, (j + 1) * r / a - j * r / a, ?_⟩
+      sorry
+
 /-- **STEPPING LEMMA**: When the denominator increases from b to b+a (with b = qa+r),
     the weighted floor sum X(a,n) changes by a LINEAR function of q:
 
