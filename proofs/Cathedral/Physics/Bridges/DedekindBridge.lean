@@ -1059,7 +1059,35 @@ private lemma weighted_floor_step (a r q : ℕ) (ha : 2 ≤ a) (hr : 2 ≤ r)
                (b' : ℝ) * (r : ℝ) * (3 * (a : ℝ) + 1) + 1) -
     (q : ℝ) * ((a : ℝ)^2 * (4 * (r : ℝ) * (b : ℝ) - 1) -
                (b : ℝ) * (r : ℝ) * (3 * (a : ℝ) + 1) + 1) := by
-  sorry
+  -- Induction on q
+  induction q with
+  | zero =>
+    -- Base case: q = 0
+    -- 12r·(X(a+r) - X(r)) - 12a·X(r) = P(a+r)
+    simp only [Nat.zero_mul, Nat.zero_add, Nat.zero_eq, CharP.cast_eq_zero, zero_mul, sub_zero]
+    -- Unfold the let bindings
+    sorry
+  | succ n ih =>
+    -- Induction step: q = n+1, assuming result for q = n
+    -- step(n+1) = step(n) + 12r·Δ²X = step(n) + 12r·K
+    -- We need: step(n+1) = (n+2)·P(b_{n+2}) - (n+1)·P(b_{n+1})
+    -- By IH:   step(n)   = (n+1)·P(b_{n+1}) - n·P(b_n)
+    -- So: step(n+1) - step(n) = (n+2)·P(b_{n+2}) - 2(n+1)·P(b_{n+1}) + n·P(b_n)
+    -- And: step(n+1) - step(n) = 12r·(X(b_{n+2}) - 2X(b_{n+1}) + X(b_n)) = 12r·K
+    -- These are equal by polynomial identity (push_cast; ring)
+    have hΔ := constant_second_diff a r n ha hr hr_lt hcop
+    -- The induction step is: goal(n+1) = ih + 12r·hΔ
+    -- Expand: LHS(n+1) - LHS(n) = 12r·Δ²X
+    -- and RHS(n+1) - RHS(n) = polynomial = 12r·K
+    -- Since Δ²X = K (by hΔ), the step follows.
+    -- First, unfold the let bindings in ih
+    simp only [] at ih
+    have : n + 1 + 1 = n + 2 := by omega
+    rw [this] at *
+    -- Push all ℕ casts to ℝ for polynomial reasoning
+    push_cast at ih hΔ ⊢
+    nlinarith [mul_self_nonneg (a : ℝ), mul_self_nonneg (r : ℝ),
+               mul_comm (a : ℝ) (r : ℝ), mul_comm (n : ℝ) (a : ℝ)]
 
 /-- **WEIGHTED FLOOR SUM EUCLIDEAN IDENTITY**: For coprime a,r with a ≥ 2, r ≥ 2,
     r < a, and b = q*a + r:
