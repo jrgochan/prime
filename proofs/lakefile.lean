@@ -542,6 +542,8 @@ lean_lib «Cathedral» where
     `Cathedral.Vasyunin.Cotangent.VasyuninReflectionWiring,
     -- Vasyunin Bound (|V(a,b)| ≤ Σ|cot|, zero sorry, Thulium Session)
     `Cathedral.Vasyunin.Cotangent.VasyuninBound,
+    -- Vasyunin Growth (|V(a,b)| ≤ a·(log a+1), zero axiom, Mountain Session)
+    `Cathedral.Vasyunin.Cotangent.VasyuninGrowth,
     -- Gershgorin Bound (eigenvalue localization, zero sorry, Thulium Session)
     `Cathedral.Vasyunin.Cotangent.GershgorinBound,
     -- Spectral Bound (Gershgorin → Gram wiring, 1 axiom, Thulium Session)
@@ -771,4 +773,6 @@ lean_lib «Cathedral» where
     `Cathedral.Geometry.Renormalization.FinalAssembly,
     -- Vasyunin-Digamma Bridge (V(a,b) = (1/π)·Σ{mb/a}·(ψ-ψ), June 8 2026) 🌉💎🐴
     `Cathedral.Vasyunin.Cotangent.VasyuninDigammaBridge,
+    -- Wedge Residual (ratio+ecot→1, V(n,n+1)=V(n,1), June 8 2026) 🌾🌊💎
+    `Cathedral.Geometry.Renormalization.WedgeResidual,
   ]
