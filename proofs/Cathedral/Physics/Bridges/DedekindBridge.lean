@@ -1046,6 +1046,12 @@ private lemma weighted_floor_base (a r : ℕ) (ha : 2 ≤ a) (hr : 2 ≤ r)
     12 * ((a : ℝ) * (∑ m ∈ Finset.Ico 1 r, (m : ℝ) * ((m * a / r : ℕ) : ℝ))) =
     (a : ℝ)^2 * (4 * (r : ℝ) * ((a : ℝ) + (r : ℝ)) - 1) -
       ((a : ℝ) + (r : ℝ)) * (r : ℝ) * (3 * (a : ℝ) + 1) + 1 := by
+  -- This is the Dedekind reciprocity core: the q=1 Euclidean identity.
+  -- Strategy: Use BerryHoof fiber decomposition at q=0 (for X(a,r))
+  -- and q=1 (for X(a,a+r)), substitute fiber_sum_eval, combine.
+  -- The per-fiber contribution is a polynomial in j, c_j, ε_j.
+  -- Summing over j gives P(a+r).
+  -- This is the irreducible combinatorial heart of the Dedekind bridge.
   sorry
 
 /-- **STEPPING LEMMA (induction)**: The base case is factored into weighted_floor_base.
