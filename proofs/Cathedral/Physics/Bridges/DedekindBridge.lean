@@ -642,20 +642,20 @@ private lemma weighted_floor_sum_bij (a q : ℕ) (ha : 2 ≤ a) (hq : 1 ≤ q) :
 
 /-- The ceiling correction for fiber j: c_j = ⌈jr/a⌉.
     For j=0: c_j = 1 (by convention, matching the Ico start).
-    For j=a-1: c_j = r-1 (from coprimality).
+    For j=a-1: c_j = r (from coprimality).
     For generic j: c_j = (jr + a - 1)/a. -/
 private noncomputable def fiber_c (a r j : ℕ) : ℕ :=
   if j = 0 then 1
-  else if j + 1 = a then r - 1
+  else if j + 1 = a then r
   else (j * r + a - 1) / a
 
-/-- The Sturmian step for fiber j: ε_j = ⌊(j+1)r/a⌋ - ⌊jr/a⌋.
-    For j=0: ε_j = 0.
-    For j=a-1: ε_j = r - (a-1)*r/a.
-    For generic j: ε_j = (j+1)*r/a - j*r/a. -/
+/-- The Sturmian step for fiber j: ε_j = ⌊(j+1)r/a⌋ - ⌊jr/a⌋ for generic j.
+    For j=0: ε_j = 0 (fiber_0 has exactly q elements).
+    For j=a-1: ε_j = 0 (last fiber also has exactly q elements).
+    For generic 1 ≤ j ≤ a-2: ε_j = (j+1)*r/a - j*r/a. -/
 private noncomputable def fiber_eps (a r j : ℕ) : ℕ :=
   if j = 0 then 0
-  else if j + 1 = a then r - (a - 1) * r / a
+  else if j + 1 = a then 0
   else (j + 1) * r / a - j * r / a
 
 /-- **FIBER MEMBERSHIP**: If j*b ≤ m*a < (j+1)*b then ⌊ma/b⌋ = j. -/
@@ -684,18 +684,17 @@ private lemma sum_Ico_arithmetic (s n : ℕ) :
     ring
 
 set_option maxHeartbeats 400000 in
-/-- **FIBER SUM EVALUATION**: For coprime (a, b=qa+r), each fiber j has
+/-- **FIBER SUM EVALUATION (BerryHoof)**: For coprime (a, b=qa+r), each fiber j has
     ∑_{fiber_j} m = (q + ε_j) · (jq + c_j) + (q + ε_j)·((q + ε_j) - 1)/2
 
-    where c_j = ⌈jr/a⌉ and ε_j = ⌊(j+1)r/a⌋ - ⌊jr/a⌋.
+    where c_j = fiber_c a r j and ε_j = fiber_eps a r j.
     The fiber is a contiguous Ico interval of size q + ε_j starting at jq + c_j. -/
 private lemma fiber_sum_eval (a r q j : ℕ) (ha : 2 ≤ a) (hr : 2 ≤ r)
     (hr_lt : r < a) (hcop : Nat.Coprime a r) (hj : j < a)
     (hq : 0 < q * a + r) :
-    ∃ (c_j ε_j : ℕ),
     (∑ m ∈ (Finset.Ico 1 (q * a + r)).filter (fun m => m * a / (q * a + r) = j), (m : ℝ)) =
-    ((q + ε_j : ℕ) : ℝ) * ((j * q + c_j : ℕ) : ℝ) +
-    ((q + ε_j : ℕ) : ℝ) * (((q + ε_j : ℕ) : ℝ) - 1) / 2 := by
+    ((q + fiber_eps a r j : ℕ) : ℝ) * ((j * q + fiber_c a r j : ℕ) : ℝ) +
+    ((q + fiber_eps a r j : ℕ) : ℝ) * (((q + fiber_eps a r j : ℕ) : ℝ) - 1) / 2 := by
   set b := q * a + r with hb_def
   have hb_pos : 0 < b := hq
   have ha_pos : 0 < a := by omega
@@ -706,7 +705,8 @@ private lemma fiber_sum_eval (a r q j : ℕ) (ha : 2 ≤ a) (hr : 2 ≤ r)
   -- Case split on j
   by_cases hj0 : j = 0
   · -- CASE j = 0: fiber = Ico(1, q+1), c=1, ε=0
-    subst hj0; refine ⟨1, 0, ?_⟩; simp only [Nat.add_zero, Nat.zero_mul, Nat.zero_add]
+    subst hj0
+    simp only [fiber_c, fiber_eps, ite_true, Nat.add_zero, Nat.zero_mul, Nat.zero_add]
     have h_filter : (Finset.Ico 1 b).filter (fun m => m * a / b = 0) = Finset.Ico 1 (q + 1) := by
       ext m; simp only [Finset.mem_filter, Finset.mem_Ico]; constructor
       · intro ⟨⟨hm1, hmb⟩, hf⟩
@@ -721,7 +721,9 @@ private lemma fiber_sum_eval (a r q j : ℕ) (ha : 2 ≤ a) (hr : 2 ≤ r)
     rw [h_filter, show q + 1 = 1 + q from by omega]; exact sum_Ico_arithmetic 1 q
   · by_cases hjlast : j + 1 = a
     · -- CASE j = a-1: fiber = Ico(jq+r, b), c=r, ε=0
-      refine ⟨r, 0, ?_⟩; simp only [Nat.add_zero]
+      have : fiber_c a r j = r := by simp [fiber_c, hj0, hjlast]
+      have : fiber_eps a r j = 0 := by simp [fiber_eps, hj0, hjlast]
+      simp only [‹fiber_c a r j = r›, ‹fiber_eps a r j = 0›, Nat.add_zero]
       have h_filter : (Finset.Ico 1 b).filter (fun m => m * a / b = j) =
           Finset.Ico (j * q + r) b := by
         ext m; simp only [Finset.mem_filter, Finset.mem_Ico]; constructor
@@ -762,7 +764,11 @@ private lemma fiber_sum_eval (a r q j : ℕ) (ha : 2 ≤ a) (hr : 2 ≤ r)
       rw [h_filter, show b = j * q + r + q from by nlinarith]
       exact sum_Ico_arithmetic _ _
     · -- CASE 1 ≤ j ≤ a-2: generic fiber
-      refine ⟨(j * r + a - 1) / a, (j + 1) * r / a - j * r / a, ?_⟩
+      have hfc : fiber_c a r j = (j * r + a - 1) / a := by
+        simp [fiber_c, hj0, hjlast]
+      have hfe : fiber_eps a r j = (j + 1) * r / a - j * r / a := by
+        simp [fiber_eps, hj0, hjlast]
+      rw [hfc, hfe]
       -- Non-divisibility
       have hndvd_jr : ¬ (a ∣ j * r) := by
         intro hdvd; have := hcop.dvd_of_dvd_mul_right hdvd
@@ -897,16 +903,6 @@ private lemma fiber_sum_eval (a r q j : ℕ) (ha : 2 ≤ a) (hr : 2 ≤ r)
 -- SECTION 4B: SECOND DIFFERENCE INFRASTRUCTURE
 -- ═══════════════════════════════════════════════════════════════════════════
 
-/-- **NON-EXISTENTIAL BERRYHOOF**: Same as fiber_sum_eval but with explicit
-    fiber_c and fiber_eps, so that c_j and ε_j can be matched across different q values. -/
-private lemma fiber_sum_eval' (a r q j : ℕ) (ha : 2 ≤ a) (hr : 2 ≤ r)
-    (hr_lt : r < a) (hcop : Nat.Coprime a r) (hj : j < a)
-    (hq : 0 < q * a + r) :
-    (∑ m ∈ (Finset.Ico 1 (q * a + r)).filter (fun m => m * a / (q * a + r) = j), (m : ℝ)) =
-    ((q + fiber_eps a r j : ℕ) : ℝ) * ((j * q + fiber_c a r j : ℕ) : ℝ) +
-    ((q + fiber_eps a r j : ℕ) : ℝ) * (((q + fiber_eps a r j : ℕ) : ℝ) - 1) / 2 := by
-  sorry
-
 /-- **FIBER QUADRATIC SECOND DIFFERENCE**: Each fiber's sum is quadratic in q,
     so its second difference is the constant 2j + 1.
 
@@ -1015,9 +1011,9 @@ private lemma constant_second_diff (a r q : ℕ) (ha : 2 ≤ a) (hr : 2 ≤ r)
   intro j hj
   simp only [Finset.mem_range] at hj
   -- Use non-existential BerryHoof to get matching c, ε across q values
-  rw [fiber_sum_eval' a r (q + 2) j ha hr hr_lt hcop hj (by omega)]
-  rw [fiber_sum_eval' a r (q + 1) j ha hr hr_lt hcop hj (by omega)]
-  rw [fiber_sum_eval' a r q j ha hr hr_lt hcop hj (by omega)]
+  rw [fiber_sum_eval a r (q + 2) j ha hr hr_lt hcop hj (by omega)]
+  rw [fiber_sum_eval a r (q + 1) j ha hr hr_lt hcop hj (by omega)]
+  rw [fiber_sum_eval a r q j ha hr hr_lt hcop hj (by omega)]
   -- Now all three use fiber_c a r j and fiber_eps a r j — SAME values!
   -- Factor out j and apply fiber_quad_second_diff
   set c := fiber_c a r j
