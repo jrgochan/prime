@@ -1028,24 +1028,28 @@ private lemma constant_second_diff (a r q : ℕ) (ha : 2 ≤ a) (hr : 2 ≤ r)
   nlinarith
 
 
-/-- **STEPPING LEMMA**: When the denominator increases from b to b+a (with b = qa+r),
-    the weighted floor sum X(a,n) changes by a LINEAR function of q:
+-- **STEPPING LEMMA**: When the denominator increases from b to b+a (with b = qa+r),
+--   the weighted floor sum X(a,n) changes by a LINEAR function of q:
+--   X(a, b+a) = X(a, b) + c₀(a,r) + c₁(a)·q
+--   where c₁(a) = a(a-1)(4a+1)/6 (independent of r!)
+--   Proved by induction on q:
+--     BASE CASE (q=0): weighted_floor_base (The Nervous Berry 🍓)
+--     INDUCTION STEP: constant_second_diff (BerryHoof Trinity 🍓🍓🍓)
 
-    X(a, b+a) = X(a, b) + c₀(a,r) + c₁(a)·q
+/-- **BASE CASE (q=0)**: The Nervous Berry 🍓
+    12r·X(a+r) - 12(r+a)·X(r) = P(a+r) where P(n) = a²(4rn-1) - nr(3a+1) + 1. -/
+private lemma weighted_floor_base (a r : ℕ) (ha : 2 ≤ a) (hr : 2 ≤ r)
+    (hr_lt : r < a) (hcop : Nat.Coprime a r) :
+    12 * ((r : ℝ) * (∑ m ∈ Finset.Ico 1 (a + r), (m : ℝ) *
+      ((m * a / (a + r) : ℕ) : ℝ)) -
+      (r : ℝ) * (∑ m ∈ Finset.Ico 1 r, (m : ℝ) * ((m * a / r : ℕ) : ℝ))) -
+    12 * ((a : ℝ) * (∑ m ∈ Finset.Ico 1 r, (m : ℝ) * ((m * a / r : ℕ) : ℝ))) =
+    (a : ℝ)^2 * (4 * (r : ℝ) * ((a : ℝ) + (r : ℝ)) - 1) -
+      ((a : ℝ) + (r : ℝ)) * (r : ℝ) * (3 * (a : ℝ) + 1) + 1 := by
+  sorry
 
-    where c₁(a) = a(a-1)(4a+1)/6 (independent of r!)
-    and c₀(a,r) = X(a, a+r) - X(a, r).
-
-    This is equivalent to: the difference 12·r·(X_{b+a} - X_b) - 12·a·X_r
-    equals the increment of the RHS polynomial.
-
-    Numerically verified for all coprime (a,r) with a ≤ 19, q ≤ 100.
-
-    The proof requires a bijection on residue classes mod a:
-    for gcd(a,b+a) = gcd(a,r) = 1, the floor values ⌊ma/(b+a)⌋ ≤ ⌊ma/b⌋,
-    and the weighted count of floor-drops equals c₁·q + c₀ exactly.
-    Each residue class j mod a contributes (2j+1) to the second difference,
-    summing to Σ(2j+1)j = c₁. -/
+/-- **STEPPING LEMMA (induction)**: The base case is factored into weighted_floor_base.
+    The induction step uses constant_second_diff (BerryHoof Trinity). -/
 private lemma weighted_floor_step (a r q : ℕ) (ha : 2 ≤ a) (hr : 2 ≤ r)
     (hr_lt : r < a) (hcop : Nat.Coprime a r) :
     let b := q * a + r
@@ -1062,11 +1066,11 @@ private lemma weighted_floor_step (a r q : ℕ) (ha : 2 ≤ a) (hr : 2 ≤ r)
   -- Induction on q
   induction q with
   | zero =>
-    -- Base case: q = 0
+    -- Base case: q = 0, b = r, b' = a + r
     -- 12r·(X(a+r) - X(r)) - 12a·X(r) = P(a+r)
-    simp only [Nat.zero_mul, Nat.zero_add, Nat.zero_eq, CharP.cast_eq_zero, zero_mul, sub_zero]
-    -- Unfold the let bindings
-    sorry
+    simp only [Nat.zero_mul, Nat.zero_add, CharP.cast_eq_zero, zero_mul, sub_zero]
+    norm_num
+    exact weighted_floor_base a r ha hr hr_lt hcop
   | succ n ih =>
     -- Induction step: q = n+1, assuming result for q = n
     -- step(n+1) = step(n) + 12r·Δ²X = step(n) + 12r·K
