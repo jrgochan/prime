@@ -641,7 +641,7 @@ private lemma weighted_floor_sum_bij (a q : ℕ) (ha : 2 ≤ a) (hq : 1 ≤ q) :
 -- ═══════════════════════════════════════════════════════════════════════════
 
 /-- **FIBER MEMBERSHIP**: If j*b ≤ m*a < (j+1)*b then ⌊ma/b⌋ = j. -/
-private lemma floor_in_fiber (a b m j : ℕ) (hb : 0 < b)
+private lemma floor_in_fiber (a b m j : ℕ) (_hb : 0 < b)
     (hlb : j * b ≤ m * a) (hub : m * a < (j + 1) * b) :
     m * a / b = j := by
   rw [Nat.div_eq_of_lt_le] <;> omega
@@ -721,7 +721,7 @@ private lemma fiber_sum_eval (a r q j : ℕ) (ha : 2 ≤ a) (hr : 2 ≤ r)
           have hmod : j * b % a > 0 :=
             Nat.pos_of_ne_zero (fun h => hndvd ⟨j * b / a, by omega⟩)
           have hm_ge : m ≥ j * b / a + 1 := by
-            by_contra h_neg; push_neg at h_neg
+            by_contra h_neg; push Not at h_neg
             have hm_le : m ≤ j * b / a := by omega
             have h1 : m * a ≤ j * b / a * a := Nat.mul_le_mul_right a hm_le
             have h2 := Nat.div_add_mod (j * b) a
@@ -816,13 +816,13 @@ private lemma fiber_sum_eval (a r q j : ℕ) (ha : 2 ≤ a) (hr : 2 ≤ r)
             have h2 := Nat.mod_lt (m * a) hb_pos; rw [hf] at h1; linarith
           constructor
           · -- Lower bound
-            rw [h_start]; by_contra h_neg; push_neg at h_neg
+            rw [h_start]; by_contra h_neg; push Not at h_neg
             have hle' : m ≤ j * b / a := by omega
             have h1 : m * a ≤ (j * b / a) * a := Nat.mul_le_mul_right a hle'
             have h1' : (j * b / a) * a = a * (j * b / a) := by ring
             have h2 := Nat.div_add_mod (j * b) a; linarith
           · -- Upper bound
-            rw [h_end]; by_contra h_neg; push_neg at h_neg
+            rw [h_end]; by_contra h_neg; push Not at h_neg
             have hge : (j + 1) * b / a + 1 ≤ m := by omega
             have h1 : ((j + 1) * b / a + 1) * a ≤ m * a := Nat.mul_le_mul_right a hge
             have h1' : ((j + 1) * b / a + 1) * a = a * ((j + 1) * b / a) + a := by ring
@@ -874,6 +874,71 @@ private lemma fiber_sum_eval (a r q j : ℕ) (ha : 2 ≤ a) (hr : 2 ≤ r)
               have h1' : ((j + 1) * b / a) * a = a * ((j + 1) * b / a) := by ring
               have h2 := Nat.div_add_mod ((j + 1) * b) a; linarith
       rw [h_filter, sum_Ico_arithmetic]
+
+-- ═══════════════════════════════════════════════════════════════════════════
+-- SECTION 4B: SECOND DIFFERENCE INFRASTRUCTURE
+-- ═══════════════════════════════════════════════════════════════════════════
+
+/-- **FIBER QUADRATIC SECOND DIFFERENCE**: Each fiber's sum is quadratic in q,
+    so its second difference is the constant 2j + 1.
+
+    fiber_sum(j, q) = (q+ε)(jq+c) + (q+ε)((q+ε)-1)/2
+
+    Δ²(fiber_sum) = fiber_sum(q+2) - 2·fiber_sum(q+1) + fiber_sum(q) = 2j+1 -/
+private lemma fiber_quad_second_diff (j c ε q : ℕ) :
+    (((q + 2 + ε : ℕ) : ℝ) * ((j * (q + 2) + c : ℕ) : ℝ) +
+     ((q + 2 + ε : ℕ) : ℝ) * (((q + 2 + ε : ℕ) : ℝ) - 1) / 2) -
+    2 * (((q + 1 + ε : ℕ) : ℝ) * ((j * (q + 1) + c : ℕ) : ℝ) +
+         ((q + 1 + ε : ℕ) : ℝ) * (((q + 1 + ε : ℕ) : ℝ) - 1) / 2) +
+    (((q + ε : ℕ) : ℝ) * ((j * q + c : ℕ) : ℝ) +
+     ((q + ε : ℕ) : ℝ) * (((q + ε : ℕ) : ℝ) - 1) / 2) =
+    2 * (j : ℝ) + 1 := by
+  push_cast
+  ring
+
+/-- **SUMMATION IDENTITY**: Σ_{j=0}^{a-1} j(2j+1) = a(a-1)(4a+1)/6 -/
+private lemma sum_j_times_2j_plus_1 (a : ℕ) :
+    (∑ j ∈ Finset.range a, (j : ℝ) * (2 * (j : ℝ) + 1)) =
+    (a : ℝ) * ((a : ℝ) - 1) * (4 * (a : ℝ) + 1) / 6 := by
+  induction a with
+  | zero => simp
+  | succ n ih =>
+    rw [Finset.sum_range_succ, ih]
+    push_cast
+    ring
+
+/-- **WEIGHTED FLOOR SUM FIBER DECOMPOSITION**: The weighted floor sum decomposes
+    into fiber contributions: X(a,b) = Σ_{j=0}^{a-1} j · (Σ_{m ∈ fiber_j} m).
+
+    This is the fundamental partition identity connecting the global sum to fibers. -/
+private lemma weighted_floor_fiber_decomp (a b : ℕ) (ha : 2 ≤ a) (hb : 2 ≤ b)
+    (hcop : Nat.Coprime a b) :
+    (∑ m ∈ Finset.Ico 1 b, (m : ℝ) * ((m * a / b : ℕ) : ℝ)) =
+    ∑ j ∈ Finset.range a, (j : ℝ) *
+      (∑ m ∈ (Finset.Ico 1 b).filter (fun m => m * a / b = j), (m : ℝ)) := by
+  -- Use Finset.sum_fiberwise: decompose the sum over m into fibers indexed by ⌊ma/b⌋
+  have hfloor_range : ∀ m ∈ Finset.Ico 1 b, m * a / b ∈ Finset.range a := by
+    intro m hm
+    simp only [Finset.mem_Ico] at hm
+    simp only [Finset.mem_range]
+    exact Nat.div_lt_of_lt_mul (by nlinarith)
+  -- The decomposition: Σ_m f(m) = Σ_j Σ_{m: g(m)=j} f(m)
+  have hdecomp := Finset.sum_fiberwise_of_maps_to hfloor_range
+      (fun m => (m : ℝ) * ((m * a / b : ℕ) : ℝ))
+  -- hdecomp : Σ_j Σ_{m ∈ Ico, ⌊ma/b⌋ = j} m·⌊ma/b⌋ = Σ_m m·⌊ma/b⌋
+  rw [← hdecomp]
+  -- Now each inner sum has ⌊ma/b⌋ = j for all m in the fiber, so factor out j
+  congr 1; ext j
+  -- Goal: j * (Σ_{m ∈ fiber_j} m) = Σ_{m ∈ fiber_j} m * ⌊ma/b⌋
+  rw [Finset.mul_sum]
+  apply Finset.sum_congr rfl
+  intro m hm
+  -- hm : m ∈ (Finset.Ico 1 b).filter (fun m => m * a / b = j)
+  simp only [Finset.mem_filter] at hm
+  -- hm.2 : m * a / b = j
+  rw [hm.2]
+  ring
+
 
 /-- **STEPPING LEMMA**: When the denominator increases from b to b+a (with b = qa+r),
     the weighted floor sum X(a,n) changes by a LINEAR function of q:
