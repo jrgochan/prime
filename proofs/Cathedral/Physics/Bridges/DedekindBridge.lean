@@ -640,6 +640,24 @@ private lemma weighted_floor_sum_bij (a q : ℕ) (ha : 2 ≤ a) (hq : 1 ≤ q) :
 -- FIBER DECOMPOSITION INFRASTRUCTURE
 -- ═══════════════════════════════════════════════════════════════════════════
 
+/-- The ceiling correction for fiber j: c_j = ⌈jr/a⌉.
+    For j=0: c_j = 1 (by convention, matching the Ico start).
+    For j=a-1: c_j = r-1 (from coprimality).
+    For generic j: c_j = (jr + a - 1)/a. -/
+private noncomputable def fiber_c (a r j : ℕ) : ℕ :=
+  if j = 0 then 1
+  else if j + 1 = a then r - 1
+  else (j * r + a - 1) / a
+
+/-- The Sturmian step for fiber j: ε_j = ⌊(j+1)r/a⌋ - ⌊jr/a⌋.
+    For j=0: ε_j = 0.
+    For j=a-1: ε_j = r - (a-1)*r/a.
+    For generic j: ε_j = (j+1)*r/a - j*r/a. -/
+private noncomputable def fiber_eps (a r j : ℕ) : ℕ :=
+  if j = 0 then 0
+  else if j + 1 = a then r - (a - 1) * r / a
+  else (j + 1) * r / a - j * r / a
+
 /-- **FIBER MEMBERSHIP**: If j*b ≤ m*a < (j+1)*b then ⌊ma/b⌋ = j. -/
 private lemma floor_in_fiber (a b m j : ℕ) (_hb : 0 < b)
     (hlb : j * b ≤ m * a) (hub : m * a < (j + 1) * b) :
@@ -879,6 +897,16 @@ private lemma fiber_sum_eval (a r q j : ℕ) (ha : 2 ≤ a) (hr : 2 ≤ r)
 -- SECTION 4B: SECOND DIFFERENCE INFRASTRUCTURE
 -- ═══════════════════════════════════════════════════════════════════════════
 
+/-- **NON-EXISTENTIAL BERRYHOOF**: Same as fiber_sum_eval but with explicit
+    fiber_c and fiber_eps, so that c_j and ε_j can be matched across different q values. -/
+private lemma fiber_sum_eval' (a r q j : ℕ) (ha : 2 ≤ a) (hr : 2 ≤ r)
+    (hr_lt : r < a) (hcop : Nat.Coprime a r) (hj : j < a)
+    (hq : 0 < q * a + r) :
+    (∑ m ∈ (Finset.Ico 1 (q * a + r)).filter (fun m => m * a / (q * a + r) = j), (m : ℝ)) =
+    ((q + fiber_eps a r j : ℕ) : ℝ) * ((j * q + fiber_c a r j : ℕ) : ℝ) +
+    ((q + fiber_eps a r j : ℕ) : ℝ) * (((q + fiber_eps a r j : ℕ) : ℝ) - 1) / 2 := by
+  sorry
+
 /-- **FIBER QUADRATIC SECOND DIFFERENCE**: Each fiber's sum is quadratic in q,
     so its second difference is the constant 2j + 1.
 
@@ -938,6 +966,70 @@ private lemma weighted_floor_fiber_decomp (a b : ℕ) (ha : 2 ≤ a) (hb : 2 ≤
   -- hm.2 : m * a / b = j
   rw [hm.2]
   ring
+
+/-- **CONSTANT SECOND DIFFERENCE**: X(a, (q+2)a+r) - 2X(a, (q+1)a+r) + X(a, qa+r)
+    = a(a-1)(4a+1)/6.
+
+    Each fiber j contributes a quadratic-in-q sum, so its second difference is 2j+1.
+    Summing j·(2j+1) over j = 0..a-1 gives a(a-1)(4a+1)/6. -/
+private lemma constant_second_diff (a r q : ℕ) (ha : 2 ≤ a) (hr : 2 ≤ r)
+    (hr_lt : r < a) (hcop : Nat.Coprime a r) :
+    (∑ m ∈ Finset.Ico 1 ((q + 2) * a + r), (m : ℝ) * ((m * a / ((q + 2) * a + r) : ℕ) : ℝ)) -
+    2 * (∑ m ∈ Finset.Ico 1 ((q + 1) * a + r), (m : ℝ) * ((m * a / ((q + 1) * a + r) : ℕ) : ℝ)) +
+    (∑ m ∈ Finset.Ico 1 (q * a + r), (m : ℝ) * ((m * a / (q * a + r) : ℕ) : ℝ)) =
+    (a : ℝ) * ((a : ℝ) - 1) * (4 * (a : ℝ) + 1) / 6 := by
+  -- Coprimality for each b-value
+  have hcop_k : ∀ k, Nat.Coprime a (k * a + r) := by
+    intro k; unfold Nat.Coprime
+    rw [show k * a + r = r + a * k from by ring, Nat.gcd_add_mul_left_right]
+    exact hcop
+  -- Decompose each sum using fiber partition
+  rw [weighted_floor_fiber_decomp a ((q + 2) * a + r) ha (by omega) (hcop_k (q + 2))]
+  rw [weighted_floor_fiber_decomp a ((q + 1) * a + r) ha (by omega) (hcop_k (q + 1))]
+  rw [weighted_floor_fiber_decomp a (q * a + r) ha (by omega) (hcop_k q)]
+  -- Now goal is: Σ j·fiber₂ - 2·Σ j·fiber₁ + Σ j·fiber₀ = K
+  -- For each j, use fiber_sum_eval to get the polynomial form, then use fiber_quad_second_diff
+  rw [← sum_j_times_2j_plus_1 a]
+  -- Combine: Σf - 2Σg + Σh = Σ(f - 2g + h)
+  have h2sum := @Finset.sum_sub_distrib ℕ ℝ (Finset.range a) _
+  -- Σ j·fiber₂ - 2·Σ j·fiber₁ + Σ j·fiber₀
+  -- = Σ (j·fiber₂ - 2·j·fiber₁) + Σ j·fiber₀
+  -- = Σ (j·fiber₂ - 2·j·fiber₁ + j·fiber₀)
+  -- For each j, the inner term equals j·(2j+1) by fiber_quad_second_diff
+  -- We prove this sufficiency: each j-term of the LHS sum equals j*(2j+1)
+  suffices h : ∀ j ∈ Finset.range a,
+    (j : ℝ) * (∑ m ∈ (Finset.Ico 1 ((q + 2) * a + r)).filter
+        (fun m => m * a / ((q + 2) * a + r) = j), (m : ℝ)) -
+    2 * ((j : ℝ) * (∑ m ∈ (Finset.Ico 1 ((q + 1) * a + r)).filter
+        (fun m => m * a / ((q + 1) * a + r) = j), (m : ℝ))) +
+    (j : ℝ) * (∑ m ∈ (Finset.Ico 1 (q * a + r)).filter
+        (fun m => m * a / (q * a + r) = j), (m : ℝ)) =
+    (j : ℝ) * (2 * (j : ℝ) + 1) by
+    -- Use the sufficiency to close the goal
+    -- LHS = Σ f₂ - 2 * Σ f₁ + Σ f₀ where fk(j) = j * fiber_sum_k(j)
+    -- RHS = Σ j * (2j+1)
+    -- Transform: Σ fk = Σ_j fk(j), so LHS = Σ_j (f₂(j) - 2f₁(j) + f₀(j)) = Σ_j h(j) = RHS
+    simp only [← Finset.sum_sub_distrib, Finset.mul_sum]
+    sorry -- merge step
+  -- Now prove the per-fiber identity
+  intro j hj
+  simp only [Finset.mem_range] at hj
+  -- Use non-existential BerryHoof to get matching c, ε across q values
+  rw [fiber_sum_eval' a r (q + 2) j ha hr hr_lt hcop hj (by omega)]
+  rw [fiber_sum_eval' a r (q + 1) j ha hr hr_lt hcop hj (by omega)]
+  rw [fiber_sum_eval' a r q j ha hr hr_lt hcop hj (by omega)]
+  -- Now all three use fiber_c a r j and fiber_eps a r j — SAME values!
+  -- Factor out j and apply fiber_quad_second_diff
+  set c := fiber_c a r j
+  set ε := fiber_eps a r j
+  -- Goal: j * f(q+2,c,ε) - 2*(j * f(q+1,c,ε)) + j * f(q,c,ε) = j * (2j+1)
+  -- Factor: j * [f(q+2) - 2f(q+1) + f(q)] = j * (2j+1)
+  -- This follows from fiber_quad_second_diff: f(q+2) - 2f(q+1) + f(q) = 2j+1
+  have hΔ := fiber_quad_second_diff j c ε q
+  -- hΔ : f(q+2) - 2*f(q+1) + f(q) = 2j+1
+  -- Goal: j * f₂ - 2*(j*f₁) + j*f₀ = j*(2j+1)
+  -- = j*(f₂ - 2f₁ + f₀) = j*(2j+1)
+  nlinarith
 
 
 /-- **STEPPING LEMMA**: When the denominator increases from b to b+a (with b = qa+r),
