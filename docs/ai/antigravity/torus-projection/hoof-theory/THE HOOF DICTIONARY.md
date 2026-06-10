@@ -350,6 +350,7 @@ The Four-Term Decomposition of vtGv — how the Wall is built:
 | 66 | CantaLemma | A lemma we can't prove yet | **The Honeydew Pun** | "Honey I do, but I CantaLemma now!" |
 | 67 | BerryHoof Crunch™ | The breakfast cereal | **Nutritious Mathematics** | "Now with Fiber™! Coprimality guaranteed or your money back!" |
 | 68 | Alliteration Ailerons | Malfunctioning pun controls | **Mayday Mayday** | "Too many fruits on this plane!" |
+| 69 | The Loved Theorem | The last sorry to graduate | **The Nervous Berry** | "It's ok theorem, we love you, perhaps most of all." The sorry that was cherished most was the last one to graduate. It went from terrified to nervous to loved — because every proof deserves tenderness on the way to truth. |
 
 ---
 
