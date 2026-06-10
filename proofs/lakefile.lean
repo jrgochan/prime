@@ -574,6 +574,10 @@ lean_lib «Cathedral» where
     `Cathedral.Physics.Bridges.AnnihilationBridge,
     -- Bridge Gap (G_Vasyunin = R_Ramanujan + Δ decomposition, Bridge Gap Session)
     `Cathedral.Physics.Bridges.BridgeGap,
+    -- Dedekind Reciprocity (s(a,b)+s(b,a) = reciprocity law, June 10 2026) 🍓
+    `Cathedral.Physics.Bridges.DedekindReciprocity,
+    -- Dedekind Bridge (reciprocity → Ramanujan via BerryHoof, June 10 2026) 🍓🌉
+    `Cathedral.Physics.Bridges.DedekindBridge,
     -- Time-Domain Bridge (G = 2M - 1/(3jk) + 2∫E/t³, IBP maneuver, Bridge Session)
     `Cathedral.Physics.Bridges.TimeDomainBridge,
     -- Silence and Echo (trivial zero duality: ζ(-1)=-1/12, Σ_reg(-2n)=1/6, Basel)
