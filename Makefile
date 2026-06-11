@@ -85,7 +85,7 @@ rh: ## 🌟 Show what axioms the compiler needs for theorem RiemannHypothesis
 		| lake env lean --stdin 2>&1 | grep -v "^warning:" | grep -v "^info:" | grep -v "^Note:" | grep -v "^$$" | sed 's/^/  /' || true
 	@echo ""
 	@echo "  ┌─────────────────────────────────────────────────┐"
-	@echo "  │  PATH 4: Nyman-Beurling Equivalence (4 PNT)    │"
+	@echo "  │  PATH 4: Nyman-Beurling Equivalence (2 PNT+2)  │"
 	@echo "  │  nyman_beurling_equivalence                     │"
 	@echo "  └─────────────────────────────────────────────────┘"
 	@cd proofs && printf '%s\n' \
@@ -291,7 +291,8 @@ stats: ## Show project statistics
 	@printf "  Experiments:        " && find experiments -maxdepth 1 -type d | tail -n +2 | wc -l | tr -d ' '
 	@echo ""
 	@printf "  Axioms:             " && find proofs/Cathedral -name '*.lean' -not -path '*/Archive/*' -not -path '*/.lake/*' -exec grep -c '^axiom ' {} + 2>/dev/null | awk -F: '{s+=$$2}END{print s}'
-	@printf "  Sorries:            " && find proofs/Cathedral -name '*.lean' -not -path '*/Archive/*' -not -path '*/.lake/*' -exec grep -c '^\s*sorry$$' {} + 2>/dev/null | awk -F: '{s+=$$2}END{print s}'
+	@printf "  Sorries (literal):  " && find proofs/Cathedral -name '*.lean' -not -path '*/Archive/*' -not -path '*/.lake/*' -exec grep -c '^\s*sorry$$' {} + 2>/dev/null | awk -F: '{s+=$$2}END{print s}'
+	@printf "  Sorry files:        " && find proofs/Cathedral -name '*.lean' -not -path '*/Archive/*' -not -path '*/.lake/*' -exec grep -l '^\s*sorry$$' {} + 2>/dev/null | wc -l | tr -d ' '
 	@echo ""
 	@echo "  ═══════════════════════════════════════════"
 	@echo ""
