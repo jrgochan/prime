@@ -725,7 +725,7 @@ private lemma weighted_floor_euclidean (a r q : ℕ) (ha : 2 ≤ a) (hr : 2 ≤ 
     decomposition of the weighted floor sum.
 
     Numerically verified for all coprime (a,b) with a+b ≤ 100. -/
-private lemma dedekind_three_term_full (a b : ℕ) (ha : 1 < a) (hb : 1 < b)
+lemma dedekind_three_term_full (a b : ℕ) (ha : 1 < a) (hb : 1 < b)
     (hr : 0 < b % a) (hcop : Nat.Coprime a b) :
     12 * (a : ℝ) * b * ((b % a : ℕ) : ℝ) * (dedekindSum a b - dedekindSum a (b % a)) =
     ((b % a : ℕ) : ℝ) * ((a : ℝ)^2 + (b : ℝ)^2 + 1) -
