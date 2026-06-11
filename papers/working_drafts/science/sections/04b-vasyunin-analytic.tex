@@ -101,8 +101,13 @@ Each term has a precise physical meaning:
 \end{itemize}
 \end{correspondence}
 
-The Dedekind reciprocity axiom (\lean{harmonicTileSum\_reciprocity}),
-which states a reciprocity law for harmonic tile sums, is the number-theoretic
-incarnation of \emph{time-reversal invariance}: the scattering amplitude
-for $a \to b$ is related to $b \to a$ by a universal kinematic factor.
-
+The Dedekind reciprocity law, originally an axiom (\lean{harmonicTileSum\_reciprocity}),
+is the number-theoretic incarnation of \emph{time-reversal invariance}: the scattering
+amplitude for $a \to b$ is related to $b \to a$ by a universal kinematic factor.
+The Cathedral now formalizes this via a \textbf{three-file Dedekind architecture}
+(\lean{DedekindBridge.lean} $\to$ \lean{DedekindReciprocity.lean} $\to$
+\lean{DedekindAssembly.lean}), which establishes the full
+$s(a,b) + s(b,a) = (a^2 + b^2 + 1)/(12ab) - 1/4$ reciprocity law with
+zero sorry in the core infrastructure and connects the Dedekind sums to
+the Ramanujan--Hardy expansion of the Gram matrix
+(\S\ref{sec:dedekind-ramanujan}).

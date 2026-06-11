@@ -23,7 +23,7 @@
 We present a systematic dictionary between the mathematical structures
 of the Cathedral---a machine-verified proof architecture for the
 Nyman--Beurling--B\'aez-Duarte equivalence for the Riemann Hypothesis
-in Lean~4 (457 active files, 571 incl.\ archive, $\sim$143{,}000 lines)---and their physical
+in Lean~4 (474 active files, 588 incl.\ archive, $\sim$149{,}500 lines)---and their physical
 counterparts in quantum mechanics, statistical mechanics, signal
 processing, and quantum field theory.
 The Gram matrix is the two-point correlator of a 1D quantum field.
@@ -517,10 +517,12 @@ Each term has a precise physical meaning:
 \end{itemize}
 \end{correspondence}
 
-The Dedekind reciprocity axiom (\lean{harmonicTileSum\_reciprocity}),
+The Dedekind reciprocity law (\lean{harmonicTileSum\_reciprocity}),
 which states a reciprocity law for harmonic tile sums, is the number-theoretic
 incarnation of \emph{time-reversal invariance}: the scattering amplitude
 for $a \to b$ is related to $b \to a$ by a universal kinematic factor.
+The Cathedral formalizes this via a three-file Dedekind architecture
+connecting to the Ramanujan quadratic form (\S\ref{sec:dedekind-ramanujan}).
 
 % ================================================================
 \section{The Nyman--Beurling Distance as Vacuum Energy}
@@ -1736,7 +1738,11 @@ assertion that this flow is complete.
 
 \input{sections/13c-susy-cancellation}
 
+\input{sections/13g-dedekind-ramanujan}
+
 \input{sections/13d-fermi-tower-confinement}
+
+\input{sections/13h-renormalization-rg}
 
 \input{sections/13d-smith-ramanujan}
 
@@ -1745,7 +1751,7 @@ assertion that this flow is complete.
 \input{sections/13f-spectral-mirror}
 
 % ================================================================
-% NEW SECTIONS (v20--v21, May 2026)
+% NEW SECTIONS (v20--v26, May--June 2026)
 % ================================================================
 
 \input{sections/14-riemann-sphere}
@@ -2384,17 +2390,17 @@ Proved (zero sorry, zero axiom) & 130+ \\
 Axiom (off-crown) & $\sim$20 \\
 Crown axiom (One-Pillar) & \textbf{1} \\
 Oracle axiom (\lean{oracle\_certificates}) & \textbf{1} \\
-Proof paths to RH & \textbf{5} \\
+Proof paths to RH & \textbf{6} \\
 Physical domains covered & 12 \\
 Cathedral Lean modules referenced & 85+ \\
 Numerical experiments & \textbf{50+} \\
-Active Lean files & 457 (571 incl.\ archive) \\
-Active lines of code & $\sim$143{,}500 ($\sim$169{,}400 incl.\ archive) \\
+Active Lean files & 474 (588 incl.\ archive) \\
+Active lines of code & $\sim$149{,}500 ($\sim$175{,}000 incl.\ archive) \\
 Theorem/lemma declarations & $\sim$4{,}600 \\
-Physics/ subsystem files & \textbf{81} \\
+Physics/ subsystem files & \textbf{83} \\
 Physics/ subsystem sorry & \textbf{0} \\
 Spectral/ subsystem sorry & \textbf{0} \\
-Geometry/ subsystem subfolders & \textbf{8} \\
+Geometry/ subsystem subfolders & \textbf{9} \\
 Crown path sorry & \textbf{0} \\
 Oracle path sorry & \textbf{0} \\
 Largest certified $N$ & \textbf{55,440} (DD precision) \\

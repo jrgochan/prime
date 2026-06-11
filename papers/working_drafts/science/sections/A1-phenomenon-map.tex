@@ -127,7 +127,7 @@ $\ln(2\pi)$ contribution & One-loop determinantal correction & \lean{StirlingBri
 Gauss digamma formula & Bloch decomposition ($\mathbb{Z}/q\mathbb{Z}$) & \lean{DigammaReflection.lean} & axiom & \ref{sec:vasyunin} \\
 Convergence axiom & Ergodic hypothesis & \lean{ConvergenceAxioms.lean} & axiom & \ref{sec:vasyunin} \\
 $V(a,b) = \sum\fract{mb/a}\cot(\pi m/a)$ & Scattering phase shift & \lean{FormulaBridge.lean} & proved & \ref{sec:vasyunin} \\
-Dedekind reciprocity & Time-reversal invariance & \lean{LogDigammaBridge.lean} & axiom & \ref{sec:vasyunin} \\
+Dedekind reciprocity & Time-reversal invariance & \lean{DedekindReciprocity.lean} & partial & \ref{sec:vasyunin} \\
 Uniqueness of limits & Ergodic = thermodynamic & \lean{LogDigammaBridge.lean} & proved & \ref{sec:vasyunin} \\
 GCD reduction $G(j,k) = G(j/d,k/d)$ & Gauge equivalence & \lean{Vasyunin/Cotangent/GCDReduction.lean} & proved & \ref{sec:vasyunin} \\
 GCD stratum partition & Inclusion-exclusion decomposition & \lean{Covariance/GCDPartition.lean} & proved & --- \\
@@ -270,16 +270,16 @@ Proof paths to RH & \textbf{6} \\
 Physical domains covered & 12 \\
 Cathedral Lean modules referenced & 85+ \\
 Numerical experiments & \textbf{50+} \\
-Active Lean files & 340 (450+ incl.\ archive) \\
-Active lines of code & $\sim$97{,}000 ($\sim$123{,}000 incl.\ archive) \\
-Theorem/lemma declarations & $\sim$3{,}600 \\
+Active Lean files & 474 (588 incl.\ archive) \\
+Active lines of code & $\sim$149{,}500 ($\sim$175{,}000 incl.\ archive) \\
+Theorem/lemma declarations & $\sim$4{,}600 \\
 Crown path sorry & \textbf{0} \\
 Oracle path sorry & \textbf{0} \\
 Gram Crown sorry & \textbf{0} \\
 Spectral/ subsystem sorry & \textbf{0} \\
 Largest certified $N$ & \textbf{55,440} (DD precision) \\
 New constants identified & \textbf{$\alpha \approx 0.47$} \\
-Arithmetic Standard Model theorems & \textbf{88} (0 sorry, 0 axioms) \\
+Arithmetic Standard Model theorems & \textbf{101} (0 sorry, 0 axioms) \\
 \bottomrule
 \end{tabular}
 \end{center}

@@ -1,5 +1,5 @@
 % ================================================================
-\section{Axiom Audit: The Crowned Cathedral (v25, June 7, 2026)}
+\section{Axiom Audit: The Crowned Cathedral (v26, June 10, 2026)}
 \label{sec:axiom-audit}
 % ================================================================
 
@@ -11,10 +11,17 @@ and is \textbf{formally proved equivalent to the Riemann Hypothesis}---plus
 the three Lean kernel axioms (\texttt{propext}, \texttt{Classical.choice},
 \texttt{Quot.sound}).
 
-\begin{remark}[The Quad-Crown Architecture (v21)]
-\label{rem:quad-crown}
-The Cathedral possesses a \textbf{Quad-Crown} architecture:
+\begin{remark}[The Penta-Crown Architecture (v26)]
+\label{rem:penta-crown}
+The Cathedral possesses a \textbf{Penta-Crown} architecture:
 \begin{itemize}
+  \item \textbf{The Overcancellation Crown (v25, PATH~1):} The \emph{cleanest}
+    proof path (\lean{overcancellation\_implies\_rh}) depends on exactly
+    \textbf{2 PNT axioms} (\lean{frac\_error\_isLittleO}, \lean{pnt\_mu\_log\_sq\_div\_k})
+    plus the three Lean kernel axioms. No custom axioms. No overcancellation
+    axiom needed---the chain is:
+    PNT consequences $\to$ Gram bound $\to$ $d_N^2 \to 0$ $\to$ RH.
+    Key advantage: the narrowest axiom footprint of any path.
   \item \textbf{The Analytic Crown:} The primary crown path
     (\lean{nyman\_beurling\_equivalence}) relies on 1 literature axiom
     (\lean{baez\_duarte\_forward}) for the continuous mathematical ideal.
@@ -40,11 +47,12 @@ The Cathedral possesses a \textbf{Quad-Crown} architecture:
     Key advantage: connects prime factorization structure directly
     to eigenvalue control via Smith's 1876 PSD theorem.
 \end{itemize}
+The Overcancellation Crown says ``RH follows from two PNT-level facts.''
 The Analytic Crown says ``RH is exactly as hard as one classical result.''
 The Cybernetic Crown says ``RH is as hard as verifying a finite computation.''
 The Gram Crown says ``RH IS a quadratic form inequality.''
 The Arakelov Crown says ``RH IS an intersection-theoretic inequality.''
-All four paths share the same zero-axiom converse via the Rank-1 Mellin identity.
+All five paths share the same zero-axiom converse via the Rank-1 Mellin identity.
 \end{remark}
 
 The axiom is a standard result of analytic number theory with a precise
@@ -209,6 +217,9 @@ Two-Tier Gram Bound & v21 & TwoTierGramBound (E43) & Diagonal + off-diagonal con
 PNT graduation ($\times 10$) & v22 & PNTAndBridge (PNTAnd) & 10 PNT axioms $\to$ theorems \\
 \texttt{abel\_summation\_cov\_bound} & v22 & Trivial from dRH & Mertens $\to$ cov (redundant) \\
 The Crowning & v22 & WitnessAsymptotics & Sole axiom = \texttt{overcancellation\_axiom} \\
+Dedekind reciprocity (partial) & v26 & DedekindReciprocity.lean & S-matrix time-reversal (3-file architecture) \\
+Wall consolidation & v25 & Cathedral.Wall & Triplicate $\to$ single canonical axiom \\
+Overcancellation Crown (PATH~1) & v25 & OvercancellationChain.lean & 2 PNT axioms (cleanest path) \\
 \bottomrule
 \end{tabular}
 \end{center}

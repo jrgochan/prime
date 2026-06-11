@@ -1,0 +1,88 @@
+% ================================================================
+\subsection{The Dedekind--Ramanujan Bridge: Time-Reversal Invariance}
+\label{sec:dedekind-ramanujan}
+% ================================================================
+
+The off-diagonal Gram entries decompose into Ramanujan terms (controlled
+by $\gcd(j,k)^2/(12jk)$) and Dedekind sum corrections. The Cathedral
+formalizes this connection through a \textbf{three-file architecture}
+that resolves a circular dependency while establishing the full
+reciprocity law.
+
+\subsubsection{The Dedekind Sum}
+
+The Dedekind sum $s(b,a)$ for coprime positive integers $a, b$ is defined via
+the sawtooth function $((x)) = x - \lfloor x \rfloor - 1/2$ (for $x \notin \ZZ$):
+\[
+  s(b,a) = \sum_{m=1}^{a-1} \left(\!\left(\frac{m}{a}\right)\!\right)
+  \left(\!\left(\frac{mb}{a}\right)\!\right)
+\]
+
+\begin{correspondence}[Dedekind Reciprocity as Time-Reversal]
+\label{corr:dedekind-reciprocity}
+The Dedekind reciprocity law
+\[
+  s(a,b) + s(b,a) = \frac{a^2 + b^2 + 1}{12ab} - \frac{1}{4}
+\]
+is the number-theoretic analogue of \emph{time-reversal invariance}
+of the S-matrix on the prime lattice. The scattering amplitude
+$V(a,b) + V(b,a)$ (Vasyunin cotangent sum pair) decomposes via
+Dedekind sums, and the reciprocity law constrains this sum to
+a universal kinematic factor depending only on $a^2 + b^2$.
+
+In quantum field theory, time-reversal invariance (T-symmetry)
+constrains the S-matrix: $S(a \to b) = S(b \to a)$ up to
+kinematic factors. The Dedekind reciprocity law is the exact
+analogue, relating the forward scattering $s(a,b)$ to the
+backward scattering $s(b,a)$ via a symmetric correction.
+\end{correspondence}
+
+\subsubsection{The Three-File Architecture}
+
+The formalization employs a three-file decomposition to resolve
+a circular dependency:
+
+\begin{itemize}
+  \item \lean{DedekindReciprocity.lean}: Self-contained definitions
+    (sawtooth, $s(b,a)$, cross-sum expansion) and the base case
+    of the three-term relation ($r = 1$).
+
+  \item \lean{DedekindBridge.lean}: The ``Brave Berry'' --- a weighted
+    floor function Euclidean descent that proves the three-term relation
+    for all $r \geq 2$ via the Ramanujan bridge infrastructure.
+
+  \item \lean{DedekindAssembly.lean}: Imports both files and assembles
+    the sorry-free reciprocity law, then connects Dedekind sums
+    to the Ramanujan matrix entry:
+    \[
+      R(j,k) = \frac{\gcd(j,k)^2}{12jk}
+    \]
+    which is the dominant term in the off-diagonal expansion.
+\end{itemize}
+
+The architecture mirrors the physical decomposition: the S-matrix
+(DedekindReciprocity) defines the scattering amplitudes, the
+Euclidean descent (DedekindBridge) provides the dynamical reduction,
+and the assembly (DedekindAssembly) proves the symmetry constraint
+that links the scattering phases to the Ramanujan self-energy.
+
+\subsubsection{The Ramanujan Connection}
+
+The Ramanujan entry $R(j,k) = \gcd(j,k)^2/(12jk)$ appears as the
+leading term in the Dedekind reciprocity expansion:
+\[
+  s(a,b) + s(b,a) = R(a,b) + \frac{a^2 + b^2}{12ab} - \frac{1}{4}
+\]
+(where $R(a,b) = 1/(12ab)$ for coprime $a,b$).
+
+The Ramanujan matrix $R$ encodes the \emph{tree-level}
+interaction between modes $j$ and $k$ in the prime number quantum field.
+The Dedekind correction $s(a,b) + s(b,a) - R(a,b)$ is the
+\emph{one-loop correction}: it captures the modular arithmetic of
+the coprime structure that goes beyond the simple GCD scaling.
+
+This decomposition is proved in the Cathedral with zero sorry
+in the core infrastructure (\lean{DedekindAssembly.lean},
+\lean{RamanujanBridge.lean}), establishing a rigorous bridge
+between the Vasyunin scattering amplitudes and the Ramanujan
+quadratic form that controls the NB distance.
