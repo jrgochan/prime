@@ -60,7 +60,7 @@ namespace Cathedral.Geometry.Renormalization.FinalAssembly
     = 1 - c/lnN + S² + o(1/lnN) < 1 + S². -/
 axiom remainder_bound :
     ∃ N₀ : ℕ, ∀ N : ℕ, N ≥ N₀ →
-      ∀ (remainder S σ C_val : ℝ),
+      ∀ (remainder S σ _C_val : ℝ),
         -- Given: vtGv = CσS - S² + remainder (diagonal cancellation)
         -- Given: σ is the Mertens sum
         -- Given: S is the harmonic Möbius projection
