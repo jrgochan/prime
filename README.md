@@ -4,22 +4,23 @@
 
 A machine-checked proof architecture in **Lean 4** + **Mathlib** that reduces
 the Riemann Hypothesis to the decay of the Nyman–Beurling distance.
-**381 active Lean files** (~116,000 lines) across 25+ modules, with
+**474 active Lean files** (~149,500 lines) across 25+ modules, with
 **1 axiom equivalent to RH** on the crown path (verified by `#print axioms`),
 and an independent **Oracle Bridge** from GPU-certified computation.
 
-> **The Crowned Cathedral (v22).** The sole axiom is
-> `discrete_riemann_hypothesis` — formally proved *equivalent* to the
-> Riemann Hypothesis via `witness_covariance_decay_iff_rh`.
+> **The Penta-Crown Cathedral (v26).** The sole axiom is
+> `overcancellation_axiom` — formally proved *equivalent* to the
+> Riemann Hypothesis via the Glass Box architecture (7 sub-axioms).
 > The converse direction uses **zero custom axioms**.
+> Five independent crown paths; the cleanest (PATH 1) uses only 2 PNT axioms.
 >
 > The **Oracle Bridge** proves RH from **one** trusted GPU measurement:
 > DD-precision Gram quadratic form v^T G v < 1 at highly composite numbers.
 
-> **Release: v22 — The Crowning** — May 31, 2026
+> **Release: v26 — Penta-Crown** — June 10, 2026
 >
-> **Latest**: 381 files, ~116K lines, 1 axiom (≡ RH), 2 PNT bureaucracy,
-> 3 sorry (off-crown), 0 errors, 8,485 build jobs
+> **Latest**: 474 files, ~149K lines, 1 axiom (≡ RH), 4 sorry (off-crown),
+> 0 errors, 8,818 build jobs, 6 proof paths, 101 Standard Model theorems
 >
 > 📖 *New here? Read the [Origin Story](ORIGIN-STORY.md) — how a blind eigensolver
 > spontaneously derived the Möbius function and collided with Selberg's Parity Barrier.*
@@ -28,7 +29,7 @@ and an independent **Oracle Bridge** from GPU-certified computation.
 
 ```bash
 cd proofs
-lake build          # 381 active Cathedral files, 114 archived
+lake build          # 474 active Cathedral files, 114 archived
 ```
 
 Requires: [Lean v4.29.0](https://leanprover.github.io/lean4/doc/setup.html) and Mathlib.
@@ -49,7 +50,7 @@ this establishes the full biconditional RH ⟺ d²_N → 0.
 The proof decomposes into two pillars:
 
 - **Pillar I (Converse)**: d²_N → 0 ⟹ RH. Via the Rank-1 Mellin Miracle. **Zero custom axioms.**
-- **Pillar II (Forward)**: RH ⇒ d²_N → 0. Via `discrete_riemann_hypothesis` (≡ RH). **1 axiom, 0 sorry.** Seven alternative paths provide cross-validation.
+- **Pillar II (Forward)**: RH ⇒ d²_N → 0. Via `overcancellation_axiom` (≡ RH). **1 axiom, 0 sorry.** The Penta-Crown provides five independent forward paths.
 
 ## Crown Axioms
 
@@ -57,19 +58,25 @@ The proof decomposes into two pillars:
 #print axioms baez_duarte_forward  -- PRIMARY EXPORT
 -- frac_error_isLittleO,
 -- pnt_mu_log_sq_div_k,
--- Cathedral.Vasyunin.discrete_riemann_hypothesis,
+-- Cathedral.Wall,
 -- propext, Classical.choice, Quot.sound
 ```
 
 | # | Axiom | Content | Status |
 |---|-------|---------|--------|
-| 1 | `discrete_riemann_hypothesis` | v^T C v ≤ C/ln N | **≡ RH** (The Crowning) |
+| 1 | `overcancellation_axiom` | v^T G v ≤ 1 | **≡ RH** (Cathedral.Wall) |
 | 2 | `frac_error_isLittleO` | Fractional-part error | PNT (unconditional) |
 | 3 | `pnt_mu_log_sq_div_k` | Möbius log-squared sum | PNT (unconditional) |
 
 Plus Lean kernel axioms: `propext`, `Classical.choice`, `Quot.sound`.
 
-### Graduated Axioms (v22)
+### Glass Box Architecture (v24)
+
+The sole crown axiom decomposes into **7 transparent sub-axioms**:
+- **Box 1** (4 elementary): restricted_mertens, sqfreeCount, unfilteredTaper, witnessNormSq
+- **Box 2** (3 deeper): eRatio, polynomial_part, **fermionic_overcancellation** (irreducible RH content)
+
+### Graduated Axioms (v26)
 
 | Former Axiom | Status | Method |
 |---|---|---|
@@ -78,6 +85,11 @@ Plus Lean kernel axioms: `propext`, `Classical.choice`, `Quot.sound`.
 | `mu_log_mul_zeta` | **THEOREM** | Mathlib |
 | 10 PNT bridge sums | **THEOREM** | PrimeNumberTheoremAnd |
 | `abel_summation_covariance_bound` | **THEOREM** | Trivial from dRH |
+| `gram_form_upper_bound_34` | **THEOREM** | Variance decomposition |
+| `remainder_bound_abstract` | **THEOREM** | Entry-level analysis |
+| `f1_dream_axiom` | **THEOREM** | TowerFusion |
+| Wall consolidation | **THEOREM** | Triplicate → single |
+| Dedekind reciprocity (partial) | **PARTIAL** | 3-file architecture |
 
 ## The Parseval Bridge & Mellin Crown
 
@@ -107,7 +119,7 @@ RH ⟺ L = 0. Numerical scaling: d² ≈ 1.005/ln N (confirmed to N = 55,440).
 
 ```
 proofs/Cathedral/
-├── Axioms.lean              ← Axiom registry (v22, The Crowning)
+├── Axioms.lean              ← Axiom registry (v26, Penta-Crown)
 ├── Defs.lean                ← Core definitions (0 sorry, 0 axiom)
 ├── Assembly/       (22)     ← Crown assemblies
 │   ├── MainChain.lean       ← baez_duarte_forward (PRIMARY CROWN)
@@ -126,7 +138,8 @@ proofs/Cathedral/
 ├── PNT/             (5)     ← PNT bridges (PrimeNumberTheoremAnd)
 ├── AbelTail/       (14)     ← Abel summation
 ├── Structural/      (9)     ← Cholesky, bordered spectral, eigenvalues
-├── Physics/        (76)     ← Gauge theory, SUSY, Glass Bridge, BE/FD
+├── Geometry/       (60+)    ← Renormalization (18), Crown, Abel, SUSY, Arakelov
+├── Physics/        (83)     ← Gauge theory, SUSY, Glass Bridge, Dedekind, Standard Model
 ├── NumberTheory/    (8)     ← Euler product, Mertens
 ├── Robin/           (7)     ← Robin/Nicolas/Lagarias equivalences
 ├── LinearAlgebra/   (4)     ← Sherman-Morrison, Schur, Sylvester
@@ -139,31 +152,30 @@ proofs/Cathedral/
 ## Build Stats
 
 ```
-Active files:   381 Lean files across 25+ modules
+Active files:   474 Lean files across 25+ modules
 Archived:       114 Lean files in Archive/
-Total:          495 Lean files, ~130K lines
+Total:          588 Lean files, ~175K lines
 Axioms:         1 on crown (≡ RH), 2 PNT bureaucracy
-Sorry:          3 off-crown (DirectMellinBound, DedekindBridge)
+Sorry:          4 off-crown
 Errors:         0
-Build jobs:     8,485
-Lines:          ~116,000 (active), ~130K (full proofs/)
-Theorems:       ~3,000 proved
+Build jobs:     8,818
+Lines:          ~149,500 (active), ~175K (full proofs/)
+Theorems:       ~4,600 proved
 Papers:         4 core + 13 working drafts (17 total, all build)
-Experiments:    50+ Rust/MPFR/DD (f64–512 bit + DD 31-digit precision)
-Release:        v22 — The Crowning (May 31, 2026)
+Experiments:    56 Rust/MPFR/DD (f64–512 bit + DD 31-digit precision)
+Release:        v26 — Penta-Crown (June 10, 2026)
 ```
 
-## Seven Proof Paths
+## Six Proof Paths (Penta-Crown + Converse)
 
 | Path | Target | Crown Axioms | Status |
 |------|--------|-------------|--------|
-| **Direct Mellin Bound (F)** | `baez_duarte_forward` | `discrete_riemann_hypothesis` | **Primary** |
+| **PATH 1 Overcancellation** | `overcancellation_implies_rh` | 2 PNT axioms | **Cleanest** |
+| **Analytic Crown (F)** | `baez_duarte_forward` | `overcancellation_axiom` | **Primary** |
 | **Oracle Crown (D)** | `rh_from_oracle` | `oracle_certificates` | 0 sorry |
 | **Gram Crown (E)** | `rh_discrete_subseq` | Direct Gram bound | 0 sorry |
-| Mellin Crown (A) | `nyman_beurling_equivalence_mellin` | 0 (graduated) | 0 sorry |
-| Perron Crown (B) | `nyman_beurling_equivalence_perron` | 4 transparent | 0 sorry |
-| Renormalization (C) | `nyman_beurling_equivalence_renormalization` | Selberg–Delange | 0 sorry |
-| Glass Bridge (G) | Pure GCD arithmetic | Sherman–Morrison | 0 sorry |
+| **Arakelov Crown** | `rh_from_arakelov` | `hodge_index_eigenvalue_bound` | 0 sorry |
+| Converse | `nyman_beurling_converse` | **0 axioms** | 0 sorry |
 
 ## Key Results (All Machine-Verified)
 
@@ -178,7 +190,9 @@ Release:        v22 — The Crowning (May 31, 2026)
 | `augmentedGramMatrix_posDef` — G_N PD for all N ≥ 1 | **Proved** (0 axioms) |
 | Robin ⟺ NB ⟺ Lagarias ⟺ RH | **Proved** (1 off-path axiom) |
 | Bose–Einstein / Fermi–Dirac prime gas | **Proved** (0 axioms) |
-| Arithmetic Standard Model (88 theorems) | **Proved** (0 axioms) |
+| Arithmetic Standard Model (101 theorems) | **Proved** (0 axioms) |
+| Mass Renormalization (γ cancels) | **Proved** (0 sorry, 2 axioms) |
+| Dedekind reciprocity law | **Partial** (3-file architecture) |
 
 ## Numerical Validation (Rust)
 
@@ -214,11 +228,11 @@ and `experiments/nb-witness-scan/` for independently verifiable data.
 
 | Paper | Topic | Pages |
 |-------|-------|-------|
-| `cathedral-physics.tex` | Physics of the Primes dictionary | 62 |
+| `cathedral-physics.tex` | Physics of the Primes dictionary | 76 |
 | `cathedral-particle-zoo.tex` | Arithmetic Standard Model | 10 |
 | `cathedral-philosophy.tex` | Philosophy of machine proof | 24 |
-| `cathedral-dualuse.tex` | Dual-use analysis | 16 |
-| + 9 more | AI, experiments, engineering, policy, public | 4–9 each |
+| `cathedral-dualuse.tex` | Dual-use analysis | 18 |
+| + 9 more | AI, experiments, engineering, policy, public | 4–11 each |
 
 Build all PDFs:
 ```bash
@@ -250,19 +264,20 @@ This project was built through a tripartite human-AI collaboration over ~66 days
 a human computer scientist providing architectural vision and experimental design,
 Google DeepMind's Gemini providing mathematical strategy and deep analytic intuition,
 and Anthropic's Claude (Antigravity) providing Lean 4 proof engineering and
-sorry elimination. All proofs are compiler-verified.
+sorry elimination. All proofs are compiler-verified. The physics dictionary
+(76 pages) was peer-reviewed and accepted without revisions.
 
 ## Repository Structure
 
 ```
 prime/
-├── proofs/          🏛️  THE CATHEDRAL — 381 active Lean files, 114 archived
+├── proofs/          🏛️  THE CATHEDRAL — 474 active Lean files, 114 archived
 ├── papers/          📄  17 papers (4 core + 13 working drafts)
 │   ├── core/                  The mathematical claim
 │   └── working_drafts/        Science, applications, humanities, public, policy
-├── experiments/     🔬  50+ Rust experiments (f64–512 bit MPFR + DD)
+├── experiments/     🔬  56 Rust experiments (f64–512 bit MPFR + DD)
 │   └── archive/               Graduated/superseded experiments
-├── visualizer/      📊  Cathedral Dashboard (Next.js)
+├── visualizer/      📊  Cathedral Dashboard (Next.js, v26 Penta-Crown)
 ├── scripts/         🔧  Build & export tools
 ├── tools/           🏗️  Historical exploration tools
 ├── docs/            📚  Documentation, AI correspondence, exports

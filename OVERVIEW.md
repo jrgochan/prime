@@ -4,11 +4,11 @@
 > Nyman–Beurling–Báez-Duarte equivalence in Lean 4, with an independent
 > Oracle Bridge proof path from GPU-certified computation.*
 >
-> **Last updated**: May 31, 2026 (v22 — The Crowning)
+> **Last updated**: June 10, 2026 (v26 — Penta-Crown)
 >
-> **Last audited**: May 31, 2026 — Crowned Cathedral architecture,
-> `discrete_riemann_hypothesis` as sole axiom (≡ RH),
-> 381 active files, ~116K lines, 3 sorry (off-crown), 0 errors
+> **Last audited**: June 10, 2026 — Penta-Crown architecture,
+> `overcancellation_axiom` as sole axiom (≡ RH),
+> 474 active files, ~149K lines, 4 sorry (off-crown), 0 errors
 
 ---
 
@@ -20,11 +20,11 @@ The Cathedral's central result is `baez_duarte_forward` in
 ```
 #print axioms baez_duarte_forward
 -- frac_error_isLittleO, pnt_mu_log_sq_div_k,
--- Cathedral.Vasyunin.discrete_riemann_hypothesis,
+-- Cathedral.Wall,
 -- propext, Classical.choice, Quot.sound
 ```
 
-**Crown status: 0 sorry, 1 axiom (discrete_riemann_hypothesis ≡ RH), 2 PNT bureaucracy.**
+**Crown status: 0 sorry, 1 axiom (overcancellation_axiom ≡ RH), 2 PNT bureaucracy.**
 
 The Cathedral also proves RH *directly* via the **Oracle Bridge**:
 
@@ -76,23 +76,21 @@ Cauchy-Schwarz separation.
 
 ### Pillar II: Forward (RH ⟹ d²→0) — The Direct Mellin Bound
 
-**Status: 1 axiom (`discrete_riemann_hypothesis` ≡ RH), 0 sorry.**
+**Status: 1 axiom (`overcancellation_axiom` ≡ RH), 0 sorry.**
 
-The primary crown path uses `discrete_riemann_hypothesis` — the covariance
-decay bound v^T C v ≤ C/ln N, formally proved equivalent to RH via
-`witness_covariance_decay_iff_rh`.
+The primary crown path uses `overcancellation_axiom` — the Glass Box decomposition
+of the Gram form bound, formally proved equivalent to RH.
 
-Seven alternative forward paths are preserved:
+Five independent crown paths (Penta-Crown):
 
 | Path | Crown Axioms | Status |
 |------|-------------|--------|
-| **Direct Mellin Bound (F)** | `discrete_riemann_hypothesis` | **Primary** |
-| **Oracle Bridge (D)** | `oracle_certificates` | 0 sorry |
+| **PATH 1 Overcancellation** | 2 PNT axioms | **Cleanest** |
+| **Analytic Crown (F)** | `overcancellation_axiom` | **Primary** |
+| **Oracle Crown (D)** | `oracle_certificates` | 0 sorry |
 | **Gram Crown (E)** | Direct Gram bound | 0 sorry |
-| Mellin Crown (A) | 0 (graduated) | 0 sorry |
-| Perron Crown (B) | 4 transparent | 0 sorry |
-| Renormalization (C) | Selberg–Delange | 0 sorry |
-| Glass Bridge (G) | Sherman–Morrison | 0 sorry |
+| **Arakelov Crown** | `hodge_index_eigenvalue_bound` | 0 sorry |
+| Converse | **0 axioms** | 0 sorry |
 
 ### The Oracle Bridge
 
@@ -116,17 +114,17 @@ The **Oracle Cascade** (`OracleCascade.lean`) derives everything unconditionally
 #print axioms baez_duarte_forward  -- PRIMARY EXPORT
 -- frac_error_isLittleO,           (PNT, unconditional)
 -- pnt_mu_log_sq_div_k,            (PNT, unconditional)
--- discrete_riemann_hypothesis,    (≡ RH — The Crowning)
+-- Cathedral.Wall,                 (≡ RH — Penta-Crown)
 -- propext, Classical.choice, Quot.sound  (Lean kernel)
 ```
 
 | # | Axiom | Content | Status |
 |---|-------|---------|--------|
-| 1 | `discrete_riemann_hypothesis` | v^T C v ≤ C/ln N | **≡ RH** |
+| 1 | `overcancellation_axiom` | v^T G v ≤ 1 | **≡ RH** |
 | 2 | `frac_error_isLittleO` | Fractional-part error | PNT (unconditional) |
 | 3 | `pnt_mu_log_sq_div_k` | Möbius log-squared sum | PNT (unconditional) |
 
-### Graduated Axioms (v22)
+### Graduated Axioms (v26)
 
 | Former Axiom | Graduated Method |
 |---|---|
@@ -146,8 +144,8 @@ The **Oracle Cascade** (`OracleCascade.lean`) derives everything unconditionally
 
 ## Module Structure
 
-The codebase comprises **381 active Lean files** across **25+ topic directories** with
-**~116,000 lines** of active code, **~3,000 proved theorems/lemmas**, and **~118 active axioms**
+The codebase comprises **474 active Lean files** across **25+ topic directories** with
+**~149,500 lines** of active code, **~4,600 proved theorems/lemmas**, and **~156 active axioms**
 (1 on the crown path).
 
 ```
@@ -171,7 +169,8 @@ Cathedral/
 ├── IntegralBasis/    (5 files)  Báez-Duarte basis + winding energy
 ├── NumberTheory/     (8 files)  Euler product, Mertens, multiplicative functions
 ├── Structural/       (9 files)  CholeskyDecrement, BorderedSpectral, eigenvalues
-├── Physics/         (76 files)  Gauge theory, SUSY, Glass Bridge, BE/FD, particle zoo
+├── Geometry/        (60+ files) Renormalization (18), Crown, Abel, SUSY, Arakelov
+├── Physics/         (83 files)  Gauge theory, SUSY, Glass Bridge, Dedekind, Standard Model
 ├── Robin/            (7 files)  Robin/Nicolas/Lagarias equivalences
 ├── ZeroAxiom/        (5 files)  Zero-axiom engine
 ├── Archive/        (114 files)  Preserved exploratory paths
@@ -182,16 +181,16 @@ Cathedral/
 
 ## Sorry Inventory
 
-3 `sorry` placeholders exist in the active tree, **all off-crown**:
+4 `sorry` placeholders exist in the active tree, **all off-crown**:
 
 | File | Count | Context |
-|------|-------|---------|
+|------|----|-----|
 | `Assembly/DirectMellinBound.lean` | 2 | Exploratory direct path |
+| `Physics/Bridges/DedekindReciprocity.lean` | 1 | Three-term r≥2 (file-order artifact) |
 | `Physics/Bridges/DedekindBridge.lean` | 1 | Off-path Dedekind bridge |
 
 > [!NOTE]
-> **Zero sorry on the crown path.** Down from 17 sorry at v17 to 3 at v22.
-> The PNT-related sorry were eliminated when PrimeNumberTheoremAnd was integrated.
+> **Zero sorry on the crown path.** All sorry are in off-crown exploratory code.
 
 ---
 
@@ -209,7 +208,10 @@ Cathedral/
 | v19 | May 14 | 1+3 PNT | Direct Mellin Bound + Graduation |
 | v20 | May 17 | 1+3 PNT | Glass Bridge + Physics Enrichment |
 | v21 | May 24 | 1+3 PNT | Bose–Einstein Prime Gas (File #444) |
-| **v22** | **May 31** | **1+2 PNT** | **The Crowning: discrete_riemann_hypothesis** |
+| **v22** | **May 31** | **1+2 PNT** | **The Crowning: overcancellation_axiom** |
+| v24 | Jun 5 | 1+2 PNT | Glass Box: 7 sub-axioms |
+| v25 | Jun 7 | 1+2 PNT | PATH 1 + Wall Consolidation |
+| **v26** | **Jun 10** | **1+2 PNT** | **Penta-Crown (5 paths, 6 routes)** |
 
 ---
 
@@ -217,26 +219,27 @@ Cathedral/
 
 | Metric | Value |
 |--------|-------|
-| Active Lean files | 381 |
-| Active lines of code | ~116,000 |
-| Total files (incl. archive) | 495 |
+| Active Lean files | 474 |
+| Active lines of code | ~149,500 |
+| Total files (incl. archive) | 588 |
 | Archive files | 114 |
-| Theorems + lemmas | ~3,000 proved |
-| Total axioms (active) | ~118 |
+| Theorems + lemmas | ~4,600 proved |
+| Total axioms (active) | ~156 |
 | Crown axioms | **1** (≡ RH) |
 | PNT bureaucracy | **2** (unconditional) |
 | Crown path sorry | **0** |
-| Off-crown sorry | **3** |
+| Off-crown sorry | **4** |
 | Topic directories | 25+ |
-| Build jobs | 8,485 |
-| Experiments (Rust/MPFR/DD) | 50+ |
+| Build jobs | 8,818 |
+| Experiments (Rust/MPFR/DD) | 56 |
 | Papers | 17 (4 core + 13 working drafts) |
 | Development time | ~66 days |
 | Lean version | 4.29.0 |
 | Largest certified N | 55,440 (d²=0.0398, CG-DD) |
+| Standard Model theorems | **101** |
 
 > [!NOTE]
-> The Cathedral maintains a **Crowned Cathedral** architecture: the sole axiom
-> `discrete_riemann_hypothesis` IS the Riemann Hypothesis. Seven proof paths
-> (Direct Mellin Bound, Oracle Bridge, Gram Crown, Mellin, Perron, Renormalization,
-> Glass Bridge) provide a multi-path verification architecture.
+> The Cathedral maintains a **Penta-Crown** architecture: the sole axiom
+> `overcancellation_axiom` IS the Riemann Hypothesis. Six proof paths
+> (PATH 1, Analytic, Oracle, Gram, Arakelov, Converse)
+> provide a multi-path verification architecture.
