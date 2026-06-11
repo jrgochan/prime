@@ -54,6 +54,16 @@ const CARDS: CardInfo[] = [
     border: "border-cyan-500/20",
   },
   {
+    href: "/dedekind-tree",
+    title: "Dedekind Architecture",
+    description:
+      "The three-file dependency tree for the Dedekind reciprocity law: Foundation \u2192 Bridge \u2192 Assembly. See how the Brave Berry \uD83C\uDF53 resolves a circular import.",
+    icon: "\u{1F333}",
+    stats: "3 files \u00B7 2,345 lines \u00B7 1892 \u2192 2026",
+    gradient: "from-indigo-500/20 to-emerald-500/20",
+    border: "border-indigo-500/20",
+  },
+  {
     href: "/term-explorer",
     title: "Term Explorer",
     description:
