@@ -32,26 +32,56 @@ groups:
     color: "#10b981"
     icon: "🌉"
     order: 4
-  assembly:
-    label: "Assembly"
-    color: "#06b6d4"
-    icon: "🏗️"
+  crown:
+    label: "Assembly (Penta-Crown)"
+    color: "#f59e0b"
+    icon: "👑"
     order: 5
+  geometry:
+    label: "Geometry · Renormalization"
+    color: "#f43f5e"
+    icon: "💎"
+    order: 6
+  physics:
+    label: "Physics · Dedekind · Standard Model"
+    color: "#ec4899"
+    icon: "⚛️"
+    order: 7
+  variational:
+    label: "Variational · Spectral"
+    color: "#8b5cf6"
+    icon: "🌀"
+    order: 8
+  equivalences:
+    label: "Robin · Lagarias"
+    color: "#06b6d4"
+    icon: "🏆"
+    order: 9
+  infrastructure:
+    label: "Infrastructure · Definitions"
+    color: "#3b82f6"
+    icon: "🧱"
+    order: 10
   oracle:
     label: "Oracle Crown"
     color: "#06b6d4"
     icon: "🔮"
-    order: 6
+    order: 11
   converse:
     label: "Converse Direction"
     color: "#ec4899"
     icon: "◀"
-    order: 7
+    order: 12
   witness:
     label: "Witness Construction"
     color: "#10b981"
     icon: "∑"
-    order: 8
+    order: 13
+  assembly:
+    label: "Assembly (Legacy)"
+    color: "#06b6d4"
+    icon: "🏗️"
+    order: 14
 
 nodes:
   # ─── Gram Matrix ─────────────────────────────────

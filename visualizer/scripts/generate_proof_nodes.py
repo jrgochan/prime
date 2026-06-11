@@ -40,15 +40,27 @@ DECL_RE = re.compile(
 AXIOM_RE = re.compile(r"^axiom\s+(\w+)", re.MULTILINE)
 
 ROUTE_MAP = {
+    # Crown / Assembly
+    "Assembly": "crown", "Compute": "crown", "ZeroAxiom": "crown",
+    # Geometry layer
+    "Geometry": "geometry", "Arakelov": "geometry", "F1": "geometry",
+    # Physics layer
+    "Physics": "physics",
+    # Mellin / analytic layer
+    "MellinBridge": "mellin", "NymanBeurling": "mellin", "Perron": "mellin",
+    "PNT": "mellin", "AbelTail": "mellin",
+    # Variational layer
+    "Vasyunin": "variational", "Sieve": "variational", "Spectral": "variational",
+    "Covariance": "variational", "Rotors": "variational",
+    # Infrastructure
     "Zeta": "infrastructure", "Gram": "infrastructure", "LinearAlgebra": "infrastructure",
-    "Defs": "infrastructure", "Analysis": "infrastructure", "Robin": "infrastructure",
-    "NumberTheory": "infrastructure", "Physics": "infrastructure",
-    "Renormalization": "infrastructure", "Rotors": "infrastructure",
-    "Vasyunin": "vasyunin", "Sieve": "vasyunin", "Spectral": "vasyunin",
-    "AbelTail": "vasyunin", "Covariance": "vasyunin",
-    "MellinBridge": "mellin", "NymanBeurling": "mellin", "Perron": "perron",
-    "PNT": "mellin", "Compute": "oracle",
-    "Assembly": "assembly", "ZeroAxiom": "assembly",
+    "Defs": "infrastructure", "Analysis": "infrastructure", "NumberTheory": "infrastructure",
+    "Structural": "infrastructure", "IntegralBasis": "infrastructure",
+    "White": "infrastructure", "Audit": "infrastructure",
+    # Renormalization (top-level legacy)
+    "Renormalization": "geometry",
+    # Equivalences
+    "Robin": "equivalences",
 }
 
 def get_group_for_file(filepath: str) -> str:
