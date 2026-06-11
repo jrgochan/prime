@@ -1,14 +1,14 @@
 # References — The Cathedral
 
-**The Crowning** — May 31, 2026 (v22)
-**Crowned Cathedral** — 1 axiom (`discrete_riemann_hypothesis` ≡ RH)
+**Penta-Crown** — June 10, 2026 (v26)
+**Penta-Crown Cathedral** — 1 axiom (`overcancellation_axiom` ≡ RH)
 
 A complete bibliography of the mathematical results used in the formal
 verification and the companion papers. Every theorem, identity, and
 technique in the Cathedral traces back to published mathematics listed here.
 
 55+ mathematicians. 167 years of prior work. One axiom ≡ RH.
-381 active files. ~3,000 theorems. 17 papers. 50+ Rust/MPFR/DD experiments.
+474 active files. ~4,600 theorems. 17 papers. 56 Rust/MPFR/DD experiments.
 
 ---
 
