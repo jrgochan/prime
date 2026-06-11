@@ -37,17 +37,23 @@ interface ProofData {
 }
 
 const ROUTE_COLORS: Record<string, string> = {
-  variational: "#8b5cf6",
   crown: "#f59e0b",
-  infrastructure: "#3b82f6",
+  geometry: "#f43f5e",
+  physics: "#ec4899",
   mellin: "#10b981",
+  variational: "#8b5cf6",
+  infrastructure: "#3b82f6",
+  equivalences: "#06b6d4",
 };
 
 const ROUTE_LABELS: Record<string, string> = {
-  variational: "Vasyunin · Spectral · Covariance",
-  crown: "Assembly (Dual Crown)",
-  infrastructure: "Infrastructure · Definitions",
+  crown: "Assembly + Oracle (Penta-Crown)",
+  geometry: "Geometry · Renormalization · GlassBox",
+  physics: "Physics · Dedekind · Standard Model",
   mellin: "Mellin · NB · Perron · PNT",
+  variational: "Vasyunin · Spectral · Covariance",
+  infrastructure: "Infrastructure · Definitions",
+  equivalences: "Robin · Lagarias Equivalences",
 };
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -206,10 +212,13 @@ export default function ProofTreePage() {
           .forceX<any>()
           .x((d: ProofNode) => {
             const positions: Record<string, number> = {
-              infrastructure: width * 0.2,
-              variational: width * 0.4,
-              mellin: width * 0.6,
-              crown: width * 0.8,
+              infrastructure: width * 0.12,
+              variational: width * 0.28,
+              mellin: width * 0.44,
+              geometry: width * 0.58,
+              physics: width * 0.72,
+              crown: width * 0.85,
+              equivalences: width * 0.15,
             };
             return positions[d.route] || width / 2;
           })

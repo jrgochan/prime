@@ -33,26 +33,25 @@ IMPORT_RE = re.compile(r"^import\s+([\w.]+)", re.MULTILINE)
 # Route classification by directory
 def classify_route(filepath: str) -> str:
     rel = filepath.replace(str(CATHEDRAL_DIR) + "/", "")
-    # Infrastructure layer
-    if rel.startswith("LinearAlgebra/"):
-        return "infrastructure"
-    if rel.startswith("Gram/"):
-        return "infrastructure"
-    if rel.startswith("Structural/"):
-        return "infrastructure"
-    if rel.startswith("Analysis/"):
-        return "infrastructure"
-    if rel.startswith("IntegralBasis/"):
-        return "infrastructure"
-    # Variational layer
-    if rel.startswith("Vasyunin/"):
-        return "variational"
-    if rel.startswith("Sieve/"):
-        return "variational"
-    if rel.startswith("Spectral/"):
-        return "variational"
-    if rel.startswith("Covariance/"):
-        return "variational"
+
+    # Crown / Assembly layer
+    if rel.startswith("Assembly/"):
+        return "crown"
+
+    # Geometry layer (Renormalization, Crown, Abel, SUSY, Arakelov, Bounds, GlassBox)
+    if rel.startswith("Geometry/"):
+        return "geometry"
+    # Top-level Renormalization (legacy, may duplicate Geometry/Renormalization)
+    if rel.startswith("Renormalization/"):
+        return "geometry"
+    # Top-level Arakelov (legacy, may duplicate Geometry/Arakelov)
+    if rel.startswith("Arakelov/"):
+        return "geometry"
+
+    # Physics layer (Gauge theory, SUSY, Glass Bridge, Dedekind, Standard Model)
+    if rel.startswith("Physics/"):
+        return "physics"
+
     # Mellin / analytic layer
     if rel.startswith("MellinBridge/"):
         return "mellin"
@@ -66,14 +65,55 @@ def classify_route(filepath: str) -> str:
         return "mellin"
     if rel.startswith("AbelTail/"):
         return "mellin"
-    # Crown
-    if rel.startswith("Assembly/"):
-        return "crown"
-    # Legacy
+
+    # Variational layer
+    if rel.startswith("Vasyunin/"):
+        return "variational"
+    if rel.startswith("Sieve/"):
+        return "variational"
+    if rel.startswith("Spectral/"):
+        return "variational"
+    if rel.startswith("Covariance/"):
+        return "variational"
+
+    # Infrastructure layer
+    if rel.startswith("LinearAlgebra/"):
+        return "infrastructure"
+    if rel.startswith("Gram/"):
+        return "infrastructure"
+    if rel.startswith("Structural/"):
+        return "infrastructure"
+    if rel.startswith("Analysis/"):
+        return "infrastructure"
+    if rel.startswith("IntegralBasis/"):
+        return "infrastructure"
     if rel.startswith("White/"):
         return "infrastructure"
+
+    # Equivalence paths
+    if rel.startswith("Robin/"):
+        return "equivalences"
+    if rel.startswith("NumberTheory/"):
+        return "infrastructure"
+
+    # Computation / Oracle
+    if rel.startswith("Compute/"):
+        return "crown"
+
+    # Supplementary
+    if rel.startswith("F1/"):
+        return "geometry"
+    if rel.startswith("Rotors/"):
+        return "variational"
+    if rel.startswith("ZeroAxiom/"):
+        return "infrastructure"
+    if rel.startswith("Audit/"):
+        return "infrastructure"
+
+    # Root files
     if rel == "Defs.lean" or rel == "Axioms.lean":
         return "infrastructure"
+
     return "infrastructure"
 
 
@@ -218,39 +258,58 @@ def parse_file(filepath: Path):
 
 
 def build_edges(all_nodes, file_imports, file_nodes):
-    """Build edges from:
-    1. Import dependencies (file-level)
-    2. Name references within proof bodies
+    """Build edges from import dependencies (file-level).
+    
+    Uses Lean import statements to create edges between files,
+    then promotes to node-level edges between key nodes.
+    This is O(files × imports) instead of the old O(nodes × files × text).
     """
     edges = []
     seen = set()
-    node_ids = {n["id"] for n in all_nodes}
-    node_file = {}
-    for n in all_nodes:
-        node_file[n["id"]] = n["file"]
-
-    # For each file, look at all names it references that exist in other files
-    for filepath, nodes in file_nodes.items():
-        text = Path(PROOFS_DIR / filepath).read_text(encoding="utf-8", errors="replace")
-        file_node_ids = {n["id"] for n in nodes}
-
-        for target_node in all_nodes:
-            if target_node["file"] == filepath:
-                continue
-            tid = target_node["id"]
-            if tid in file_node_ids:
-                continue
-            # Check if this name appears in the file body
-            if re.search(r"\b" + re.escape(tid) + r"\b", text):
-                # Find which local nodes might use it
-                for local_node in nodes:
-                    if local_node["category"] in ("proved", "axiom"):
-                        edge_key = (tid, local_node["id"])
-                        if edge_key not in seen:
+    
+    # Build file → module name mapping
+    # Cathedral/Assembly/MainChain.lean → Cathedral.Assembly.MainChain
+    file_to_module = {}
+    for filepath in file_nodes:
+        # Strip proofs/ prefix and .lean suffix, replace / with .
+        module = filepath.replace("/", ".").replace(".lean", "")
+        if module.startswith("Cathedral."):
+            file_to_module[module] = filepath
+    
+    # For each file, find which other Cathedral files it imports
+    file_deps = {}  # file → list of imported files
+    for filepath, imports in file_imports.items():
+        deps = []
+        for imp in imports:
+            if imp in file_to_module:
+                deps.append(file_to_module[imp])
+            # Also check without Cathedral. prefix
+            elif "Cathedral." + imp.split(".")[-1] in file_to_module:
+                pass  # partial match, skip
+        file_deps[filepath] = deps
+    
+    # Create edges between notable nodes in importing/imported files
+    # For each file pair (A imports B), connect A's theorems to B's axioms/defs
+    for filepath, deps in file_deps.items():
+        local_nodes = file_nodes.get(filepath, [])
+        local_notable = [n for n in local_nodes if n["category"] in ("proved", "sorry")]
+        
+        for dep_file in deps:
+            dep_nodes = file_nodes.get(dep_file, [])
+            dep_notable = [n for n in dep_nodes if n["category"] in ("axiom", "proved", "definition")]
+            
+            # Connect first notable local to first notable dep (representative edge)
+            if local_notable and dep_notable:
+                # Pick the most important nodes
+                local_best = sorted(local_notable, key=lambda n: 0 if n["category"] == "proved" else 1)[:2]
+                dep_best = sorted(dep_notable, key=lambda n: 0 if n["category"] == "axiom" else 1)[:2]
+                
+                for ln in local_best:
+                    for dn in dep_best:
+                        edge_key = (dn["id"], ln["id"])
+                        if edge_key not in seen and dn["id"] != ln["id"]:
                             seen.add(edge_key)
-                            edges.append(
-                                {"source": tid, "target": local_node["id"]}
-                            )
+                            edges.append({"source": dn["id"], "target": ln["id"]})
 
     return edges
 
