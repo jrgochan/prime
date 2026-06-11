@@ -4,7 +4,7 @@
 > locations, documenting what was proved, what was superseded, and what
 > remains valuable for future work.*
 >
-> **Last updated**: May 31, 2026 (v22 — The Crowning)
+> **Last updated**: June 10, 2026 (v26 — Penta-Crown)
 >
 > **Last audited**: May 31, 2026 — Crowned Cathedral, `discrete_riemann_hypothesis`
 
@@ -22,12 +22,12 @@ plus **34 pre-Cathedral files** of Lean 4 code:
 | `proofs/Cathedral/Archive/` | 94 | 22,344 | Superseded Cathedral modules |
 | **Total** | **128** | **29,784** | |
 
-For comparison, the active codebase is **381 files / ~116,000 lines / ~3,000 theorems**.
+For comparison, the active codebase is **474 files / ~149,500 lines / ~4,600 theorems**.
 
 Additionally, `Cathedral/Vasyunin/Archive/` contains 1 file (204 lines) — an
 archived Gram induction framework within the active Vasyunin tree.
 
-### Architecture Context (v22)
+### Architecture Context (v26)
 
 The Cathedral's crown path now uses the **Crowned Cathedral** architecture:
 - **Crown**: 1 axiom (`discrete_riemann_hypothesis` ≡ RH) + 2 PNT bureaucracy
@@ -267,8 +267,8 @@ Pure duplicates/stubs:        ~27 files
 
 | Metric | Active | Archive | Ratio |
 |--------|--------|---------|-------|
-| Files | 381 | 114 | 3.34× |
-| Lines | ~116,000 | 22,000+ | 5.27× |
+| Files | 474 | 114 | 4.16× |
+| Lines | ~149,500 | 22,000+ | 6.80× |
 | Theorems | ~3,000 | ~994 | 3.02× |
 | Crown axioms | **1** (≡ RH) | — | — |
 
@@ -305,7 +305,8 @@ The project evolved through five major phases:
 8. **Cathedral v16** (1 week) — **Observatory Edition** — One-Pillar Cathedral (1 axiom), DD-precision pipeline, N=55,440 certified
 9. **Cathedral v17** (4 days) — **Oracle Capstone** — Dual Crown (Analytic + Oracle), Oracle Cascade
 10. **Cathedral v18-v21** (2 weeks) — Gram Crown, Glass Bridge, Physics Enrichment, Bose–Einstein (381→444 files)
-11. **Cathedral v22** (3 days) — **The Crowning** — PNT graduation (×10), `discrete_riemann_hypothesis` as sole axiom, Cholesky Miracle, BorderedSpectral closure
+11. **Cathedral v22** (3 days) — **The Crowning** — PNT graduation (×10), `discrete_riemann_hypothesis` as sole axiom
+12. **Cathedral v24-v26** (10 days) — Glass Box (7 sub-axioms), PATH 1 (2 PNT axioms), **Penta-Crown** (474 files)
 
 ---
 

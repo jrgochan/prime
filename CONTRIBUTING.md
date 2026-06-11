@@ -3,7 +3,7 @@
 Thank you for your interest in contributing to the Cathedral — a machine-verified
 reduction of the Riemann Hypothesis in Lean 4.
 
-## Current Status (v22 — The Crowning, May 31 2026)
+## Current Status (v26 — Penta-Crown, June 10 2026)
 
 The crown theorem `baez_duarte_forward` depends on **1 axiom**
 (`discrete_riemann_hypothesis`, formally equivalent to RH) plus
@@ -69,7 +69,7 @@ Several Mathlib PRs would unlock further improvements:
 
 ```bash
 # Lean proofs
-cd proofs && lake build    # 381 files, 8485 jobs
+cd proofs && lake build    # 474 files, 8818 jobs
 
 # Papers (all 17)
 cd papers && ./build.sh
