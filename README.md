@@ -73,8 +73,9 @@ Plus Lean kernel axioms: `propext`, `Classical.choice`, `Quot.sound`.
 ### Glass Box Architecture (v24)
 
 The sole crown axiom decomposes into **7 transparent sub-axioms**:
-- **Box 1** (4 elementary): restricted_mertens, sqfreeCount, unfilteredTaper, witnessNormSq
-- **Box 2** (3 deeper): eRatio, polynomial_part, **fermionic_overcancellation** (irreducible RH content)
+- **Box 1** (4 elementary): restricted_mertens, sqfreeCount, unfilteredTaper, witnessNormSq — *3 have companion graduation proofs*
+- **Box 2** (3 deeper): eRatio, polynomial_part, **fermionic_overcancellation** (graduated to theorem)
+- Irreducible RH content: **fermionic_dominance** (the overcancellation axiom proper)
 
 ### Graduated Axioms (v26)
 
