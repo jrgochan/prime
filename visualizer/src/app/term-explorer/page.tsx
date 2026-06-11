@@ -78,7 +78,7 @@ export default function TermExplorerPage() {
   const [expandedStep, setExpandedStep] = useState<number|null>(null);
   const [N, setN] = useState(20);
   const [searchQuery, setSearchQuery] = useState("");
-  const [showAuto, setShowAuto] = useState(false);
+  const [showAuto, setShowAuto] = useState(true);
   const [groupFilter, setGroupFilter] = useState<string>("all");
 
   // Load data
