@@ -698,12 +698,26 @@ technique in the Cathedral traces back to published mathematics listed here.
 - **Hans Rademacher and Emil Grosswald**, *Dedekind Sums*, Mathematical
   Association of America, 1972.
 
-  > The Vasyunin cotangent sum V(a,b) = Σ_{m=1}^{a-1} {mb/a} cot(πm/a)
-  > is related to classical Dedekind sums. The reciprocity law for
-  > Dedekind sums provides the key structural identity for the
-  > off-diagonal Gram entries. The diagonal case was proved via
-  > Stirling + piecewise FTC (April 20, 2026); the off-diagonal
-  > is structurally proved via uniqueness-of-limits (April 25, 2026).
+  > s(a,b) = Σ_{m=1}^{b-1} ((m/b))·((ma/b)) where ((x)) = {x} - 1/2.
+  > The Dedekind reciprocity law s(a,b) + s(b,a) = (a²+b²+1)/(12ab) - 1/4
+  > connects Dedekind sums to the Ramanujan matrix entry R(j,k) = 1/(12jk).
+  >
+  > **Cathedral formalization** (three-file architecture):
+  > - `DedekindReciprocity.lean`: definitions, cross-sum, base case (r=1)
+  > - `DedekindBridge.lean`: the **Brave Berry** 🍓 (weighted_floor_base),
+  >   Euclidean descent, connection to Ramanujan via BerryHoof
+  > - `DedekindAssembly.lean`: sorry-free reciprocity law and Ramanujan
+  >   connection, resolving the circular dependency
+  >
+  > The three-term relation 12abr·(s(a,b) - s(a,r)) = polynomial is proved
+  > via Gaussian elimination of Dedekind sum variables using reciprocity,
+  > periodicity (s(a+r,a) = s(r,a)), and CAS-verified polynomial certificates.
+  >
+  > **Graduation dates**:
+  > - Diagonal Gram entries: April 20, 2026 (Stirling + FTC)
+  > - Off-diagonal Gram entries: April 25, 2026 (uniqueness-of-limits)
+  > - Dedekind reciprocity (base case r=1): May 19, 2026
+  > - **The Brave Berry** (full three-term, sorry-free): June 10, 2026 🍓
 
 ---
 

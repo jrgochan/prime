@@ -347,8 +347,8 @@ private lemma sum_j_times_2j_plus_1 (a : ℕ) :
     into fiber contributions: X(a,b) = Σ_{j=0}^{a-1} j · (Σ_{m ∈ fiber_j} m).
 
     This is the fundamental partition identity connecting the global sum to fibers. -/
-private lemma weighted_floor_fiber_decomp (a b : ℕ) (ha : 2 ≤ a) (hb : 2 ≤ b)
-    (hcop : Nat.Coprime a b) :
+private lemma weighted_floor_fiber_decomp (a b : ℕ) (ha : 2 ≤ a) (_hb : 2 ≤ b)
+    (_hcop : Nat.Coprime a b) :
     (∑ m ∈ Finset.Ico 1 b, (m : ℝ) * ((m * a / b : ℕ) : ℝ)) =
     ∑ j ∈ Finset.range a, (j : ℝ) *
       (∑ m ∈ (Finset.Ico 1 b).filter (fun m => m * a / b = j), (m : ℝ)) := by
@@ -535,7 +535,6 @@ private lemma weighted_floor_base (a r : ℕ) (ha : 2 ≤ a) (hr : 2 ≤ r)
   rw [hdecomp_r] at hcs_r
   have har_cast : ((a + r : ℕ) : ℝ) = (a : ℝ) + (r : ℝ) := by push_cast; ring
   push_cast [har_cast] at hcs_ar
-  push_cast at hcs_r
   -- hcs_ar: 12(a+r)²·s_ar = 12(a·Sar-(a+r)·Xar) - 3(a+r)²((a+r)-1)
   -- hcs_r:  12r²·s_r = 12(a·Sr-r·Xr) - 3r²(r-1)
   -- hdiff_cleared: 12ar(a+r)·(s_ar-s_r) = P(a,r)
@@ -631,7 +630,7 @@ private lemma weighted_floor_step (a r q : ℕ) (ha : 2 ≤ a) (hr : 2 ≤ r)
   | zero =>
     -- Base case: q = 0, b = r, b' = a + r
     -- 12r·(X(a+r) - X(r)) - 12a·X(r) = P(a+r)
-    simp only [Nat.zero_mul, Nat.zero_add, CharP.cast_eq_zero, zero_mul, sub_zero]
+    simp only [Nat.zero_add, CharP.cast_eq_zero, zero_mul, sub_zero]
     norm_num
     exact weighted_floor_base a r ha hr hr_lt hcop
   | succ n ih =>
