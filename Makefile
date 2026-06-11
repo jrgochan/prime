@@ -9,7 +9,7 @@
 # ============================================
 
 .PHONY: help build papers verify axioms rh cascade crown-audit clock
-.PHONY: hyperzeta hyperzeta-origin hyperzeta-explorer particle-zoo
+.PHONY: hyperzeta hyperzeta-origin hyperzeta-explorer particle-zoo visualizer
 .PHONY: check setup setup-lean setup-rust setup-node setup-python setup-latex setup-gmp
 .PHONY: experiment-vasyunin experiment-covariance experiment-bd
 .PHONY: experiment-gram experiment-abel experiment-all
@@ -162,6 +162,18 @@ particle-zoo: ## Launch Particle Zoo — every integer has a soul (port 3003)
 	else \
 		echo "  Installing dependencies..." && \
 		cd tools/hyperzeta-particle-zoo && npm install && npm run dev; \
+	fi
+
+visualizer: ## Launch Cathedral Visualizer — proof architecture explorer (port 3004)
+	@echo ""
+	@echo "  🏛️  Launching Cathedral Visualizer — Proof Architecture Explorer..."
+	@echo ""
+	@if [ -d visualizer/node_modules ]; then \
+		echo "  Starting Next.js dev server on http://localhost:3004 ..." && \
+		cd visualizer && npm run dev -- -p 3004; \
+	else \
+		echo "  Installing dependencies..." && \
+		cd visualizer && npm install && npm run dev -- -p 3004; \
 	fi
 
 cascade: ## Audit the Oracle Cascade axiom footprint (requires: make build)
@@ -377,7 +389,7 @@ help: ## Show this help message
 	@echo "  Usage: make <target>"
 	@echo ""
 	@echo "  ─── THE CATHEDRAL ────────────────────────────────────────"
-	@grep -E '^(build|verify|axioms|rh|cascade|crown-audit|papers|clock|hyperzeta[a-z-]*|particle-zoo):.*##' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  %-24s %s\n", $$1, $$2}'
+	@grep -E '^(build|verify|axioms|rh|cascade|crown-audit|papers|clock|hyperzeta[a-z-]*|particle-zoo|visualizer):.*##' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  %-24s %s\n", $$1, $$2}'
 	@echo ""
 	@echo "  ─── EXPERIMENTS & AUDITING ───────────────────────────────"
 	@grep -E '^(audit|experiment-[a-z]+|stats):.*##' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  %-24s %s\n", $$1, $$2}'
