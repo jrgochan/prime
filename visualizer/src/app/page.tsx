@@ -44,6 +44,16 @@ const CARDS: CardInfo[] = [
     border: "border-rose-500/20",
   },
   {
+    href: "/rg-flow",
+    title: "RG Flow Visualization",
+    description:
+      "Interactive renormalization group flow F(s) \u2192 L\u2081 with animated canvas, beta function plot, coprime sector decomposition, and the physics analogy dictionary.",
+    icon: "\u{1F300}",
+    stats: "\u03B2(s) < 0 \u00B7 asymptotic freedom \u00B7 animated",
+    gradient: "from-cyan-500/20 to-rose-500/20",
+    border: "border-cyan-500/20",
+  },
+  {
     href: "/term-explorer",
     title: "Term Explorer",
     description:
