@@ -25,7 +25,7 @@
   Graduated: June 7, 2026 — Both sub-axioms proved 🎓
 -/
 
-import Cathedral.Geometry.Bounds.NormLowerBound
+import Cathedral.Geometry.Bounds.NormLowerBoundDefs
 import Cathedral.Geometry.Bounds.SquarefreeCountBound
 import Cathedral.Covariance.GCDSignLaw
 

@@ -21,7 +21,7 @@
   Created: June 5, 2026 — Sub-Axiom Graduation Campaign 🛡️
 -/
 
-import Cathedral.Geometry.Bounds.NormLowerBound
+import Cathedral.Geometry.Bounds.NormLowerBoundDefs
 import Mathlib.Analysis.SumIntegralComparisons
 import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
 

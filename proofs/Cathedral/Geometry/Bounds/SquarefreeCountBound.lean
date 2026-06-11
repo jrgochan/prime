@@ -20,7 +20,7 @@
 
 import Cathedral.NumberTheory.SquarefreeReciprocal
 import Cathedral.NumberTheory.DirichletConvolution
-import Cathedral.Geometry.Bounds.NormLowerBound
+import Cathedral.Geometry.Bounds.NormLowerBoundDefs
 
 set_option maxHeartbeats 800000
 

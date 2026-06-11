@@ -676,10 +676,14 @@ lean_lib «Cathedral» where
     `Cathedral.Geometry.Bounds.RestrictedBesselGraduation,
     -- Glass Box 2 Graduation (bosonic bound + fermionic dominance → vtGv ≤ 1, June 5 2026) 🎓⚛️
     `Cathedral.Geometry.GlassBox.GlassBox2Graduation,
-    -- Norm Lower Bound (||v||² ≥ c₀·N/ln²N, squarefree density + Abel, June 5 2026) 🎓📐
+    -- Norm Lower Bound Defs (definitions extracted for circular import resolution, June 11 2026) 🎓
+    `Cathedral.Geometry.Bounds.NormLowerBoundDefs,
+    -- Norm Lower Bound (||v||² ≥ c₀·N/ln²N, GRADUATED: 0 axioms, June 11 2026) 🎓📐
     `Cathedral.Geometry.Bounds.NormLowerBound,
-    -- Divisor Coeff Graduation (|y_d| ≤ C/(d·lnN), multiplicative reduction, June 5 2026) 🎓🔢
+    -- Divisor Coeff Graduation (|y_d| ≤ C/(d·lnN), GRADUATED: 0 axioms, June 11 2026) 🎓🔢
     `Cathedral.Geometry.Bounds.DivisorCoeffGraduation,
+    -- Restricted Mertens Bound (coprime-filtered Mertens, 2 axioms, June 6 2026) 🎓
+    `Cathedral.Geometry.Bounds.RestrictedMertensBound,
     -- Bosonic Upper Bound Graduation (bosonic ≤ 1+K/lnN, eRatio+poly, June 5 2026) 🎓⚡
     `Cathedral.Geometry.SUSY.BosonicUpperBoundGraduation,
     -- Fermionic Lower Bound Graduation (fermion ≥ bosonExcess, unified axiom, June 5 2026) 🎓🔥

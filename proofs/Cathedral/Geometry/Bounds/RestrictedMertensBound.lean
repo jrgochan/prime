@@ -25,7 +25,8 @@
   Created: June 6, 2026 — Sub-Axiom Graduation Campaign 🛡️
 -/
 
-import Cathedral.Geometry.Bounds.DivisorCoeffGraduation
+import Cathedral.Geometry.Bernoulli.BernoulliDiagonal
+import Cathedral.Physics.Mertens.RamanujanFormBound
 
 set_option maxHeartbeats 1600000
 
@@ -37,7 +38,8 @@ namespace Cathedral.Geometry.Bounds.RestrictedMertensBound
 open Cathedral.Vasyunin
 open Cathedral.Geometry.Bernoulli.BernoulliDiagonal
 open Cathedral.Physics.RamanujanFormBound
-open Cathedral.Geometry.Bounds.DivisorCoeffGraduation
+-- (Previously imported DivisorCoeffGraduation; now imports directly
+--  to avoid circular dependency for axiom graduation)
 
 -- ════════════════════════════════════════════════════════════════
 -- §1. THE DIVISOR COEFFICIENT FACTORIZATION

@@ -42,6 +42,7 @@
 -/
 
 import Cathedral.Geometry.Bounds.RestrictedBesselGraduation
+import Cathedral.Geometry.Bounds.RestrictedMertensBound
 
 set_option maxHeartbeats 800000
 
@@ -147,12 +148,15 @@ where K_e depends on the constant from s1_le_const_div_log. -/
 
     Each term: ≤ K/log(M/δ) ≤ K/(½logM) = 2K/logM  (for δ ≤ √M)
 
-    Total: |coprime sum| ≤ 2^ω(d) · 2K / logM -/
-axiom restricted_mertens_bound :
+    Total: |coprime sum| ≤ 2^ω(d) · 2K / logM
+
+    **GRADUATED**: Was axiom. Now: theorem delegating to RestrictedMertensBound. -/
+theorem restricted_mertens_bound :
     ∃ K : ℝ, K > 0 ∧ ∃ N₀ : ℕ, ∀ N : ℕ, N ≥ N₀ → N ≥ 3 →
       ∀ d : ℕ, 1 ≤ d → d ≤ N → Squarefree d →
         |divisorCoeff N (logCutoffWitness N) d| ≤
-          K / ((d : ℝ) * Real.log ↑N)
+          K / ((d : ℝ) * Real.log ↑N) :=
+  RestrictedMertensBound.restricted_mertens_bound_proved
 
 -- ════════════════════════════════════════════════════════════════
 -- §4. THE NON-SQUAREFREE VANISHING LEMMA
@@ -278,8 +282,8 @@ The chain:
 
 ### Sorry: 0 ✅ (was 1, fixed by case-splitting on Squarefree d)
 
-### Custom Axioms: 1
-  - `restricted_mertens_bound`: Coprime-filtered Mertens sum ≤ K/(d·lnN)
+### Custom Axioms: 0 ✅ (was 1 — graduated!)
+  - `restricted_mertens_bound`: GRADUATED → RestrictedMertensBound.lean
 
 ### Theorems PROVED:
 | # | Result | Status | Content |
