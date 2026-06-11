@@ -24,6 +24,16 @@ const CARDS: CardInfo[] = [
     border: "border-amber-500/20",
   },
   {
+    href: "/penta-crown",
+    title: "Penta-Crown Explorer",
+    description:
+      "Interactive diagram of the five independent proof paths to RH. Explore each crown's axiom footprint, key theorem, and mathematical technique.",
+    icon: "\u{1F451}",
+    stats: "5 paths \u00B7 6 routes \u00B7 interactive",
+    gradient: "from-rose-500/20 to-violet-500/20",
+    border: "border-rose-500/20",
+  },
+  {
     href: "/graduation-timeline",
     title: "Graduation Timeline",
     description:
