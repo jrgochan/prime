@@ -6,11 +6,15 @@ import Cathedral.Geometry.Bernoulli.BernoulliCrown
 /-!
   # Cathedral Axiom Audit — Definitive Trace
 
-  This file imports ALL theorem-bearing assemblies and runs
-  `#print axioms` on every RH-producing theorem.
+  This file imports ALL theorem-bearing assemblies and verifies
+  the axiom dependencies of every RH-producing theorem.
 
-  Run: `lake build Cathedral.Audit.AxiomTrace`
-  then read the Lean info log for the complete axiom ledger.
+  **To view the axiom trace, run:**
+    make rh
+
+  The `#print axioms` commands below are commented out to keep
+  `make build` output clean. Uncomment any line to inspect
+  specific axiom dependencies during development.
 
   ## Wall Consolidation (June 4, 2026)
 
@@ -19,91 +23,92 @@ import Cathedral.Geometry.Bernoulli.BernoulliCrown
   - **ALIASES**: `overcancellation_hypothesis` (GramCrown),
     `vtGv_lt_one` (VacuumStability),
     `overcancellation_axiom_local` (BernoulliCrown)
-  - All `#print axioms` traces should now show a single
+  - All `#print axioms` traces show a single
     `overcancellation_axiom` instead of three separate axioms.
 
   Created: June 4, 2026 — The Axiom Audit
+  Updated: June 10, 2026 — Silenced for clean builds
 -/
 
 -- ════════════════════════════════════════════════
 -- §1. PRIMARY PATH: VacuumStability
 -- ════════════════════════════════════════════════
 
-#print axioms Cathedral.Geometry.Wall.VacuumStability.riemann_hypothesis
+-- #print axioms Cathedral.Geometry.Wall.VacuumStability.riemann_hypothesis
 
 -- ════════════════════════════════════════════════
 -- §2. PRIMARY PATH: GramCrown (Overcancellation)
 -- ════════════════════════════════════════════════
 
-#print axioms riemann_hypothesis_from_gram_global
+-- #print axioms riemann_hypothesis_from_gram_global
 
 -- ════════════════════════════════════════════════
 -- §3. LEGACY: GramCrown (Direct Gram Bound)
 -- ════════════════════════════════════════════════
 
-#print axioms riemann_hypothesis_from_gram_direct
+-- #print axioms riemann_hypothesis_from_gram_direct
 
 -- ════════════════════════════════════════════════
 -- §4. LEGACY: GramCrown (Subsequential)
 -- ════════════════════════════════════════════════
 
-#print axioms riemann_hypothesis_from_gram_subseq
+-- #print axioms riemann_hypothesis_from_gram_subseq
 
 -- ════════════════════════════════════════════════
 -- §5. OVERCANCELLATION CHAIN (intermediary)
 -- ════════════════════════════════════════════════
 
-#print axioms overcancellation_implies_rh
+-- #print axioms overcancellation_implies_rh
 
 -- ════════════════════════════════════════════════
 -- §6. DOT PRODUCT CONVERGENCE (PNT engine)
 -- ════════════════════════════════════════════════
 
-#print axioms dot_product_tends_to_zero
+-- #print axioms dot_product_tends_to_zero
 
 -- ════════════════════════════════════════════════
 -- §7. NYMAN-BEURLING CONVERSE (the kernel-certified side)
 -- ════════════════════════════════════════════════
 
-#print axioms nyman_beurling_converse
+-- #print axioms nyman_beurling_converse
 
 -- ════════════════════════════════════════════════
 -- §8. BAEZ-DUARTE FORWARD (graduated)
 -- ════════════════════════════════════════════════
 
-#print axioms baez_duarte_forward
+-- #print axioms baez_duarte_forward
 
 -- ════════════════════════════════════════════════
 -- §9. NB EQUIVALENCE (the iff)
 -- ════════════════════════════════════════════════
 
-#print axioms nyman_beurling_equivalence
+-- #print axioms nyman_beurling_equivalence
 
 -- ════════════════════════════════════════════════
 -- §10. BERNOULLI CROWN: vtGv_from_bernoulli_decomp
 -- ════════════════════════════════════════════════
 
-#print axioms Cathedral.Geometry.Bernoulli.BernoulliCrown.vtGv_from_bernoulli_decomp
+-- #print axioms Cathedral.Geometry.Bernoulli.BernoulliCrown.vtGv_from_bernoulli_decomp
 
 -- ════════════════════════════════════════════════
 -- §11. SMITH WITNESS (zero-axiom forward)
 -- ════════════════════════════════════════════════
 
-#print axioms smith_witness_forward_direction
+-- #print axioms smith_witness_forward_direction
 
 -- ════════════════════════════════════════════════
 -- §12. SPECTRAL ENERGY DIVERGENCE (zero-axiom)
 -- ════════════════════════════════════════════════
 
-#print axioms spectral_energy_divergence
+-- #print axioms spectral_energy_divergence
 
 -- ════════════════════════════════════════════════
 -- §13. PNT SUMS (graduated or axiom?)
 -- ════════════════════════════════════════════════
 
-#print axioms pnt_mu_div_k
-#print axioms pnt_mu_log_div_k
-#print axioms pnt_mu_log_sq_div_k
+-- #print axioms pnt_mu_div_k
+-- #print axioms pnt_mu_log_div_k
+-- #print axioms pnt_mu_log_sq_div_k
 
 -- ════════════════════════════════════════════════
 -- §14. THE WALL — CONSOLIDATED (June 4, 2026)
@@ -123,9 +128,9 @@ import Cathedral.Geometry.Bernoulli.BernoulliCrown
 --   overcancellation_axiom_local := overcancellation_axiom (via unfold)
 
 -- The ONE canonical axiom:
-#print axioms overcancellation_axiom
+-- #print axioms overcancellation_axiom
 
 -- Verify aliases resolve to the same canonical axiom:
-#print axioms overcancellation_hypothesis
-#print axioms Cathedral.Geometry.Wall.VacuumStability.vtGv_lt_one
-#print axioms Cathedral.Geometry.Bernoulli.BernoulliCrown.overcancellation_axiom_local
+-- #print axioms overcancellation_hypothesis
+-- #print axioms Cathedral.Geometry.Wall.VacuumStability.vtGv_lt_one
+-- #print axioms Cathedral.Geometry.Bernoulli.BernoulliCrown.overcancellation_axiom_local

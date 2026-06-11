@@ -247,7 +247,7 @@ theorem antitone_variation_eq (f : ℕ → ℝ) (M N : ℕ) (hMN : M ≤ N)
     rw [abs_of_nonpos h_neg]
     rw [ih hle (fun j hj hjn => h_anti j hj (by omega))]
     show f M - f (M + n) + -(f (M + n + 1) - f (M + n)) = f M - f (M + (n + 1))
-    ring
+    ring_nf
 
 /-- **ANTITONE 1/j**: The function j ↦ 1/j is antitone for j ≥ 1. -/
 theorem antitone_reciprocal (j : ℕ) (hj : 1 ≤ j) :
