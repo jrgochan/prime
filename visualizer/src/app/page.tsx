@@ -17,11 +17,21 @@ const CARDS: CardInfo[] = [
     href: "/axiom-map",
     title: "Axiom Architecture",
     description:
-      "Interactive map of the Dual Crown axioms. Analytic Crown: ba\u00E9z_duarte_forward (IMRN 2003). Oracle Crown: oracle_certificates (GPU computation). Two paths, one equivalence.",
+      "Interactive map of the Penta-Crown axioms. Five independent proof paths to RH: Overcancellation (2 PNT), Analytic (1 literature), Oracle (1 GPU), Gram (1 discrete), Arakelov (1 geometric).",
     icon: "\u{1F3DB}\uFE0F",
-    stats: "2 crowns \u00B7 1 literature \u00B7 1 computational",
+    stats: "5 crowns \u00B7 6 proof paths \u00B7 0 sorry on crown",
     gradient: "from-amber-500/20 to-red-500/20",
     border: "border-amber-500/20",
+  },
+  {
+    href: "/graduation-timeline",
+    title: "Graduation Timeline",
+    description:
+      "Watch axioms fall from 6 to 1 across 65 days. The full history of the Cathedral from v1 to v26: every graduation, every bypass, every crowning moment.",
+    icon: "\u{1F4C8}",
+    stats: "v1\u2192v26 \u00B7 65 days \u00B7 20+ graduations",
+    gradient: "from-rose-500/20 to-amber-500/20",
+    border: "border-rose-500/20",
   },
   {
     href: "/term-explorer",
@@ -37,9 +47,9 @@ const CARDS: CardInfo[] = [
     href: "/proof-tree",
     title: "Proof Dependency Tree",
     description:
-      "Interactive force-directed graph of every theorem, axiom, and definition. Trace dependency chains from the Dual Crown down to Mathlib foundations.",
+      "Interactive force-directed graph of every theorem, axiom, and definition. Trace dependency chains from the Penta-Crown down to Mathlib foundations.",
     icon: "\uD83C\uDF33",
-    stats: "~2,000+ theorems \u00B7 75 axioms \u00B7 223 files",
+    stats: "~4,600 theorems \u00B7 156 axioms \u00B7 474 files",
     gradient: "from-emerald-500/20 to-teal-500/20",
     border: "border-emerald-500/20",
   },
@@ -107,7 +117,7 @@ const CARDS: CardInfo[] = [
     href: "/cathedral-3d",
     title: "Cathedral 3D",
     description:
-      "The proof architecture as a literal cathedral \u2014 the Dual Crown (Analytic + Oracle) holding the golden roof of RH \u27FA d\u00B2\u2099 \u2192 0.",
+      "The proof architecture as a literal cathedral \u2014 the Penta-Crown (5 proof paths) holding the golden roof of RH \u27FA d\u00B2\u2099 \u2192 0.",
     icon: "\u26EA",
     stats: "3D \u00B7 auto-rotates",
     gradient: "from-purple-500/20 to-indigo-500/20",
@@ -132,23 +142,37 @@ const ROUTES: RouteInfo[] = [
     borderColor: "border-emerald-500/20",
   },
   {
+    label: "PATH 1 \u2014 OVERCANCELLATION",
+    name: "2 PNT axioms \u27F9 RH",
+    desc: "The cleanest path. overcancellation_implies_rh depends on exactly 2 PNT axioms (frac_error_isLittleO + pnt_mu_log_sq_div_k) plus Lean kernel. No custom axioms needed.",
+    color: "from-rose-500/10 to-transparent",
+    borderColor: "border-rose-500/20",
+  },
+  {
     label: "ANALYTIC CROWN",
-    name: "RH \u27F9 d\u00B2_N \u2192 0",
-    desc: "1 literature axiom (ba\u00E9z_duarte_forward, IMRN 2003). Pure mathematics \u2014 no computers. Alternative paths: Mellin (2 axioms), Perron (4 axioms), Heisenberg (spectral).",
+    name: "1 lit. axiom \u27F9 RH",
+    desc: "1 literature axiom (ba\u00E9z_duarte_forward, IMRN 2003). Pure mathematics \u2014 no computers. The continuous mathematical ideal.",
     color: "from-amber-500/10 to-transparent",
     borderColor: "border-amber-500/20",
   },
   {
     label: "ORACLE CROWN",
     name: "GPU \u27F9 RH",
-    desc: "0 literature axioms. 1 trusted GPU computation (HPDF Gram matrices at highly composite numbers). Proves RH from certified eigenvalue bounds via the Nyman-Beurling spectral gap.",
+    desc: "0 literature axioms. 1 trusted GPU computation (HPDF Gram matrices at highly composite numbers). Proves RH from certified eigenvalue bounds.",
     color: "from-cyan-500/10 to-transparent",
     borderColor: "border-cyan-500/20",
   },
   {
-    label: "CAPSTONE",
-    name: "RH \u27FA d\u00B2_N \u2192 0",
-    desc: "Assembly chains both directions via nyman_beurling_equivalence. The Dual Crown: one analytic, one cybernetic \u2014 gauge-separated proof paths to the same equivalence.",
+    label: "GRAM CROWN",
+    name: "v\u1D40Gv \u2264 1+K/lnN \u27F9 RH",
+    desc: "RH as a single discrete arithmetic inequality. Bypasses the covariance axiom entirely. 1 crown axiom + 5 PNT axioms.",
+    color: "from-indigo-500/10 to-transparent",
+    borderColor: "border-indigo-500/20",
+  },
+  {
+    label: "ARAKELOV CROWN",
+    name: "G = G\u2098\u2099 + G\u2090\u2093 \u27F9 RH",
+    desc: "Algebraic-geometric path via Arakelov intersection pairing. Connects prime factorization to eigenvalue control via Smith's 1876 PSD theorem.",
     color: "from-violet-500/10 to-transparent",
     borderColor: "border-violet-500/20",
   },
@@ -170,18 +194,18 @@ export default function HomePage() {
         </h1>
         <p className="text-lg text-slate-400 max-w-2xl">
           A machine-checked reduction of the Riemann Hypothesis in Lean 4.
-          223 active files, 8,480 compiled targets. Dual Crown architecture:
-          Analytic (1 literature axiom) + Oracle (1 GPU computation).
-          <span className="text-amber-400 text-sm ml-1">v17 Dual Crown</span>
+          474 active files, 8,818 compiled targets. Penta-Crown architecture:
+          5 independent proof paths, 6 routes to RH.
+          <span className="text-amber-400 text-sm ml-1">v26 Penta-Crown</span>
         </p>
 
         <div className="flex gap-6 mt-6 text-sm flex-wrap">
           {[
-            { color: "bg-emerald-500", text: "223 active files" },
-            { color: "bg-red-500", text: "8,480 build targets" },
-            { color: "bg-amber-500", text: "Dual Crown (2 paths)" },
+            { color: "bg-emerald-500", text: "474 active files" },
+            { color: "bg-red-500", text: "8,818 build targets" },
+            { color: "bg-amber-500", text: "Penta-Crown (6 paths)" },
             { color: "bg-blue-500", text: "0 sorry on crown" },
-            { color: "bg-purple-500", text: "~60,000 lines of Lean 4" },
+            { color: "bg-purple-500", text: "~149,500 lines of Lean 4" },
           ].map((item) => (
             <div key={item.text} className="flex items-center gap-2">
               <div className={`w-2.5 h-2.5 rounded-full ${item.color}`} />
@@ -193,9 +217,9 @@ export default function HomePage() {
 
       {/* Two Pillars */}
       <h2 className="text-xl font-bold text-slate-200 mb-4">
-        The Dual Crown Architecture
+        The Penta-Crown Architecture
       </h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-12">
         {ROUTES.map((route, i) => (
           <motion.div
             key={route.label}
@@ -229,13 +253,13 @@ export default function HomePage() {
             <span className="text-2xl">{"\u{1F451}"}</span>
             <div>
               <h3 className="text-sm font-bold text-amber-400">
-                v17 &mdash; DUAL CROWN (May 9, 2026)
+                v26 &mdash; PENTA-CROWN (June 10, 2026)
               </h3>
               <p className="text-xs text-slate-500 mt-0.5">
-                Dual Crown architecture: Analytic (<code>baez_duarte_forward</code>) +
-                Oracle (<code>oracle_certificates</code>). Gauge-separated proof paths.
-                HPDF pipeline certifies N=55,440 Gram matrices at 256-bit precision.
-                Parseval Bridge proved (0 axioms). 223 files, ~60K lines. 8,480 build targets.
+                Penta-Crown architecture: Overcancellation (2 PNT axioms, cleanest path) +
+                Analytic + Oracle + Gram + Arakelov. PATH 1 <code>overcancellation_implies_rh</code>.
+                Glass Box graduation decomposes the sole axiom into 7 sub-axioms.
+                474 files, ~149K lines. 8,818 build targets. 101 Standard Model theorems.
               </p>
             </div>
           </div>

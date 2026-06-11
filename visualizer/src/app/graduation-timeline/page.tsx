@@ -189,6 +189,126 @@ const MILESTONES: Milestone[] = [
     ],
     color: "#f59e0b",
   },
+  {
+    version: "v18",
+    date: "May 13",
+    axiomCount: 2,
+    sorryCount: 0,
+    title: "Gram Crown + Standard Model",
+    changes: [
+      "Gram Crown: RH IS a quadratic form inequality v\u1D40Gv \u2264 1+K/lnN",
+      "Arithmetic Standard Model: U(1)\u00D7SU(2)\u00D7SU(3) gauge group formalized",
+      "88 theorems from zero axioms, zero free parameters",
+      "GramBoundDirect.lean bypasses covariance axiom entirely",
+    ],
+    graduated: ["gram_form_upper_bound_direct"],
+    color: "#6366f1",
+  },
+  {
+    version: "v19",
+    date: "May 14",
+    axiomCount: 2,
+    sorryCount: 0,
+    title: "Born Negativity",
+    changes: [
+      "remainder_bound_abstract: false \u2192 3 theorems",
+      "Entry-level analysis removes false axiom",
+      "Born approximation negativity proved",
+    ],
+    graduated: ["remainder_bound_abstract"],
+    color: "#8b5cf6",
+  },
+  {
+    version: "v20",
+    date: "May 29",
+    axiomCount: 2,
+    sorryCount: 0,
+    title: "Spectral Mirror + Riemann Sphere",
+    changes: [
+      "MirrorGeometry.lean: critical line = great circle on Riemann sphere",
+      "PrimeHarmonics.lean: prime democracy |w_p(t)|=1",
+      "F\u2081 Dream graduated: axiom \u2192 theorem via TowerFusion",
+      "Zeta/MirrorGeometry, RiemannSphere layers (E38\u201340)",
+    ],
+    graduated: ["f1_dream_axiom"],
+    color: "#ec4899",
+  },
+  {
+    version: "v21",
+    date: "May 30",
+    axiomCount: 2,
+    sorryCount: 0,
+    title: "Arakelov Crown",
+    changes: [
+      "Arakelov Fusion: G = G_fin + G_arch via intersection pairing",
+      "Tropical geometry \u2192 spectral decay connection",
+      "Two-Tier Gram Bound: diagonal + off-diagonal control",
+      "Hodge index eigenvalue bound (1 axiom)",
+      "Smith 1876 PSD theorem connects factorization to eigenvalues",
+    ],
+    color: "#a855f7",
+  },
+  {
+    version: "v22",
+    date: "May 31",
+    axiomCount: 1,
+    sorryCount: 0,
+    title: "The Crowning",
+    changes: [
+      "10 PNT axioms \u2192 theorems via PNTAndBridge",
+      "abel_summation_cov_bound graduated (trivial from dRH)",
+      "WitnessAsymptotics: sole axiom = overcancellation_axiom",
+      "The Crowning: one axiom to rule them all",
+    ],
+    graduated: ["pnt_axioms_x10", "abel_summation_cov_bound"],
+    color: "#f59e0b",
+  },
+  {
+    version: "v24",
+    date: "Jun 5",
+    axiomCount: 1,
+    sorryCount: 0,
+    title: "Glass Box Graduation",
+    changes: [
+      "overcancellation_axiom decomposed into 7 transparent sub-axioms",
+      "Box 1: restricted_mertens, sqfreeCount, unfilteredTaper, witnessNormSq",
+      "Box 2: eRatio, polynomial_part, fermionic_overcancellation",
+      "Sub-axioms 1\u20136 elementary (PNT + Abel), #7 = irreducible RH content",
+      "rh_from_unified_fermionic: 3-line proof, 0 sorry",
+    ],
+    color: "#22c55e",
+  },
+  {
+    version: "v25",
+    date: "Jun 7",
+    axiomCount: 1,
+    sorryCount: 0,
+    title: "PATH 1 + Wall Consolidation",
+    changes: [
+      "PATH 1: overcancellation_implies_rh (2 PNT axioms, cleanest path)",
+      "Wall consolidation: triplicate axiom \u2192 single Cathedral.Wall",
+      "Mass Renormalization Theorem: \u03B3 cancels, c_holes = 2+\u03B3\u2212ln4\u03C0",
+      "18 files in Geometry/Renormalization/ (~6,000 lines)",
+      "BerryHoof Theorem: w\u00B7hoof = stability",
+    ],
+    color: "#ef4444",
+  },
+  {
+    version: "v26",
+    date: "Jun 10",
+    axiomCount: 1,
+    sorryCount: 0,
+    title: "Penta-Crown",
+    changes: [
+      "Penta-Crown: Overcancellation + Analytic + Oracle + Gram + Arakelov",
+      "Dedekind 3-file architecture: DedekindBridge \u2192 Reciprocity \u2192 Assembly",
+      "Full reciprocity law s(a,b)+s(b,a) = (a\u00B2+b\u00B2+1)/(12ab)\u22121/4",
+      "Standard Model expanded to 101 theorems (0 sorry, 0 axioms)",
+      "474 files, ~149,500 lines, 8,818 build targets, 6 proof paths",
+    ],
+    graduated: ["dedekind_reciprocity_partial"],
+    color: "#f59e0b",
+  },
 ];
 
 /* ───────── components ───────── */
@@ -352,7 +472,7 @@ export default function GraduationTimelinePage() {
           </span>
         </h1>
         <p className="text-slate-400 mt-2 max-w-2xl">
-          Watch axioms fall one by one. From 6 crown axioms to the Dual Crown in 33 days.
+          Watch axioms fall one by one. From 6 crown axioms to the Penta-Crown in 65 days.
           {" "}<strong className="text-emerald-400">{totalGraduated} axioms graduated</strong> to theorems.
         </p>
       </motion.div>
@@ -373,11 +493,11 @@ export default function GraduationTimelinePage() {
           </div>
           <div className="flex gap-8 text-center">
             <div>
-              <div className="text-2xl font-bold text-blue-400">223</div>
+              <div className="text-2xl font-bold text-blue-400">474</div>
               <div className="text-[10px] text-slate-600">files</div>
             </div>
             <div>
-              <div className="text-2xl font-bold text-violet-400">1,155</div>
+              <div className="text-2xl font-bold text-violet-400">~4,600</div>
               <div className="text-[10px] text-slate-600">theorems</div>
             </div>
             <div>

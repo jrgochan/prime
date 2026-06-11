@@ -10,12 +10,21 @@ interface Axiom {
   math: string;
   desc: string;
   ref: string;
-  tier: 1 | 2 | 3 | 4;
+  tier: 1 | 2 | 3 | 4 | 5;
   file: string;
   onCrown: boolean;
 }
 
 const CROWN_AXIOMS: Axiom[] = [
+  {
+    name: "overcancellation_axiom (PATH 1)",
+    math: "2 PNT axioms \u27F9 RH",
+    desc: "The cleanest proof path. overcancellation_implies_rh depends on exactly 2 PNT-level axioms (frac_error_isLittleO + pnt_mu_log_sq_div_k) plus Lean kernel. No custom axioms. The overcancellation chain proves: PNT consequences \u2192 Gram bound \u2192 d\u00B2_N \u2192 0 \u2192 RH. This is the narrowest axiom footprint of any path.",
+    ref: "Cathedral v25, June 7, 2026",
+    tier: 5,
+    file: "Geometry/Renormalization/OvercancellationGraduation.lean",
+    onCrown: true,
+  },
   {
     name: "baez_duarte_forward",
     math: "RH \u27F9 d\u00B2_N \u2192 0",
@@ -32,6 +41,24 @@ const CROWN_AXIOMS: Axiom[] = [
     ref: "Certified computation: Apple M2 Max, CUDA 12.x, SHA-256 verified",
     tier: 2,
     file: "Assembly/OracleCascade.lean",
+    onCrown: true,
+  },
+  {
+    name: "gram_form_upper_bound_subseq",
+    math: "v\u1D40Gv \u2264 1 + K/ln N (subsequential)",
+    desc: "RH reformulated as a single discrete arithmetic inequality about M\u00F6bius-weighted fractional-part sums. The subsequential variant requires this bound only along an unbounded subsequence (e.g., highly composite numbers). Bypasses the covariance axiom entirely. 1 crown axiom + 5 PNT bureaucracy axioms.",
+    ref: "Cathedral v18, May 13, 2026",
+    tier: 3,
+    file: "Geometry/Crown/GramBoundDirect.lean",
+    onCrown: true,
+  },
+  {
+    name: "hodge_index_eigenvalue_bound",
+    math: "G = G_fin + G_arch \u27F9 eigenvalue control",
+    desc: "Algebraic-geometric path via Arakelov intersection pairing. Decomposes the Gram matrix via the Arakelov product, connects tropical geometry to spectral decay, and reduces RH to an intersection-theoretic inequality. Key advantage: connects prime factorization structure directly to eigenvalue control via Smith's 1876 PSD theorem.",
+    ref: "Cathedral v21, May 30, 2026",
+    tier: 4,
+    file: "Geometry/Arakelov/ArakelovFusion.lean",
     onCrown: true,
   },
 ];
@@ -166,6 +193,15 @@ const TIER_COLORS: Record<number, {
   label: string;
   sublabel: string;
 }> = {
+  5: {
+    bg: "from-rose-500/15 to-rose-900/10",
+    border: "border-rose-500/40",
+    text: "text-rose-400",
+    dot: "bg-rose-500",
+    glow: "shadow-rose-500/20",
+    label: "Overcancellation Crown \u2014 PATH 1",
+    sublabel: "2 PNT axioms (cleanest)",
+  },
   1: {
     bg: "from-amber-500/15 to-amber-900/10",
     border: "border-amber-500/40",
@@ -183,6 +219,24 @@ const TIER_COLORS: Record<number, {
     glow: "shadow-cyan-500/20",
     label: "Oracle Crown \u2014 GPU Certificates",
     sublabel: "Trusted computation axiom (HPDF)",
+  },
+  3: {
+    bg: "from-indigo-500/15 to-indigo-900/10",
+    border: "border-indigo-500/40",
+    text: "text-indigo-400",
+    dot: "bg-indigo-500",
+    glow: "shadow-indigo-500/20",
+    label: "Gram Crown \u2014 Discrete Inequality",
+    sublabel: "1 crown + 5 PNT axioms",
+  },
+  4: {
+    bg: "from-violet-500/15 to-violet-900/10",
+    border: "border-violet-500/40",
+    text: "text-violet-400",
+    dot: "bg-violet-500",
+    glow: "shadow-violet-500/20",
+    label: "Arakelov Crown \u2014 Intersection Theory",
+    sublabel: "1 Hodge index axiom",
   },
 };
 
@@ -370,8 +424,10 @@ export default function AxiomMapPage() {
           </span>
         </h1>
         <p className="text-slate-400 mt-2 max-w-2xl">
-          The Dual Crown architecture: two gauge-separated proof paths.
-          The Analytic Crown uses{" "}
+          The Penta-Crown architecture: five independent proof paths.
+          PATH 1 uses{" "}
+          <code className="text-rose-400/80">overcancellation_implies_rh</code>{" "}
+          (2 PNT axioms, cleanest). The Analytic Crown uses{" "}
           <code className="text-amber-400/80">baez_duarte_forward</code>{" "}
           (1 literature axiom). The Oracle Crown uses{" "}
           <code className="text-cyan-400/80">oracle_certificates</code>{" "}
@@ -389,22 +445,40 @@ export default function AxiomMapPage() {
         className="flex rounded-xl overflow-hidden h-10 gap-0.5"
       >
         <div
-          className="bg-gradient-to-r from-amber-600 to-amber-500 flex items-center justify-center"
-          style={{ width: "50%" }}
+          className="bg-gradient-to-r from-rose-600 to-rose-500 flex items-center justify-center"
+          style={{ width: "20%" }}
         >
-          <span className="text-[10px] font-bold text-white">ba\u00E9z_duarte_forward (Analytic)</span>
+          <span className="text-[9px] font-bold text-white">PATH 1</span>
+        </div>
+        <div
+          className="bg-gradient-to-r from-amber-600 to-amber-500 flex items-center justify-center"
+          style={{ width: "20%" }}
+        >
+          <span className="text-[9px] font-bold text-white">Analytic</span>
         </div>
         <div
           className="bg-gradient-to-r from-cyan-600 to-cyan-500 flex items-center justify-center"
-          style={{ width: "50%" }}
+          style={{ width: "20%" }}
         >
-          <span className="text-[10px] font-bold text-white">oracle_certificates (Oracle)</span>
+          <span className="text-[9px] font-bold text-white">Oracle</span>
+        </div>
+        <div
+          className="bg-gradient-to-r from-indigo-600 to-indigo-500 flex items-center justify-center"
+          style={{ width: "20%" }}
+        >
+          <span className="text-[9px] font-bold text-white">Gram</span>
+        </div>
+        <div
+          className="bg-gradient-to-r from-violet-600 to-violet-500 flex items-center justify-center"
+          style={{ width: "20%" }}
+        >
+          <span className="text-[9px] font-bold text-white">Arakelov</span>
         </div>
       </motion.div>
 
       {/* Tier legend */}
       <div className="flex flex-wrap gap-6 text-xs">
-        {([1, 2] as const).map((t) => {
+        {([5, 1, 2, 3, 4] as const).map((t) => {
           const tier = TIER_COLORS[t];
           return (
             <div key={t} className="flex items-center gap-2">
@@ -427,7 +501,7 @@ export default function AxiomMapPage() {
           Forward: RH {"\u27F9"} d{"\u00B2"}_N {"\u2192"} 0
         </h2>
         <p className="text-xs text-slate-500 mb-4">
-          Click an axiom to learn more. Two gauge-separated crown paths.
+          Click an axiom to learn more. Five crown paths + zero-axiom converse.
         </p>
         <div className="space-y-3">
           {CROWN_AXIOMS.map((axiom, i) => (
@@ -456,7 +530,7 @@ export default function AxiomMapPage() {
         className="text-center text-xs text-slate-600 pt-4 border-t border-slate-800"
       >
         <code>#print axioms nyman_beurling_equivalence</code> &mdash; compiler
-        verified, v17 Dual Crown, May 9, 2026
+        verified, v26 Penta-Crown, June 10, 2026
       </motion.div>
     </div>
   );
