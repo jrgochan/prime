@@ -189,18 +189,24 @@ theorem variance_bound_from_decomp
 The off-diagonal bilinear form:
   Var_off = Σ_{j≠k} v_j · v_k · G̃(j,k)
 
-is bounded using:
-  1. Abel summation to convert the double sum to integrals of M(x)
-  2. The Mertens bound |M(x)/x| ≤ C_M/ln(x)
-  3. The Fejér taper suppresses contributions near the boundary
+⚠️ **CORRECTION (June 11, 2026 — The h_abel Experiment):**
 
-The key inequality is:
+The original commentary claimed this bound followed from PNT via:
+  |Var_off| ≤ ||v||₁² · max|G̃(j,k)| ≤ (C_M/lnN)² · lnN = C_M² / lnN
 
-  |Var_off| ≤ ||v||₁² · max|G̃(j,k)|
-            ≤ (C_M/lnN)² · lnN
-            = C_M² / lnN
+Numerical testing (h_abel experiment, N=20..200) showed that
+|Var_off|·ln²N **grows without bound** (0.6 → 119), disproving
+the claim that h_abel is a standard consequence of PNT.
 
-This gives Var_off · lnN ≤ C_M². -/
+The bound requires **bilinear Möbius cancellation** with
+arithmetic (GCD) structure — this is at the Chowla frontier
+of analytic number theory, strictly beyond PNT.
+
+The theorem below remains valid as a CONDITIONAL result:
+IF h_abel holds, THEN the Selberg Bridge gives the Wall.
+But h_abel itself likely contains RH-equivalent content.
+
+See: fiber_tower_analysis.py for the HPDF decomposition. -/
 
 /-- **MERTENS TO OFF-DIAGONAL**: The Mertens first bound implies
     the off-diagonal variance bound.
@@ -308,10 +314,10 @@ theorem selberg_bridge
 
 /-! ### Connecting it all
 
-The complete formal chain from PNT to RH:
+The formal chain from variance bound to RH:
 
 ```
-  PNT (Mertens first)
+  h_abel + h_diag (HYPOTHESES — see ⚠️ below)
     ↓   selberg_bridge
   Var·lnN ≤ C_var
     ↓   capstone_wall (RGFlow.lean)
@@ -321,19 +327,35 @@ The complete formal chain from PNT to RH:
 ```
 
 Status:
-  ✅ selberg_bridge:   Var bound from PNT hypotheses (PROVED)
+  ✅ selberg_bridge:   Var bound from hypotheses (PROVED)
   ✅ capstone_wall:    Wall from Var bound (PROVED, RGFlow.lean)
-  ⬜ h_abel:           Abel summation bridge (THE analytic content)
-  ⬜ h_diag:           Diagonal bound (routine Mertens)
+  ✅ critical_check:   C_var < 2K₁ (PROVED, arithmetic)
+  ❌ h_abel:           Off-diagonal bilinear bound (NOT from PNT — see below)
+  ⬜ h_diag:           Diagonal bound (routine Mertens, likely achievable)
 
-The TWO remaining analytic facts (h_abel, h_diag) are
-standard consequences of PNT. They do not require any
-hypothesis beyond Σ μ(n)/n = O(1/lnN).
+⚠️ **CORRECTION (June 11, 2026 — The h_abel Experiment):**
 
-Once formalized, the chain is complete:
-  PNT → Mertens → Selberg Bridge → Capstone → Wall → RH
+h_abel does NOT follow from PNT alone. Numerical testing shows
+|Var_off|·ln²N grows without bound (0.6 at N=20 → 119 at N=200),
+meaning the off-diagonal bilinear form is NOT O(1/ln²N).
 
-One Selberg sieve away. 🐴🏔️💜 -/
+The bilinear Möbius cancellation required by h_abel is at the
+Chowla frontier of analytic number theory. It requires controlling
+Σ μ(j)μ(k) w_j w_k G̃(j,k) — a bilinear sum with GCD structure.
+Linear Mertens (PNT) gives |Σ μ(k)/k| = O(1/lnN), but the
+bilinear lift to the off-diagonal Gram form is genuinely harder.
+
+The Selberg Bridge framework is CORRECT as a conditional chain:
+IF h_abel holds, THEN PNT → Wall → RH. But h_abel itself
+likely contains RH-equivalent content, similar to the Wall axiom.
+
+Alternative attack: the fiber decomposition (per-prime analysis)
+shows that the overcancellation decomposes into per-prime fiber
+contributions. The p=3 fiber carries the dominant cancellation.
+This may offer a different path to the Wall via Euler product
+structure rather than the Selberg shortcut.
+
+The Wall is the Wall. It can only be proved. 🏔️🥝🍓 -/
 
 -- ════════════════════════════════════════════════════════════════
 -- §7. THE TAPER MERTENS IDENTITY — T₁·lnN → 1
@@ -599,22 +621,32 @@ theorem positive_margin (γ_val : ℝ)
 
 ### The Remaining Analytic Content:
 
-Two hypotheses that are standard PNT consequences:
+⚠️ **CORRECTED (June 11, 2026):**
   1. `h_abel`: Off-diagonal bilinear ≤ C_M²/ln²N + 2C_M/ln²N
-     (Abel summation + Fejér taper cancellation)
+     **STATUS: NOT achievable from PNT alone.**
+     Numerical testing shows |Var_off|·ln²N grows without bound.
+     This bound requires bilinear Möbius cancellation (Chowla frontier).
+     h_abel likely contains RH-equivalent content.
   2. `h_diag`: Diagonal excess ≤ D_diag/lnN
      (Mertens product: Σ μ(k)²/k = (6/π²)lnN + O(1))
+     **STATUS: Likely achievable from PNT.** Routine Mertens.
 
-### Numerical Values:
-  C_M ≈ 1 (Mertens constant bound)
-  D_diag ≈ 0.02 (diagonal excess from Gram structure)
-  C_var = D_diag + C_M² + 2C_M ≈ 3.02 (conservative bound)
-  Data: actual C_var ≈ 0.045 (much tighter!)
-  Both work: all that matters is C_var < 2K₁ = 2(1+γ) ≈ 3.15
+### Numerical Evidence (h_abel experiment, June 11, 2026):
+  |Var_off|·ln²N at N=20:   0.62
+  |Var_off|·ln²N at N=50:   8.91
+  |Var_off|·ln²N at N=100:  41.6
+  |Var_off|·ln²N at N=200:  119.4
+  → GROWING, not bounded. h_abel fails.
 
-### The Architecture:
+### Fiber Decomposition (HPDF data, June 11, 2026):
+  vtGv = diagonal + coprime + gcd_2 + gcd_3 + gcd_5 + gcd_6+
+  Coprime sector ALWAYS negative (9998/9998 tested N). ✅
+  p=3 fiber carries dominant cancellation (-0.266 at N=10000).
+  (1-vtGv)·lnN → 2.83 (convergent margin constant).
+
+### The Architecture (CORRECTED):
 ```
-  PNT (Σ μ(n)/n = O(1/lnN))
+  h_abel (HYPOTHESIS — bilinear Möbius, Chowla frontier)
        ↓ mertens_implies_offdiag
   |Var_off| · lnN ≤ C_off
        ↓ variance_bound_from_decomp
@@ -625,7 +657,8 @@ Two hypotheses that are standard PNT consequences:
   THE RIEMANN HYPOTHESIS
 ```
 
-linarith. The universe doesn't wiggle hard enough to escape. 🐴🏔️💜
+The framework is valid. The shortcut is not.
+The Wall is the Wall. It can only be proved. 🏔️🥝🍓
 -/
 
 end Cathedral.Geometry.Renormalization.SelbergBridge
