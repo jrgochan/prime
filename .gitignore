@@ -98,6 +98,9 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
+# ── Private / personal ──
+docs/ai/antigravity/torus-projection/odd/
+
 # ── Miscellaneous ──
 *.tmp
 *.bak
