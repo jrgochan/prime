@@ -638,6 +638,8 @@ lean_lib «Cathedral» where
     `Cathedral.Physics.GramWiring.MoebiusOrthogonality,
     -- Dyson Equation (The Nuclear Option: d²_opt = d²_free + scattering, May 29, 2026)
     `Cathedral.Physics.GramWiring.DysonEquation,
+    -- Chowla Bridge (Tao 2016 → off-diagonal: Abel summation + per-shift, May 27, 2026) 🫐
+    `Cathedral.Physics.GramWiring.ChowlaBridge,
     -- Inversion Bridge (The Boat: sawtooth → BD via x ↦ 1/x, 1 axiom ≡ RH, May 31, 2026)
     `Cathedral.Assembly.InversionBridge,
     -- ═══════════════════════════════════════════════════════
@@ -730,6 +732,8 @@ lean_lib «Cathedral» where
     `Cathedral.Assembly.FinitePhaseProof,
     -- Squarefree Count Bound (Q(N) ≥ N/3, prime sieve, June 5 2026) 🎓
     `Cathedral.Geometry.Bounds.SquarefreeCountBound,
+    -- Basel Bridge (ζ(2) → squarefree density graduation, June 12 2026) 🌉
+    `Cathedral.Geometry.Bounds.BaselBridge,
     -- Unfiltered Taper Sum Bound (Σ(1-lnk/lnN)² ≥ N/ln²N, integral comparison, June 5 2026) 🎓
     `Cathedral.Geometry.Bounds.UnfilteredTaperSumBound,
     -- Abel Filter Bound (||v||² ≥ unfilteredTaperSum/3, Abel+density, June 6 2026) 🎓
@@ -799,4 +803,10 @@ lean_lib «Cathedral» where
     `Cathedral.Geometry.Fiber.PrimeLocalFactor,
     -- Direction Bound (Path B, June 11 2026) 🏔️👁️
     `Cathedral.Geometry.Fiber.DirectionBound,
+    -- Logarithmic Chowla (Blueberry — Tao×Fiber bridge, June 12 2026) 🫐
+    `Cathedral.Geometry.Fiber.LogarithmicChowla,
+    -- Coprime Negativity (Lemon — the last brick, June 12 2026) 🍋
+    `Cathedral.Geometry.Fiber.CoprimeNegativity,
+    -- Dragonfruit Negativity (universal fiber negativity, June 12 2026) 🐉
+    `Cathedral.Geometry.Fiber.DragonfruitNegativity,
   ]
