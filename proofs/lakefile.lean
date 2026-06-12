@@ -785,4 +785,18 @@ lean_lib «Cathedral» where
     `Cathedral.Vasyunin.Cotangent.VasyuninDigammaBridge,
     -- Wedge Residual (ratio+ecot→1, V(n,n+1)=V(n,1), June 8 2026) 🌾🌊💎
     `Cathedral.Geometry.Renormalization.WedgeResidual,
+    -- Fiber Decomposition (GCD channel anatomy, The Kiwi Discovery, June 11 2026) 🥝🍓
+    `Cathedral.Geometry.Fiber.FiberDecomposition,
+    -- Kiwi-Banana Chain (fiber convergence → Wall, June 11 2026) 🥝🍌
+    `Cathedral.Geometry.Fiber.KiwiBananaChain,
+    -- Watermelon Bound (large sieve + Burnol → Wall, June 11 2026) 🍉
+    `Cathedral.Geometry.Fiber.WatermelonBound,
+    -- Overcancellation from Sieve (GRADUATION, June 11 2026) 🥪🏔️
+    `Cathedral.Geometry.Fiber.OvercancellationFromSieve,
+    -- Coprime Sector Bound (Path B Step 1, June 11 2026) 🍌🔫
+    `Cathedral.Geometry.Fiber.CoprimeSectorBound,
+    -- Prime Local Factor (Path B Step 2, June 11 2026) 🥝🔫
+    `Cathedral.Geometry.Fiber.PrimeLocalFactor,
+    -- Direction Bound (Path B, June 11 2026) 🏔️👁️
+    `Cathedral.Geometry.Fiber.DirectionBound,
   ]
