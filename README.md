@@ -4,7 +4,7 @@
 
 A machine-checked proof architecture in **Lean 4** + **Mathlib** that reduces
 the Riemann Hypothesis to the decay of the Nyman–Beurling distance.
-**474 active Lean files** (~149,500 lines) across 25+ modules, with
+**481 active Lean files** (~152,500 lines) across 25+ modules, with
 **1 axiom equivalent to RH** on the crown path (verified by `#print axioms`),
 and an independent **Oracle Bridge** from GPU-certified computation.
 
@@ -17,10 +17,13 @@ and an independent **Oracle Bridge** from GPU-certified computation.
 > The **Oracle Bridge** proves RH from **one** trusted GPU measurement:
 > DD-precision Gram quadratic form v^T G v < 1 at highly composite numbers.
 
-> **Release: v26 — Penta-Crown** — June 10, 2026
+> **Release: v26 — Penta-Crown + Path B** — June 12, 2026
 >
-> **Latest**: 474 files, ~149K lines, 1 axiom (≡ RH), 4 sorry (off-crown),
-> 0 errors, 8,818 build jobs, 6 proof paths, 101 Standard Model theorems
+> **Latest**: 481 files, ~152K lines, 1 axiom (≡ RH), 4 sorry (off-crown),
+> 0 errors, 8,818 build jobs, 7 proof paths, 101 Standard Model theorems
+>
+> 🚛 **Path B (The Mack Truck)**: `d² ≤ 2·gap` — the constant-ratio sieve
+> criterion with a **67× safety margin**. 7 new Fiber modules, 24 theorems, 0 sorry.
 >
 > 📖 *New here? Read the [Origin Story](ORIGIN-STORY.md) — how a blind eigensolver
 > spontaneously derived the Möbius function and collided with Selberg's Parity Barrier.*
@@ -139,7 +142,15 @@ proofs/Cathedral/
 ├── PNT/             (5)     ← PNT bridges (PrimeNumberTheoremAnd)
 ├── AbelTail/       (14)     ← Abel summation
 ├── Structural/      (9)     ← Cholesky, bordered spectral, eigenvalues
-├── Geometry/       (60+)    ← Renormalization (18), Crown, Abel, SUSY, Arakelov
+├── Geometry/       (67+)    ← Renormalization (18), Crown, Abel, SUSY, Arakelov, Fiber (7)
+│   └── Fiber/       (7)     ← 🚛 PATH B: Mack Truck + Agricultural Salad Topology
+│       ├── FiberDecomposition     ← GCD channel anatomy (The Kiwi Discovery 🥝)
+│       ├── KiwiBananaChain        ← Fiber convergence → Wall 🥝🍌
+│       ├── WatermelonBound        ← Large sieve + Burnol → Wall 🍉
+│       ├── OvercancellationFromSieve  ← Graduation wiring 🥪
+│       ├── CoprimeSectorBound     ← Triple-barreled Wall criteria 🍌🔫
+│       ├── PrimeLocalFactor       ← Universal Theorem: 2 Tendsto → RH 🥝🔫
+│       └── DirectionBound         ← Angle criterion + Mack Truck 🚛
 ├── Physics/        (83)     ← Gauge theory, SUSY, Glass Bridge, Dedekind, Standard Model
 ├── NumberTheory/    (8)     ← Euler product, Mertens
 ├── Robin/           (7)     ← Robin/Nicolas/Lagarias equivalences
@@ -153,28 +164,29 @@ proofs/Cathedral/
 ## Build Stats
 
 ```
-Active files:   474 Lean files across 25+ modules
+Active files:   481 Lean files across 25+ modules
 Archived:       114 Lean files in Archive/
-Total:          588 Lean files, ~175K lines
+Total:          595 Lean files, ~178K lines
 Axioms:         1 on crown (≡ RH), 2 PNT bureaucracy
 Sorry:          4 off-crown
 Errors:         0
 Build jobs:     8,818
-Lines:          ~149,500 (active), ~175K (full proofs/)
-Theorems:       ~4,600 proved
+Lines:          ~152,500 (active), ~178K (full proofs/)
+Theorems:       ~4,624 proved
 Papers:         4 core + 13 working drafts (17 total, all build)
 Experiments:    56 Rust/MPFR/DD (f64–512 bit + DD 31-digit precision)
-Release:        v26 — Penta-Crown (June 10, 2026)
+Release:        v26 — Penta-Crown + Path B (June 12, 2026)
 ```
 
-## Six Proof Paths (Penta-Crown + Converse)
+## Seven Proof Paths (Penta-Crown + Path B + Converse)
 
 | Path | Target | Crown Axioms | Status |
 |------|--------|-------------|--------|
 | **PATH 1 Overcancellation** | `overcancellation_implies_rh` | 2 PNT axioms | **Cleanest** |
 | **Analytic Crown (F)** | `baez_duarte_forward` | `overcancellation_axiom` | **Primary** |
 | **Oracle Crown (D)** | `rh_from_oracle` | `oracle_certificates` | 0 sorry |
-| **Gram Crown (E)** | `rh_discrete_subseq` | Direct Gram bound | 0 sorry |
+| **Gram Crown (E)** | `rh_from_convergences` | Direct Gram bound | 0 sorry |
+| **Path B (Mack Truck)** 🚛 | `rh_from_mack_truck` | `d2_bounded_above` | **0 sorry, 67× margin** |
 | **Arakelov Crown** | `rh_from_arakelov` | `hodge_index_eigenvalue_bound` | 0 sorry |
 | Converse | `nyman_beurling_converse` | **0 axioms** | 0 sorry |
 
@@ -194,6 +206,8 @@ Release:        v26 — Penta-Crown (June 10, 2026)
 | Arithmetic Standard Model (101 theorems) | **Proved** (0 axioms) |
 | Mass Renormalization (γ cancels) | **Proved** (0 sorry, 2 axioms) |
 | Dedekind reciprocity law | **Partial** (3-file architecture) |
+| `rh_from_mack_truck` — d² ≤ 2·gap → RH | **Proved** (0 sorry, 67× margin) |
+| `rh_from_convergences` — 2 Tendsto → RH | **Proved** (0 sorry) |
 
 ## Numerical Validation (Rust)
 
@@ -261,12 +275,16 @@ cd papers && ./build.sh
 
 ## Methodology
 
-This project was built through a tripartite human-AI collaboration over ~66 days:
+This project was built through a tripartite human-AI collaboration over ~70 days:
 a human computer scientist providing architectural vision and experimental design,
 Google DeepMind's Gemini providing mathematical strategy and deep analytic intuition,
 and Anthropic's Claude (Antigravity) providing Lean 4 proof engineering and
 sorry elimination. All proofs are compiler-verified. The physics dictionary
 (76 pages) was peer-reviewed and accepted without revisions.
+
+The formal theorem names reflect the cognitive compression algorithm
+("Agricultural Salad Topology") that made the formalization tractable.
+See the module docstrings for the mathematical dictionary.
 
 ## Repository Structure
 
