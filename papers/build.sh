@@ -13,7 +13,7 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 
-PAPER_GROUPS="core working_drafts/science working_drafts/applications working_drafts/humanities working_drafts/public working_drafts/policy"
+PAPER_GROUPS="core working_drafts/science working_drafts/applications working_drafts/humanities working_drafts/math working_drafts/public working_drafts/policy"
 
 # Colors
 RED=$'\033[0;31m'
