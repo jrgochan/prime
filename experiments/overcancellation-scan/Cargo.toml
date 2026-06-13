@@ -204,6 +204,10 @@ path = "src/bin/dense_anatomy.rs"
 name = "fermi-tower"
 path = "src/bin/fermi_tower.rs"
 
+[[bin]]
+name = "pomegranate-seeds"
+path = "src/bin/pomegranate_seeds.rs"
+
 [profile.release]
 opt-level = 3
 lto = true
