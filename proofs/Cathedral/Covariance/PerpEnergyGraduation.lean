@@ -57,10 +57,10 @@ theorem margin_lower_bound
 theorem perp_energy_graduation
     (vtGv btv delta eps C_delta : Real)
     (h_decomp : vtGv = btv ^ 2 + delta)
-    (h_delta_pos : 0 <= delta)
+    (_h_delta_pos : 0 <= delta)
     (h_btv_below : btv <= 1 - eps)
     (h_btv_above : 0 <= btv)
-    (h_eps_pos : 0 < eps)
+    (_h_eps_pos : 0 < eps)
     (h_eps_lt_one : eps < 1)
     (h_delta_bound : delta <= C_delta)
     (h_margin : C_delta < eps * (2 - eps)) :
@@ -77,13 +77,13 @@ theorem perp_energy_graduation
 
     This replaces perp_energy_bound (axiom) with a THEOREM. -/
 theorem perp_energy_bound_graduated
-    (N : Nat) (hN : N >= 3)
+    (N : Nat) (_hN : N >= 3)
     (vtGv btv delta eps C_delta : Real)
-    (h_decomp : vtGv = btv ^ 2 + delta)
-    (h_delta_pos : 0 <= delta)
+    (_h_decomp : vtGv = btv ^ 2 + delta)
+    (_h_delta_pos : 0 <= delta)
     (h_btv_below : btv <= 1 - eps)
     (h_btv_above : 0 <= btv)
-    (h_eps_pos : 0 < eps)
+    (_h_eps_pos : 0 < eps)
     (h_eps_lt_one : eps < 1)
     (h_delta_bound : delta <= C_delta)
     (h_margin : C_delta < eps * (2 - eps)) :
@@ -149,7 +149,7 @@ def C_eff_lower : Real := 5 / 2
     then for any N with logN > 5/2 (i.e., N >= 13),
     we have vtGv < 1 with margin at least (5/2)/logN. -/
 theorem flyspeck_margin
-    (vtGv : Real) (N : Nat) (hN : N >= 13)
+    (vtGv : Real) (N : Nat) (_hN : N >= 13)
     (h_logN : Real.log (N : Real) > 0)
     (h_vtgv : vtGv <= 1 - C_eff_lower / Real.log (N : Real)) :
     vtGv < 1 := by
@@ -173,7 +173,7 @@ theorem flyspeck_margin
 theorem constant_comparison_safe
     (K1 K2 logN : Real)
     (hK1 : 0 < K1)
-    (hK2 : 0 < K2)
+    (_hK2 : 0 < K2)
     (hlogN : 5 <= logN)
     (h_ratio : K2 < K1)
     (h_K1_small : K1 < logN) :
