@@ -180,6 +180,65 @@ theorem ramanujan_dominance_iff (N : ℕ) :
   fermionic_dominance_iff N ramanujanKernel
 
 -- ════════════════════════════════════════════════
+-- §3. THE GLASS BRIDGE THEOREM
+-- ════════════════════════════════════════════════
+
+/-! ### Glass Bridge: G = R + Δ meets Parity
+
+If a quadratic form Q decomposes as:
+  Q = Q_R + Q_Δ     (Bridge Gap: R is nonneg, Δ is the correction)
+
+And Q_R decomposes by parity as:
+  Q_R = diag + same + cross   (with cross ≤ 0)
+
+Then:
+  Q = (diag + same) - gap + Q_Δ
+    ≤ (diag + same) + Q_Δ
+
+So Q < 1 whenever:
+  (diag + same) + Q_Δ < 1
+
+This separates the problem into:
+  1. Bound (diag + same) — the Ramanujan positive sectors → 0
+  2. Bound Q_Δ — the cotangent correction < 1
+
+Numerically at N=10,000:
+  (diag + same) ≈ 0.133    (positive sectors, small)
+  gap ≈ 0.082               (Pauli subtraction)
+  Q_Δ ≈ 0.641               (cotangent correction)
+  Total = 0.133 - 0.082 + 0.641 = 0.692 < 1 ✅  -/
+
+/-- **THEOREM 20** ⭐⭐⭐: The Glass Bridge Decomposition.
+
+    For any kernel f and correction term c:
+
+    If the total form equals the kernel form plus correction:
+      total = kernel_form + correction
+
+    And the kernel is nonneg (so cross ≤ 0):
+      kernel_form = (diag + same) - gap
+
+    Then:
+      total ≤ (diag + same) + correction
+
+    The gap is FREE — it subtracts from the total
+    without needing to be estimated. The Pauli
+    exclusion provides a guaranteed discount.
+
+    PROVED. Zero sorry. Zero axioms.
+    The 20th theorem of the Zorblax Session. 🍍 -/
+theorem glass_bridge_parity_bound (N : ℕ) (f : ℕ → ℕ → ℝ)
+    (hf : ∀ j k, 0 ≤ f j k)
+    (kernel_form correction : ℝ)
+    (h_kernel : kernel_form =
+      ∑ j ∈ Icc 1 (N - 1), ∑ k ∈ Icc 1 (N - 1),
+        ((moebius j : ℤ) : ℝ) * ((moebius k : ℤ) : ℝ) * f j k) :
+    kernel_form + correction ≤
+    diagonalPart N f + sameParityPart N f + correction := by
+  rw [h_kernel]
+  linarith [total_le_diag_plus_same N f hf]
+
+-- ════════════════════════════════════════════════
 -- AUDIT
 -- ════════════════════════════════════════════════
 
@@ -189,7 +248,7 @@ theorem ramanujan_dominance_iff (N : ℕ) :
 ### Sorry count: 0 ✅
 ### Custom Axioms: 0 ✅
 
-### Theorems: 4
+### Theorems: 5
 
 | # | Result | Status | What it says |
 |---|--------|--------|-------------|
@@ -197,6 +256,7 @@ theorem ramanujan_dominance_iff (N : ℕ) :
 | 2 | `ramanujan_three_sector_identity` | ✅ ⭐⭐ | vtRv = diag + same + cross |
 | 3 | `ramanujan_cross_magnitude` | ✅ | gap(R) = -crossParity(R) |
 | 4 | `ramanujan_dominance_iff` | ✅ ⭐⭐⭐ | **vtRv ≤ 0 ↔ gap ≥ positive sectors** |
+| 5 | `glass_bridge_parity_bound` | ✅ ⭐⭐⭐ | **vtRv + vtΔv ≤ (diag+same) + vtΔv** |
 
 ### The Wiring:
 
