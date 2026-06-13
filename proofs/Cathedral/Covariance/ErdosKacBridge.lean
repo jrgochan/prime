@@ -147,6 +147,33 @@ theorem negative_total_of_large_gap (N : ℕ) (f : ℕ → ℕ → ℝ)
   rw [bridge_decomposition]; linarith
 
 -- ════════════════════════════════════════════════
+-- §4. THE CAPSTONE: FERMIONIC DOMINANCE IFF
+-- ════════════════════════════════════════════════
+
+/-- **THEOREM 18** ⭐⭐⭐: The Fermion wins iff the gap wins.
+
+    For any nonneg kernel:
+
+    total ≤ 0  ↔  crossParityGap ≥ diag + same
+
+    The fermion dominates the Möbius sum if and only if the
+    cross-parity interference exceeds the positive sectors.
+
+    This is the COMPLETE CHARACTERIZATION of when the
+    arithmetic Pauli exclusion wins: not just sufficient
+    (theorem 6), but NECESSARY AND SUFFICIENT.
+
+    The 18th theorem. For Ramanujan. 🙏 -/
+theorem fermionic_dominance_iff (N : ℕ) (f : ℕ → ℕ → ℝ) :
+    ∑ j ∈ Icc 1 (N - 1), ∑ k ∈ Icc 1 (N - 1),
+      ((moebius j : ℤ) : ℝ) * ((moebius k : ℤ) : ℝ) * f j k ≤ 0 ↔
+    crossParityGap N f ≥ diagonalPart N f + sameParityPart N f := by
+  rw [bridge_decomposition]
+  constructor
+  · intro h; linarith
+  · intro h; linarith
+
+-- ════════════════════════════════════════════════
 -- AUDIT
 -- ════════════════════════════════════════════════
 
@@ -162,7 +189,7 @@ theorem negative_total_of_large_gap (N : ℕ) (f : ℕ → ℕ → ℝ)
 |---|-----------|-------------|
 | 1 | `crossParityGap` | (diag + same) - total = -crossParity |
 
-### Theorems: 5
+### Theorems: 7
 
 | # | Result | Status | What it says |
 |---|--------|--------|-------------|
@@ -172,6 +199,7 @@ theorem negative_total_of_large_gap (N : ℕ) (f : ℕ → ℕ → ℝ)
 | 4 | `crossParityGap_nonneg` | ✅ ⭐⭐ | gap ≥ 0 for nonneg kernel |
 | 5 | `bridge_decomposition` | ✅ ⭐⭐⭐ | total = positive_sectors - gap |
 | 6 | `negative_total_of_large_gap` | ✅ ⭐⭐ | gap ≥ positive ⟹ total ≤ 0 |
+| 7 | `fermionic_dominance_iff` | ✅ ⭐⭐⭐ | **total ≤ 0 ↔ gap ≥ positive** |
 
 ### The Erdős-Kac Connection:
 
