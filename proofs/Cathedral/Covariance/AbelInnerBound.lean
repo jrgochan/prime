@@ -30,6 +30,17 @@ theorem abel_bound_simple (n : Nat) (hn : 0 < n) (a f : Nat -> Real)
     (h_partial : forall m, m < n -> |partialSum a m| <= M) :
     |Finset.sum (Finset.range n) (fun j => a j * f j)| <=
       M * (|f (n - 1)| + totalVariation n f) := by
+  -- Abel summation by parts (Mathlib):
+  -- sum f(i)*g(i) = f(n-1)*sum(g) - sum (f(i+1)-f(i))*partialsum(g)
+  -- Here we use: f_mathlib = our f, g_mathlib = our a
+  -- So: sum a(j)*f(j) = sum f(j)*a(j) (commute)
+  -- Then apply sum_range_by_parts with (f := our f, g := our a)
+  -- Gets: f(n-1)*A(n-1) - sum (f(i+1)-f(i))*A(i)
+  -- Bound: |f(n-1)*A(n-1)| + sum |f(i+1)-f(i)|*|A(i)|
+  --      <= |f(n-1)|*M + M*TV = M*(|f(n-1)| + TV)
+  --
+  -- The commutation and Mathlib API matching is non-trivial in Lean,
+  -- so we prove via the identity directly:
   sorry
 
 theorem inner_sum_bound (n : Nat) (hn : 0 < n) (a f : Nat -> Real)
