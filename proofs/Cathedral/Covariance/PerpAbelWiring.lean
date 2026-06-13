@@ -142,7 +142,7 @@ theorem inner_bound_from_abel_pnt_tv
 -- §5. THE PERPENDICULAR ENERGY BOUND (From Inner + bilinear_row)
 -- ════════════════════════════════════════════════
 
-/-- **δ BOUND**: From inner(k) ≤ C/(k·logN) to δ ≤ 1-(bᵀv)².
+/-! **δ BOUND**: From inner(k) ≤ C/(k·logN) to δ ≤ 1-(bᵀv)².
 
     δ = |vᵀG⊥v| ≤ max_k |inner(k)| · Σ|v_k|    (bilinear_row_bound)
       ≤ (C/logN) · Σ|v_k|                          (inner bound with k≥1)
@@ -179,14 +179,32 @@ theorem inner_bound_from_abel_pnt_tv
       = C·C'·N/log²N → 0/logN = 0  ✓
 
     This is the DOUBLE Abel framework from AbelDoubleSum.lean. -/
-theorem delta_bound_from_double_abel
-    (C : ℝ) (hC : C > 0)
-    (delta : ℝ) (bound : ℝ)
-    (h_delta_le : delta ≤ C)
-    (h_bound_ge : 0 < bound) :
-    -- If C < bound, then delta < bound
-    C ≤ bound → delta ≤ bound := by
-  intro hCb; linarith
+
+-- The key wiring: bilinear_row_bound → δ bound.
+-- This can be proved NOW, independent of Abel inner bound details.
+
+open Cathedral.Geometry.Abel.AbelDoubleSum
+
+/-- **THE WIRING**: If every inner sum |Σ_j v_j · G⊥(j,k)| ≤ C_inner,
+    then |δ| = |vᵀG⊥v| ≤ C_inner · Σ|v_k|.
+
+    This is bilinear_row_bound instantiated with K = G⊥. PROVED. -/
+theorem perp_delta_wiring {N : ℕ} (v : Fin N → ℝ) (Gperp : Fin N → Fin N → ℝ)
+    (C_inner : ℝ) (hCi : 0 ≤ C_inner)
+    (h_inner : ∀ k : Fin N, |∑ j : Fin N, v j * Gperp j k| ≤ C_inner) :
+    |∑ i : Fin N, ∑ j : Fin N, v i * Gperp i j * v j| ≤
+    C_inner * ∑ k : Fin N, |v k| :=
+  bilinear_row_bound v Gperp C_inner hCi h_inner
+
+/-- **COROLLARY**: If C_inner · Σ|v_k| ≤ bound, then |δ| ≤ bound. -/
+theorem perp_delta_chain {N : ℕ} (v : Fin N → ℝ) (Gperp : Fin N → Fin N → ℝ)
+    (C_inner bound : ℝ) (hCi : 0 ≤ C_inner)
+    (h_inner : ∀ k : Fin N, |∑ j : Fin N, v j * Gperp j k| ≤ C_inner)
+    (h_sum : C_inner * ∑ k : Fin N, |v k| ≤ bound) :
+    |∑ i : Fin N, ∑ j : Fin N, v i * Gperp i j * v j| ≤ bound := by
+  calc |∑ i : Fin N, ∑ j : Fin N, v i * Gperp i j * v j|
+      ≤ C_inner * ∑ k : Fin N, |v k| := perp_delta_wiring v Gperp C_inner hCi h_inner
+    _ ≤ bound := h_sum
 
 -- ════════════════════════════════════════════════
 -- AUDIT
