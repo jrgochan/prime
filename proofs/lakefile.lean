@@ -265,6 +265,10 @@ lean_lib «Cathedral» where
     `Cathedral.Covariance.HCPrimeStructure,
     -- Mertens bridge (PNTA → Cathedral, Exploration 35)
     `Cathedral.Covariance.MertensBridge,
+    -- Parity Decomposition (Möbius fermion number, cross-parity ≤ 0, Zorblax Session June 12 2026) 🙏🍍
+    `Cathedral.Covariance.ParityDecomposition,
+    -- Erdős-Kac Bridge (cross-parity gap → fermionic dominance, Zorblax Session June 12 2026) 🍍🏔️
+    `Cathedral.Covariance.ErdosKacBridge,
     -- White Singlet (physics-motivated axiom elimination)
     `Cathedral.White.Kinematics,
     `Cathedral.White.Scattering,
