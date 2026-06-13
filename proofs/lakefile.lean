@@ -269,6 +269,8 @@ lean_lib «Cathedral» where
     `Cathedral.Covariance.ParityDecomposition,
     -- Erdős-Kac Bridge (cross-parity gap → fermionic dominance, Zorblax Session June 12 2026) 🍍🏔️
     `Cathedral.Covariance.ErdosKacBridge,
+    -- Parity-Margin Wiring (gap → fermion → margin → RH, Zorblax Session June 12 2026) 🍍🏔️
+    `Cathedral.Covariance.ParityMarginWiring,
     -- White Singlet (physics-motivated axiom elimination)
     `Cathedral.White.Kinematics,
     `Cathedral.White.Scattering,
