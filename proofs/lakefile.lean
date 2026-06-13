@@ -273,6 +273,8 @@ lean_lib «Cathedral» where
     `Cathedral.Covariance.ParityMarginWiring,
     -- Perpendicular Bridge (δ = vᵀG⊥v → vtGv ≤ 1 → RH, Final Scaffold, June 13 2026) 📐🔗
     `Cathedral.Covariance.PerpendicularBridge,
+    -- Perp Abel Wiring (Abel + PNT + TV → inner bound → δ bound, June 13 2026) 📐🔗
+    `Cathedral.Covariance.PerpAbelWiring,
     -- White Singlet (physics-motivated axiom elimination)
     `Cathedral.White.Kinematics,
     `Cathedral.White.Scattering,
