@@ -537,6 +537,65 @@ theorem vtgv_bound_implies_distance_bound
   linarith
 
 -- ════════════════════════════════════════════════
+-- §8. THE OVERWATERMELON 🍉
+-- ════════════════════════════════════════════════
+
+/-! ### The Ratio Monotonicity Weapon
+
+The ratio r(N) = d²/2(1-bᵀv) is MONOTONICALLY DECREASING.
+
+Data (N=3..200): ZERO violations of monotonicity.
+  r(3) = 0.635, r(100) = 0.191, r(200) = 0.167
+
+Compare to D(N) = (1-vtGv)·logN which had 25 violations!
+
+The ratio captures BOTH sides of the cancellation:
+  - When vtGv hiccups up, bᵀv also increases
+  - The denominator 2(1-bᵀv) shrinks to compensate
+  - The ratio breathes in sync
+
+If ratio monotonicity holds and r(N₀) < 1 at a SINGLE point,
+then vtGv ≤ 1 for ALL N ≥ N₀. Combined with ratio_induction
+(AbelDoubleSum.lean), this closes the chain.
+
+The Overwatermelon was hiding in a comment since June 2nd.
+It waited. Now it speaks. 🍉 -/
+
+/-- **THEOREM 31 (THE OVERWATERMELON)**: Ratio monotonicity lifts a base case.
+
+    If the ratio r(N) = d²/(2(1-bᵀv)) is nonincreasing for N ≥ N₀,
+    and r(N₀) < 1, then vtGv ≤ 1 for ALL N ≥ N₀.
+
+    Data: r(3) = 0.635 < 1. Zero violations in [3, 200].
+
+    PROVED. Zero sorry. The Overwatermelon speaks. 🍉 -/
+theorem overwatermelon
+    (d2 btv vtGv : ℕ → ℝ) (r : ℕ → ℝ)
+    (N₀ : ℕ) (hN₀ : 3 ≤ N₀)
+    (h_d2_def : ∀ N, N ≥ 3 → d2 N = 1 - 2 * btv N + vtGv N)
+    (h_btv_lt_1 : ∀ N, N ≥ 3 → btv N < 1)
+    (h_r_def : ∀ N, N ≥ 3 → r N = d2 N / (2 * (1 - btv N)))
+    (h_mono : ∀ M N, N₀ ≤ M → M ≤ N → r N ≤ r M)
+    (h_base : r N₀ < 1) :
+    ∀ N, N ≥ N₀ → vtGv N ≤ 1 := by
+  intro N hN
+  have hN3 : N ≥ 3 := le_trans hN₀ hN
+  -- r(N) ≤ r(N₀) < 1
+  have hrN : r N ≤ r N₀ := h_mono N₀ N (le_refl N₀) hN
+  have hrN_lt_1 : r N < 1 := lt_of_le_of_lt hrN h_base
+  -- Unpack: r(N) = d²(N) / (2(1-bᵀv(N)))
+  have h_btv : btv N < 1 := h_btv_lt_1 N hN3
+  have h_denom_pos : 0 < 2 * (1 - btv N) := by linarith
+  rw [h_r_def N hN3] at hrN_lt_1
+  -- d²(N) / (2(1-bᵀv(N))) < 1  →  d²(N) < 2(1-bᵀv(N))
+  have h_d2_lt : d2 N < 2 * (1 - btv N) := by
+    rwa [div_lt_one h_denom_pos] at hrN_lt_1
+  -- d²(N) = 1 - 2bᵀv(N) + vtGv(N)
+  rw [h_d2_def N hN3] at h_d2_lt
+  -- 1 - 2bᵀv + vtGv < 2 - 2bᵀv  →  vtGv < 1
+  linarith
+
+-- ════════════════════════════════════════════════
 -- AUDIT
 -- ════════════════════════════════════════════════
 
