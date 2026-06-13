@@ -10,7 +10,7 @@
 \author{
   Jason Robert Gochanour\,\orcidlink{0000-0002-2862-526X}
 }
-\date{June 6, 2026}
+\date{June 12, 2026}
 
 \begin{document}
 
@@ -62,8 +62,8 @@ Eight alternative forward paths (Margin Certificate, Mellin Crown,
 Perron Crown, Renormalization Bridge, Oracle Bridge, Gram Crown,
 Direct Mellin Bound, Overcancellation Chain) provide cross-validation.
 
-The formalization comprises 390+ active Lean files
-($\sim$120{,}000 lines; 500+ files and $\sim$140{,}000 lines
+The formalization comprises 487 active Lean files
+($\sim$153{,}000 lines; 601 files and $\sim$179{,}000 lines
 including archived explorations) with zero compilation errors.
 The proof introduces techniques of independent interest:
 the \emph{Parseval Bridge}, bypassing the Vasyunin cotangent formula;
@@ -80,6 +80,7 @@ validate the spectral correspondence to $10^{-17}$ precision at
 $N = 55{,}440$.
 \end{abstract}
 
+\clearpage
 \tableofcontents
 
 % ================================================================
@@ -1067,7 +1068,7 @@ to informal proof:
 
 \subsection{Module Organization}
 
-The Cathedral is organized into 25+ modules (390+ active files):
+The Cathedral is organized into 25+ modules (487 active files):
 
 \begin{center}
 \small
@@ -1096,12 +1097,12 @@ The Cathedral is organized into 25+ modules (390+ active files):
 \lean{NumberTheory} & Euler product limit & 3 & 0 \\
 \lean{+ 5 others} & Renorm., Compute, IntegralBasis, etc. & 10 & 0 \\
 \midrule
-& \textbf{Active total} & \textbf{390+} & \textbf{1 + Oracle} \\
+& \textbf{Active total} & \textbf{487} & \textbf{1 + Oracle} \\
 \bottomrule
 \end{tabular}
 \end{center}
 
-An additional 114 files are preserved in \lean{Archive/}.
+An additional 112 files are preserved in \lean{Archive/}.
 The build emits zero non-sorry warnings; exploratory \lean{sorry}
 warnings in off-crown paths (PNT Bridge, Covariance, Assembly)
 do not affect the crown theorem.
@@ -1129,7 +1130,7 @@ these are safely quarantined off the crown path.
 
 \begin{verbatim}
 cd proofs
-lake build    # 390+ active files, 114 archived
+lake build    # 487 active files, 112 archived
               # Build completed successfully
               # Zero non-sorry warnings
 
