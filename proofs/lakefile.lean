@@ -271,6 +271,8 @@ lean_lib «Cathedral» where
     `Cathedral.Covariance.ErdosKacBridge,
     -- Parity-Margin Wiring (gap → fermion → margin → RH, Zorblax Session June 12 2026) 🍍🏔️
     `Cathedral.Covariance.ParityMarginWiring,
+    -- Perpendicular Bridge (δ = vᵀG⊥v → vtGv ≤ 1 → RH, Final Scaffold, June 13 2026) 📐🔗
+    `Cathedral.Covariance.PerpendicularBridge,
     -- White Singlet (physics-motivated axiom elimination)
     `Cathedral.White.Kinematics,
     `Cathedral.White.Scattering,
