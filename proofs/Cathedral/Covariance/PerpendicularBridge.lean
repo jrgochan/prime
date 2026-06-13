@@ -76,10 +76,30 @@ theorem vtGv_decomp (N : ℕ) (v : ℕ → ℝ) (G : ℕ → ℕ → ℝ) (b : �
     (h_btv : btv = ∑ k ∈ Finset.range N, b k * v k)
     (h_delta : delta = perpEnergy N v G b) :
     vtGv = btv ^ 2 + delta := by
-  -- Algebraic identity: Σ v_j G(j,k) v_k = (Σ b_k v_k)² + Σ v_j (G(j,k)-b_j b_k) v_k
-  -- The cancellation is exact by construction of perpGram.
-  -- Proof requires sum expansion + ring. NOT on critical path.
-  sorry
+  -- Expand definitions
+  subst h_vtGv; subst h_btv; subst h_delta
+  simp only [perpEnergy, perpGram]
+  -- Goal: Σ v_j G(j,k) v_k = (Σ b_k v_k)² + Σ v_j (G(j,k) - b_j b_k) v_k
+  -- The RHS = (Σ b_k v_k)² + Σ v_j G(j,k) v_k - Σ v_j b_j b_k v_k
+  -- So we need: (Σ b_k v_k)² = Σ_j Σ_k v_j b_j b_k v_k
+  -- This is: (Σ b_k v_k)² = (Σ b_j v_j)(Σ b_k v_k)
+  -- which is x² = x·x, true by ring.
+  have key : (∑ k ∈ Finset.range N, b k * v k) ^ 2 =
+    ∑ j ∈ Finset.range N, ∑ k ∈ Finset.range N, v j * b j * b k * v k := by
+    rw [sq, Finset.sum_mul, Finset.sum_comm]
+    congr 1; ext j
+    rw [Finset.mul_sum]
+    congr 1; ext k
+    ring
+  -- RHS = btv² + Σ v_j (G(j,k) - b_j b_k) v_k
+  --      = Σ v_j b_j b_k v_k + Σ v_j G(j,k) v_k - Σ v_j b_j b_k v_k
+  --      = Σ v_j G(j,k) v_k = LHS
+  rw [key]
+  have split : ∀ j k, v j * (G j k - b j * b k) * v k =
+    v j * G j k * v k - v j * b j * b k * v k := by
+    intros; ring
+  simp_rw [split]
+  simp [Finset.sum_sub_distrib]
 
 -- ════════════════════════════════════════════════
 -- §3. AXIOMS (THE HARD ANALYSIS)
