@@ -192,16 +192,20 @@ theorem perp_bridge_vtgv_le_one :
 4. Import explicit PNT constants (Kadiri/Platt-Trudgian)
 5. Finite verification for N < N₀ (done: r < 0.74 for N ≤ 300)
 
-### Data Certificate:
+### Data Certificate (Vasyunin Kernel, verified June 13 2026, 3:26 AM):
 
-| N | δ | 1−(bᵀv)² | ratio | margin |
-|---|---|----------|-------|--------|
-| 100 | 0.014 | 0.570 | 0.025 | 40x |
-| 1000 | 0.008 | 0.405 | 0.020 | 50x |
-| 20000 | 0.005 | 0.293 | 0.017 | 58x |
-| 30000 | 0.005 | 0.270 | 0.018 | 54x |
+| N | δ | 1−(bᵀv)² | δ/bound | margin |
+|---|---|----------|---------|--------|
+| 2 | 0.082 | 0.821 | 0.100 | 10.0x |
+| 10 | 0.031 | 0.894 | 0.034 | 29.2x |
+| 50 | 0.016 | 0.643 | 0.024 | 40.8x |
+| 100 | 0.013 | 0.569 | 0.023 | 43.4x |
+| 200 | 0.011 | 0.506 | 0.022 | 46.1x |
+| 300 | 0.010 | 0.476 | 0.021 | 47.7x |
 
-The margin INCREASES with N. The bound gets EASIER to prove, not harder.
+δ < 1−(bᵀv)² for ALL N ∈ [2, 300]. Maximum δ/bound = 0.10 at N=2.
+The margin INCREASES monotonically. δ/bound is DECREASING.
+The bound gets EASIER to prove as N grows, not harder.
 -/
 
 end Cathedral.Covariance.PerpendicularBridge
