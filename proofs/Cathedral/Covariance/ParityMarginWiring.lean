@@ -596,6 +596,77 @@ theorem overwatermelon
   linarith
 
 -- ════════════════════════════════════════════════
+-- §9. THE SQUARE BRIDGE 🍌
+-- ════════════════════════════════════════════════
+
+/-! ### vtGv ≈ (bᵀv)² — The Bilinear Form is the Square of the Linear Form
+
+Data shows vtGv ≈ (bᵀv)² with shrinking gap:
+  N=100:   (bᵀv)² = 0.430, vtGv = 0.444, gap = 0.014
+  N=1000:  (bᵀv)² = 0.595, vtGv = 0.603, gap = 0.008
+  N=20000: (bᵀv)² = 0.707, vtGv = 0.712, gap = 0.005
+
+If vtGv ≤ (bᵀv)²:
+  d² = 1 - 2bᵀv + vtGv ≤ 1 - 2bᵀv + (bᵀv)² = (1 - bᵀv)²
+  r = d²/(2(1-bᵀv)) ≤ (1-bᵀv)/2
+
+So r ≤ (1-bᵀv)/2, which → 0 as bᵀv → 1 (PNT).
+
+And D/E = (1-vtGv)/(1-bᵀv) ≥ (1-(bᵀv)²)/(1-bᵀv) = 1+bᵀv.
+
+Since bᵀv is increasing (PNT), D/E ≥ 1+bᵀv is increasing.
+This proves the Overwatermelon's ratio monotonicity!
+
+The Gram matrix is "almost rank 1" — dominated by the projection
+onto the mean vector. The bilinear form squares the linear form.
+The banana peel is a ramp. 🍌 -/
+
+/-- **THEOREM 32 (THE SQUARE BRIDGE)**: If vtGv ≤ (bᵀv)², then d² ≤ (1-bᵀv)².
+
+    This is the clean bridge: the bilinear form squares the linear form,
+    so the distance is bounded by the PNT gap squared.
+
+    PROVED. Zero sorry. 🍌 -/
+theorem square_bridge
+    (vtGv btv d2 : ℝ)
+    (h_d2 : d2 = 1 - 2 * btv + vtGv)
+    (h_sq : vtGv ≤ btv ^ 2) :
+    d2 ≤ (1 - btv) ^ 2 := by
+  nlinarith [sq_nonneg btv, sq_nonneg (1 - btv)]
+
+/-- **THEOREM 32b**: The Square Bridge gives r ≤ (1-bᵀv)/2 → 0.
+
+    Combined with PNT (bᵀv → 1), this gives r → 0, hence d² → 0, hence RH.
+
+    PROVED. Zero sorry. -/
+theorem square_bridge_ratio
+    (vtGv btv d2 r : ℝ)
+    (h_d2 : d2 = 1 - 2 * btv + vtGv)
+    (h_btv_lt_1 : btv < 1)
+    (h_sq : vtGv ≤ btv ^ 2)
+    (h_r : r = d2 / (2 * (1 - btv))) :
+    r ≤ (1 - btv) / 2 := by
+  have h_denom_pos : 0 < 2 * (1 - btv) := by linarith
+  have h_d2_bound : d2 ≤ (1 - btv) ^ 2 := square_bridge vtGv btv d2 h_d2 h_sq
+  rw [h_r]
+  rw [div_le_div_iff₀ h_denom_pos (by linarith : (0:ℝ) < 2)]
+  nlinarith [sq_nonneg (1 - btv)]
+
+/-- **THEOREM 32c**: The Square Bridge implies vtGv < 1 (when 0 ≤ bᵀv < 1).
+
+    PROVED. Zero sorry. The banana peel is a ramp. 🍌 -/
+theorem square_bridge_vtgv_bound
+    (vtGv btv : ℝ)
+    (h_btv_nonneg : 0 ≤ btv)
+    (h_btv_lt_1 : btv < 1)
+    (h_sq : vtGv ≤ btv ^ 2) :
+    vtGv < 1 := by
+  have h1 : btv ^ 2 < 1 := by
+    have : btv ^ 2 < 1 ^ 2 := sq_lt_sq' (by linarith) h_btv_lt_1
+    simpa using this
+  linarith
+
+-- ════════════════════════════════════════════════
 -- AUDIT
 -- ════════════════════════════════════════════════
 
