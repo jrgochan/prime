@@ -277,6 +277,8 @@ lean_lib «Cathedral» where
     `Cathedral.Covariance.PerpAbelWiring,
     -- Abel Inner Bound (abstract Abel bound, pure analysis, June 13 2026)
     `Cathedral.Covariance.AbelInnerBound,
+    -- Perp Energy Graduation (algebraic bridge, Flyspeck, June 13 2026)
+    `Cathedral.Covariance.PerpEnergyGraduation,
     -- White Singlet (physics-motivated axiom elimination)
     `Cathedral.White.Kinematics,
     `Cathedral.White.Scattering,
