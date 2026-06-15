@@ -444,6 +444,12 @@ lean_lib «Cathedral» where
     `Cathedral.Compute.IntervalVerifier,
     -- Compute: Trusted oracle certificates (GPU → Lean, Exploration 32)
     `Cathedral.Compute.OracleCertificates,
+    -- Compute: Generic Bound (2 axioms → RH, June 13 2026)
+    `Cathedral.Compute.GenericBound,
+    -- Compute: Base Case Certificates (rational bound verification, June 15 2026)
+    `Cathedral.Compute.BaseCaseCertificates,
+    -- Geometry: Cheeseburger Bound (top_bun + bottom_bun → d²/gap ≤ 3/2, Day 77 🍔)
+    `Cathedral.Geometry.Bounds.CheeseburgerBound,
     -- Oracle Cascade: RH from oracle → all conditional theorems (Exploration 32)
     `Cathedral.Assembly.OracleCascade,
     -- Qualitative forward direction (off-path, PNT convergence scaffold)
@@ -720,6 +726,8 @@ lean_lib «Cathedral» where
     `Cathedral.Geometry.PythagoreanStrike,
     -- Euler-Mascheroni Rate ((1-bᵀv)·lnN → γ+1, the (γ+1) Discovery, June 6 2026) 🏛️
     `Cathedral.Geometry.Renormalization.EulerMascheroniRate,
+    -- Banana Ramp (d²·lnN ≤ C < K₁ → d² < gap → Var ≤ gap 🍌, Day 77 midnight, June 15 2026)
+    `Cathedral.Geometry.Renormalization.BananaRamp,
     -- Variance Bound (Path 5f: Var·ln²N ≤ C_V, the width of the leash, June 4 2026) 🎯
     `Cathedral.Geometry.Bounds.VarianceBound,
     -- Overcancellation Fusion (unified overcancellation paths, June 2 2026)

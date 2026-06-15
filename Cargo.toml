@@ -90,6 +90,7 @@ members = [
     "experiments/ramanujan-oracle",
     "experiments/overcancellation-scan",
     "experiments/f1-hodge-explorer",
+    "experiments/seed-kitchen",
 ]
 
 # ═══════════════════════════════════════════════════════════

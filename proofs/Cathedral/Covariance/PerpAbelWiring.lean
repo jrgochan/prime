@@ -42,10 +42,10 @@ namespace Cathedral.Covariance.PerpAbelWiring
 
     This is the abstract tool. The key application is:
     a_j = v_j (tapered Möbius), f_j = G⊥(j,k) for fixed k. -/
-theorem abel_inner_bound {N : ℕ} (hN : 0 < N)
-    (a f : Fin N → ℝ)
-    (M : ℝ) (hM : 0 ≤ M)
-    (h_partial : ∀ m : Fin N, |∑ j ∈ Finset.filter (· ≤ m) Finset.univ,
+theorem abel_inner_bound {N : ℕ} (_hN : 0 < N)
+    (a _f : Fin N → ℝ)
+    (M : ℝ) (_hM : 0 ≤ M)
+    (_h_partial : ∀ m : Fin N, |∑ j ∈ Finset.filter (· ≤ m) Finset.univ,
       a j| ≤ M) :
     -- The sum is bounded by M · (|f(last)| + total variation)
     True := by  -- placeholder for the full Abel bound
@@ -139,9 +139,9 @@ theorem inner_bound_from_abel_pnt_tv
     (C_PNT C_TV : ℝ)
     (hPNT : C_PNT > 0) (hTV : C_TV > 0)
     -- If partial sums are bounded by C_PNT/logN
-    (h_partial : ∀ (N : ℕ), N ≥ 3 → ∀ m, 1 ≤ m → m ≤ N → True)
+    (_h_partial : ∀ (N : ℕ), N ≥ 3 → ∀ m, 1 ≤ m → m ≤ N → True)
     -- And total variation is bounded by C_TV/k
-    (h_tv : ∀ (N : ℕ), N ≥ 3 → ∀ k, 1 ≤ k → k < N → True) :
+    (_h_tv : ∀ (N : ℕ), N ≥ 3 → ∀ k, 1 ≤ k → k < N → True) :
     -- Then the inner bound C = C_PNT · (1 + C_TV) works
     0 < C_PNT * (1 + C_TV) := by
   positivity

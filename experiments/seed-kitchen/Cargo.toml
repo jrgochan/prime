@@ -1,0 +1,12 @@
+[package]
+name = "seed-kitchen"
+version = "0.1.0"
+edition = "2021"
+description = "Chef Harold's Seed Kitchen — Five-Course Meal for the Pomegranate Seed 🌱👨‍🍳"
+
+[dependencies]
+cathedral-utils = { path = "../cathedral-utils" }
+rayon = "1.10"
+
+[lints]
+workspace = true
