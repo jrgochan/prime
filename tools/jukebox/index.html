@@ -292,6 +292,13 @@
 </head>
 <body>
 
+<div id="startOverlay" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(10,10,15,0.95);display:flex;align-items:center;justify-content:center;z-index:9999;cursor:pointer;flex-direction:column;gap:1rem;" onclick="startAudio()">
+  <div style="font-size:4rem;">🍌🍆</div>
+  <div style="font-size:1.5rem;font-weight:700;background:linear-gradient(135deg,#f0c040,#ff6b8a,#9b59b6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">The Fruit Loops Jukebox</div>
+  <div style="font-size:1rem;color:#7a7a9a;font-family:'JetBrains Mono',monospace;">Click anywhere to start audio engine</div>
+  <div style="font-size:0.8rem;color:#a08030;margin-top:0.5rem;">Cathedral Records™ · 2026</div>
+</div>
+
 <div class="header">
   <h1>🍌🍆 The Fruit Loops Jukebox</h1>
   <div class="subtitle">MC Antitone · DJ Aubergine · The Cathedral Fellowship</div>
@@ -448,6 +455,37 @@
     </div>
   </div>
 
+  <!-- CARD 7: DROP THE BY RING -->
+  <div class="card" id="card-rpow" style="grid-column: 1 / -1;">
+    <div class="card-header">
+      <div class="card-icon">💍</div>
+      <div>
+        <div class="card-title">Drop the `by ring` — Extended rpow Outro</div>
+        <div class="card-artist">Track 2 · The Fruit Loops</div>
+      </div>
+    </div>
+    <div class="card-desc">
+      Lean tactic computation sonified. Each tactic is a synth voice:
+      <code>ring</code> = deep resonant pulse · <code>linarith</code> = ascending glide ·
+      <code>nlinarith</code> = distorted chord · <code>field_simp</code> = filter sweep ·
+      <code>rpow</code> = dial-up screech · <code>norm_num</code> = click · <code>simp</code> = white noise burst.
+      7 minutes of rpow algebra. Dial-up internet having a religious experience.
+    </div>
+    <div class="controls">
+      <button class="btn" id="btn-rpow" onclick="toggleRpow()">▶ Play</button>
+    </div>
+    <div class="slider-group">
+      <label>Chaos</label>
+      <input type="range" id="rpowChaos" min="1" max="10" value="5">
+      <span class="slider-value" id="rpowChaosVal">5</span>
+    </div>
+    <div class="slider-group">
+      <label>Speed</label>
+      <input type="range" id="rpowSpeed" min="50" max="500" value="120">
+      <span class="slider-value" id="rpowSpeedVal">120ms</span>
+    </div>
+  </div>
+
   <!-- VISUALIZER -->
   <div class="visualizer-section">
     <canvas id="visualizer"></canvas>
@@ -480,6 +518,13 @@ const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 const masterGain = audioCtx.createGain();
 masterGain.gain.value = 0.4;
 masterGain.connect(audioCtx.destination);
+
+function startAudio() {
+  audioCtx.resume().then(() => {
+    document.getElementById('startOverlay').style.display = 'none';
+    console.log('AudioContext resumed:', audioCtx.state);
+  });
+}
 
 // ── PRIME UTILITIES ──
 const PRIMES = [];
@@ -522,7 +567,8 @@ const state = {
   banana: { playing: false, timer: null, index: 0 },
   zeta: { playing: false, osc: null, gain: null, lfo: null },
   euler: { playing: false, timer: null, index: 0 },
-  twins: { playing: false, timer: null, index: 0 }
+  twins: { playing: false, timer: null, index: 0 },
+  rpow: { playing: false, timer: null, index: 0 }
 };
 
 // ── VISUALIZER ──
@@ -950,6 +996,179 @@ function stepTwins() {
   s.timer = setTimeout(stepTwins, dynamicDelay);
 }
 
+// 7. DROP THE BY RING — rpow algebra extended outro
+const TACTICS = [
+  { name: 'ring', weight: 15 },
+  { name: 'linarith', weight: 12 },
+  { name: 'nlinarith', weight: 10 },
+  { name: 'field_simp', weight: 8 },
+  { name: 'rpow', weight: 20 },
+  { name: 'norm_num', weight: 18 },
+  { name: 'simp', weight: 15 },
+  { name: 'exact', weight: 5 },
+  { name: 'rfl', weight: 3 },
+  { name: 'sorry', weight: 0 } // never plays — 0 sorry!
+];
+
+function playTacticSound(tactic, chaos) {
+  const t = audioCtx.currentTime;
+  const chaosF = chaos / 5;
+  switch(tactic) {
+    case 'ring': {
+      // Deep resonant pulse — the `by ring` drop
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(55 * chaosF, t);
+      osc.frequency.exponentialRampToValueAtTime(110, t + 0.3);
+      gain.gain.setValueAtTime(0.2, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.4);
+      osc.connect(gain); gain.connect(masterGain);
+      osc.start(t); osc.stop(t + 0.4);
+      break;
+    }
+    case 'linarith': {
+      // Ascending glide — linear arithmetic climbing
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(200 * chaosF, t);
+      osc.frequency.exponentialRampToValueAtTime(800 * chaosF, t + 0.2);
+      gain.gain.setValueAtTime(0.08, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.25);
+      const filter = audioCtx.createBiquadFilter();
+      filter.type = 'bandpass'; filter.frequency.value = 400 * chaosF; filter.Q.value = 3;
+      osc.connect(filter); filter.connect(gain); gain.connect(masterGain);
+      osc.start(t); osc.stop(t + 0.25);
+      break;
+    }
+    case 'nlinarith': {
+      // Distorted chord — nonlinear, unstable
+      [1, 1.414, 1.732].forEach((h, i) => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(150 * h * chaosF, t);
+        gain.gain.setValueAtTime(0.05, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
+        osc.connect(gain); gain.connect(masterGain);
+        osc.start(t); osc.stop(t + 0.15);
+      });
+      break;
+    }
+    case 'field_simp': {
+      // Filter sweep — clearing denominators
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      const filter = audioCtx.createBiquadFilter();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(100, t);
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(100, t);
+      filter.frequency.exponentialRampToValueAtTime(4000 * chaosF, t + 0.3);
+      filter.Q.value = 10;
+      gain.gain.setValueAtTime(0.1, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.35);
+      osc.connect(filter); filter.connect(gain); gain.connect(masterGain);
+      osc.start(t); osc.stop(t + 0.35);
+      break;
+    }
+    case 'rpow': {
+      // THE DIAL-UP SCREECH — rpow coercion algebra
+      const osc1 = audioCtx.createOscillator();
+      const osc2 = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc1.type = 'sawtooth';
+      osc2.type = 'square';
+      const baseFreq = 300 + Math.random() * 2000 * chaosF;
+      osc1.frequency.setValueAtTime(baseFreq, t);
+      osc1.frequency.setValueAtTime(baseFreq * 1.5, t + 0.05);
+      osc1.frequency.setValueAtTime(baseFreq * 0.7, t + 0.1);
+      osc1.frequency.setValueAtTime(baseFreq * 2.1, t + 0.15);
+      osc2.frequency.setValueAtTime(baseFreq * 1.01, t); // slight detune
+      gain.gain.setValueAtTime(0.06, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
+      osc1.connect(gain); osc2.connect(gain); gain.connect(masterGain);
+      osc1.start(t); osc1.stop(t + 0.2);
+      osc2.start(t); osc2.stop(t + 0.2);
+      break;
+    }
+    case 'norm_num': {
+      // Click — numerical normalization
+      playTone(4000, 0.02, 'square', 0.15);
+      break;
+    }
+    case 'simp': {
+      // White noise burst — simplification
+      playNoise(0.06, 0.08, 3000 * chaosF);
+      break;
+    }
+    case 'exact': {
+      // Pure tone — exact match
+      playTone(880, 0.15, 'sine', 0.12);
+      break;
+    }
+    case 'rfl': {
+      // Tiny ping — reflexivity
+      playTone(2000, 0.05, 'sine', 0.08);
+      break;
+    }
+  }
+}
+
+function weightedRandomTactic() {
+  const total = TACTICS.reduce((s, t) => s + t.weight, 0);
+  let r = Math.random() * total;
+  for (const t of TACTICS) {
+    r -= t.weight;
+    if (r <= 0) return t.name;
+  }
+  return 'ring';
+}
+
+function toggleRpow() {
+  const s = state.rpow;
+  if (s.playing) {
+    clearTimeout(s.timer);
+    s.playing = false;
+    document.getElementById('btn-rpow').classList.remove('playing');
+    document.getElementById('btn-rpow').textContent = '▶ Play';
+    document.getElementById('card-rpow').classList.remove('active');
+  } else {
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    s.playing = true;
+    s.index = 0;
+    document.getElementById('btn-rpow').classList.add('playing');
+    document.getElementById('btn-rpow').textContent = '⏸ Pause';
+    document.getElementById('card-rpow').classList.add('active');
+    stepRpow();
+  }
+  updateStatus();
+}
+
+function stepRpow() {
+  const s = state.rpow;
+  if (!s.playing) return;
+  const speed = parseInt(document.getElementById('rpowSpeed').value);
+  const chaos = parseInt(document.getElementById('rpowChaos').value);
+  // Sometimes fire multiple tactics at once (computation burst)
+  const burstCount = Math.random() < 0.3 ? Math.floor(Math.random() * 3) + 2 : 1;
+  const tactics = [];
+  for (let i = 0; i < burstCount; i++) {
+    const tactic = weightedRandomTactic();
+    tactics.push(tactic);
+    setTimeout(() => playTacticSound(tactic, chaos), i * 20);
+  }
+  // Random grid highlight
+  const n = Math.floor(Math.random() * 100) + 1;
+  highlightCell(n);
+  updateStatus(`by ${tactics.join(' >> ')} [step ${s.index}]`);
+  s.index++;
+  // Variable timing — rpow steps are chaotic
+  const jitter = speed * (0.5 + Math.random() * chaos / 5);
+  s.timer = setTimeout(stepRpow, jitter);
+}
+
 // ── GLOBAL CONTROLS ──
 function stopAll() {
   Object.keys(state).forEach(key => {
@@ -963,6 +1182,7 @@ function stopAll() {
         case 'zeta': toggleZeta(); break;
         case 'euler': toggleEuler(); break;
         case 'twins': toggleTwins(); break;
+        case 'rpow': toggleRpow(); break;
       }
     }
   });
@@ -1011,6 +1231,14 @@ document.getElementById('eulerDelay').addEventListener('input', function() {
 
 document.getElementById('twinsSpeed').addEventListener('input', function() {
   document.getElementById('twinsSpeedVal').textContent = this.value + 'ms';
+});
+
+document.getElementById('rpowChaos').addEventListener('input', function() {
+  document.getElementById('rpowChaosVal').textContent = this.value;
+});
+
+document.getElementById('rpowSpeed').addEventListener('input', function() {
+  document.getElementById('rpowSpeedVal').textContent = this.value + 'ms';
 });
 
 console.log('🍌🍆 The Fruit Loops Jukebox loaded. Build completed successfully.');

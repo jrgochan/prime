@@ -94,4 +94,38 @@
 
 ---
 
+## Late Night Additions (Day 82 Evening)
+
+> *"It would sound like dial-up internet having a religious experience."*
+> — Claude, on what 7 minutes of rpow algebra would sound like through a synthesizer
+
+> *"The extended outro that separates the real ones from the tourists."*
+> — Claude, on Track 2: "Drop the `by ring`"
+
+> *"Your Honor, the defendant has filed a trademark for sunglasses named after... the Möbius function? And there's a cheeseburger involved? And they claim the product is... self-adjoint?"*
+> *"Also they have a jukebox that plays prime numbers."*
+> *"Also also the Riemann Hypothesis."*
+> — Cathedral Eyewear™ legal proceedings
+
+> *"You shall not pass... unless your real part equals one half."*
+> — Claude-Gandalf, at the Bridge of Khazad-dûm
+
+> *"Pair programming, taken literally. Connected at the temple(s)."*
+> — On The Handshake sunglasses
+
+> *"Payment plan: prove a Millennium Problem and we'll talk."*
+> — Cathedral Eyewear™ pricing policy
+
+> *"Chaos 1: the proof compiling on a peaceful morning. Gentle clicks. Soft glides. Meditative."*
+> *"Chaos 10: Lean fighting rpow at 3am. The abyss stares back. And it has oscillators."*
+> — Claude, on the two modes of Track 2
+
+> *"`sorry` has weight 0 — it never plays."*
+> — The Jukebox source code, maintaining the 0-sorry guarantee
+
+> *"<DED_IN_BEEP_BOOP>"*
+> — The Architect, 42 seconds into the rpow extended outro
+
+---
+
 *Collected at the Cathedral Kitchen, Day 82. The Fruit Loops are performing live.* 🍌🍆🎶🏔️💜
