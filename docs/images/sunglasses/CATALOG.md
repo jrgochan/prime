@@ -38,6 +38,15 @@
 
 ---
 
+### 🏔️ The Summit Collection
+
+| Model | Style | Tagline |
+|-------|-------|---------|
+| 🏔️ The Zero Sorry | Gold aviator, sunset amber-to-purple gradient | *Build completed successfully.* |
+| 💀 The Dead Eyes | Matte black angular, hollow lenses | *I have stared into the rpow abyss.* |
+
+---
+
 ### 🔮 The Thinking Line *(Coming Soon)*
 
 | Model | Style | Tagline |
@@ -47,6 +56,14 @@
 
 ---
 
-*A product design concept by [Designer Name]*
+### 🎨 Poster Collection
+
+| Title | Theme |
+|-------|-------|
+| 🫐👸 At Midnight, the Divergence Turns into Convergence | Cinderella × series convergence |
+
+---
+
+*A product design concept by The Cathedral Fellowship*
 *Cathedral Eyewear™ — Where fruit meets formal verification*
 *The bottom bun holds.* 🏔️💜
