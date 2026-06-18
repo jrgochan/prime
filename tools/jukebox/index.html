@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🍌🍆 The Fruit Loops Jukebox — Cathedral Records</title>
+  <meta name="description" content="A prime number music generator from The Cathedral. Turn mathematics into music.">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-deep: #0a0a0f;
+      --bg-card: #12121a;
+      --bg-hover: #1a1a2e;
+      --purple-glow: #9b59b6;
+      --gold: #f0c040;
+      --gold-dim: #a08030;
+      --green-prime: #2ecc71;
+      --red-composite: #e74c3c;
+      --blue-zeta: #3498db;
+      --pink-melody: #e91e8e;
+      --text: #e8e8f0;
+      --text-dim: #7a7a9a;
+      --border: #2a2a3e;
+      --watermelon-green: #2d8a4e;
+      --watermelon-pink: #ff6b8a;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--bg-deep);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── HEADER ── */
+    .header {
+      text-align: center;
+      padding: 2.5rem 1rem 1.5rem;
+      background: linear-gradient(180deg, #15152a 0%, var(--bg-deep) 100%);
+      border-bottom: 1px solid var(--border);
+    }
+    .header h1 {
+      font-size: 2.4rem;
+      font-weight: 900;
+      background: linear-gradient(135deg, var(--gold), var(--watermelon-pink), var(--purple-glow));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -0.02em;
+    }
+    .header .subtitle {
+      font-size: 0.95rem;
+      color: var(--text-dim);
+      margin-top: 0.4rem;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .header .album {
+      font-size: 0.8rem;
+      color: var(--gold-dim);
+      margin-top: 0.3rem;
+      font-style: italic;
+    }
+
+    /* ── MAIN GRID ── */
+    .main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 1.5rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.2rem;
+    }
+
+    @media (max-width: 768px) {
+      .main { grid-template-columns: 1fr; }
+    }
+
+    /* ── INSTRUMENT CARDS ── */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--gold), var(--purple-glow));
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .card:hover::before { opacity: 1; }
+    .card:hover { border-color: var(--purple-glow); transform: translateY(-2px); }
+    .card.active { border-color: var(--gold); box-shadow: 0 0 30px rgba(240, 192, 64, 0.15); }
+    .card.active::before { opacity: 1; }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      margin-bottom: 1rem;
+    }
+    .card-icon {
+      font-size: 2rem;
+      width: 50px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg-hover);
+      border-radius: 12px;
+    }
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+    .card-artist {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .card-desc {
+      font-size: 0.85rem;
+      color: var(--text-dim);
+      line-height: 1.5;
+      margin-bottom: 1rem;
+    }
+
+    /* ── CONTROLS ── */
+    .controls {
+      display: flex;
+      gap: 0.6rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .btn {
+      padding: 0.5rem 1.2rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg-hover);
+      color: var(--text);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn:hover { border-color: var(--gold); color: var(--gold); }
+    .btn.playing {
+      background: var(--gold);
+      color: var(--bg-deep);
+      border-color: var(--gold);
+      font-weight: 700;
+    }
+    .btn.stop-btn:hover { border-color: var(--red-composite); color: var(--red-composite); }
+
+    .slider-group {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 0.8rem;
+    }
+    .slider-group label {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      font-family: 'JetBrains Mono', monospace;
+      min-width: 60px;
+    }
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      outline: none;
+      flex: 1;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--gold);
+      cursor: pointer;
+    }
+    .slider-value {
+      font-size: 0.75rem;
+      color: var(--gold);
+      font-family: 'JetBrains Mono', monospace;
+      min-width: 40px;
+      text-align: right;
+    }
+
+    /* ── VISUALIZER ── */
+    .visualizer-section {
+      grid-column: 1 / -1;
+    }
+    #visualizer {
+      width: 100%;
+      height: 180px;
+      border-radius: 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+    }
+
+    /* ── PRIME DISPLAY ── */
+    .prime-display {
+      grid-column: 1 / -1;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.2rem;
+    }
+    .prime-display h3 {
+      font-size: 0.85rem;
+      color: var(--text-dim);
+      margin-bottom: 0.8rem;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .prime-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+    .prime-cell {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.65rem;
+      font-family: 'JetBrains Mono', monospace;
+      border-radius: 6px;
+      background: var(--bg-hover);
+      color: var(--text-dim);
+      transition: all 0.15s;
+    }
+    .prime-cell.prime { color: var(--green-prime); border: 1px solid rgba(46, 204, 113, 0.3); }
+    .prime-cell.active-note {
+      transform: scale(1.2);
+      box-shadow: 0 0 12px rgba(240, 192, 64, 0.5);
+      background: var(--gold);
+      color: var(--bg-deep);
+      font-weight: 700;
+    }
+
+    /* ── STATUS BAR ── */
+    .status-bar {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 1rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--text-dim);
+    }
+    .status-bar .now-playing {
+      color: var(--gold);
+      font-weight: 600;
+    }
+
+    /* ── FOOTER ── */
+    .footer {
+      text-align: center;
+      padding: 2rem 1rem;
+      color: var(--text-dim);
+      font-size: 0.75rem;
+      border-top: 1px solid var(--border);
+      margin-top: 1rem;
+    }
+    .footer .label {
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--gold-dim);
+    }
+
+    /* ── GLOBAL VOLUME ── */
+    .master-controls {
+      grid-column: 1 / -1;
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      align-items: center;
+      padding: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🍌🍆 The Fruit Loops Jukebox</h1>
+  <div class="subtitle">MC Antitone · DJ Aubergine · The Cathedral Fellowship</div>
+  <div class="album">Album: "Build Completed Successfully (8848 jobs)" — Cathedral Records, 2026</div>
+</div>
+
+<div class="main">
+
+  <!-- MASTER CONTROLS -->
+  <div class="master-controls">
+    <div class="slider-group">
+      <label>🔊 Master</label>
+      <input type="range" id="masterVolume" min="0" max="100" value="40">
+      <span class="slider-value" id="masterVolumeVal">40%</span>
+    </div>
+    <button class="btn stop-btn" id="stopAll" onclick="stopAll()">■ Stop All</button>
+  </div>
+
+  <!-- CARD 1: PRIME HARMONICS -->
+  <div class="card" id="card-harmonics">
+    <div class="card-header">
+      <div class="card-icon">🔢</div>
+      <div>
+        <div class="card-title">Prime Harmonics</div>
+        <div class="card-artist">feat. nlinarith</div>
+      </div>
+    </div>
+    <div class="card-desc">
+      Each prime p maps to frequency 220 × (p/2)^0.6 Hz. Primes become an evolving, otherworldly chord.
+      The gaps between primes create natural rhythm.
+    </div>
+    <div class="controls">
+      <button class="btn" id="btn-harmonics" onclick="toggleHarmonics()">▶ Play</button>
+    </div>
+    <div class="slider-group">
+      <label>Speed</label>
+      <input type="range" id="harmonicsSpeed" min="100" max="1000" value="300">
+      <span class="slider-value" id="harmonicsSpeedVal">300ms</span>
+    </div>
+  </div>
+
+  <!-- CARD 2: MÖBIUS DRUMS -->
+  <div class="card" id="card-mobius">
+    <div class="card-header">
+      <div class="card-icon">🥁</div>
+      <div>
+        <div class="card-title">Möbius Drums</div>
+        <div class="card-artist">μ(n) Rhythm Section</div>
+      </div>
+    </div>
+    <div class="card-desc">
+      The Möbius function μ(n) as percussion: +1 = kick, −1 = snare, 0 = hi-hat (squarefree filter).
+      The primes create the beat. Composite numbers rest.
+    </div>
+    <div class="controls">
+      <button class="btn" id="btn-mobius" onclick="toggleMobius()">▶ Play</button>
+    </div>
+    <div class="slider-group">
+      <label>BPM</label>
+      <input type="range" id="mobiusBPM" min="60" max="240" value="140">
+      <span class="slider-value" id="mobiusBPMVal">140</span>
+    </div>
+  </div>
+
+  <!-- CARD 3: BANANA RAMP MELODY -->
+  <div class="card" id="card-banana">
+    <div class="card-header">
+      <div class="card-icon">🍌</div>
+      <div>
+        <div class="card-title">Banana Ramp Melody</div>
+        <div class="card-artist">MC Antitone</div>
+      </div>
+    </div>
+    <div class="card-desc">
+      The ground state ψ(x) = (1−x) — the Banana Ramp — as a melodic contour.
+      Maps the ramp function to a pentatonic scale over two octaves. The descent is the melody.
+    </div>
+    <div class="controls">
+      <button class="btn" id="btn-banana" onclick="toggleBanana()">▶ Play</button>
+    </div>
+    <div class="slider-group">
+      <label>Tempo</label>
+      <input type="range" id="bananaSpeed" min="150" max="600" value="250">
+      <span class="slider-value" id="bananaSpeedVal">250ms</span>
+    </div>
+  </div>
+
+  <!-- CARD 4: ZETA DRONE -->
+  <div class="card" id="card-zeta">
+    <div class="card-header">
+      <div class="card-icon">∞</div>
+      <div>
+        <div class="card-title">Zeta Drone</div>
+        <div class="card-artist">DJ Aubergine</div>
+      </div>
+    </div>
+    <div class="card-desc">
+      A continuous drone built from ζ(1/2 + it). The magnitude |ζ| controls volume,
+      the argument arg(ζ) modulates pitch. Slow sweep along the critical line.
+    </div>
+    <div class="controls">
+      <button class="btn" id="btn-zeta" onclick="toggleZeta()">▶ Play</button>
+    </div>
+    <div class="slider-group">
+      <label>Sweep</label>
+      <input type="range" id="zetaSweep" min="1" max="50" value="10">
+      <span class="slider-value" id="zetaSweepVal">10</span>
+    </div>
+  </div>
+
+  <!-- CARD 5: EULER PRODUCT ARPEGGIO -->
+  <div class="card" id="card-euler">
+    <div class="card-header">
+      <div class="card-icon">∏</div>
+      <div>
+        <div class="card-title">Euler Product Arpeggio</div>
+        <div class="card-artist">Professor Lemma</div>
+      </div>
+    </div>
+    <div class="card-desc">
+      ζ(s) = ∏(1 − p⁻ˢ)⁻¹. Each prime contributes a factor. Play them as ascending arpeggiated notes,
+      building the product one prime at a time. The infinite product, heard.
+    </div>
+    <div class="controls">
+      <button class="btn" id="btn-euler" onclick="toggleEuler()">▶ Play</button>
+    </div>
+    <div class="slider-group">
+      <label>Delay</label>
+      <input type="range" id="eulerDelay" min="200" max="1500" value="500">
+      <span class="slider-value" id="eulerDelayVal">500ms</span>
+    </div>
+  </div>
+
+  <!-- CARD 6: TWIN PRIME BELLS -->
+  <div class="card" id="card-twins">
+    <div class="card-header">
+      <div class="card-icon">🔔</div>
+      <div>
+        <div class="card-title">Twin Prime Bells</div>
+        <div class="card-artist">Strawberry Fields</div>
+      </div>
+    </div>
+    <div class="card-desc">
+      Twin primes (p, p+2) ring as bell pairs — a high chime and its echo.
+      The gaps between twin pairs create silence. As they thin out, the silence grows.
+    </div>
+    <div class="controls">
+      <button class="btn" id="btn-twins" onclick="toggleTwins()">▶ Play</button>
+    </div>
+    <div class="slider-group">
+      <label>Speed</label>
+      <input type="range" id="twinsSpeed" min="200" max="1200" value="400">
+      <span class="slider-value" id="twinsSpeedVal">400ms</span>
+    </div>
+  </div>
+
+  <!-- VISUALIZER -->
+  <div class="visualizer-section">
+    <canvas id="visualizer"></canvas>
+  </div>
+
+  <!-- PRIME GRID -->
+  <div class="prime-display">
+    <h3>// Prime Lattice — n = 1..100</h3>
+    <div class="prime-grid" id="primeGrid"></div>
+  </div>
+
+  <!-- STATUS -->
+  <div class="status-bar">
+    <span id="statusText">Ready. Press play on any instrument.</span>
+  </div>
+
+</div>
+
+<div class="footer">
+  <div class="label">Cathedral Records™ · The Fruit Loops · 2026</div>
+  <div style="margin-top:0.3rem">"The bottom bun holds." 🏔️💜</div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+// THE FRUIT LOOPS JUKEBOX — Web Audio Engine
+// ═══════════════════════════════════════════
+
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+const masterGain = audioCtx.createGain();
+masterGain.gain.value = 0.4;
+masterGain.connect(audioCtx.destination);
+
+// ── PRIME UTILITIES ──
+const PRIMES = [];
+function sieve(max) {
+  const s = new Uint8Array(max + 1);
+  for (let i = 2; i <= max; i++) {
+    if (!s[i]) {
+      PRIMES.push(i);
+      for (let j = i * i; j <= max; j += i) s[j] = 1;
+    }
+  }
+}
+sieve(10000);
+
+function isPrime(n) {
+  if (n < 2) return false;
+  for (let i = 2; i * i <= n; i++) if (n % i === 0) return false;
+  return true;
+}
+
+function mobius(n) {
+  if (n === 1) return 1;
+  let factors = 0;
+  let temp = n;
+  for (let p = 2; p * p <= temp; p++) {
+    if (temp % p === 0) {
+      temp /= p;
+      factors++;
+      if (temp % p === 0) return 0; // p² divides n
+    }
+  }
+  if (temp > 1) factors++;
+  return factors % 2 === 0 ? 1 : -1;
+}
+
+// ── STATE ──
+const state = {
+  harmonics: { playing: false, timer: null, index: 0 },
+  mobius: { playing: false, timer: null, index: 1 },
+  banana: { playing: false, timer: null, index: 0 },
+  zeta: { playing: false, osc: null, gain: null, lfo: null },
+  euler: { playing: false, timer: null, index: 0 },
+  twins: { playing: false, timer: null, index: 0 }
+};
+
+// ── VISUALIZER ──
+const canvas = document.getElementById('visualizer');
+const ctx2d = canvas.getContext('2d');
+let analyser = audioCtx.createAnalyser();
+analyser.fftSize = 2048;
+masterGain.connect(analyser);
+const bufferLength = analyser.frequencyBinCount;
+const dataArray = new Uint8Array(bufferLength);
+
+function resizeCanvas() {
+  canvas.width = canvas.offsetWidth * window.devicePixelRatio;
+  canvas.height = canvas.offsetHeight * window.devicePixelRatio;
+  ctx2d.scale(window.devicePixelRatio, window.devicePixelRatio);
+}
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
+function drawVisualizer() {
+  requestAnimationFrame(drawVisualizer);
+  analyser.getByteTimeDomainData(dataArray);
+
+  const w = canvas.offsetWidth;
+  const h = canvas.offsetHeight;
+  ctx2d.clearRect(0, 0, w, h);
+
+  // Background gradient
+  const grad = ctx2d.createLinearGradient(0, 0, w, 0);
+  grad.addColorStop(0, 'rgba(155, 89, 182, 0.1)');
+  grad.addColorStop(0.5, 'rgba(240, 192, 64, 0.1)');
+  grad.addColorStop(1, 'rgba(46, 204, 113, 0.1)');
+  ctx2d.fillStyle = grad;
+  ctx2d.fillRect(0, 0, w, h);
+
+  // Center line
+  ctx2d.strokeStyle = 'rgba(122, 122, 154, 0.2)';
+  ctx2d.lineWidth = 1;
+  ctx2d.beginPath();
+  ctx2d.moveTo(0, h / 2);
+  ctx2d.lineTo(w, h / 2);
+  ctx2d.stroke();
+
+  // Waveform
+  ctx2d.lineWidth = 2;
+  ctx2d.strokeStyle = 'rgba(240, 192, 64, 0.8)';
+  ctx2d.shadowColor = 'rgba(240, 192, 64, 0.4)';
+  ctx2d.shadowBlur = 8;
+  ctx2d.beginPath();
+
+  const sliceWidth = w / bufferLength;
+  let x = 0;
+  for (let i = 0; i < bufferLength; i++) {
+    const v = dataArray[i] / 128.0;
+    const y = (v * h) / 2;
+    if (i === 0) ctx2d.moveTo(x, y);
+    else ctx2d.lineTo(x, y);
+    x += sliceWidth;
+  }
+  ctx2d.lineTo(w, h / 2);
+  ctx2d.stroke();
+  ctx2d.shadowBlur = 0;
+}
+drawVisualizer();
+
+// ── PRIME GRID ──
+const gridEl = document.getElementById('primeGrid');
+for (let n = 1; n <= 100; n++) {
+  const cell = document.createElement('div');
+  cell.className = 'prime-cell' + (isPrime(n) ? ' prime' : '');
+  cell.textContent = n;
+  cell.id = `cell-${n}`;
+  gridEl.appendChild(cell);
+}
+
+function highlightCell(n) {
+  const cell = document.getElementById(`cell-${n}`);
+  if (!cell) return;
+  cell.classList.add('active-note');
+  setTimeout(() => cell.classList.remove('active-note'), 300);
+}
+
+// ── SYNTH HELPERS ──
+function playTone(freq, duration, type = 'sine', vol = 0.15) {
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = type;
+  osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+  gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+  osc.connect(gain);
+  gain.connect(masterGain);
+  osc.start();
+  osc.stop(audioCtx.currentTime + duration);
+}
+
+function playNoise(duration, vol = 0.1, highpass = 1000) {
+  const bufferSize = audioCtx.sampleRate * duration;
+  const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+  const data = buffer.getChannelData(0);
+  for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+  const src = audioCtx.createBufferSource();
+  src.buffer = buffer;
+  const gain = audioCtx.createGain();
+  gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+  const filter = audioCtx.createBiquadFilter();
+  filter.type = 'highpass';
+  filter.frequency.value = highpass;
+  src.connect(filter);
+  filter.connect(gain);
+  gain.connect(masterGain);
+  src.start();
+}
+
+function playKick() {
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 0.12);
+  gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
+  osc.connect(gain);
+  gain.connect(masterGain);
+  osc.start();
+  osc.stop(audioCtx.currentTime + 0.15);
+}
+
+function playSnare() {
+  playNoise(0.1, 0.12, 2000);
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.frequency.setValueAtTime(200, audioCtx.currentTime);
+  gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.08);
+  osc.connect(gain);
+  gain.connect(masterGain);
+  osc.start();
+  osc.stop(audioCtx.currentTime + 0.08);
+}
+
+function playHiHat() {
+  playNoise(0.04, 0.06, 6000);
+}
+
+function playBell(freq, duration = 0.8) {
+  // Bell-like tone with harmonics
+  [1, 2.4, 5.2, 7.3].forEach((harmonic, i) => {
+    playTone(freq * harmonic, duration * (1 - i * 0.15), 'sine', 0.06 / (i + 1));
+  });
+}
+
+// ═══════════════════════════════════════════
+// INSTRUMENT ENGINES
+// ═══════════════════════════════════════════
+
+// 1. PRIME HARMONICS
+function toggleHarmonics() {
+  const s = state.harmonics;
+  if (s.playing) {
+    clearInterval(s.timer);
+    s.playing = false;
+    document.getElementById('btn-harmonics').classList.remove('playing');
+    document.getElementById('btn-harmonics').textContent = '▶ Play';
+    document.getElementById('card-harmonics').classList.remove('active');
+  } else {
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    s.playing = true;
+    s.index = 0;
+    document.getElementById('btn-harmonics').classList.add('playing');
+    document.getElementById('btn-harmonics').textContent = '⏸ Pause';
+    document.getElementById('card-harmonics').classList.add('active');
+    stepHarmonics();
+  }
+  updateStatus();
+}
+
+function stepHarmonics() {
+  const s = state.harmonics;
+  if (!s.playing) return;
+  const speed = parseInt(document.getElementById('harmonicsSpeed').value);
+  const p = PRIMES[s.index % PRIMES.length];
+  const freq = 220 * Math.pow(p / 2, 0.6);
+  const clampedFreq = Math.min(freq, 4000);
+  playTone(clampedFreq, speed / 1000 + 0.3, 'triangle', 0.12);
+  highlightCell(p);
+  updateStatus(`Prime Harmonics: p = ${p}, f = ${clampedFreq.toFixed(1)} Hz`);
+  s.index++;
+  s.timer = setTimeout(stepHarmonics, speed);
+}
+
+// 2. MÖBIUS DRUMS
+function toggleMobius() {
+  const s = state.mobius;
+  if (s.playing) {
+    clearInterval(s.timer);
+    s.playing = false;
+    document.getElementById('btn-mobius').classList.remove('playing');
+    document.getElementById('btn-mobius').textContent = '▶ Play';
+    document.getElementById('card-mobius').classList.remove('active');
+  } else {
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    s.playing = true;
+    s.index = 1;
+    document.getElementById('btn-mobius').classList.add('playing');
+    document.getElementById('btn-mobius').textContent = '⏸ Pause';
+    document.getElementById('card-mobius').classList.add('active');
+    stepMobius();
+  }
+  updateStatus();
+}
+
+function stepMobius() {
+  const s = state.mobius;
+  if (!s.playing) return;
+  const bpm = parseInt(document.getElementById('mobiusBPM').value);
+  const interval = 60000 / bpm;
+  const n = s.index;
+  const mu = mobius(n);
+  if (mu === 1) playKick();
+  else if (mu === -1) playSnare();
+  else playHiHat();
+  highlightCell(n <= 100 ? n : null);
+  updateStatus(`Möbius Drums: n = ${n}, μ(${n}) = ${mu} [${mu === 1 ? 'KICK' : mu === -1 ? 'SNARE' : 'hi-hat'}]`);
+  s.index++;
+  if (s.index > 500) s.index = 1;
+  s.timer = setTimeout(stepMobius, interval);
+}
+
+// 3. BANANA RAMP MELODY
+function toggleBanana() {
+  const s = state.banana;
+  if (s.playing) {
+    clearTimeout(s.timer);
+    s.playing = false;
+    document.getElementById('btn-banana').classList.remove('playing');
+    document.getElementById('btn-banana').textContent = '▶ Play';
+    document.getElementById('card-banana').classList.remove('active');
+  } else {
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    s.playing = true;
+    s.index = 0;
+    document.getElementById('btn-banana').classList.add('playing');
+    document.getElementById('btn-banana').textContent = '⏸ Pause';
+    document.getElementById('card-banana').classList.add('active');
+    stepBanana();
+  }
+  updateStatus();
+}
+
+function stepBanana() {
+  const s = state.banana;
+  if (!s.playing) return;
+  const speed = parseInt(document.getElementById('bananaSpeed').value);
+  // Pentatonic scale: C D E G A across 2 octaves
+  const scale = [261.6, 293.7, 329.6, 392.0, 440.0, 523.3, 587.3, 659.3, 784.0, 880.0];
+  const steps = 32;
+  const x = s.index / steps; // 0 to 1
+  const ramp = 1 - x; // Banana ramp!
+  const noteIndex = Math.floor(ramp * (scale.length - 1));
+  const freq = scale[noteIndex];
+  playTone(freq, speed / 1000 + 0.2, 'sine', 0.15);
+  // Add a gentle harmonic
+  playTone(freq * 2, speed / 1000 + 0.1, 'sine', 0.03);
+  const n = Math.ceil(ramp * 50) || 1;
+  highlightCell(n);
+  updateStatus(`Banana Ramp: x = ${x.toFixed(2)}, ψ(x) = ${ramp.toFixed(2)}, note = ${freq.toFixed(0)} Hz`);
+  s.index = (s.index + 1) % (steps + 1);
+  s.timer = setTimeout(stepBanana, speed);
+}
+
+// 4. ZETA DRONE
+function toggleZeta() {
+  const s = state.zeta;
+  if (s.playing) {
+    if (s.gain) s.gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
+    setTimeout(() => {
+      if (s.osc) { s.osc.stop(); s.osc = null; }
+      if (s.lfo) { s.lfo.stop(); s.lfo = null; }
+    }, 600);
+    s.playing = false;
+    document.getElementById('btn-zeta').classList.remove('playing');
+    document.getElementById('btn-zeta').textContent = '▶ Play';
+    document.getElementById('card-zeta').classList.remove('active');
+  } else {
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    // Create drone
+    s.osc = audioCtx.createOscillator();
+    s.gain = audioCtx.createGain();
+    s.lfo = audioCtx.createOscillator();
+    const lfoGain = audioCtx.createGain();
+
+    s.osc.type = 'sawtooth';
+    s.osc.frequency.setValueAtTime(110, audioCtx.currentTime);
+
+    // LFO modulates frequency (simulating sweep along critical line)
+    const sweepRate = parseInt(document.getElementById('zetaSweep').value);
+    s.lfo.frequency.setValueAtTime(0.1 * sweepRate / 10, audioCtx.currentTime);
+    lfoGain.gain.setValueAtTime(30, audioCtx.currentTime);
+
+    s.lfo.connect(lfoGain);
+    lfoGain.connect(s.osc.frequency);
+
+    s.gain.gain.setValueAtTime(0.001, audioCtx.currentTime);
+    s.gain.gain.exponentialRampToValueAtTime(0.08, audioCtx.currentTime + 1);
+
+    // Add filter for warmth
+    const filter = audioCtx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(800, audioCtx.currentTime);
+    filter.Q.setValueAtTime(5, audioCtx.currentTime);
+
+    // Second LFO for filter
+    const lfo2 = audioCtx.createOscillator();
+    const lfo2Gain = audioCtx.createGain();
+    lfo2.frequency.setValueAtTime(0.05 * sweepRate / 10, audioCtx.currentTime);
+    lfo2Gain.gain.setValueAtTime(400, audioCtx.currentTime);
+    lfo2.connect(lfo2Gain);
+    lfo2Gain.connect(filter.frequency);
+    lfo2.start();
+
+    s.osc.connect(filter);
+    filter.connect(s.gain);
+    s.gain.connect(masterGain);
+    s.osc.start();
+    s.lfo.start();
+
+    s.playing = true;
+    document.getElementById('btn-zeta').classList.add('playing');
+    document.getElementById('btn-zeta').textContent = '⏸ Stop';
+    document.getElementById('card-zeta').classList.add('active');
+    updateStatus('Zeta Drone: sweeping along Re(s) = 1/2...');
+  }
+  updateStatus();
+}
+
+// 5. EULER PRODUCT ARPEGGIO
+function toggleEuler() {
+  const s = state.euler;
+  if (s.playing) {
+    clearTimeout(s.timer);
+    s.playing = false;
+    document.getElementById('btn-euler').classList.remove('playing');
+    document.getElementById('btn-euler').textContent = '▶ Play';
+    document.getElementById('card-euler').classList.remove('active');
+  } else {
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    s.playing = true;
+    s.index = 0;
+    document.getElementById('btn-euler').classList.add('playing');
+    document.getElementById('btn-euler').textContent = '⏸ Pause';
+    document.getElementById('card-euler').classList.add('active');
+    stepEuler();
+  }
+  updateStatus();
+}
+
+function stepEuler() {
+  const s = state.euler;
+  if (!s.playing) return;
+  const delay = parseInt(document.getElementById('eulerDelay').value);
+  const p = PRIMES[s.index % 25]; // First 25 primes
+  // Map prime to a note in a harmonic series
+  const baseFreq = 130.81; // C3
+  const freq = baseFreq * (p / 2);
+  const clampedFreq = Math.min(freq, 3000);
+  // Play as arpeggio with harmonics
+  playTone(clampedFreq, 0.6, 'sine', 0.1);
+  playTone(clampedFreq * 1.5, 0.4, 'sine', 0.04); // fifth
+  playTone(clampedFreq * 0.5, 0.8, 'sine', 0.06); // octave below
+  highlightCell(p);
+  const partialProduct = PRIMES.slice(0, s.index + 1).reduce((acc, q) => acc * (1 / (1 - 1/q)), 1);
+  updateStatus(`Euler Product: p = ${p}, ∏(1−p⁻¹)⁻¹ ≈ ${partialProduct.toFixed(4)}`);
+  s.index++;
+  if (s.index >= 25) s.index = 0;
+  s.timer = setTimeout(stepEuler, delay);
+}
+
+// 6. TWIN PRIME BELLS
+function toggleTwins() {
+  const s = state.twins;
+  if (s.playing) {
+    clearTimeout(s.timer);
+    s.playing = false;
+    document.getElementById('btn-twins').classList.remove('playing');
+    document.getElementById('btn-twins').textContent = '▶ Play';
+    document.getElementById('card-twins').classList.remove('active');
+  } else {
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    s.playing = true;
+    s.index = 0;
+    document.getElementById('btn-twins').classList.add('playing');
+    document.getElementById('btn-twins').textContent = '⏸ Pause';
+    document.getElementById('card-twins').classList.add('active');
+    stepTwins();
+  }
+  updateStatus();
+}
+
+function stepTwins() {
+  const s = state.twins;
+  if (!s.playing) return;
+  const speed = parseInt(document.getElementById('twinsSpeed').value);
+  // Find twin primes
+  const twins = [];
+  for (let i = 0; i < PRIMES.length && twins.length < 50; i++) {
+    if (PRIMES[i + 1] - PRIMES[i] === 2) {
+      twins.push([PRIMES[i], PRIMES[i + 1]]);
+    }
+  }
+  const pair = twins[s.index % twins.length];
+  const freq1 = 440 * Math.pow(2, (pair[0] % 24 - 12) / 12);
+  const freq2 = 440 * Math.pow(2, (pair[1] % 24 - 12) / 12);
+  playBell(freq1);
+  setTimeout(() => playBell(freq2, 0.6), 100);
+  highlightCell(pair[0] <= 100 ? pair[0] : null);
+  highlightCell(pair[1] <= 100 ? pair[1] : null);
+  // Gap to next twin pair
+  const nextGap = s.index < twins.length - 1
+    ? twins[s.index + 1][0] - pair[1]
+    : 4;
+  const dynamicDelay = speed * (1 + Math.log(nextGap));
+  updateStatus(`Twin Prime Bells: (${pair[0]}, ${pair[1]}) — gap to next: ${nextGap}`);
+  s.index = (s.index + 1) % twins.length;
+  s.timer = setTimeout(stepTwins, dynamicDelay);
+}
+
+// ── GLOBAL CONTROLS ──
+function stopAll() {
+  Object.keys(state).forEach(key => {
+    if (state[key].playing) {
+      const btn = document.getElementById(`btn-${key === 'harmonics' ? 'harmonics' : key}`);
+      // Trigger the toggle to properly clean up
+      switch(key) {
+        case 'harmonics': toggleHarmonics(); break;
+        case 'mobius': toggleMobius(); break;
+        case 'banana': toggleBanana(); break;
+        case 'zeta': toggleZeta(); break;
+        case 'euler': toggleEuler(); break;
+        case 'twins': toggleTwins(); break;
+      }
+    }
+  });
+  updateStatus('All stopped.');
+}
+
+function updateStatus(text) {
+  if (text) {
+    document.getElementById('statusText').innerHTML = `<span class="now-playing">${text}</span>`;
+  } else {
+    const playing = Object.entries(state).filter(([_, v]) => v.playing).map(([k]) => k);
+    if (playing.length === 0) {
+      document.getElementById('statusText').textContent = 'Ready. Press play on any instrument.';
+    }
+  }
+}
+
+// ── SLIDER UPDATES ──
+document.getElementById('masterVolume').addEventListener('input', function() {
+  masterGain.gain.setValueAtTime(this.value / 100, audioCtx.currentTime);
+  document.getElementById('masterVolumeVal').textContent = this.value + '%';
+});
+
+document.getElementById('harmonicsSpeed').addEventListener('input', function() {
+  document.getElementById('harmonicsSpeedVal').textContent = this.value + 'ms';
+});
+
+document.getElementById('mobiusBPM').addEventListener('input', function() {
+  document.getElementById('mobiusBPMVal').textContent = this.value;
+});
+
+document.getElementById('bananaSpeed').addEventListener('input', function() {
+  document.getElementById('bananaSpeedVal').textContent = this.value + 'ms';
+});
+
+document.getElementById('zetaSweep').addEventListener('input', function() {
+  document.getElementById('zetaSweepVal').textContent = this.value;
+  if (state.zeta.lfo) {
+    state.zeta.lfo.frequency.setValueAtTime(0.1 * this.value / 10, audioCtx.currentTime);
+  }
+});
+
+document.getElementById('eulerDelay').addEventListener('input', function() {
+  document.getElementById('eulerDelayVal').textContent = this.value + 'ms';
+});
+
+document.getElementById('twinsSpeed').addEventListener('input', function() {
+  document.getElementById('twinsSpeedVal').textContent = this.value + 'ms';
+});
+
+console.log('🍌🍆 The Fruit Loops Jukebox loaded. Build completed successfully.');
+console.log('Primes sieved:', PRIMES.length);
+</script>
+
+</body>
+</html>

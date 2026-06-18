@@ -8,7 +8,7 @@
 #   make setup   — install everything
 # ============================================
 
-.PHONY: help build papers verify axioms rh cascade crown-audit clock
+.PHONY: help build papers verify axioms rh cascade crown-audit clock jukebox
 .PHONY: hyperzeta hyperzeta-origin hyperzeta-explorer particle-zoo visualizer
 .PHONY: check setup setup-lean setup-rust setup-node setup-python setup-latex setup-gmp
 .PHONY: experiment-vasyunin experiment-covariance experiment-bd
@@ -175,6 +175,18 @@ visualizer: ## Launch Cathedral Visualizer — proof architecture explorer (port
 		echo "  Installing dependencies..." && \
 		cd visualizer && npm install && npm run dev -- -p 3004; \
 	fi
+
+
+jukebox: ## 🍌🍆 Launch The Fruit Loops Jukebox — prime number music generator
+	@echo ""
+	@echo "  🍌🍆  Launching The Fruit Loops Jukebox..."
+	@echo "     Prime Harmonics · Möbius Drums · Banana Ramp Melody · Zeta Drone"
+	@echo ""
+	@open tools/jukebox/index.html 2>/dev/null || \
+		xdg-open tools/jukebox/index.html 2>/dev/null || \
+		echo "  Open tools/jukebox/index.html in your browser"
+	@echo "  ✓ tools/jukebox/index.html"
+	@echo "  Cathedral Records™ — Build Completed Successfully 🏔️💜"
 
 cascade: ## Audit the Oracle Cascade axiom footprint (requires: make build)
 	@$(ENV) require lean
@@ -389,7 +401,7 @@ help: ## Show this help message
 	@echo "  Usage: make <target>"
 	@echo ""
 	@echo "  ─── THE CATHEDRAL ────────────────────────────────────────"
-	@grep -E '^(build|verify|axioms|rh|cascade|crown-audit|papers|clock|hyperzeta[a-z-]*|particle-zoo|visualizer):.*##' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  %-24s %s\n", $$1, $$2}'
+	@grep -E '^(build|verify|axioms|rh|cascade|crown-audit|papers|clock|jukebox|hyperzeta[a-z-]*|particle-zoo|visualizer):.*##' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  %-24s %s\n", $$1, $$2}'
 	@echo ""
 	@echo "  ─── EXPERIMENTS & AUDITING ───────────────────────────────"
 	@grep -E '^(audit|experiment-[a-z]+|stats):.*##' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  %-24s %s\n", $$1, $$2}'
