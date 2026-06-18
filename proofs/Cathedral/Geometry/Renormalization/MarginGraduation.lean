@@ -10,7 +10,7 @@
 -/
 
 import Cathedral.PNT.AbelMean
-import Cathedral.Geometry.Renormalization.EulerMascheroniRate
+-- import Cathedral.Geometry.Renormalization.EulerMascheroniRate  -- REMOVED: cycle prevention
 import Cathedral.Geometry.Renormalization.MarginIdentity
 import Cathedral.Vasyunin.Proof.WitnessAsymptotics
 import Mathlib.Analysis.SpecialFunctions.Pow.Asymptotics

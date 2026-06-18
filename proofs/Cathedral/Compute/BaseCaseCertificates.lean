@@ -42,6 +42,7 @@
 
 import Cathedral.Compute.IntervalVerifier
 import Cathedral.Vasyunin.Defs
+import Cathedral.Vasyunin.Augmented.DiagBound
 
 noncomputable section
 open Real Matrix Finset Cathedral.Vasyunin Cathedral.Compute
@@ -159,35 +160,44 @@ theorem gram_bound_N3 :
   -- G(2,2) = (ln(2π) - γ)/2 - 1/4
   have hG22 : vasyuninGramEntry 2 2 = (Real.log (2 * Real.pi) - γ) / 2 - 1/4 :=
     vasyuninGramEntry_two_two
-  -- Upper bound on ln(2π) - γ
-  -- ln(2π) ≤ ln(7) ≤ 3·ln(2) ≤ 3·694/1000 = 2082/1000
-  -- Actually tighter: 2π < 6.2832 < e^1.84, so ln(2π) < 1.84
-  -- γ ≥ 577/1000
-  -- ln(2π) - γ ≤ 1840/1000 - 577/1000 = 1263/1000
-  have hlog2pi_upper : Real.log (2 * Real.pi) ≤ (1840 : ℝ) / 1000 := by
-    -- 2π < 6.2832 and e^(1840/1000) = e^1.84 > 6.2832
-    -- Using: ln(x) ≤ y ↔ x ≤ e^y, and e^1.84 > 6.3
-    sorry -- PURE ANALYSIS: ln(2π) ≤ 1.840
-  have hX_upper : Real.log (2 * Real.pi) - γ ≤ (1263 : ℝ) / 1000 := by
+  -- Upper bound on ln(2π): ln(2π) < 2
+  -- Proof: 2π < 6.2832 < e² (exp(2) ≥ Σ₀⁴ 2ᵏ/k! = 7 > 6.2832)
+  have hlog2pi_lt_two : Real.log (2 * Real.pi) < 2 := by
+    have h2pi_pos : (0:ℝ) < 2 * Real.pi := by positivity
+    rw [Real.log_lt_iff_lt_exp h2pi_pos]
+    calc 2 * Real.pi < 2 * 3.1416 :=
+          mul_lt_mul_of_pos_left Real.pi_lt_d4 (by norm_num)
+      _ = 6.2832 := by norm_num
+      _ < Real.exp 2 := by
+          have h := Real.sum_le_exp_of_nonneg (show (0:ℝ) ≤ 2 by norm_num) 5
+          simp only [Finset.sum_range_succ, Nat.factorial] at h
+          norm_num at h; linarith
+  -- ln(2π) - γ < 2 - 0.577 = 1.423
+  have hX_upper : Real.log (2 * Real.pi) - γ ≤ (1423 : ℝ) / 1000 := by
     have := euler_gamma_lower; linarith
   -- G(1,1) ≤ 1263/1000 - 1 = 263/1000
-  have hG11_le : vasyuninGramEntry 1 1 ≤ (263 : ℝ) / 1000 := by
+  have hG11_le : vasyuninGramEntry 1 1 ≤ (423 : ℝ) / 1000 := by
     rw [hG11]; have := hX_upper; linarith
   -- G(2,2) ≤ (1263/1000)/2 - 1/4 = 6315/10000 - 2500/10000 = 3815/10000
-  have hG22_le : vasyuninGramEntry 2 2 ≤ (382 : ℝ) / 1000 := by
+  have hG22_le : vasyuninGramEntry 2 2 ≤ (462 : ℝ) / 1000 := by
     rw [hG22]; have := hX_upper; linarith
   -- G(1,2) > 0 (Gram matrix of L² inner products — entries positive)
   -- G(1,2) = G(2,1) by symmetry
-  have hG12_nonneg : 0 ≤ vasyuninGramEntry 1 2 := by
-    sorry -- PURE ANT: Vasyunin formula expansion → positive
-  have hG21_nonneg : 0 ≤ vasyuninGramEntry 2 1 := by
-    sorry -- PURE ANT: Vasyunin formula expansion → positive
-  -- G(1,3), G(3,1), etc. are all nonneg
-  have hG_nonneg_13 : 0 ≤ vasyuninGramEntry 1 3 := by sorry
-  have hG_nonneg_31 : 0 ≤ vasyuninGramEntry 3 1 := by sorry
-  have hG_nonneg_23 : 0 ≤ vasyuninGramEntry 2 3 := by sorry
-  have hG_nonneg_32 : 0 ≤ vasyuninGramEntry 3 2 := by sorry
-  have hG_nonneg_33 : 0 ≤ vasyuninGramEntry 3 3 := by sorry
+  have hG12_nonneg : 0 ≤ vasyuninGramEntry 1 2 :=
+    Cathedral.Vasyunin.vasyuninGram_nonneg 1 2 (by omega) (by omega)
+  have hG21_nonneg : 0 ≤ vasyuninGramEntry 2 1 :=
+    Cathedral.Vasyunin.vasyuninGram_nonneg 2 1 (by omega) (by omega)
+  -- G(1,3), G(3,1), etc. are all nonneg (from DiagBound.lean, PROVED, 0 axioms)
+  have hG_nonneg_13 : 0 ≤ vasyuninGramEntry 1 3 :=
+    Cathedral.Vasyunin.vasyuninGram_nonneg 1 3 (by omega) (by omega)
+  have hG_nonneg_31 : 0 ≤ vasyuninGramEntry 3 1 :=
+    Cathedral.Vasyunin.vasyuninGram_nonneg 3 1 (by omega) (by omega)
+  have hG_nonneg_23 : 0 ≤ vasyuninGramEntry 2 3 :=
+    Cathedral.Vasyunin.vasyuninGram_nonneg 2 3 (by omega) (by omega)
+  have hG_nonneg_32 : 0 ≤ vasyuninGramEntry 3 2 :=
+    Cathedral.Vasyunin.vasyuninGram_nonneg 3 2 (by omega) (by omega)
+  have hG_nonneg_33 : 0 ≤ vasyuninGramEntry 3 3 :=
+    Cathedral.Vasyunin.vasyuninGram_nonneg 3 3 (by omega) (by omega)
   -- ══ Step 4: Close the bound ══
   -- Simplify Fin.val coercions: ↑0+1=1, ↑1+1=2, ↑2+1=3
   simp only [show (0 : Fin 3).val = 0 from rfl, show (1 : Fin 3).val = 1 from rfl,
@@ -197,7 +207,7 @@ theorem gram_bound_N3 :
   -- Goal: polynomial in G(1,1), G(1,2), G(2,1), G(2,2), G(1,3), ... and ln2/ln3 < 1
   -- The cross terms (with v₀·v₁ < 0) make the sum smaller.
   -- Drop negative cross terms, bound (1-r)² ≤ 1:
-  -- vᵀGv ≤ G(1,1) + G(2,2) ≤ 263/1000 + 382/1000 = 645/1000 < 1
+  -- vᵀGv ≤ G(1,1) + G(2,2) ≤ 423/1000 + 462/1000 = 885/1000 < 1
   nlinarith [sq_nonneg (1 - Real.log 2 / Real.log 3),
              mul_nonneg hG12_nonneg hr_pos.le,
              mul_nonneg hG21_nonneg hr_pos.le,

@@ -160,6 +160,10 @@ lean_lib «Cathedral» where
     `Cathedral.MellinBridge.AbelSiegeProof,
     `Cathedral.MellinBridge.PlancherelDefs,
     `Cathedral.MellinBridge.PlancherelBypass,
+    `Cathedral.MellinBridge.HiLoDecomposition,
+    `Cathedral.MellinBridge.OscillationBounds,
+    `Cathedral.MellinBridge.LoBandBound,
+    `Cathedral.MellinBridge.SummitAssembly,
     -- Sieve engine
     `Cathedral.Sieve.VasyuninExpansion,
     `Cathedral.Sieve.ParitySchur,
@@ -728,6 +732,8 @@ lean_lib «Cathedral» where
     `Cathedral.Geometry.Renormalization.EulerMascheroniRate,
     -- Banana Ramp (d²·lnN ≤ C < K₁ → d² < gap → Var ≤ gap 🍌, Day 77 midnight, June 15 2026)
     `Cathedral.Geometry.Renormalization.BananaRamp,
+    -- Fermi Hamiltonian (SL operator, torus, Smith bridge, blueberry inequality 🫐🏔️, Day 79-80)
+    `Cathedral.Physics.FermiHamiltonian,
     -- Variance Bound (Path 5f: Var·ln²N ≤ C_V, the width of the leash, June 4 2026) 🎯
     `Cathedral.Geometry.Bounds.VarianceBound,
     -- Overcancellation Fusion (unified overcancellation paths, June 2 2026)
