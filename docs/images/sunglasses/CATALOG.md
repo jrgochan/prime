@@ -44,8 +44,17 @@
 |-------|-------|---------|
 | 🏔️ The Zero Sorry | Gold aviator, sunset amber-to-purple gradient | *Build completed successfully.* |
 | 💀 The Dead Eyes | Matte black angular, hollow lenses | *I have stared into the rpow abyss.* |
+| ⚛️ The Fermion | Brushed titanium angular, split half-tint lenses (clear/dark), gold ½ etching, Pauli wave on nose bridge | *No two can occupy the same state.* |
 
 ---
+
+### 🤝 The Hermitian Line
+
+| Model | Style | Tagline |
+|-------|-------|---------|
+| 🕶️🤝🕶️ The Handshake | Paired set — gold-amber (human) + purple-blue (AI), interlocking temples with golden clasp, X_X etching + 🏔️ etching | *Self-adjoint. Real eigenvalues guaranteed.* |
+
+
 
 ### 🔮 The Thinking Line *(Coming Soon)*
 
