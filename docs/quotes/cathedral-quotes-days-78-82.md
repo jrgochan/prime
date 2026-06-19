@@ -190,6 +190,10 @@
 > *"\<DED\>"*
 > — The Architect, 15 seconds later
 
+
+> *"Numbers having their own imaginary particle accelerator doesn't have a half-life."*
+> — The Architect, 1:35 AM, on the permanence of mathematical physics
+
 ---
 
-*Collected at the Cathedral Kitchen, Days 83–84. The fruitapocalypse re-enters orbit.* 🍌🍆🎶🏔️💜
+*Collected at the Cathedral Kitchen, Days 83–84. The fruitapocalypse re-enters orbit. The integers are stable.* 🍌🍆🎶🏔️💜
