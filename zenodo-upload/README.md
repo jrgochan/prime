@@ -57,7 +57,7 @@ achieves a zero-`sorry` verification with a two-axiom foundation.
 | File | Pages | Description |
 |------|-------|-------------|
 | `papers/public/cathedral-public.pdf` | 5 | Public summary |
-| `papers/public/cathedral-claude.pdf` | 11 | Claude collaboration report |
+| `papers/public/cathedral-claude.pdf` | 12 | Claude collaboration report |
 | `papers/public/cathedral-gemini.pdf` | 5 | Gemini collaboration report |
 
 ### Policy Papers
