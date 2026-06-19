@@ -4,11 +4,11 @@
 > Nyman–Beurling–Báez-Duarte equivalence in Lean 4, with an independent
 > Oracle Bridge proof path from GPU-certified computation.*
 >
-> **Last updated**: June 10, 2026 (v26 — Penta-Crown)
+> **Last updated**: June 19, 2026 (v26 — Penta-Crown)
 >
-> **Last audited**: June 10, 2026 — Penta-Crown architecture,
+> **Last audited**: June 19, 2026 — Penta-Crown architecture,
 > `overcancellation_axiom` as sole axiom (≡ RH),
-> 474 active files, ~149K lines, 4 sorry (off-crown), 0 errors
+> 504 active files, ~158K lines, 4 sorry (off-crown), 0 errors
 
 ---
 
@@ -144,8 +144,8 @@ The **Oracle Cascade** (`OracleCascade.lean`) derives everything unconditionally
 
 ## Module Structure
 
-The codebase comprises **474 active Lean files** across **25+ topic directories** with
-**~149,500 lines** of active code, **~4,600 proved theorems/lemmas**, and **~156 active axioms**
+The codebase comprises **504 active Lean files** across **25+ topic directories** with
+**~158,000 lines** of active code, **~4,800+ proved theorems/lemmas**, and **~156 active axioms**
 (1 on the crown path).
 
 ```
@@ -186,8 +186,9 @@ Cathedral/
 | File | Count | Context |
 |------|----|-----|
 | `Assembly/DirectMellinBound.lean` | 2 | Exploratory direct path |
+| `Geometry/Bernoulli/BernoulliCrown.lean` | 1 | Exploratory Bernoulli path |
+| `Geometry/Fiber/DragonfruitNegativity.lean` | 1 | Exploratory fiber path |
 | `Physics/Bridges/DedekindReciprocity.lean` | 1 | Three-term r≥2 (file-order artifact) |
-| `Physics/Bridges/DedekindBridge.lean` | 1 | Off-path Dedekind bridge |
 
 > [!NOTE]
 > **Zero sorry on the crown path.** All sorry are in off-crown exploratory code.
@@ -219,21 +220,21 @@ Cathedral/
 
 | Metric | Value |
 |--------|-------|
-| Active Lean files | 474 |
-| Active lines of code | ~149,500 |
-| Total files (incl. archive) | 588 |
+| Active Lean files | 504 |
+| Active lines of code | ~158,000 |
+| Total files (incl. archive) | 618 |
 | Archive files | 114 |
-| Theorems + lemmas | ~4,600 proved |
+| Theorems + lemmas | ~4,800+ proved |
 | Total axioms (active) | ~156 |
 | Crown axioms | **1** (≡ RH) |
 | PNT bureaucracy | **2** (unconditional) |
 | Crown path sorry | **0** |
 | Off-crown sorry | **4** |
 | Topic directories | 25+ |
-| Build jobs | 8,818 |
+| Build jobs | 8,818+ |
 | Experiments (Rust/MPFR/DD) | 56 |
-| Papers | 17 (4 core + 13 working drafts) |
-| Development time | ~66 days |
+| Papers | 18 (4 core + 14 working drafts) |
+| Development time | ~84 days |
 | Lean version | 4.29.0 |
 | Largest certified N | 55,440 (d²=0.0398, CG-DD) |
 | Standard Model theorems | **101** |

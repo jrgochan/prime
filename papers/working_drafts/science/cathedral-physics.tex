@@ -23,7 +23,7 @@
 We present a systematic dictionary between the mathematical structures
 of the Cathedral---a machine-verified proof architecture for the
 Nyman--Beurling--B\'aez-Duarte equivalence for the Riemann Hypothesis
-in Lean~4 (474 active files, 588 incl.\ archive, $\sim$149{,}500 lines)---and their physical
+in Lean~4 ($\sim$504 active files, $\sim$618 incl.\ archive, $\sim$160{,}000 lines)---and their physical
 counterparts in quantum mechanics, statistical mechanics, signal
 processing, and quantum field theory.
 The Gram matrix is the two-point correlator of a 1D quantum field.
@@ -53,15 +53,18 @@ number gas are formalized and proved equivalent to the Glass Tower
 factorization; the squarefree density is proved to be the Fermi
 statistic.
 The crown theorem depends on exactly \textbf{one custom axiom}
-(\texttt{overcancellation\_axiom} in \texttt{Cathedral.Wall},
+(\texttt{fermionic\_overcancellation},
 formally equivalent to RH via\linebreak
 \texttt{rh\_from\_unified\_fermionic});
 the converse direction is proved with
 \textbf{zero} custom axioms via the Rank-1 Mellin identity.
-The Glass Box graduation decomposes this single axiom into
-6~elementary sub-axioms (provable from PNT) and 1~irreducible
-axiom: \emph{fermionic overcancellation}---the M\"obius-weighted
-cotangent interference dominates the smooth self-energy excess.
+The Mellin Bridge (v26) decomposes the B\'aez-Duarte distance
+via Parseval into hi-band and lo-band frequency integrals---a
+crossover network splitting at $|t| = \log N$---proving
+$d^2/\log N \to 0$ from two axioms.
+The convergence rate is governed by the Euler--Mascheroni constant
+$\gamma = 0.5772\ldots$ via the master coupling parameter
+$K_1 = 1 + \gamma \approx 1.577$.
 The Mass Renormalization Theorem proves that the
 B\'aez-Duarte constant $c_{\text{holes}} = 2 + \gamma - \ln 4\pi$
 arises as the finite residue of two individually-divergent components
@@ -76,11 +79,12 @@ reveals that the NB distance decreases monotonically---each new basis
 function extracts vacuum energy like a quantum cooling step.
 An alternative Oracle Bridge bypasses the custom axiom entirely
 via DD-precision GPU certification at highly composite numbers.
-Over 170 physics correspondences are catalogued, spanning
+Over 180 physics correspondences are catalogued, spanning
 Feynman diagram decompositions, Abel summation as renormalization,
 eigenvalue interlacing as Weyl asymptotics, Gallagher MVT as a
 quantum error-correcting code, SUSY breaking of the quadratic
-form into bosonic and fermionic sectors,
+form into bosonic and fermionic sectors, hi-lo crossover networks
+as audio-frequency separation,
 Smith--Ramanujan spectral diagonalization, color confinement of
 the Fermi layers, and Bohr
 complementarity between spatial and spectral proof paths.
@@ -100,7 +104,9 @@ Hypothesis follows from the spectral theorem: self-adjoint operators have
 real eigenvalues, and the zeros $\rho = 1/2 + i\gamma$ have real part $1/2$
 precisely when $\gamma$ is real.
 
-The Cathedral proof does not construct such an operator. Instead, it does
+The Cathedral proof does not rely on constructing such an operator
+(though the Fermi Hamiltonian of \S\ref{sec:standard-model}
+explores this direction). Instead, it does
 something arguably more revealing: it reduces the Riemann Hypothesis to
 the \emph{decay of an $L^2$ distance} in a concrete function space, and
 every step of this reduction has a precise physical interpretation. The proof
@@ -1760,116 +1766,49 @@ assertion that this flow is complete.
 
 
 % ================================================================
-\section{Summary: The Physics--Mathematics Dictionary}
-\label{sec:summary}
-% ================================================================
-
-The following table summarizes the complete physics--mathematics
-dictionary of the Cathedral, mapping every formal object in the
-Lean~4 codebase to its physical counterpart. The full phenomenon
-map (120+ entries, organized by physical domain) appears in
-Appendix~A (Section~\ref{app:phenomenon-map}).
-
-\begin{table}[h]
-\centering
-\small
-\begin{tabular}{@{}>{}p{4cm}>{}p{5cm}>{}p{4.5cm}@{}}
-\toprule
-\textbf{Cathedral Object} & \textbf{Physics Concept} & \textbf{Lean Module} \\
-\midrule
-$L^2(0,1)$ & Hilbert space (Fock space) & \lean{Defs.lean} \\
-$\mathbf{1} \in L^2$ & Vacuum state $\ket{0}$ & --- \\
-$h_k(x) = \fract{1/(kx)}$ & Single-particle state & \lean{Defs.lean} \\
-$f_{N,v}(x) = \sum v_k h_k$ & Trial wavefunction & \lean{BDMellin.lean} \\
-$d_N^2 = \inf_v \|1 - f_v\|^2$ & Ground state energy & \lean{NymanBeurling.lean} \\
-$G(j,k) = \braket{h_j}{h_k}$ & Two-point correlator & \lean{Gram/*.lean} \\
-$G > 0$ & Reflection positivity & \lean{Gram/Bounds.lean} \\
-$C = G - bb^T$ & Covariance / fluctuations & \lean{Vasyunin/*.lean} \\
-$\lambda_{\min}(G)$ & Mass gap / spectral gap & \lean{Spectral/*.lean} \\
-$\lambda_{\min} \sim c/\ln N$ & Mass gap closing & \lean{Sieve/ParitySchur.lean} \\
-Mod-8 decomposition & Internal symmetry sectors & \lean{Spectral/ClassRestriction.lean} \\
-Schur complement & Supersymmetric localization & \lean{Structural/SchurComplement.lean} \\
-\midrule
-\multicolumn{3}{@{}l@{}}{\emph{Vasyunin Tower (Lattice Field Theory, \S\ref{sec:vasyunin})}} \\
-\midrule
-Per-tile FTC & Per-site Lagrangian & \lean{CrossTermFTC.lean} \textbf{(proved)} \\
-Row partition & Kadanoff block-spin grouping & \lean{OffDiagPartition.lean} \textbf{(proved)} \\
-Telescoping sums & Transfer matrix propagation & \lean{TelescopeSum.lean} \textbf{(proved)} \\
-Stirling approx & Saddle-point / steepest descent & \lean{StirlingBridge.lean} \textbf{(proved)} \\
-Gauss digamma formula & Bloch decomposition ($\ZZ/q\ZZ$) & \lean{DigammaReflection.lean} \textbf{(axiom)} \\
-Convergence axiom & Ergodic hypothesis & \lean{ConvergenceAxioms.lean} \textbf{(axiom)} \\
-Beatty sequence bound & Nearest-neighbor interaction & \lean{CrossTermFTC.lean} \textbf{(proved)} \\
-$V(a,b) = \sum\fract{mb/a}\cot(\pi m/a)$ & Scattering phase shift & \lean{FormulaBridge.lean} \\
-Dedekind reciprocity & Time-reversal invariance & \lean{LogDigammaBridge.lean} \textbf{(axiom)} \\
-Uniqueness of limits & Ergodic = thermodynamic & \lean{LogDigammaBridge.lean} \textbf{(proved)} \\
-\midrule
-\multicolumn{3}{@{}l@{}}{\emph{Parseval Bridge and Mertens}} \\
-\midrule
-Parseval identity & Unitarity / optical theorem & \lean{PlancherelBypass.lean} \\
-Three-term decomposition & Tree + loop + self-energy & \lean{PlancherelBypass.lean} \\
-$1/|s|^2$ integral $= 1$ & Cauchy/Breit-Wigner resonance & \lean{PlancherelBypass.lean} \\
-$M(x) = \sum \mu(n)$ & Magnetization & \lean{MertensBound.lean} \\
-$\mu(n) \in \{-1,0,1\}$ & Spin variable & --- \\
-RH $\Rightarrow |M(x)| = O(\sqrt{x})$ & Critical exponent $\beta = 1/2$ & \lean{MertensBound.lean} \\
-Log-cutoff taper & Bartlett window / UV cutoff & \lean{MertensIntegral.lean} \\
-Abel $S_1, S_2, S_3$ & Magnetization / $\chi$ / $c_v$ & \lean{AbelTail/*.lean} \textbf{(proved)} \\
-$1 - b^Tv$ decomposition & Thermodynamic hierarchy & \lean{CalcBounds.lean} \textbf{(proved)} \\
-\midrule
-\multicolumn{3}{@{}l@{}}{\emph{Mass Renormalization (\S\ref{sec:mass-renormalization})}} \\
-\midrule
-$K_1 = (1 - b^Tv) \cdot \ln N$ & Bare mass (Mertens) & \lean{MarginGraduation.lean} \textbf{(proved)} \\
-$L_1 = (v^TGv - 1) \cdot \ln N$ & Self-energy (Gram) & \lean{GramGraduation.lean} \textbf{(proved)} \\
-$c_{\mathrm{holes}} = L_1 + 2K_1$ & Observed mass (BD) & \lean{MassRenormalization.lean} \textbf{(proved)} \\
-$\gamma$ cancellation & UV regularization & \lean{EulerMascheroniRate.lean} \textbf{(proved)} \\
-\midrule
-\multicolumn{3}{@{}l@{}}{\emph{Perron Chain (Inverse Laplace, \S\ref{sec:perron})}} \\
-\midrule
-Perron contour integral & Inverse Laplace transform & \lean{Perron/KernelBound.lean} \textbf{(proved)} \\
-Perron half-integer assembly & Quantitative inverse Laplace & \lean{Perron/HalfIntegerPerron.lean} \textbf{(proved)} \\
-Born--Oppenheimer $\|M-A_N\|+\|A_N-B\|$ & Fast/slow mode separation & \lean{Perron/HalfIntegerPerron.lean} \textbf{(proved)} \\
-Archimedean $N$ choice & Adaptive UV regularization & \lean{Perron/HalfIntegerPerron.lean} \textbf{(proved)} \\
-$h_{\mathrm{tail\_crushed}}$ & Asymptotic freedom & \lean{Perron/HalfIntegerPerron.lean} \textbf{(proved)} \\
-Contour shift $\sigma \to 1/2$ & Crossing phase boundary & \lean{Perron/Rectangle.lean} \textbf{(proved)} \\
-\midrule
-\multicolumn{3}{@{}l@{}}{\emph{Analytic Tools}} \\
-\midrule
-Borel--Carath\'eodory & Maximum entropy principle & \lean{(Mathlib)} \\
-Hadamard Three-Circles & Open-closed / conformal gauge & \lean{Zeta/Hadamard.lean} \textbf{(proved)} \\
-Zero-counting axiom & Weyl law / spectral density & \lean{Zeta/Hadamard.lean} \textbf{(axiom)} \\
-$|\zeta(s)| \geq c/|t|^A$ & Free energy lower bound & \lean{Zeta/Convexity.lean} \textbf{(proved)} \\
-RH $\Rightarrow \zeta(s) \neq 0$ & No off-shell resonances & \lean{Zeta/Convexity.lean} \textbf{(proved)} \\
-$C \approx 21.649$ & $1/c_v$ (inverse heat capacity) & \lean{(Rust oracle, 512-bit)} \\
-$c_{\text{holes}} \approx 0.046$ & Casimir energy / sum rule & --- \\
-$\theta(t)$ functional equation & Modular invariance & \lean{ThetaBound.lean} \\
-$\Lambda(s) < 0$ on $(0,1)$ & Vacuum instability at real $s$ & \lean{BDMellin.lean} \\
-$x = e^{-u}$ substitution & Wick rotation & \lean{White/Kinematics.lean} \\
-Weyl's inequality & Eigenvalue perturbation theory & \lean{RayleighBridge.lean} \\
-Sherman--Morrison & Rank-1 scattering update & \lean{ShermanMorrison.lean} \\
-PNT axioms $S_1, S_2, S_3$ & Response function asymptotics & \lean{PNT/AbelMean.lean} \\
-\bottomrule
-\end{tabular}
-\caption{The core physics--mathematics dictionary of the Cathedral
-(updated June~7, 2026, v25). The table is organized by subsystem.
-Additional subsystems (Glass Tower, SUSY, Smith--Ramanujan,
-Arithmetic Standard Model, Time-Domain Bridge) are detailed in
-\S\ref{sec:glass-tower}--\S\ref{sec:standard-model}.
-Entries marked \textbf{(proved)} denote theorems with zero sorry;
-\textbf{(axiom)} denotes off-crown mathematical axioms.
-\textbf{One} literature axiom remains on the primary crown path;
-alternative paths achieve the same result with two to four axioms;
-the Oracle Bridge achieves RH with one trusted computation axiom.
-The forward chain from RH to $d_N^2 \to 0$ is now a continuous,
-compiler-verified logical chain with zero sorry on the crown path.
-Every mathematical equation in the proof corresponds to a physical
-concept, and this correspondence is not metaphorical but structural.}
-\label{tab:dictionary}
-\end{table}
-
-% ================================================================
 % Cholesky Vacuum Extraction (new in v22)
 % ================================================================
 
 \input{sections/16-cholesky-vacuum}
+
+% ================================================================
+\section{Summary: The Physics--Mathematics Dictionary}
+\label{sec:summary}
+% ================================================================
+
+The Cathedral's physics--mathematics dictionary spans 120+ entries
+across eight subsystems, each detailed in the sections above.
+Table~\ref{tab:architecture-summary} provides the architectural
+overview; the full entry-by-entry dictionary appears in
+Appendix~A (Section~\ref{app:phenomenon-map}).
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{@{}lllc@{}}
+\toprule
+\textbf{Subsystem} & \textbf{Physics Domain} & \textbf{Section} & \textbf{Entries} \\
+\midrule
+Hilbert space / Gram matrix & QFT foundations & \S\ref{sec:qft} & 12 \\
+Vasyunin Tower & Lattice field theory & \S\ref{sec:vasyunin} & 10 \\
+Parseval Bridge / Mertens & Unitarity / magnetization & \S\ref{sec:parseval}--\S\ref{sec:mertens} & 9 \\
+Mass Renormalization & Bare/observed mass & \S\ref{sec:mass-renormalization} & 4 \\
+Perron Chain & Inverse Laplace / scattering & \S\ref{sec:perron} & 6 \\
+Glass Tower / SUSY & Cayley--Dickson / supersymmetry & \S\ref{sec:glass-tower}--\S\ref{sec:susy-breaking} & 20+ \\
+Fermi Tower / ASM & Confinement / Standard Model & \S\ref{sec:fermi-tower}--\S\ref{sec:standard-model} & 30+ \\
+Analytic Tools & Entropy / spectral density & \S\ref{sec:bc}--\S\ref{sec:theta} & 13 \\
+\midrule
+\textbf{Total} & & & \textbf{120+} \\
+\bottomrule
+\end{tabular}
+\caption{Architectural summary of the physics--mathematics dictionary.
+Each subsystem maps formal Lean~4 objects to physical counterparts.
+The full entry-by-entry dictionary appears in Appendix~A.
+\textbf{One} irreducible axiom remains on the primary crown path;
+every mathematical equation in the proof corresponds to a physical
+concept, and this correspondence is structural, not metaphorical.}
+\label{tab:architecture-summary}
+\end{table}
 
 % ================================================================
 % Axiom Audit (externalized to sections/15-axiom-audit.tex, v22)
@@ -1884,6 +1823,132 @@ concept, and this correspondence is not metaphorical but structural.}
 % ================================================================
 
 \input{sections/oracle-bridge}
+
+% ================================================================
+\section{The Mellin Bridge: A Crossover Network for the Primes}
+\label{sec:crossover}
+% ================================================================
+
+The v26 architecture introduces the \emph{Mellin Bridge}: a
+frequency-domain decomposition of the B\'aez-Duarte distance
+that is, structurally, an \emph{audio crossover network}---the
+same device that splits a music signal into bass and treble
+for separate amplification.
+
+\subsection{The Hi-Lo Decomposition as Crossover Filter}
+
+The Parseval Bridge rewrites $d^2(N)$ as a critical-line
+Mellin integral. The Mellin Bridge splits this integral at the
+crossover frequency $|t| = \log N$:
+\[
+  d^2(N) = \underbrace{I_{\mathrm{lo}}(N)}_{|t| \leq \log N}
+  + \underbrace{I_{\mathrm{hi}}(N)}_{|t| > \log N}
+\]
+
+\begin{correspondence}[Audio Crossover Network]
+\label{corr:crossover}
+The hi-lo decomposition maps precisely to a two-way loudspeaker
+crossover:
+\begin{center}
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Audio} & \textbf{Cathedral} & \textbf{Bound} \\
+\midrule
+Bass (woofer) & Lo-band ($|t| \leq \log N$) &
+  $I_{\mathrm{lo}} \leq 2C \cdot \log^2(\log N + 2)$ \\
+Treble (tweeter) & Hi-band ($|t| > \log N$) &
+  $I_{\mathrm{hi}} \leq 2C^2/\log^3 N$ \\
+Crossover frequency & $|t| = \log N$ & Slides with $N$ \\
+Amplifier & SummitAssembly & $d^2/\log N \to 0$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The crossover frequency $|t| = \log N$ is not fixed---it slides
+logarithmically with $N$, like a parametric equalizer tracking the
+signal. As $N$ grows, the crossover point moves to higher frequencies,
+and the hi-band (treble) contribution decays cubically while the
+lo-band (bass) contribution is controlled by the zero-free region.
+\end{correspondence}
+
+\subsection{The Lo-Band: Zero-Free Region as Bass Control}
+
+The lo-band integral $I_{\mathrm{lo}}$ is bounded using the
+classical zero-free region of $\zeta(s)$: no zeros with
+$\sigma > 1 - c/\log(|t|+2)$.
+
+\begin{principle}[Bass Response = Zero-Free Region]
+In audio engineering, the bass response of a speaker is
+determined by the resonant frequency of the enclosure.
+Below this frequency, the response rolls off.
+
+In the Cathedral, the ``enclosure'' is the zero-free region:
+it determines how much low-frequency Mellin energy leaks through.
+A wider zero-free region (deeper bass rolloff) gives a tighter
+bound on $I_{\mathrm{lo}}$. The \emph{classical} de la Vall\'ee
+Poussin zero-free region gives
+$I_{\mathrm{lo}} \leq O(\log^2 \log N)$---enough to prove
+$d^2/\log N \to 0$.
+\end{principle}
+
+\subsection{The Hi-Band: Oscillation Bounds as Treble Control}
+
+The hi-band integral $I_{\mathrm{hi}}$ is bounded by
+Abel summation and oscillation bounds on the Dirichlet series.
+
+\begin{principle}[Treble Response = Oscillation Damping]
+High-frequency Mellin components correspond to rapid oscillations
+of the B\'aez-Duarte basis functions. The oscillation bound
+$I_{\mathrm{hi}} \leq 2C^2/\log^3 N$ says that the treble
+energy decays \emph{cubically}---the prime number signal is
+naturally ``dark'' at high frequencies, like a well-damped
+acoustic chamber.
+\end{principle}
+
+\subsection{$\gamma$ as the Master Coupling Parameter}
+
+The convergence rate of the full crossover is governed by the
+Euler--Mascheroni constant:
+\[
+  K_1 = 1 + \gamma \approx 1.577
+\]
+
+\begin{correspondence}[Coupling Constant]
+\label{corr:gamma}
+In quantum field theory, the coupling constant determines the
+strength of the interaction. In the Cathedral, $K_1 = 1 + \gamma$
+is the coupling constant of the prime number vacuum:
+\begin{itemize}
+  \item It controls the rate at which $b^T v \to 1$
+    (the dot product convergence).
+  \item It sets the overall scale of the lo-band bound
+    via $d^2(N) \leq K_1 \cdot \log^2(\log N + 2)/\log N$.
+  \item The constant $\gamma = 0.5772\ldots$ appears because
+    the harmonic series $H_N = \ln N + \gamma + O(1/N)$ governs
+    the BD basis inner products.
+\end{itemize}
+The Euler--Mascheroni constant is, in this sense, the ``fine
+structure constant'' of the prime number vacuum: it sets the
+strength of the interaction between the arithmetic (discrete)
+and analytic (continuous) sectors.
+\end{correspondence}
+
+The formal chain is:
+\begin{center}
+\small
+\begin{tabular}{@{}llll@{}}
+\toprule
+\textbf{Pitch} & \textbf{File} & \textbf{Content} & \textbf{Status} \\
+\midrule
+1 & \lean{OscillationBounds.lean} & Hi-band $\leq 2C^2/\log^3 N$ &
+  \textbf{Proved} \\
+2 & \lean{LoBandBound.lean} & Lo-band $\leq 2C \cdot \log^2(\log N+2)$ &
+  \textbf{Proved} \\
+3 & \lean{SummitAssembly.lean} & $d^2/\log N \to 0$ &
+  \textbf{Proved (2 axioms)} \\
+\bottomrule
+\end{tabular}
+\end{center}
 
 % ================================================================
 \section{Conclusion: Why the Primes Know Physics}

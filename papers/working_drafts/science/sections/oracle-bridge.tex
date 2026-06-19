@@ -219,9 +219,12 @@ solvers because:
   \item The Born approximation has \emph{full-dimensional support}:
     $v_k = -\mu(k)(1 - \ln k / \ln N)$ spans all $N-1$ dimensions.
   \item The CG solver is confined to a 5{,}000-dimensional
-    \emph{Krylov subspace} $\mathcal{K}_m(G, b) =
-    \text{span}\{b, Gb, G^2 b, \ldots, G^{m-1} b\}$, missing
-    the 50{,}439 remaining directions.
+    \emph{Krylov subspace}
+    \[
+      \mathcal{K}_m(G, b) =
+      \operatorname{span}\{b,\, Gb,\, G^2 b,\, \ldots,\, G^{m-1} b\},
+    \]
+    missing the 50{,}439 remaining directions.
   \item The Gram matrix has condition number $\kappa \sim 10^7$,
     so CG convergence is slow: $\|r_k\|/\|r_0\| \leq
     2((\sqrt{\kappa}-1)/(\sqrt{\kappa}+1))^k \approx 2 \cdot 0.9994^k$,
@@ -242,15 +245,16 @@ The Oracle path is architecturally independent of the primary crown
 axiom \lean{baez\_duarte\_forward}. The axiom dependencies are:
 
 \begin{center}
-\small
-\begin{tabular}{@{}lp{4.5cm}p{4cm}l@{}}
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}llll@{}}
 \toprule
 \textbf{Path} & \textbf{Target} & \textbf{Custom Axioms} & \textbf{Physics} \\
 \midrule
-Crown & \lean{nyman\_beurling\_equivalence} & \lean{baez\_duarte\_forward} & Unitarity \\
-Spatial & \lean{nyman\_beurling\_equivalence\_spatial} & PNT + covariance & Virial + $\chi$ \\
-Mellin & \lean{nyman\_beurling\_equivalence\_mellin} & 2 composite & Spectral \\
-Renorm & \lean{nyman\_beurling\_equivalence\_renormalization} & Selberg--Delange & $\alpha$-decay \\
+Crown & \lean{nb\_equivalence} & \lean{baez\_duarte\_forward} & Unitarity \\
+Spatial & \lean{nb\_equivalence\_spatial} & PNT + covariance & Virial + $\chi$ \\
+Mellin & \lean{nb\_equivalence\_mellin} & 2 composite & Spectral \\
+Renorm & \lean{nb\_equiv\_renormalization} & Selberg--Delange & $\alpha$-decay \\
 \textbf{Oracle} & \lean{rh\_from\_oracle} & \lean{oracle\_certificates} + PNT & \textbf{Lattice QCD} \\
 \bottomrule
 \end{tabular}

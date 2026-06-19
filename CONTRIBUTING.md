@@ -3,10 +3,10 @@
 Thank you for your interest in contributing to the Cathedral — a machine-verified
 reduction of the Riemann Hypothesis in Lean 4.
 
-## Current Status (v26 — Penta-Crown, June 10 2026)
+## Current Status (v26 — Penta-Crown, June 19 2026)
 
 The crown theorem `baez_duarte_forward` depends on **1 axiom**
-(`discrete_riemann_hypothesis`, formally equivalent to RH) plus
+(`overcancellation_axiom`, formally equivalent to RH) plus
 2 PNT bureaucracy axioms (unconditional, provable from Mathlib's PNT infrastructure).
 The forward chain has **zero sorry** and **zero warning**.
 
@@ -19,7 +19,7 @@ proving the Riemann Hypothesis itself.
 
 | # | Axiom | Content | Difficulty |
 |---|-------|---------|------------|
-| 1 | `discrete_riemann_hypothesis` | v^T C v ≤ C/ln N | ⭐⭐⭐⭐⭐ (≡ RH) |
+| 1 | `overcancellation_axiom` | v^T G v ≤ 1 | ⭐⭐⭐⭐⭐ (≡ RH) |
 
 Promising angles:
 - **Fourth moment of zeta** — unconditional L⁴ control on the critical line
@@ -43,10 +43,12 @@ Closing them is a formalization exercise, not a mathematical one.
 
 ### 3. Close Off-Path Sorries
 
-3 `sorry` markers remain in the active tree, all off the crown path:
+4 `sorry` markers remain in the active tree, all off the crown path:
 
 - `Assembly/DirectMellinBound.lean` (2) — Exploratory direct path
-- `Physics/Bridges/DedekindBridge.lean` (1) — Dedekind bridge
+- `Geometry/Bernoulli/BernoulliCrown.lean` (1) — Exploratory Bernoulli path
+- `Geometry/Fiber/DragonfruitNegativity.lean` (1) — Exploratory fiber path
+- `Physics/Bridges/DedekindReciprocity.lean` (1) — Dedekind reciprocity
 
 ### 4. Contribute to Mathlib
 
@@ -69,9 +71,9 @@ Several Mathlib PRs would unlock further improvements:
 
 ```bash
 # Lean proofs
-cd proofs && lake build    # 474 files, 8818 jobs
+cd proofs && lake build    # 504 files, 8818+ jobs
 
-# Papers (all 17)
+# Papers (all 18)
 cd papers && ./build.sh
 
 # Rust experiments (any one)
