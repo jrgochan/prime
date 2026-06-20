@@ -24,7 +24,7 @@
   | Vacuum energy                      | d²_opt = 1 - bᵀG⁻¹b                |
   | UV catastrophe (-∞)               | d²_free = 1 - bᵀR⁻¹b → -∞          |
   | IR regularization (+∞)            | scattering = w*ᵀΔv* → +∞            |
-  | Renormalization                    | (-∞) + (+∞) = 0.042                  |
+  | Renormalization                    | (-∞) + (+∞) → 0  (d² → 0 = RH)      |
 
   ### Numerical Evidence (May 30, 2026 — FULL TABLE CONFIRMED)
 
