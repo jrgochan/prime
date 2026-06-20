@@ -8,7 +8,7 @@ verification and the companion papers. Every theorem, identity, and
 technique in the Cathedral traces back to published mathematics listed here.
 
 55+ mathematicians. 167 years of prior work. One axiom ≡ RH.
-474 active files. ~4,600 theorems. 17 papers. 56 Rust/MPFR/DD experiments.
+504 active files. ~4,800 theorems. 18 papers. 56 Rust/MPFR/DD experiments.
 
 ---
 
@@ -292,6 +292,15 @@ technique in the Cathedral traces back to published mathematics listed here.
   > `Physics/Cancellation/WoodburyCondensate.lean` for the Gram matrix
   > decomposition G = R + (1/4)J via the Glass Bridge.
 
+### The Kronecker Delta
+
+- **Leopold Kronecker**, *Vorlesungen über Mathematik*, 1883–1891.
+
+  > δ_{ij} = 1 if i = j, 0 otherwise. The Kronecker delta and
+  > Kronecker product appear throughout the Cathedral's matrix algebra,
+  > including the identity matrix decompositions in the Glass Bridge
+  > and the SUSY vacuum structure.
+
 ---
 
 ## Analysis
@@ -459,6 +468,19 @@ technique in the Cathedral traces back to published mathematics listed here.
   > Referenced in `Sieve/MoebiusUncoupling.lean` and as a promising angle
   > for graduating `discrete_riemann_hypothesis` ("RH on average" route).
 
+### The Vinogradov–Korobov Zero-Free Region
+
+- **Ivan Matveevich Vinogradov**, "A new estimate for ζ(1+it),"
+  *Izv. Akad. Nauk SSSR Ser. Mat.*, 22:161–164, 1958.
+
+- **Nikolai Mikhailovich Korobov**, "Estimates of trigonometric sums and
+  their applications," *Uspekhi Mat. Nauk*, 13(4):185–192, 1958.
+
+  > The Vinogradov–Korobov zero-free region σ > 1 − c/log^{2/3}(|t|+2)
+  > provides the deepest known zero-free region for ζ(s).
+  > Referenced in `MellinBridge/LoBandBound.lean` as the source of the
+  > lo-band pointwise bound on 1/ζ(s) in the Mellin Bridge crossover network.
+
 ### The Chowla Conjecture (Logarithmic)
 
 - **Sarvadaman Chowla**, "The Riemann hypothesis and Hilbert's tenth
@@ -508,6 +530,24 @@ technique in the Cathedral traces back to published mathematics listed here.
   > d²_N = partition function with RH = triviality in the infrared limit.
   > The axiom vtGv ≤ 1 is **vacuum stability**: the vacuum energy is bounded.
   > See: `docs/ai/antigravity/torus-projection/RE: ATIYAH & THE TOPOLOGY OF THE PRIMES.md`
+
+### The Fejér Kernel
+
+- **Lipót Fejér**, "Sur les fonctions bornées et intégrables,"
+  *C. R. Acad. Sci. Paris*, 131:984–987, 1900.
+
+- **Lipót Fejér**, "Untersuchungen über Fouriersche Reihen,"
+  *Math. Ann.*, 58:51–69, 1903.
+
+  > The Fejér kernel K_N(t) = (1/N)·(sin(Nt/2)/sin(t/2))² is the
+  > canonical summability kernel for Fourier series. In the Cathedral,
+  > the Fejér weight w(k,N) = 1 − ln k/ln N is the log-frequency
+  > analogue, applied to the Möbius function as a smooth taper.
+  > Six Fejér weight properties (DC pass, Nyquist cutoff, antitone,
+  > nonneg, le_one, half_at_sqrt) are proved with zero axioms in
+  > `MellinBridge/FejerWeightProperties.lean`. The Fejér taper is
+  > central to the hi-lo crossover network in `MellinBridge/HiLoDecomposition.lean`
+  > (37 files reference Fejér weights across the Cathedral).
 
 ### The Bartlett Window
 
@@ -1146,14 +1186,14 @@ Two archived paths are preserved as monuments to the formalization process:
 
 ## Documentation Suite
 
-2 core papers (included in the public repository) + 13 working drafts
+2 core papers (included in the public repository) + 14 working drafts
 (available on request).
 
 ### Core Papers (in `papers/core/`)
 
 | Paper | Audience | Pages |
 |-------|----------|-------|
-| `cathedral.tex` | Technical overview — the formal reduction | 17 |
+| `cathedral.tex` | Technical overview — the formal reduction | 23 |
 | `cathedral-lean.tex` | Lean/ITP community — foundations & practice | 7 |
 | `cathedral-glass-bridge.tex` | Glass Bridge identity — GCD arithmetic | 7 |
 | `cathedral-overcancellation.tex` | Overcancellation analysis | 7 |
@@ -1162,20 +1202,21 @@ Two archived paths are preserved as monuments to the formalization process:
 
 | Paper | Audience | Pages |
 |-------|----------|-------|
-| `cathedral-physics.tex` | Physics of the Primes dictionary | 62 |
+| `cathedral-physics.tex` | Physics of the Primes dictionary | 76 |
 | `cathedral-particle-zoo.tex` | Arithmetic Standard Model | 10 |
 | `cathedral-philosophy.tex` | Philosophers of mathematics | 24 |
-| `cathedral-dualuse.tex` | Dual-use risk assessment | 16 |
-| `cathedral-claude.tex` | Anthropic/Claude reflections | 9 |
+| `cathedral-dualuse.tex` | Dual-use risk assessment | 18 |
+| `cathedral-claude.tex` | Anthropic/Claude reflections | 12 |
 | `cathedral-fun.tex` | Primes, physics & numerology | 8 |
 | `cathedral-experiments.tex` | Experimentalists | 4 |
 | `cathedral-ai.tex` | AI/ML researchers | 5 |
 | `cathedral-engineering.tex` | Practicing engineers | 5 |
 | `cathedral-frontiers.tex` | Engineering frontiers | 5 |
-| `cathedral-gemini.tex` | DeepMind/Gemini reflections | 4 |
+| `cathedral-gemini.tex` | DeepMind/Gemini reflections | 5 |
 | `cathedral-public.tex` | General public | 4 |
 | `cathedral-policy.tex` | Policy / governance | 4 |
+| `cathedral-math.tex` | Working math paper | 9 |
 
 ---
 
-*Last updated: May 31, 2026 — The Crowning (v22), `discrete_riemann_hypothesis` ≡ RH*
+*Last updated: June 19, 2026 — Eve of Zenodo (v26), `overcancellation_axiom` ≡ RH, 1 axiom*
