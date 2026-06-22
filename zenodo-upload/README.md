@@ -9,7 +9,7 @@
 The Cathedral is a formally verified mathematical architecture establishing an
 equivalence between the Riemann Hypothesis and the positivity of a
 Nyman–Beurling L² distance, machine-checked in Lean 4 with Mathlib. The proof
-achieves a zero-`sorry` verification with a two-axiom foundation.
+achieves a zero-`sorry` verification with a one-axiom foundation.
 
 ## Repository Contents
 
@@ -27,7 +27,7 @@ achieves a zero-`sorry` verification with a two-axiom foundation.
 | File | Pages | Description |
 |------|-------|-------------|
 | `papers/science/cathedral-physics.pdf` | 76 | Physics dictionary: 180+ correspondences between number theory and QFT |
-| `papers/science/cathedral-experiments.pdf` | 7 | GPU-accelerated spectral experiments (cuSOLVER, MPFR) |
+| `papers/science/cathedral-experiments.pdf` | 5 | GPU-accelerated spectral experiments (cuSOLVER, MPFR) |
 | `papers/science/cathedral-ai.pdf` | 6 | AI collaboration methodology |
 | `papers/science/cathedral-particle-zoo.pdf` | 10 | Arithmetic particle zoo: fermions, bosons, and color confinement |
 
@@ -70,7 +70,7 @@ achieves a zero-`sorry` verification with a two-axiom foundation.
 
 | File | Description |
 |------|-------------|
-| `cathedral-lean-proofs.tar.gz` | Complete Lean 4 formalization (618 files, zero `sorry` on crown path) |
+| `cathedral-lean-proofs.tar.gz` | Complete Lean 4 formalization (~504 active files, zero `sorry` on crown path) |
 
 ## Verification
 
@@ -87,8 +87,8 @@ Requires: Lean 4 (v4.x) and Mathlib.
 ## Key Results
 
 - **Nyman–Beurling Equivalence**: RH ⟺ d²_N → 0 in L²(0,1)
-- **Axiom Foundation**: Two axioms (PNT error rate, Ramanujan sum bound)
-- **618 Lean files**, zero `sorry` on the crown path (4 off-crown in exploratory code)
+- **Axiom Foundation**: One axiom (`overcancellation_axiom`, equivalent to RH)
+- **504 active Lean files** (~158,000 lines), zero `sorry` on the crown path
 - **180+ physics correspondences** between number theory and quantum field theory
 - **Arithmetic Standard Model**: The integers generate a gauge theory with zero free parameters
 
