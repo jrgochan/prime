@@ -35,7 +35,7 @@ import Cathedral.Geometry.Renormalization.MarginIdentity
 import Cathedral.Geometry.Renormalization.MarginGraduation
 import Cathedral.Vasyunin.Proof.GramBoundDirect
 
-set_option maxHeartbeats 400000
+set_option maxHeartbeats 800000
 
 noncomputable section
 open Real Filter
