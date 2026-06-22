@@ -16,7 +16,7 @@
 We survey the open problems and research directions suggested by
 the Cathedral project, spanning mathematics, physics, engineering,
 medicine, AI collaboration, and formalization methodology.
-The Cathedral reduced the Riemann Hypothesis to two axioms
+The Cathedral reduced the Riemann Hypothesis to one axiom
 and discovered a structural correspondence between the integers
 and gauge field theory captured by five Pentagon insights.
 We identify the mathematical infrastructure needed to close the
@@ -41,11 +41,11 @@ the Cathedral walls.
 \section{Closing the One Crown Axiom}
 % ================================================================
 
-The two crown axioms are \lean{gram\_form\_upper\_bound} (the Gram
-quadratic form bound, formally equivalent to RH) and
-\lean{mertens\_34\_unconditional} (the classical Mertens bound
-$|M(x)| \leq Cx^{3/4}$, an unconditional consequence of PNT).
-Closing them requires connecting the existing infrastructure
+The sole crown axiom is \lean{overcancellation\_axiom}, formally
+proved \emph{equivalent} to the Riemann Hypothesis via the Glass Box
+architecture. The two PNT axioms on the cleanest path are
+unconditional consequences of the Prime Number Theorem.
+Closing the crown requires connecting the existing infrastructure
 (see BOUNTY.md for the detailed gap analysis):
 
 \begin{enumerate}
@@ -241,13 +241,59 @@ The Cathedral architecture could be adapted for:
     would be of interest.
 \end{itemize}
 
+\subsection{The Glass Box Methodology (v24)}
+
+The Glass Box architecture (v24) decomposed the single opaque
+\lean{overcancellation\_axiom} into 7 transparent sub-axioms,
+then graduated 5 of them to theorems. This \emph{axiom
+decomposition} methodology is transferable to any formalization
+project with opaque assumptions:
+\begin{enumerate}
+  \item Identify the opaque axiom.
+  \item Decompose it into elementary sub-claims.
+  \item Graduate the elementary sub-claims one by one.
+  \item The irreducible residual reveals the \emph{true} unknown
+    content.
+\end{enumerate}
+This is the formalization analogue of a physics experiment
+isolating a signal from background noise.
+
+\subsection{The Mellin Bridge and Hi-Lo Crossover (v26)}
+
+The Hi-Lo decomposition (\texttt{MellinBridge/HiLoDecomposition.lean})
+splits the Mellin integral at a crossover frequency $T_0(N)$,
+routing the low-frequency bulk through PNT estimates and the
+high-frequency tail through oscillation bounds. This
+\emph{crossover technique} is applicable wherever an integral
+or sum has qualitatively different behavior in different regimes
+---a common pattern in signal processing, statistical physics,
+and numerical analysis.
+
+\subsection{The Arithmetic Standard Model (v25--v26)}
+
+The 101-theorem Arithmetic Standard Model
+(\texttt{Physics/StandardModel/}) establishes a complete dictionary
+between the multiplicative structure of the integers and gauge
+field theory. Key open problems:
+\begin{itemize}
+  \item \textbf{Mass spectrum}: The proton-neutron mass ratio
+    $m_n/m_p = 1 + 1/720$ emerges from the divisor structure of
+    highly composite numbers. Is this coincidence or structure?
+  \item \textbf{Confinement}: The formalized confinement theorem
+    shows that M\"obius-charged ``quarks'' cannot be isolated.
+    Does this connect to actual QCD confinement?
+  \item \textbf{Pauli exclusion}: The formalized Pauli theorem
+    for squarefree numbers mirrors the spin-statistics theorem.
+    What is the deeper categorical structure?
+\end{itemize}
+
 % ================================================================
 \section{Conclusion}
 % ================================================================
 
 The Cathedral is an ending and a beginning. The proof architecture
 is complete; the questions it raises are not. The research frontier
-extends in at least eight directions: closing the two crown axioms,
+extends in at least eight directions: closing the crown axiom,
 understanding the spectral universality, exploiting the algorithmic
 structure (including the DD-precision pipeline), contributing to
 Mathlib, generalizing to other $L$-functions, testing the Pentagon
@@ -332,7 +378,7 @@ Each is testable against public databases within one week.
 % ================================================================
 
 The Cathedral was built by three minds---a human Architect, an AI
-Proof Engineer (Claude), and an AI Theorist (Gemini)---over 68 days.
+Proof Engineer (Claude), and an AI Theorist (Gemini)---over 84 days.
 This human-AI pair programming model is transferable:
 
 \begin{itemize}

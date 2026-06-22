@@ -49,17 +49,17 @@ layer carrying a different epistemic character:
 
 The philosophical significance of this hierarchy is that it
 \emph{stratifies} the unknown. When we say ``the Cathedral has
-two axioms,'' we are making a precise claim: one represents
-genuinely unknown mathematical content, the other is an
-unconditional truth awaiting library integration. All other layers
-the last have been certified. The remaining gap is not diffuse
+one axiom,'' we are making a precise claim: it represents
+genuinely unknown mathematical content---the Riemann Hypothesis
+itself, reformulated as an arithmetic inequality. All other layers
+have been certified. The remaining gap is not diffuse
 but concentrated---a single inequality about a specific quadratic
 form over Möbius-weighted vectors.
 
 \subsection{The Graduated Gate as Epistemological Process}
 
-The axiom count of the Cathedral evolved over its 68-day
-construction: 56 $\to$ 42 $\to$ 7 $\to$ 4 $\to$ 2.
+The axiom count of the Cathedral evolved over its 84-day
+construction: 56 $\to$ 42 $\to$ 7 $\to$ 4 $\to$ 2 $\to$ 1.
 Each reduction involved one of three mechanisms:
 
 \begin{itemize}
@@ -87,23 +87,20 @@ pragmatist strategy of dissolving a problem rather than solving
 it; \emph{architecture} corresponds to the systematist's goal of
 reducing many principles to few.
 
-The progression $56 \to 2$ is itself a philosophical achievement:
+The progression $56 \to 1$ is itself a philosophical achievement:
 it demonstrates that the ``distance'' between current mathematical
 knowledge and the Riemann Hypothesis is \emph{measurable} and
 \emph{shrinking}. Each graduated gate was an instance of converting
 trust into verification, authority into mechanism.
 
-The final two-axiom architecture introduces a philosophically rich
-distinction: one axiom (\lean{gram\_form\_upper\_bound}) represents
-genuinely unknown mathematical content---\emph{the} Riemann
-Hypothesis in reformulated form. The other
-(\lean{mertens\_34\_unconditional}) represents mathematical content
-that is unconditionally true (a consequence of PNT, known since
-1896) but awaits upstream formalization. These carry different
-epistemic weights: the first is an open question, the second is a
-TODO item. The two-axiom crown makes this distinction explicit,
-whereas a single-axiom architecture would have collapsed two
-epistemically distinct claims into one.
+The final one-axiom architecture (v24--v26) achieves a
+philosophically clean state: the sole remaining axiom
+(\lean{overcancellation\_axiom}) is formally proved
+\emph{equivalent} to the Riemann Hypothesis via the Glass Box
+architecture. There is no epistemic ambiguity: the axiom IS
+the open question, nothing more, nothing less. The PNT content
+that previously required a separate axiom has been graduated
+to a theorem via \texttt{PrimeNumberTheoremAnd}.
 
 \subsection{The False Axiom as Philosophical Event}
 

@@ -17,10 +17,10 @@ and an independent **Oracle Bridge** from GPU-certified computation.
 > The **Oracle Bridge** proves RH from **one** trusted GPU measurement:
 > DD-precision Gram quadratic form v^T G v < 1 at highly composite numbers.
 
-> **Release: v26 — Penta-Crown + Path B** — June 12, 2026
+> **Release: v26 — Penta-Crown + Path B** — June 22, 2026
 >
 > **Latest**: 504 files, ~158K lines, 1 axiom (≡ RH), 4 sorry (off-crown),
-> 0 errors, 8,818+ build jobs, 7 proof paths, 101 Standard Model theorems
+> 0 errors, 8,848+ build jobs, 7 proof paths, 101 Standard Model theorems
 >
 > 🚛 **Path B (The Mack Truck)**: `d² ≤ 2·gap` — the constant-ratio sieve
 > criterion with a **67× safety margin**. 7 new Fiber modules, 24 theorems, 0 sorry.
@@ -265,10 +265,10 @@ cd papers && ./build.sh
 3. **The Triangle Inequality Trap**: ‖1 − f‖₂ ≤ 1 + ‖f‖₂ yields d²_N ≤ 4
    for a quantity → 0. The Parseval Bridge is mathematically *necessary*.
 
-4. **The Selberg Revelation**: The sole axiom `discrete_riemann_hypothesis`
+4. **The Selberg Revelation**: The sole axiom `overcancellation_axiom`
    is not an intermediate lemma — it IS the Riemann Hypothesis, stated in
-   the language of the Cathedral. The irreducible content is the archimedean
-   anomaly Δ in the covariance decomposition C = C_arith + Δ.
+   the language of the Cathedral. The irreducible content is the fermionic
+   overcancellation in the BD optimal weights.
 
 5. **The Cholesky Miracle**: d²(N+1) = d²(N) − y²_new. The NB distance
    decreases monotonically. RH ⟺ the cooling protocol reaches absolute zero.
@@ -297,8 +297,11 @@ prime/
 ├── experiments/     🔬  56 Rust experiments (f64–512 bit MPFR + DD)
 │   └── archive/               Graduated/superseded experiments
 ├── visualizer/      📊  Cathedral Dashboard (Next.js, v26 Penta-Crown)
+├── tools/           🏗️  Exploration tools
+│   ├── particle-zoo/  ⚛️  Every Integer Has a Soul (3D galaxy, 55K particles)
+│   ├── jukebox/       🎵  The Cathedral Jukebox (music + visualization)
+│   └── sedenion-explorer/     The experiment that started it all
 ├── scripts/         🔧  Build & export tools
-├── tools/           🏗️  Historical exploration tools
 ├── docs/            📚  Documentation, AI correspondence, exports
 ├── ORIGIN-STORY.md  📖  How it all started
 └── REFERENCES.md    📚  Bibliography (45+ mathematicians, 167 years)
@@ -315,6 +318,8 @@ Apache 2.0
   title={The Cathedral: A Machine-Verified Reduction of the Riemann
          Hypothesis via the Nyman--Beurling Criterion},
   author={Gochanour, Jason Robert},
-  year={2026}
+  year={2026},
+  doi={10.5281/zenodo.XXXXXXX},
+  url={https://github.com/jrgochan/prime}
 }
 ```

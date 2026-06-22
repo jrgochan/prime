@@ -64,8 +64,8 @@ what it proves is not the Riemann Hypothesis. It proves:
   \item \textbf{The converse} ($d_N^2 \to 0 \implies \RH$):
     with zero custom axioms.
   \item \textbf{The forward direction} ($\RH \implies d_N^2 \to 0$):
-    conditional on two precisely characterized axioms (one open,
-    one unconditionally known).
+    conditional on one precisely characterized axiom (equivalent
+    to RH).
   \item \textbf{The equivalence} ($\RH \iff d_N^2 \to 0$):
     the conjunction of (1) and (2), conditional on the same axiom.
 \end{enumerate}
@@ -78,8 +78,8 @@ This creates a \emph{gradient of certainty}:
 \textbf{Claim} & \textbf{Axioms} & \textbf{Epistemic Status} \\
 \midrule
 $d_N^2 \to 0 \implies \RH$ & 0 & Machine-certified \\
-$\RH \implies d_N^2 \to 0$ & 2 (1 open + 1 PNT) & Conditional \\
-$\RH \iff d_N^2 \to 0$ & 2 (1 open + 1 PNT) & Conditional \\
+$\RH \implies d_N^2 \to 0$ & 1 ($\equiv$ RH) & Conditional \\
+$\RH \iff d_N^2 \to 0$ & 1 ($\equiv$ RH) & Conditional \\
 RH itself & = Crown Axiom & Open \\
 \bottomrule
 \end{tabular}
@@ -147,7 +147,7 @@ traversed in precisely identified steps.
 \end{enumerate}
 
 The graduated gates---the axioms that were successively converted
-to theorems (56 $\to$ 42 $\to$ 7 $\to$ 4 $\to$ 2)---are
+to theorems (56 $\to$ 42 $\to$ 7 $\to$ 4 $\to$ 2 $\to$ 1)---are
 the most philosophically significant feature of this gradient. Each
 graduation was an act of converting faith into knowledge: a claim
 that was previously accepted on the authority of classical
@@ -197,21 +197,22 @@ vindicates the formalization project's methodology: state your
 assumptions explicitly, test them computationally, prove them
 formally, and be prepared to discover that some of them are wrong.
 
-\subsection{The Tri-Crown and Epistemological Pluralism}
+\subsection{The Penta-Crown and Epistemological Pluralism}
 
-The Cathedral offers not one but three independent paths to the
+The Cathedral offers not one but seven independent paths to the
 Riemann Hypothesis:
 \begin{itemize}
-  \item The \textbf{Analytic Crown}: RH via two crown axioms
-    (Gram form bound + Mertens $x^{3/4}$).
-  \item The \textbf{Cybernetic Crown} (Oracle Bridge): RH via one
-    computation axiom (GPU-certified Gram matrices at highly
-    composite numbers).
-  \item The \textbf{Gram Crown}: RH via one arithmetic inequality
-    (the Gram form bound along a subsequence).
+  \item The \textbf{Classical Crown}: RH via one crown axiom
+    (\texttt{overcancellation\_axiom} $\equiv$ RH) + 2 PNT axioms.
+  \item The \textbf{Parseval Bridge}: RH via Plancherel isometry.
+  \item The \textbf{Mellin Bridge}: RH via Hi-Lo crossover decomposition.
+  \item The \textbf{Oracle Bridge}: RH via one GPU computation axiom.
+  \item The \textbf{Path B (Mack Truck)}: RH via constant-ratio sieve criterion.
+  \item The \textbf{Gram Crown}: RH via Gram form convergence.
+  \item The \textbf{Arakelov Crown}: RH via Hodge index bound.
 \end{itemize}
 
-All three paths share the same zero-axiom converse. They differ
+All seven paths share the same zero-axiom converse. They differ
 only in how they establish the forward direction. This architectural
 feature has epistemological significance: it demonstrates that the
 truth of RH, if it is true, can be \emph{witnessed} from multiple

@@ -29,7 +29,7 @@ eigenvalue certification through $N = 1000$, and DD-precision
 Gram matrix certification at $N = 55{,}440$.
 \end{abstract}
 
-\tableofcontents
+
 
 % ================================================================
 \section{Introduction}
@@ -47,76 +47,176 @@ Rust crates with \texttt{Cargo.toml} build files. Most use the
 arithmetic.
 
 % ================================================================
-\section{Experiment Catalog}
-% ================================================================
 
-\begin{center}
-\small
-\begin{tabular}{@{}rlll@{}}
+\subsection{Gram Matrix Experiments (1--6, 42)}
+
+The Gram matrix $G(j,k) = \int_0^1 \{j/x\}\{k/x\}\,dx$ is the
+foundation of the Nyman--Beurling formulation. These experiments
+compute, validate, and certify the matrix at scales from $N=50$
+to $N=55{,}440$, using precisions from f64 to 512-bit MPFR.
+
+\begin{center}\small
+\begin{tabular}{@{}rllp{5cm}@{}}
 \toprule
-\textbf{\#} & \textbf{Name} & \textbf{Category} & \textbf{Precision} \\
+\textbf{\#} & \textbf{Name} & \textbf{Precision} & \textbf{Purpose} \\
 \midrule
-1 & gram-matrix & Gram & 512-bit MPFR \\
-2 & gram-oracle & Gram & Exact rational \\
-3 & gram-form-identity & Gram & 256-bit MPFR \\
-4 & gram-bilinear-abel & Gram & 256-bit MPFR \\
-5 & gram-pointwise & Gram & 256-bit MPFR \\
-6 & gram-quadform & Gram & 256-bit MPFR \\
+1 & gram-matrix & 512-bit MPFR & Full matrix construction \\
+2 & gram-oracle & Exact rational & Rational entry validation \\
+3 & gram-form-identity & 256-bit MPFR & Quadratic form identities \\
+4 & gram-bilinear-abel & 256-bit MPFR & Abel summation on Gram \\
+5 & gram-pointwise & 256-bit MPFR & Entry-level convergence \\
+6 & gram-quadform & 256-bit MPFR & $v^T G v$ computation \\
+42 & gram-scaling-oracle & 256-bit MPFR & Scaling law validation \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Mellin/Parseval and Perron Experiments (7--11)}
+
+The frequency-domain pathway: validating the Parseval bridge
+$\|1-f\|^2 = (1/2\pi)\int |M_r(1/2+it)|^2\,dt$ and the Perron
+contour integrals that connect $\zeta(s)$ to arithmetic sums.
+
+\begin{center}\small
+\begin{tabular}{@{}rllp{5cm}@{}}
+\toprule
+\textbf{\#} & \textbf{Name} & \textbf{Precision} & \textbf{Purpose} \\
 \midrule
-7 & mellin-certificate & Mellin & 256-bit MPFR \\
-8 & contour-oracle & Mellin & f64 \\
-9 & perron-contour & Perron & 256-bit MPFR \\
-10 & mvt-decomposition & Perron & 256-bit MPFR \\
-11 & crown-cancellation & Perron & 256-bit MPFR \\
+7 & mellin-certificate & 256-bit MPFR & Parseval bridge validation \\
+8 & contour-oracle & f64 & Contour integration tests \\
+9 & perron-contour & 256-bit MPFR & Perron formula verification \\
+10 & mvt-decomposition & 256-bit MPFR & Mean value theorem split \\
+11 & crown-cancellation & 256-bit MPFR & Crown path cancellations \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Vasyunin Tower Experiments (12--14)}
+
+The discrete cotangent formula: validating the Vasyunin identity
+that eliminates continuous integrals from the Gram matrix computation.
+
+\begin{center}\small
+\begin{tabular}{@{}rllp{5cm}@{}}
+\toprule
+\textbf{\#} & \textbf{Name} & \textbf{Precision} & \textbf{Purpose} \\
 \midrule
-12 & vasyunin & Vasyunin & Exact rational \\
-13 & vasyunin-convergence & Vasyunin & 256-bit MPFR \\
-14 & vasyunin-integral & Vasyunin & 256-bit MPFR \\
+12 & vasyunin & Exact rational & Formula verification \\
+13 & vasyunin-convergence & 256-bit MPFR & Convergence rates \\
+14 & vasyunin-integral & 256-bit MPFR & Integral validation \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Spectral Analysis (15--20, 48)}
+
+Eigenvalue and eigenvector analysis of the Gram matrix: confirming
+positive definiteness, measuring the spectral gap, and discovering
+the $\alpha \approx 0.47$ participation ratio constant.
+
+\begin{center}\small
+\begin{tabular}{@{}rllp{5cm}@{}}
+\toprule
+\textbf{\#} & \textbf{Name} & \textbf{Precision} & \textbf{Purpose} \\
 \midrule
-15 & spectral & Spectral & f64 \\
-16 & spectral-analyzer & Spectral & 512-bit MPFR \\
-17 & hilbert-spectral & Spectral & 256-bit MPFR \\
-18 & rotor-spectroscopy & Spectral & f64 \\
-19 & two-tile-analyzer & Spectral & f64 \\
-20 & van-hove-probe & Spectral & f64 \\
+15 & spectral & f64 & Eigenvalue computation \\
+16 & spectral-analyzer & 512-bit MPFR & High-precision eigenvalues \\
+17 & hilbert-spectral & 256-bit MPFR & Hilbert-space spectral theory \\
+18 & rotor-spectroscopy & f64 & Rotational mode analysis \\
+19 & two-tile-analyzer & f64 & Two-tile decomposition \\
+20 & van-hove-probe & f64 & Van Hove singularities \\
+48 & spectral-observatory & DD MPFR-256 & DD-precision spectral census \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{B\'aez-Duarte Distance and PNT (21--30)}
+
+The core distance $d_N^2 = \inf_v \|1 - f_v\|^2$: computing it
+at scale, validating the $d^2 \sim C/\ln N$ scaling law, and
+confirming the PNT sums $S_1, S_2, S_3$ that drive the Abel chain.
+
+\begin{center}\small
+\begin{tabular}{@{}rllp{5cm}@{}}
+\toprule
+\textbf{\#} & \textbf{Name} & \textbf{Precision} & \textbf{Purpose} \\
 \midrule
-21 & character-spectral & Character & f64 + MPFR \\
-22 & baez-duarte & BD & 512-bit MPFR \\
-23 & numerical & Numerical & f64 \\
-24 & l2-decay-certificate & $L^2$ & 256-bit MPFR \\
-25 & norm-bound-validator & Bounds & 256-bit MPFR \\
+21 & character-spectral & f64 + MPFR & Residue class spectral analysis \\
+22 & baez-duarte & 512-bit MPFR & High-precision $d^2$ \\
+23 & numerical & f64 & Fast numerical surveys \\
+24 & l2-decay-certificate & 256-bit MPFR & $L^2$ decay certification \\
+25 & norm-bound-validator & 256-bit MPFR & Norm bound validation \\
+26 & pnt-mobius-sums & f64 & M\"obius PNT sums \\
+27 & mobius-basis & f64 & M\"obius basis structure \\
+28 & siegel-walfisz & f64 & Siegel--Walfisz bounds \\
+29 & covariance-probe & 256-bit MPFR & Covariance matrix analysis \\
+30 & fejer-kernel & f64 & Fej\'er weight analysis \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Abel, Algebraic, and Zeta Tools (31--38)}
+
+Supporting infrastructure: Abel summation validators, algebraic
+identity checkers, Borel--Carath\'eodory witnesses, and the
+JSON certification export pipeline.
+
+\begin{center}\small
+\begin{tabular}{@{}rllp{5cm}@{}}
+\toprule
+\textbf{\#} & \textbf{Name} & \textbf{Precision} & \textbf{Purpose} \\
 \midrule
-26 & pnt-mobius-sums & PNT & f64 \\
-27 & mobius-basis & PNT & f64 \\
-28 & siegel-walfisz & PNT & f64 \\
-29 & covariance-probe & Covariance & 256-bit MPFR \\
-30 & fejer-kernel & Analysis & f64 \\
+31 & abel-bridge & 256-bit MPFR & Abel summation validation \\
+32 & abel-tail-validator & 256-bit MPFR & Tail bound verification \\
+33 & algebraic & Exact & Algebraic identity checks \\
+34 & millennium-wall & f64 & Wall criterion testing \\
+35 & bc-exponent-frontier & f64 & B--C exponent optimization \\
+36 & bc-witness-analysis & f64 & B--C witness construction \\
+37 & bc-zeta-lower & 256-bit MPFR & Zeta lower bounds \\
+38 & cert-export & f64 + JSON & Certificate pipeline \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{DD-Precision and GPU Frontier (39--47)}
+
+The high-precision frontier: Double-Double (31-digit) arithmetic,
+GPU-accelerated eigensolvers, and the certification pipeline that
+bridges computation to formal proof at $N = 55{,}440$.
+
+\begin{center}\small
+\begin{tabular}{@{}rllp{5cm}@{}}
+\toprule
+\textbf{\#} & \textbf{Name} & \textbf{Precision} & \textbf{Purpose} \\
 \midrule
-31 & abel-bridge & Abel & 256-bit MPFR \\
-32 & abel-tail-validator & Abel & 256-bit MPFR \\
-33 & algebraic & Algebraic & Exact \\
-34 & millennium-wall & Misc & f64 \\
+39 & nb-witness-scan & f64 (midpoint) & $d^2$ at $N$ up to 20K \\
+40 & certified-distance & DD + MPFR & DD $d^2$ at $N = 55{,}440$ \\
+41 & cathedral-utils & f64 + MPFR & Shared utility library \\
+43 & two-tile-decomposition & f64 & Tile structure analysis \\
+44 & nb-witness-scan-gpu & f32/f64 & GPU-accelerated $d^2$ \\
+45 & renormalization-bridge & f64 & Mass renormalization data \\
+46 & moebius-microscope & MPFR + CUDA & GPU Gram microscopy \\
+47 & hc-gram-oracle & DD + HPDF & HC-number Gram certification \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Advanced Analysis (49--55+)}
+
+Recent experiments exploring deeper structure: torus projections
+of the Gram energy onto $T^\infty = \prod_p S^1_p$, prime--zero
+duality via zeta zero harmonics, and overcancellation analysis.
+
+\begin{center}\small
+\begin{tabular}{@{}rllp{5cm}@{}}
+\toprule
+\textbf{\#} & \textbf{Name} & \textbf{Precision} & \textbf{Purpose} \\
 \midrule
-35 & bc-exponent-frontier & Zeta & f64 \\
-36 & bc-witness-analysis & Zeta & f64 \\
-37 & bc-zeta-lower & Zeta & 256-bit MPFR \\
-38 & cert-export & Certified & f64 + JSON \\
-\midrule
-39 & nb-witness-scan & BD & f64 (midpoint quad) \\
-40 & certified-distance & DD & DD + MPFR \\
-41 & cathedral-utils & Shared & f64 + MPFR \\
-42 & gram-scaling-oracle & Gram & 256-bit MPFR \\
-43 & two-tile-decomposition & Analysis & f64 \\
-44 & nb-witness-scan-gpu & BD (GPU) & f32/f64 \\
-45 & renormalization-bridge & Renorm & f64 \\
-46 & moebius-microscope & Gram (GPU) & MPFR-256 + CUDA \\
-47 & hc-gram-oracle & DD cert & DD + HPDF \\
-48 & spectral-observatory & Spectral & DD MPFR-256 \\
-49 & prime-harmonics & Mirror & f64 (10K zeros) \\
-50 & overcancellation-scan & Analysis & f64 + MPFR \\
-51 & torus-projection & Torus & f64 \\
-52 & selberg-ecot-exponent & Exponent & f64 \\
-53--55+ & (additional experiments) & Various & Mixed \\
+49 & prime-harmonics & f64 (10K zeros) & Prime--zero spectral mirror \\
+50 & overcancellation-scan & f64 + MPFR & Overcancellation analysis \\
+51 & torus-projection & f64 & Per-prime torus energy \\
+52 & selberg-ecot-exponent & f64 & Exponent optimization \\
+53--55+ & (additional) & Mixed & Ongoing investigations \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -208,7 +308,7 @@ where $c_{\mathrm{holes}} = 2 + \gamma - \ln(4\pi) \approx 0.0462$.
 The PNT sum $S_1 = \sum_{k \leq N} \mu(k)/k \to 0$ is confirmed
 to $O(10^{-3})$ at $N = 20{,}000$.
 
-Total computation time: 2{,}307 seconds (MacBook Pro, M-series, 10 cores).
+Total computation time: 2{,}307 seconds (MacBook Pro, M-series, 12 cores).
 
 \subsection{Parseval Bridge Validation}
 

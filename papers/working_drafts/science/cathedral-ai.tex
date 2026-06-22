@@ -16,7 +16,7 @@
 We document the methodology of AI-assisted formal verification as
 practiced in the Cathedral project, where a human mathematician
 collaborated with two large language models---Google DeepMind's
-Gemini and Anthropic's Claude---to produce a $\sim$120{,}000-line Lean~4
+Gemini and Anthropic's Claude---to produce a $\sim$158{,}000-line Lean~4
 formalization of the Nyman--Beurling equivalence for the Riemann
 Hypothesis. We analyze the division of labor, the communication
 protocols between human and AI, the failure modes encountered,
@@ -69,7 +69,7 @@ The human's role was irreplaceable in three areas:
   \item \textbf{Quality control}: Reading every line of generated
     Lean code, catching subtle errors that ``looked right'' but
     were mathematically wrong.
-  \item \textbf{Persistence}: The project took 68 days. Neither AI
+  \item \textbf{Persistence}: The project took 84 days. Neither AI
     maintained state between sessions. The human carried the
     architectural memory.
 \end{enumerate}
@@ -97,7 +97,7 @@ Gemini's contributions included:
 Claude's contributions included:
 \begin{enumerate}
   \item \textbf{Lean~4 implementation}: Writing and debugging
-    $\sim$120{,}000 lines of formal proof code (390+ active files).
+    $\sim$158{,}000 lines of formal proof code (504 active files).
   \item \textbf{The Parseval Bridge}: Implementing the frequency-domain
     bypass of the Vasyunin cotangent formula.
   \item \textbf{Rust experiments}: Designing and implementing all
@@ -156,7 +156,7 @@ a structural defense against correlated AI failure modes.
 \subsection{The Exploration Protocol}
 
 Mathematical investigations were organized as numbered
-``Explorations'' (37 total, spanning 68 days). Each exploration had:
+``Explorations'' (40+ total, spanning 84 days). Each exploration had:
 \begin{itemize}
   \item A hypothesis to test.
   \item An experimental design document.
@@ -197,7 +197,7 @@ was either machine-verified or explicitly marked as an axiom.
 
 \subsection{Context Window Limitations}
 
-Neither AI could hold the entire $\sim$120{,}000-line codebase in context.
+Neither AI could hold the entire $\sim$158{,}000-line codebase in context.
 This required careful file-level modularization and systematic
 documentation of inter-file dependencies.
 
@@ -222,7 +222,7 @@ possessed:
 \end{enumerate}
 
 % ================================================================
-\section{The 68-Day Timeline}
+\section{The 84-Day Timeline}
 % ================================================================
 
 \begin{center}
@@ -251,6 +251,12 @@ possessed:
 65--66 & \textbf{The Crowning} (v22): PNT graduation $\times$10 & Claude \\
 67 & \textbf{Night of Six Graduations}: dRH graduated & Claude \\
 68 & Torus Projection, warning cleanup, paper suite v23 & All three \\
+69--72 & \textbf{Glass Box} (v24): 7 sub-axioms, 5 graduated & Claude \\
+73--76 & \textbf{Path B} (Mack Truck): Fiber modules, 67$\times$ margin & Claude \\
+77--78 & \textbf{Penta-Crown} (v26): 5 independent proof paths & All three \\
+79--80 & Particle Zoo (55{,}440 integers, 3D galaxy) & Claude \\
+81--82 & Mellin Bridge (Hi-Lo crossover), Summit Assembly & Claude \\
+83--84 & Physics tower completion, Solstice polish & All three \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -286,9 +292,9 @@ reproducibility than any traditional mathematical paper.
 
 The Cathedral demonstrates that the ``three-mind'' architecture is
 not just feasible but \emph{powerful}. The axiom count dropped from
-56 to 2 (1 equivalent to RH, 1 unconditional PNT). The codebase grew from
-0 to $\sim$120{,}000 lines across 390+ active files and 37 explorations
-spanning 68 days. Five mathematical traps were caught that would have
+56 to 1 (equivalent to RH). The codebase grew from
+0 to $\sim$158{,}000 lines across 504 active files and 40+ explorations
+spanning 84 days. Five mathematical traps were caught that would have
 been invisible to informal proof. And a 167-year-old problem was
 reduced to one well-understood bound.
 

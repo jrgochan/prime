@@ -16,7 +16,7 @@
 \begin{abstract}
 We survey the engineering applications of the mathematical
 infrastructure developed in the Cathedral project---a
-$\sim$120{,}000-line Lean~4 formalization of the Nyman--Beurling
+$\sim$158{,}000-line Lean~4 formalization of the Nyman--Beurling
 equivalence for the Riemann Hypothesis. Beyond three direct
 applications (energy systems, security, signal processing),
 we identify four \emph{universal design patterns} that emerge from the
@@ -574,11 +574,77 @@ cryptographic parameter selection, safety-critical control systems,
 and certified numerical linear algebra.
 
 % ================================================================
+\section{Design Pattern 5: Fiber Decomposition\\
+  for Coprime Sector Analysis}
+\label{sec:fiber}
+% ================================================================
+
+\subsection{The Cathedral Identity}
+
+The Fiber Decomposition, proved in
+\texttt{Geometry/Fiber/FiberDecomposition.lean}
+(0 sorry, 0 axioms), decomposes the Gram quadratic form into
+\emph{coprime sectors}:
+\begin{equation}
+  v^T G v = \sum_{d} \sum_{\substack{j,k \\ \gcd(j,k) = d}}
+  v_j\, G(j,k)\, v_k
+\end{equation}
+Each GCD channel $d$ collects all interactions between elements
+sharing that common factor. The key insight (the ``Kiwi Discovery'')
+is that these channels are anatomically distinct: the coprime
+sector ($d = 1$) carries qualitatively different information from
+the highly composite sectors ($d = 12, 60, \ldots$).
+
+\subsection{The Engineering Pattern}
+
+Any system whose coupling matrix has multiplicative structure
+admits a fiber decomposition:
+\begin{enumerate}
+  \item Partition interactions by their ``shared factor'' (GCD for
+    integers, common dependency for supply chains, shared protocol
+    for networks).
+  \item Analyze each fiber independently---the coprime fiber
+    ($d = 1$) reveals novel interactions, while high-$d$ fibers
+    reveal redundant coupling.
+  \item Apply the \textbf{Mack Truck criterion}: if the total
+    energy satisfies $d^2 \leq 2 \cdot \text{gap}$, the system
+    converges with a provable safety margin.
+\end{enumerate}
+
+The Cathedral's Path B achieves a \textbf{67$\times$ safety margin}
+using this criterion---meaning the bound holds with 67 times the
+energy to spare.
+
+\subsection{Applications}
+
+\begin{center}
+\small
+\begin{tabular}{@{}lllp{4cm}@{}}
+\toprule
+\textbf{Domain} & \textbf{Fiber = GCD channel} & \textbf{Coprime sector} & \textbf{Diagnostic} \\
+\midrule
+Supply chains & Shared supplier & Novel vendor pairs & Concentration risk \\
+Network traffic & Shared protocol & Cross-protocol flows & Anomaly detection \\
+Gene networks & Shared pathway & Novel gene interactions & Discovery targets \\
+Financial & Shared sector & Cross-sector correlation & Systemic risk \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The fiber decomposition is particularly powerful for
+\emph{anomaly detection}: novel interactions (coprime sector)
+stand out against the background of expected coupling
+(high-$d$ fibers). This is the engineering analogue of the
+Cathedral's discovery that fermionic overcancellation (coprime
+pairs) drives convergence, not bosonic self-coupling
+(highly composite pairs).
+
+% ================================================================
 \section{Conclusion}
 % ================================================================
 
 The Cathedral's mathematical infrastructure---originally developed
-for the Riemann Hypothesis---provides four universal engineering
+for the Riemann Hypothesis---provides five universal engineering
 design patterns:
 
 \begin{center}
@@ -591,6 +657,7 @@ Cholesky Cooling & $d^2_{N+1} = d^2_N - y^2$ & Iterative allocation \\
 Ward Health Index & $D + B + F$, $|W| \approx 0$ & Parity diagnostics \\
 Anomaly Gating & $G = A + H$ & Precision engineering \\
 Torus Stratification & $T^\infty = \prod_p S^1_p$ & Parallel computation \\
+Fiber Decomposition & GCD channel anatomy & Coprime sector analysis \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -615,7 +682,7 @@ validation at industrial precision levels, from f64 through
 \begin{thebibliography}{99}
 \bibitem{cathedral}
 J.R.~Gochanour, \emph{The Cathedral: A Formal Reduction of the
-Riemann Hypothesis to Two Axioms via the Nyman--Beurling
+Riemann Hypothesis to One Axiom via the Nyman--Beurling
 Criterion}, 2026.
 \bibitem{cathedral-physics}
 J.R.~Gochanour, \emph{The Physics of the Primes}, Cathedral Paper

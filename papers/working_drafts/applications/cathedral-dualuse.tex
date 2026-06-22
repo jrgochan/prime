@@ -38,7 +38,7 @@ where high-condition-number spectral injections cause
 defender software to hallucinate.
 Since the original version of this paper (April~20, 2026),
 the Cathedral has evolved from a single-path, single-axiom
-architecture (v5) to a \emph{two-axiom crown} architecture (v23) with
+architecture (v5) to a \emph{one-axiom crown} architecture (v26) with
 multiple independent compiler-verified proof routes connected by the
 Parseval Bridge---a zero-axiom isometry between time and frequency
 domains---and a Torus Projection that decomposes the Gram energy onto
@@ -118,16 +118,16 @@ has undergone a fundamental architectural transformation:
     IMRN 2003). Three alternative proof paths (Mellin, Perron,
     Renormalization) are preserved with different axiom footprints,
     all connected by the Parseval Bridge (zero-axiom isometry).
-  \item \textbf{Scale}: 390+ active Lean files, $\sim$120{,}000 lines of
+  \item \textbf{Scale}: 504 active Lean files, $\sim$158{,}000 lines of
     formally verified logic, 55+ computational experiments,
-    0 sorry placeholders on the critical path, 8{,}736 build jobs.
+    0 sorry placeholders on the critical path, 8{,}848 build jobs.
   \item \textbf{DD-precision certification}: A Dekker--Knuth
     Double-Double Conjugate Gradient engine certifies the
     B\'aez-Duarte distance at $N = 55{,}440$ ($\dim = 55{,}439$),
     the largest such computation in the literature. A 512-bit MPFR
     engine provides Sherman-Morrison cross-validation to $10^{-17}$.
-  \item \textbf{AI collaboration}: The entire v5 $\to$ v23 journey
-    was conducted through human-AI pair programming over 68 days,
+  \item \textbf{AI collaboration}: The entire v5 $\to$ v26 journey
+    was conducted through human-AI pair programming over 84 days,
     demonstrating the feasibility of AI-assisted formal verification.
   \item \textbf{Engineering design patterns (v23)}: Four universal
     patterns now extend the attack surface beyond spectral analysis:
