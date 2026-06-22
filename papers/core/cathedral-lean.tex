@@ -26,7 +26,7 @@ Riemann Hypothesis, proof engineering.
 \begin{abstract}
 We describe the practical techniques and logical foundations for
 formalizing analytic number theory in Lean~4 with Mathlib, distilled
-from the Cathedral project: a $\sim$120{,}000-line formalization of the
+from the Cathedral project: a $\sim$158{,}000-line formalization of the
 Nyman--Beurling criterion for the Riemann Hypothesis.
 
 The first half covers foundations: the type-theoretic setting (CIC
@@ -64,7 +64,7 @@ the \emph{foundational} (what are we trusting?) and the
 \toprule
 \textbf{Layer} & \textbf{What Must Be Trusted} \\
 \midrule
-5 & Mathematical axioms (2 substantive on crown, $\sim$92 active total) \\
+5 & Mathematical axioms (1 substantive on crown, $\sim$92 active total) \\
 4 & Mathlib library ($\sim$1.4M LOC) \\
 3 & Lean kernel axioms (3: \lean{propext}, \lean{choice}, \lean{Quot.sound}) \\
 2 & Lean type-checker ($\sim$5{,}000 LOC of C++ kernel) \\
@@ -76,7 +76,7 @@ the \emph{foundational} (what are we trusting?) and the
 The Cathedral project encountered the challenge of using complex
 analysis, real analysis, combinatorics, and linear algebra
 \emph{together} in a single proof, with consistent type coercions
-and compatible assumptions. Over $\sim$68 days it produced 390+ active
+and compatible assumptions. Over $\sim$84 days it produced 504 active
 Lean files (with 114 archived). This paper distills the lessons.
 
 % ================================================================
@@ -106,8 +106,9 @@ $\ZFC$ plus countably many inaccessible cardinals~\cite{carneiro2019}.
 
 \subsection{The Axioms of the Crown}
 
-The crown theorem (\lean{baez\_duarte\_forward}) reports 7 axioms via
-\lean{\#print axioms}: 3 kernel + 2 substantive + 2 PNT bureaucracy.
+The crown theorem (\lean{baez\_duarte\_forward}) reports 6 axioms via
+\lean{\#print axioms}: 3 kernel + 1 substantive (overcancellation)
++ 2 PNT bureaucracy.
 
 \begin{center}
 \small
@@ -119,24 +120,24 @@ The crown theorem (\lean{baez\_duarte\_forward}) reports 7 axioms via
 2 & \lean{Classical.choice} & Lean kernel & --- \\
 3 & \lean{Quot.sound} & Lean kernel & --- \\
 \midrule
-4 & \lean{gram\_form\_upper\_bound} & Cathedral & $v^T G v \leq 1+K/\ln N$ ($\equiv$ RH) \\
-5 & \lean{mertens\_34\_unconditional} & PNT & $|M(x)| \leq Cx^{3/4}$ (unconditional) \\
+4 & \lean{overcancellation\_axiom} & Cathedral & $\equiv$ RH (Glass Box) \\
 \midrule
-6 & \lean{frac\_error\_isLittleO} & PNT & Fractional-part error \\
-7 & \lean{pnt\_mu\_log\_sq\_div\_k} & PNT & $\sum \mu(n)(\ln n)^2/n$ \\
+5 & \lean{frac\_error\_isLittleO} & PNT & Fractional-part error \\
+6 & \lean{pnt\_mu\_log\_sq\_div\_k} & PNT & $\sum \mu(n)(\ln n)^2/n$ \\
 \bottomrule
 \end{tabular}
 \end{center}
 
 \noindent
-The two \emph{substantive} mathematical axioms are:
-\lean{gram\_form\_upper\_bound} (the Gram quadratic form bound,
-formally equivalent to RH) and \lean{mertens\_34\_unconditional}
-(the classical Mertens bound $|M(x)| \leq Cx^{3/4}$, an unconditional
-consequence of PNT, provable in $\ZFC$). The former sole axiom
+The sole \emph{substantive} mathematical axiom is
+\lean{overcancellation\_axiom}, which is formally proved
+\emph{equivalent} to the Riemann Hypothesis via the Glass Box
+architecture (v24). The former axiom
 \lean{discrete\_riemann\_hypothesis} ($v^T C v \leq C/\ln N$)
 was \textbf{graduated to a theorem} on June~1, 2026, derived via
-variance decomposition. Ten PNT bureaucracy axioms were graduated
+variance decomposition. The former PNT axiom
+\lean{mertens\_34\_unconditional} was also graduated. Ten
+PNT bureaucracy axioms were graduated
 using the PrimeNumberTheoremAnd bridge (May~31, 2026).
 The 2 remaining PNT bureaucracy axioms (axioms 6--7) are unconditional
 consequences of the Prime Number Theorem; they are imported as axioms
@@ -165,7 +166,7 @@ of the tactics or library~\cite{debruijn1970}.
 Lean kernel (type-checker) & $\sim$5{,}000 \\
 Lean elaborator + tactics & $\sim$100{,}000 \\
 Mathlib library & $\sim$1{,}400{,}000 \\
-Cathedral & $\sim$120{,}000 \\
+Cathedral & $\sim$158{,}000 \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -182,7 +183,7 @@ The Cathedral introduces a foundational concept: the
 
 \begin{enumerate}
   \item \textbf{Kernel axioms}: Trusted by design. (3)
-  \item \textbf{Crown axioms (substantive)}: On the critical path. (2: 1 RH + 1 PNT)
+  \item \textbf{Crown axioms (substantive)}: On the critical path. (1: overcancellation $\equiv$ RH)
   \item \textbf{Crown axioms (PNT bureaucracy)}: Unconditional,
     provable from Mathlib PNTA. (2)
   \item \textbf{Off-path axioms}: Don't affect the crown. ($\sim$86)
@@ -192,7 +193,7 @@ The Cathedral introduces a foundational concept: the
 
 This gradient makes progress visible. Each axiom elimination moves
 a statement from category~2/3 to category~5. The reduction from
-56 crown axioms to 2 substantive axioms is a deleveraging of the proof's
+56 crown axioms to 1 substantive axiom is a deleveraging of the proof's
 balance sheet.
 
 % ================================================================
@@ -410,8 +411,8 @@ was substantially reduced by the PrimeNumberTheoremAnd bridge
 (10 axioms graduated); 2 PNT bureaucracy axioms remain
 \textbf{on the crown path}, while 2 analytic
 continuation axioms remain \textbf{quarantined on alternative
-exploratory paths}. The Cathedral took $\sim$68 days and produced
-$\sim$120{,}000 lines across 390+ active files (500+ including archived
+exploratory paths}. The Cathedral took $\sim$84 days and produced
+$\sim$158{,}000 lines across 504 active files (600+ including archived
 explorations).
 
 The foundational analysis shows the proof inhabits ordinary
@@ -431,7 +432,7 @@ The complete Lean~4 formalization, Rust experiments, and GPU
 pipeline code are available at
 \url{https://github.com/jrgochan/prime}.
 The repository compiles with \texttt{lake build} (Lean~4 /
-Mathlib, zero errors, 8{,}736 build jobs, zero non-sorry warnings).
+Mathlib, zero errors, 8{,}848 build jobs, zero non-sorry warnings).
 
 \begin{thebibliography}{99}
 
