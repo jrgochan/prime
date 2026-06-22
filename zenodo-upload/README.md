@@ -100,7 +100,7 @@ Requires: Lean 4 (v4.x) and Mathlib.
   title = {The Cathedral: A Machine-Verified Architecture for the Riemann Hypothesis},
   year = {2026},
   publisher = {Zenodo},
-  doi = {10.5281/zenodo.XXXXXXX}
+  doi = {10.5281/zenodo.20803093}
 }
 ```
 
