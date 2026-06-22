@@ -782,6 +782,8 @@ lean_lib «Cathedral» where
     `Cathedral.Geometry.Crown.StrataCrownBridge,
     -- L₁ Tracking Lemma (two infinities cancel: tracking ↔ overcancellation → RH, June 6 2026) 🏔️🌉🏛️
     `Cathedral.Geometry.L1TrackingLemma,
+    -- Gram Graduation (algebraic reduction: gram_limit from d2_logN_limit + margin, June 7 2026) 🌀
+    `Cathedral.Geometry.Renormalization.GramGraduation,
     -- Mass Renormalization (d²(v)·logN → c_holes = 2+γ−log4π, algebraic glue, June 7 2026) 🌀⚛️
     `Cathedral.Geometry.Renormalization.MassRenormalization,
     -- Margin Graduation (N^{-1/4}·log²N → 0, Part B Tendsto, three-part algebra, June 7 2026) 🎓
