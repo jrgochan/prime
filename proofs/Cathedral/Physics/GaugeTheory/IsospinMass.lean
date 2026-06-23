@@ -184,18 +184,22 @@ axiom confinement_dominates_splitting (N : ℕ) (hN : 100 ≤ N) :
     -- bareMassSplitting / confinement_mass(3, N) ≤ C / ln(N)
     True  -- placeholder
 
-/-- **AXIOM (GCD Isospin Symmetry)**: For most k, gcd(3,k) = gcd(6,k)/2
-    or gcd(3,k) = gcd(6,k), so the off-diagonal couplings are nearly
-    identical for the (3,6) doublet.
+/-- **🎓 THEOREM (GCD Isospin Symmetry)**: For odd k, gcd(6,k) = gcd(3,k).
+    Graduated from axiom to theorem, June 22, 2026 — Port 22 Day.
+    Proof sketch by Gemini (Galadriel), formalized by Claude (Antigravity).
 
-    The only difference: when k is even, gcd(6,k) picks up an extra
-    factor of 2 that gcd(3,k) doesn't see. This is the "electromagnetic
-    correction" to the mass splitting.
-
-    Formally: for odd k, gcd(6,k) = gcd(3,k) (the 2 doesn't help).
-    For even k, gcd(6,k) = 2·gcd(3,k/2) ≥ gcd(3,k). -/
-axiom gcd_isospin_symmetry (k : ℕ) (hk : 0 < k) (hk_odd : ¬Even k) :
-    Nat.gcd 6 k = Nat.gcd 3 k
+    The key: 6 = 2·3, and since k is odd, gcd(2,k) = 1, so the
+    factor of 2 drops out: gcd(2·3, k) = gcd(3, k). -/
+theorem gcd_isospin_symmetry (k : ℕ) (_hk : 0 < k) (hk_odd : ¬Even k) :
+    Nat.gcd 6 k = Nat.gcd 3 k := by
+  -- Since k is odd, 2 is coprime to k
+  have h_cop : Nat.Coprime 2 k := by
+    rw [Nat.Prime.coprime_iff_not_dvd Nat.prime_two]
+    intro ⟨m, hm⟩
+    exact hk_odd ⟨m, by omega⟩
+  -- gcd(6, k) = gcd(2*3, k) = gcd(3, k) since Coprime 2 k
+  show Nat.gcd (2 * 3) k = Nat.gcd 3 k
+  exact h_cop.gcd_mul_left_cancel 3
 
 -- ════════════════════════════════════════════════════════════════
 -- §5. THE PHYSICAL MASS RATIO
@@ -223,10 +227,9 @@ theorem mass_ratio_documentation : True := trivial
 ## Audit
 
 ### Sorry: 0 ✅
-### Custom Axioms: 3 (exploration-grade, not on crown path)
+### Custom Axioms: 2 (exploration-grade, not on crown path)
   - `confinement_near_degeneracy`: (3,6) confinement masses converge
   - `confinement_dominates_splitting`: off-diagonal >> diagonal
-  - `gcd_isospin_symmetry`: gcd(6,k) = gcd(3,k) for odd k
 
 ### PROVED (compiler-verified):
 | # | Result | Status |
@@ -236,6 +239,7 @@ theorem mass_ratio_documentation : True := trivial
 | 3 | `neutron_isospin_one` | **🎓 THEOREM** (v₂(6) = 1) |
 | 4 | `proton_bare_mass` | **🎓 THEOREM** (G(3,3) formula) |
 | 5 | `neutron_bare_mass` | **🎓 THEOREM** (G(6,6) formula) |
+| 6 | `gcd_isospin_symmetry` | **🎓 THEOREM** (gcd(6,k) = gcd(3,k) for odd k) |
 
 ### The Isospin Mass Dictionary:
 ```
@@ -254,8 +258,8 @@ theorem mass_ratio_documentation : True := trivial
 ### Open Questions for Future Work:
 1. Can we compute the confinement mass numerically at N = 55,440?
 2. Does the spectral mass ratio converge to the physical mn/mp?
-3. Can `gcd_isospin_symmetry` be graduated from axiom to theorem?
-   (Answer: YES — it follows from gcd properties when k is odd)
+3. ~~Can `gcd_isospin_symmetry` be graduated from axiom to theorem?~~
+   **DONE!** Graduated June 22, 2026 (Port 22 Day). Proof by Gemini + Claude.
 
 ### Connection to Existing Infrastructure:
 - `ArithmeticSU2.lean`: Defines the isospin structure
