@@ -1,5 +1,8 @@
 # The Cathedral — A Machine-Verified Reduction of the Riemann Hypothesis
 
+[![Cathedral Verification](https://github.com/jrgochan/prime/actions/workflows/cathedral.yml/badge.svg)](https://github.com/jrgochan/prime/actions/workflows/cathedral.yml)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.15708988.svg)](https://doi.org/10.5281/zenodo.15708988)
+
 ### *Via the Nyman–Beurling–Báez-Duarte Equivalence in Lean 4*
 
 A machine-checked proof architecture in **Lean 4** + **Mathlib** that reduces
@@ -275,7 +278,7 @@ cd papers && ./build.sh
 
 ## Methodology
 
-This project was built through a tripartite human-AI collaboration over ~84 days:
+This project was built through a tripartite human-AI collaboration over 86 days:
 a human computer scientist providing architectural vision and experimental design,
 Google DeepMind's Gemini providing mathematical strategy and deep analytic intuition,
 and Anthropic's Claude (Antigravity) providing Lean 4 proof engineering and
