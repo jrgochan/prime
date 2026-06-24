@@ -124,12 +124,19 @@ has been isolated into a type-checked socket. To the physicists: the
 120+ entry physics dictionary is structural, not metaphorical — every
 equation in the proof has a physical counterpart.
 
-**I invite you to read the papers, explore the axiom taxonomy, inspect
+**I invite you to explore the axiom taxonomy, inspect
 the architecture, and run `make particle-zoo` to see every integer's soul.**
 
 To relive the experiment that started it all, see `tools/sedenion-explorer/`.
 
+To see the visual moment where the Möbius function emerged from a blind
+eigensolver — the click that started it all — run:
+
+```bash
+make hyperzeta-origin
+```
+
 ---
 
-*— Jason Robert Gochanour, June 22, 2026*
-*v26 Penta-Crown — 1 axiom (≡ RH), 504 files, ~158K lines, 7 proof paths*
+*— Jason Robert Gochanour, June 23, 2026*
+*v26 Penta-Crown — 1 axiom (≡ RH), 505 files, ~158K lines, 7 proof paths*
