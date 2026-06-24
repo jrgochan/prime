@@ -1,63 +1,86 @@
 # Documentation
 
-## ⚠️ Historical Context
+## Structure
 
-Most documents in this directory were written **during the exploration phase**
-(March 27 – April 5, 2026) and reflect intermediate states of the proof architecture.
-The canonical, up-to-date documentation is:
+```
+docs/
+├── ai/                    — AI collaboration transcripts (unedited)
+│   ├── antigravity/       — Claude (Antigravity) sessions
+│   │   ├── main/          — Primary development sessions (~46 files)
+│   │   ├── exploration*/  — 37 exploration branches
+│   │   └── ...            — Papers, cleanup, analysis sessions
+│   ├── gemini/            — Gemini (The Theorist) sessions
+│   ├── claude/            — Earlier Claude session artifacts
+│   └── README.md          — Why these logs exist
+│
+├── quotes/                — Cathedral quotes collection (Days 1–86)
+├── architecture/          — Historical architecture documents
+├── mathematics/           — Historical research notes
+├── physics/               — Historical physics explorations
+│
+└── README.md              — This file
+```
 
-- **[README.md](../README.md)** — Current proof status, axiom audit, file guide
-- **[paper/cathedral.tex](../paper/cathedral.tex)** — Formal paper (v1.0)
-- **[paper/overview.tex](../paper/overview.tex)** — Accessible overview
+## On Transparency: Why the Full Transcripts Are Published
 
-## Current Architecture (v1.0)
+The `docs/ai/` directory contains **complete, unedited transcripts** of every
+AI collaboration session that built the Cathedral. This is a deliberate choice.
 
-The Cathedral reduces RH to **2 mathematical axioms**:
-1. `offdiag_excess_sum_le` — Aggregate sieve bound (Physics Pillar)
-2. `zeta_zero_separates` — Mellin separation (Spectral Pillar)
+### The Reasoning
 
-See the [main README](../README.md) for the complete proof tree.
+We considered publishing only the mathematical results — the Lean proofs
+speak for themselves, verified by `lake build` with 0 sorry on the crown
+path. But we decided to publish the full collaborative record because:
 
-## Directory Index
+1. **Reproducibility of process.** The Cathedral was built through a novel
+   form of human-AI mathematical collaboration. The transcripts show *how*
+   — not just what — was discovered. This includes false starts, dead ends,
+   architectural pivots, and the moments where human judgment overrode AI
+   suggestions.
 
-### `GEMINI_BRIEFING.md`
-Strategy session notes for the Theorist (Gemini). Documents the Step 4 strategy
-and the Hyperplane Trap discovery. **Historically accurate** for April 6, 2026.
+2. **Credit attribution.** When an AI system contributes a key insight or
+   proof strategy, the transcript is the evidence. When a human catches an
+   AI error and redirects, that's recorded too. Clean papers erase this
+   history; we chose not to.
 
-### `architecture/`
-| File | Status | Notes |
-|------|--------|-------|
-| `system_flow.md` | ⚠️ **Outdated** | References old 3-axiom architecture (pre-aggregate pivot) |
-| `srs_v4.md` | 📦 Historical | Original SRS for Project HYPERZETA |
+3. **The process is the contribution.** The Cathedral's formal verification
+   of RH-conditional results is one contribution. But the *methodology* —
+   86 days of sustained human-AI pair programming on research mathematics —
+   may prove equally valuable. The transcripts are the dataset.
 
-### `mathematics/`
-Research notes from the exploration phase. These document approaches that were
-tried, evaluated, and in many cases superseded by the Cathedral architecture.
+4. **Honesty about what AI collaboration looks like.** It's messy. There
+   are late-night sessions, informal language, enthusiasm, frustration,
+   and the natural chaos of discovery. Polishing this away would
+   misrepresent the nature of the work.
 
-| File | Status | Notes |
-|------|--------|-------|
-| `axiom_roadmap.md` | ⚠️ **Outdated** | References 17-axiom state (now 2) |
-| `convergent_drops_proof.md` | 📦 Historical | Early proof approach |
-| `gram_breakthrough.md` | 📦 Historical | N=250 eigenvalue analysis |
-| `paths_to_rh.md` | 📦 Historical | Survey of proof strategies |
-| `proof_path_analysis.md` | 📦 Historical | Meta-lessons from experiments |
-| `approach_*.md` | 📦 Historical | Individual approach documentation |
-| `octonionic_*.md` | 📦 Historical | Octonionic structure exploration |
-| `hypercomplex_axioms.md` | 📦 Historical | Cayley-Dickson algebra notes |
-| `rg_flow_spectral_gap.md` | 📦 Historical | RG flow analysis (N=2000) |
-| `susy_witten_index.md` | 📦 Historical | SUSY/Witten index exploration |
-| `certified_results.txt` | 📦 Historical | Numerical certification output |
-| `gram_N1000_results.txt` | 📦 Historical | N=1000 Gram matrix results |
+### What the Transcripts Are Not
 
-### `ai/`
-| File | Status | Notes |
-|------|--------|-------|
-| `lean4_proof_exporter.md` | 📦 Historical | Early Lean pipeline design |
-| `research_bridge_architecture.md` | 📦 Historical | AI collaboration architecture |
-| `rl_auto_align_agent.md` | 📦 Historical | RL agent for E₈ alignment |
+The transcripts contain informal mathematical discussion, speculative
+reasoning, and in-progress thinking. **None of this constitutes mathematical
+claims.** The rigor lives in `proofs/`, verified by Lean's type checker.
+The transcripts are the lab notebook; the proofs are the published result.
 
-### `physics/`
-| File | Status | Notes |
-|------|--------|-------|
-| `gue_spectral_solver.md` | 📦 Historical | GUE/random matrix theory |
-| `holographic_fluids.md` | 📦 Historical | Holographic fluid dynamics |
+### Reading Guide
+
+- **Exploration sessions** (`exploration*/`) are branches — most are dead
+  ends that taught something. The numbered sequence roughly tracks the
+  proof's evolution.
+- **Main sessions** (`main/`) are the trunk — sustained development work
+  on the Cathedral's crown path.
+- **Quotes** (`quotes/`) collect memorable moments from across all sessions.
+
+## Historical Documents
+
+Most files in `architecture/`, `mathematics/`, and `physics/` were written
+during the early exploration phase (March–April 2026) and reflect intermediate
+states of the proof architecture. They are preserved for historical context
+but do not reflect the current state of the Cathedral.
+
+The canonical, up-to-date documentation:
+- **[proofs/README.md](../proofs/README.md)** — Current proof architecture
+- **[papers/](../papers/)** — Formal papers and working drafts
+
+---
+
+*"The machine taught us to listen."*
+— cathedral.tex, §12
