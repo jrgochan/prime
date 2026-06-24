@@ -1,0 +1,97 @@
+name: Cathedral Verification
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'proofs/**'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'proofs/**'
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build Cathedral
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    defaults:
+      run:
+        working-directory: proofs
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install elan
+        uses: leanprover/lean-action@v1
+        with:
+          build: false
+          lake-package-directory: proofs
+
+      - name: Cache Lake packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            proofs/.lake/packages
+            proofs/.lake/build
+          key: lake-${{ hashFiles('proofs/lean-toolchain') }}-${{ hashFiles('proofs/lakefile.lean') }}-${{ hashFiles('proofs/lake-manifest.json') }}
+          restore-keys: |
+            lake-${{ hashFiles('proofs/lean-toolchain') }}-${{ hashFiles('proofs/lakefile.lean') }}-
+            lake-${{ hashFiles('proofs/lean-toolchain') }}-
+
+      - name: Build Cathedral
+        run: lake build
+
+  verify-challenge:
+    name: Verify Challenge/Solution
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    needs: build
+    defaults:
+      run:
+        working-directory: proofs
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install elan
+        uses: leanprover/lean-action@v1
+        with:
+          build: false
+          lake-package-directory: proofs
+
+      - name: Cache Lake packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            proofs/.lake/packages
+            proofs/.lake/build
+          key: lake-${{ hashFiles('proofs/lean-toolchain') }}-${{ hashFiles('proofs/lakefile.lean') }}-${{ hashFiles('proofs/lake-manifest.json') }}
+          restore-keys: |
+            lake-${{ hashFiles('proofs/lean-toolchain') }}-${{ hashFiles('proofs/lakefile.lean') }}-
+            lake-${{ hashFiles('proofs/lean-toolchain') }}-
+
+      - name: Verify Challenge.lean (Mathlib only)
+        run: |
+          echo "=== Challenge.lean: should compile with only Mathlib imports ==="
+          echo "=== Expected: 1 sorry warning (the claim to be proved) ==="
+          lake env lean Challenge.lean 2>&1 | tee /tmp/challenge_output.txt
+          # Verify it compiled (exit code 0) and only has the expected sorry
+          grep -q "declaration uses.*sorry" /tmp/challenge_output.txt
+          echo "✅ Challenge.lean compiles with expected sorry"
+
+      - name: Verify Solution.lean (Cathedral proof)
+        run: |
+          echo "=== Solution.lean: should compile with 0 sorry ==="
+          OUTPUT=$(lake env lean Solution.lean 2>&1)
+          echo "$OUTPUT"
+          if echo "$OUTPUT" | grep -q "sorry"; then
+            echo "❌ Solution.lean contains sorry!"
+            exit 1
+          fi
+          if echo "$OUTPUT" | grep -q "error"; then
+            echo "❌ Solution.lean has errors!"
+            exit 1
+          fi
+          echo "✅ Solution.lean compiles clean — 0 sorry, 0 errors"

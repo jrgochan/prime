@@ -1,3 +1,3 @@
-import Cathedral.Assembly.DirectL2Crown
+import Cathedral.Vasyunin.Proof.Chain
 
-#print axioms rh_implies_bd_convergence_direct
+#print axioms Cathedral.Vasyunin.Proof.Chain.vasyunin_proof_chain
