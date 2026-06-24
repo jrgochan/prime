@@ -1,4 +1,4 @@
-# Cathedral Priority Certificate
+# Cathedral Provenance Record
 
 ## Timestamp
 - **Date**: June 1, 2026, 09:42:11 UTC (03:42 AM MDT)
@@ -8,11 +8,15 @@
 
 ## Project Summary
 
-The Cathedral is a ~120,000-line Lean 4 formalization that reduces
-the Riemann Hypothesis to two axioms via the Nyman-Beurling criterion.
-390+ active files, 55+ computational experiments, zero sorry on the
-critical path. Built over 68 days (March 25 - June 1, 2026) through
-human-AI pair programming.
+The Cathedral is a ~158,000-line Lean 4 formalization that reduces
+the Riemann Hypothesis to one axiom (equivalent to RH) via the
+Nyman-Beurling criterion. 505 active files, 56 computational
+experiments, zero sorry on the critical path. Built over 86 days
+(March 30 - June 23, 2026) through human-AI pair programming.
+
+The mathematical content builds on the work of Nyman, Beurling,
+Báez-Duarte, Vasyunin, Burnol, and others. The contribution is
+the formalization architecture, not the underlying mathematics.
 
 ## SHA-256 Hashes of All 17 Papers
 
@@ -70,11 +74,16 @@ To verify the git commit:
 git log --oneline -1 f28383d9
 ```
 
-## Legal Notice
+## Notice
 
-This certificate establishes priority of authorship and discovery.
-The mathematical content, formal proofs, and associated papers are
-the intellectual property of Jason Robert Gochanour.
+This document records the provenance of the Cathedral formalization.
+The underlying mathematics belongs to the mathematical community.
+The formalization, proof engineering, and associated papers are the
+work of Jason Robert Gochanour with AI assistance (credited above).
 
-The Cathedral remains under coordinated disclosure pending
-security review of dual-use implications.
+Dual-use analysis papers were submitted for review in early June 2026.
+No response was received. The author made the independent judgment call
+to release the Cathedral publicly on June 22, 2026, consistent with
+the project's ethics framework (see [ETHICS.md](../ETHICS.md)).
+
+Licensed under Apache 2.0.
