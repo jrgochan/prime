@@ -1,7 +1,7 @@
 # The Cathedral — A Machine-Verified Reduction of the Riemann Hypothesis
 
 [![Cathedral Verification](https://github.com/jrgochan/prime/actions/workflows/cathedral.yml/badge.svg)](https://github.com/jrgochan/prime/actions/workflows/cathedral.yml)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.15708988.svg)](https://doi.org/10.5281/zenodo.15708988)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20803093.svg)](https://doi.org/10.5281/zenodo.20803093)
 
 ### *Via the Nyman–Beurling–Báez-Duarte Equivalence in Lean 4*
 
