@@ -726,6 +726,17 @@ technique in the Cathedral traces back to published mathematics listed here.
   > in the Gram diagonal is proved in `Physics/Cancellation/SUSYReduction.lean`
   > and `Physics/Cancellation/SUSYVacuum.lean` (0 sorry).
 
+### Geometric Unity
+
+- **Eric Weinstein**, "Geometric Unity," lecture at the University of
+  Oxford, 2013; preprint, 2021.
+
+  > The Geometric Unity framework inspired the inhomogeneous reformulation
+  > of the crown axiom: instead of requiring |B+F| → 0, the bound is
+  > expressed as vᵀGv = 1 + ε(N) where ε(N) = O(1/ln N) is the
+  > "inhomogeneous source" — the matter content of the arithmetic vacuum.
+  > Formalized in `Physics/Cancellation/InhomogeneousWard.lean`.
+
 ---
 
 ## Dedekind Sums
