@@ -95,3 +95,74 @@ jobs:
             exit 1
           fi
           echo "✅ Solution.lean compiles clean — 0 sorry, 0 errors"
+
+  comparator:
+    name: Comparator Verification
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    needs: build
+    defaults:
+      run:
+        working-directory: proofs
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install elan
+        uses: leanprover/lean-action@v1
+        with:
+          build: false
+          lake-package-directory: proofs
+
+      - name: Cache Lake packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            proofs/.lake/packages
+            proofs/.lake/build
+          key: lake-${{ hashFiles('proofs/lean-toolchain') }}-${{ hashFiles('proofs/lakefile.lean') }}-${{ hashFiles('proofs/lake-manifest.json') }}
+          restore-keys: |
+            lake-${{ hashFiles('proofs/lean-toolchain') }}-${{ hashFiles('proofs/lakefile.lean') }}-
+            lake-${{ hashFiles('proofs/lean-toolchain') }}-
+
+      - name: Extract toolchain version
+        id: toolchain
+        run: |
+          TAG=$(sed -e 's/^leanprover\/lean4://' lean-toolchain | tr -d '[:space:]')
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "Lean toolchain: $TAG"
+
+      - name: Clone and build lean4export
+        run: |
+          git clone --depth 1 https://github.com/leanprover/lean4export /tmp/lean4export
+          cd /tmp/lean4export
+          lake build
+
+      - name: Export Challenge module
+        run: |
+          lake env /tmp/lean4export/.lake/build/bin/lean4export Challenge > /tmp/challenge.export
+          echo "✅ Challenge module exported ($(wc -l < /tmp/challenge.export) lines)"
+
+      - name: Export Solution module
+        run: |
+          lake env /tmp/lean4export/.lake/build/bin/lean4export Solution > /tmp/solution.export
+          echo "✅ Solution module exported ($(wc -l < /tmp/solution.export) lines)"
+
+      - name: Clone and build comparator
+        run: |
+          git clone --depth 1 https://github.com/leanprover/comparator /tmp/comparator
+          cd /tmp/comparator
+          lake build
+
+      - name: Run comparator
+        run: |
+          echo "=== Running leanprover/comparator ==="
+          echo "=== Config: comparator.json ==="
+          cat comparator.json
+          echo ""
+          /tmp/comparator/.lake/build/bin/comparator \
+            /tmp/challenge.export \
+            /tmp/solution.export \
+            comparator.json
+          echo "✅ Comparator verification passed"
+
