@@ -138,6 +138,10 @@ jobs:
           cd /tmp/lean4export
           lake build
 
+      - name: Build Challenge and Solution targets
+        run: |
+          lake build Challenge Solution
+
       - name: Export Challenge module
         run: |
           lake env /tmp/lean4export/.lake/build/bin/lean4export Challenge > /tmp/challenge.export

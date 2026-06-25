@@ -842,3 +842,11 @@ lean_lib «Cathedral» where
     -- Dragonfruit Negativity (universal fiber negativity, June 12 2026) 🐉
     `Cathedral.Geometry.Fiber.DragonfruitNegativity,
   ]
+
+-- Comparator interface: Challenge (Mathlib-only statement) + Solution (Cathedral proof).
+-- These are separate targets so lean4export can export them independently.
+lean_lib «Challenge» where
+  roots := #[`Challenge]
+
+lean_lib «Solution» where
+  roots := #[`Solution]
