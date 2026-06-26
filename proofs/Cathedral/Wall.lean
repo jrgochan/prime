@@ -63,9 +63,10 @@ theorem overcancellation_axiom_cathedral :
 
 /-! ### Why this axiom cannot be graduated
 
-The `overcancellation_axiom` states that the Vasyunin Gram quadratic form
-`vᵀGv ≤ 1` for the specific log-cutoff Möbius witness. This statement
-is **equivalent** to the Riemann Hypothesis:
+The `overcancellation_axiom` (declared in CathedralDefs.lean, re-exported here)
+states that the Vasyunin Gram quadratic form `vᵀGv ≤ 1` for the specific
+log-cutoff Möbius witness. This statement is **equivalent** to the Riemann
+Hypothesis:
 
   **Forward** (Wall → RH): PROVED in `overcancellation_implies_rh`
   (OvercancellationChain.lean, 0 sorry, 2 PNT axioms).
