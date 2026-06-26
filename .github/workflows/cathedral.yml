@@ -23,7 +23,7 @@ jobs:
         working-directory: proofs
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Install elan
         uses: leanprover/lean-action@v1
@@ -32,7 +32,7 @@ jobs:
           lake-package-directory: proofs
 
       - name: Cache Lake packages
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             proofs/.lake/packages
@@ -55,7 +55,7 @@ jobs:
         working-directory: proofs
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Install elan
         uses: leanprover/lean-action@v1
@@ -64,7 +64,7 @@ jobs:
           lake-package-directory: proofs
 
       - name: Cache Lake packages
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             proofs/.lake/packages
@@ -107,7 +107,7 @@ jobs:
         working-directory: proofs
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Install elan
         uses: leanprover/lean-action@v1
@@ -116,7 +116,7 @@ jobs:
           lake-package-directory: proofs
 
       - name: Cache Lake packages
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             proofs/.lake/packages
