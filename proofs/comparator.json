@@ -9,5 +9,6 @@
     "overcancellation_axiom",
     "pnt_mu_log_sq_div_k",
     "frac_error_isLittleO"
-  ]
+  ],
+  "enable_nanoda": false
 }
