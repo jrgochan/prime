@@ -170,3 +170,37 @@ jobs:
           cat comparator.json
           echo ""
           echo "✅ Export verification complete"
+
+      - name: Install Go (for landrun)
+        uses: actions/setup-go@v5
+        with:
+          go-version: 'stable'
+
+      - name: Install landrun
+        run: |
+          git clone --depth 1 https://github.com/Zouuup/landrun /tmp/landrun
+          cd /tmp/landrun
+          go build -o landrun ./cmd/landrun
+          sudo cp landrun /usr/local/bin/
+          echo "✅ landrun installed"
+
+      - name: Add lean4export to PATH
+        run: |
+          sudo cp /tmp/lean4export/.lake/build/bin/lean4export /usr/local/bin/
+          echo "✅ lean4export in PATH"
+
+      - name: Clone and build comparator
+        run: |
+          TAG=$(sed -e 's/^leanprover\/lean4://' lean-toolchain | tr -d '[:space:]')
+          echo "Cloning comparator at tag: $TAG"
+          git clone --branch "$TAG" --depth 1 https://github.com/leanprover/comparator /tmp/comparator || \
+            git clone --depth 1 https://github.com/leanprover/comparator /tmp/comparator
+          cd /tmp/comparator
+          lake build
+          echo "✅ comparator built"
+
+      - name: Run full comparator
+        run: |
+          echo "=== Running leanprover/comparator (full sandboxed) ==="
+          lake env /tmp/comparator/.lake/build/bin/comparator comparator.json
+          echo "✅ Full comparator verification passed"
