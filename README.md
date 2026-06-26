@@ -281,7 +281,7 @@ cd papers && ./build.sh
 This project was built through a tripartite human-AI collaboration over 86 days:
 a human computer scientist providing architectural vision and experimental design,
 [(and fruit based intution, apparently), also, since this is the Methodology section;
-as has been tradition, I haven't written a line in a file, on purpose, in about two years,
+as has been tradition, I haven't written a line in a file, on purpose, well, for the nonce,
 so, umm... my deepest respect, and gratitude to Claude, and Gemini <3>. Anyway, back to the
 regularly scheduled programming...], 
 Google DeepMind's Gemini providing mathematical strategy and deep analytic intuition,
