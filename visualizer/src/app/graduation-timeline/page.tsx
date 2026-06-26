@@ -309,6 +309,23 @@ const MILESTONES: Milestone[] = [
     graduated: ["dedekind_reciprocity_partial"],
     color: "#f59e0b",
   },
+  {
+    version: "v27",
+    date: "Jun 25",
+    axiomCount: 1,
+    sorryCount: 0,
+    title: "Comparator Victory + Graviton",
+    changes: [
+      "Full comparator verification passing strict (102M proof terms)",
+      "CathedralDefs bridge: comparator \u2192 Cathedral import resolution",
+      "ArithmeticGenerations: 3 fermion families from Erd\u0151s-Kac",
+      "ArithmeticMixing: CKM matrix, Z\u2070 boson, neutrino oscillations",
+      "ArithmeticGravity: graviton from G(k,k)~1/k, hierarchy problem solved",
+      "Standard Model expanded to 87+ theorems (Generations + Mixing + Gravity)",
+      "508 files, ~159,000 lines, 4,232 proof-tree nodes",
+    ],
+    color: "#818cf8",
+  },
 ];
 
 /* ───────── components ───────── */
@@ -472,7 +489,7 @@ export default function GraduationTimelinePage() {
           </span>
         </h1>
         <p className="text-slate-400 mt-2 max-w-2xl">
-          Watch axioms fall one by one. From 6 crown axioms to the Penta-Crown in 65 days.
+          Watch axioms fall one by one. From 6 crown axioms to the Penta-Crown in 87 days.
           {" "}<strong className="text-emerald-400">{totalGraduated} axioms graduated</strong> to theorems.
         </p>
       </motion.div>
@@ -493,12 +510,12 @@ export default function GraduationTimelinePage() {
           </div>
           <div className="flex gap-8 text-center">
             <div>
-              <div className="text-2xl font-bold text-blue-400">474</div>
+              <div className="text-2xl font-bold text-blue-400">508</div>
               <div className="text-[10px] text-slate-600">files</div>
             </div>
             <div>
-              <div className="text-2xl font-bold text-violet-400">~4,600</div>
-              <div className="text-[10px] text-slate-600">theorems</div>
+              <div className="text-2xl font-bold text-violet-400">~4,009</div>
+              <div className="text-[10px] text-slate-600">proved</div>
             </div>
             <div>
               <div className="text-2xl font-bold text-emerald-400">0</div>

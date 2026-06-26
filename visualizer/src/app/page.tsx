@@ -37,9 +37,9 @@ const CARDS: CardInfo[] = [
     href: "/graduation-timeline",
     title: "Graduation Timeline",
     description:
-      "Watch axioms fall from 6 to 1 across 65 days. The full history of the Cathedral from v1 to v26: every graduation, every bypass, every crowning moment.",
+      "Watch axioms fall from 6 to 1 across 87 days. The full history of the Cathedral from v1 to v27: every graduation, every bypass, every crowning moment.",
     icon: "\u{1F4C8}",
-    stats: "v1\u2192v26 \u00B7 65 days \u00B7 20+ graduations",
+    stats: "v1\u2192v27 \u00B7 87 days \u00B7 20+ graduations",
     gradient: "from-rose-500/20 to-amber-500/20",
     border: "border-rose-500/20",
   },
@@ -79,7 +79,7 @@ const CARDS: CardInfo[] = [
     description:
       "Interactive force-directed graph of every theorem, axiom, and definition. Trace dependency chains from the Penta-Crown down to Mathlib foundations.",
     icon: "\uD83C\uDF33",
-    stats: "~4,600 theorems \u00B7 156 axioms \u00B7 474 files",
+    stats: "~4,009 proved \u00B7 174 axioms \u00B7 508 files",
     gradient: "from-emerald-500/20 to-teal-500/20",
     border: "border-emerald-500/20",
   },
@@ -224,18 +224,18 @@ export default function HomePage() {
         </h1>
         <p className="text-lg text-slate-400 max-w-2xl">
           A machine-checked reduction of the Riemann Hypothesis in Lean 4.
-          474 active files, 8,818 compiled targets. Penta-Crown architecture:
+          508 active files, ~159,000 lines. Penta-Crown architecture:
           5 independent proof paths, 6 routes to RH.
-          <span className="text-amber-400 text-sm ml-1">v26 Penta-Crown</span>
+          <span className="text-amber-400 text-sm ml-1">v27 Penta-Crown</span>
         </p>
 
         <div className="flex gap-6 mt-6 text-sm flex-wrap">
           {[
-            { color: "bg-emerald-500", text: "474 active files" },
-            { color: "bg-red-500", text: "8,818 build targets" },
+            { color: "bg-emerald-500", text: "508 active files" },
+            { color: "bg-red-500", text: "4,009 proved theorems" },
             { color: "bg-amber-500", text: "Penta-Crown (6 paths)" },
             { color: "bg-blue-500", text: "0 sorry on crown" },
-            { color: "bg-purple-500", text: "~149,500 lines of Lean 4" },
+            { color: "bg-purple-500", text: "~159,000 lines of Lean 4" },
           ].map((item) => (
             <div key={item.text} className="flex items-center gap-2">
               <div className={`w-2.5 h-2.5 rounded-full ${item.color}`} />
@@ -283,13 +283,13 @@ export default function HomePage() {
             <span className="text-2xl">{"\u{1F451}"}</span>
             <div>
               <h3 className="text-sm font-bold text-amber-400">
-                v26 &mdash; PENTA-CROWN (June 10, 2026)
+                v27 &mdash; PENTA-CROWN (June 25, 2026)
               </h3>
               <p className="text-xs text-slate-500 mt-0.5">
                 Penta-Crown architecture: Overcancellation (2 PNT axioms, cleanest path) +
                 Analytic + Oracle + Gram + Arakelov. PATH 1 <code>overcancellation_implies_rh</code>.
-                Glass Box graduation decomposes the sole axiom into 7 sub-axioms.
-                474 files, ~149K lines. 8,818 build targets. 101 Standard Model theorems.
+                Full comparator verification passing strict. CathedralDefs bridge.
+                508 files, ~159K lines. 87+ Standard Model theorems. 3 Generations + Graviton.
               </p>
             </div>
           </div>
