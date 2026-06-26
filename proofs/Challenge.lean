@@ -85,8 +85,6 @@ def vasyuninGramMatrix (N : ℕ) : Matrix (Fin N) (Fin N) ℝ :=
 def logCutoffWitness (N : ℕ) (i : Fin N) : ℝ :=
   -(↑(moebius (i.val + 1)) : ℝ) * (1 - Real.log ↑(i.val + 1) / Real.log ↑N)
 
-end CathedralChallenge
-
 -- ════════════════════════════════════════════════════════════════
 -- §2. THE THREE AXIOMS
 -- ════════════════════════════════════════════════════════════════
@@ -101,8 +99,8 @@ end CathedralChallenge
     Margin: vᵀGv ≤ 0.74 (26% below the threshold). -/
 axiom overcancellation_axiom :
     ∃ N₀ : ℕ, ∀ N : ℕ, N ≥ N₀ → N ≥ 3 →
-      dotProduct (CathedralChallenge.logCutoffWitness N)
-        ((CathedralChallenge.vasyuninGramMatrix N).mulVec (CathedralChallenge.logCutoffWitness N)) ≤ 1
+      dotProduct (logCutoffWitness N)
+        ((vasyuninGramMatrix N).mulVec (logCutoffWitness N)) ≤ 1
 
 /-- **AXIOM 2 — PNT (log²-weighted)**: Σ μ(k)·log²(k)/k → -2γ.
     From the second derivative of 1/ζ(s) at s=1.
@@ -126,6 +124,8 @@ axiom frac_error_isLittleO :
     (fun N : ℕ => ∑ n ∈ Icc 1 N, (↑(moebius n) : ℝ) *
       Real.log n * ((↑(N % n) : ℝ) / n))
     =o[atTop] (fun N => (N : ℝ))
+
+end CathedralChallenge
 
 -- ════════════════════════════════════════════════════════════════
 -- §3. THE CLAIM
