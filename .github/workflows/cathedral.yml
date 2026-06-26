@@ -176,7 +176,7 @@ jobs:
           echo "✅ Export verification complete"
 
       - name: Install Go (for landrun)
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           go-version: 'stable'
 
