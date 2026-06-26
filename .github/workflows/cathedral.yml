@@ -134,7 +134,10 @@ jobs:
 
       - name: Clone and build lean4export
         run: |
-          git clone --depth 1 https://github.com/leanprover/lean4export /tmp/lean4export
+          TAG=${{ steps.toolchain.outputs.tag }}
+          echo "Cloning lean4export at tag: $TAG"
+          git clone --branch "$TAG" --depth 1 https://github.com/leanprover/lean4export /tmp/lean4export || \
+            git clone --depth 1 https://github.com/leanprover/lean4export /tmp/lean4export
           cd /tmp/lean4export
           lake build
 
@@ -154,7 +157,10 @@ jobs:
 
       - name: Clone and build comparator
         run: |
-          git clone --depth 1 https://github.com/leanprover/comparator /tmp/comparator
+          TAG=${{ steps.toolchain.outputs.tag }}
+          echo "Cloning comparator at tag: $TAG"
+          git clone --branch "$TAG" --depth 1 https://github.com/leanprover/comparator /tmp/comparator || \
+            git clone --depth 1 https://github.com/leanprover/comparator /tmp/comparator
           cd /tmp/comparator
           lake build
 
