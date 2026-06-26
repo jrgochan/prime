@@ -281,13 +281,13 @@
       "sorryCount": 0
     },
     {
-      "id": "overcancellation_axiom",
-      "type": "axiom",
-      "category": "axiom",
+      "id": "overcancellation_axiom_cathedral",
+      "type": "theorem",
+      "category": "proved",
       "route": "infrastructure",
       "file": "Cathedral/Wall.lean",
-      "line": 65,
-      "signature": "axiom overcancellation_axiom : \u2203 N\u2080 : \u2115, \u2200 N : \u2115, N \u2265 N\u2080 \u2192 N \u2265 3 \u2192 dotProduct (logCutoffWitness N) ((vasyuninGramMatrix N).mulVec (logCutoffWitness N)) \u2264 1  -- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2026",
+      "line": 54,
+      "signature": "theorem overcancellation_axiom_cathedral : \u2203 N\u2080 : \u2115, \u2200 N : \u2115, N \u2265 N\u2080 \u2192 N \u2265 3 \u2192 dotProduct (logCutoffWitness N) ((vasyuninGramMatrix N).mulVec (logCutoffWitness N)) \u2264 1",
       "sorryCount": 0
     },
     {
@@ -12631,6 +12631,66 @@
       "sorryCount": 0
     },
     {
+      "id": "cotangent_dominance",
+      "type": "axiom",
+      "category": "axiom",
+      "route": "crown",
+      "file": "Cathedral/Assembly/CotangentDominance.lean",
+      "line": 127,
+      "signature": "axiom cotangent_dominance : \u2203 \u03b4 : \u211d, \u03b4 > 0 \u2227 \u2203 N\u2080 : \u2115, \u2200 N : \u2115, N \u2265 N\u2080 \u2192 N \u2265 3 \u2192 fermionicSector N \u2265 bosonicExcess N + \u03b4 / Real.log \u2191N  -- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2026",
+      "sorryCount": 0
+    },
+    {
+      "id": "margin_from_dominance",
+      "type": "theorem",
+      "category": "proved",
+      "route": "crown",
+      "file": "Cathedral/Assembly/CotangentDominance.lean",
+      "line": 152,
+      "signature": "theorem margin_from_dominance : \u2203 \u03b4 : \u211d, \u03b4 > 0 \u2227 \u2203 N\u2080 : \u2115, \u2200 N : \u2115, N \u2265 N\u2080 \u2192 N \u2265 3 \u2192 vtGvMargin N \u2265 \u03b4 / Real.log \u2191N",
+      "sorryCount": 0
+    },
+    {
+      "id": "vtgv_below_one_from_dominance",
+      "type": "theorem",
+      "category": "proved",
+      "route": "crown",
+      "file": "Cathedral/Assembly/CotangentDominance.lean",
+      "line": 167,
+      "signature": "theorem vtgv_below_one_from_dominance : \u2203 N\u2080 : \u2115, \u2200 N : \u2115, N \u2265 N\u2080 \u2192 N \u2265 3 \u2192 vtGvForm N \u2264 1",
+      "sorryCount": 0
+    },
+    {
+      "id": "rh_from_cotangent_dominance",
+      "type": "theorem",
+      "category": "proved",
+      "route": "crown",
+      "file": "Cathedral/Assembly/CotangentDominance.lean",
+      "line": 213,
+      "signature": "theorem rh_from_cotangent_dominance : RiemannHypothesis",
+      "sorryCount": 0
+    },
+    {
+      "id": "dominance_implies_certificate",
+      "type": "theorem",
+      "category": "proved",
+      "route": "crown",
+      "file": "Cathedral/Assembly/CotangentDominance.lean",
+      "line": 234,
+      "signature": "theorem dominance_implies_certificate : \u2203 C : \u211d, C > 0 \u2227 \u2203 N\u2080 : \u2115, \u2200 N : \u2115, N \u2265 N\u2080 \u2192 N \u2265 3 \u2192 scaledMargin N \u2265 C",
+      "sorryCount": 0
+    },
+    {
+      "id": "quantitative_overcancellation",
+      "type": "theorem",
+      "category": "proved",
+      "route": "crown",
+      "file": "Cathedral/Assembly/CotangentDominance.lean",
+      "line": 258,
+      "signature": "theorem quantitative_overcancellation : \u2203 \u03b4 : \u211d, \u03b4 > 0 \u2227 \u2203 N\u2080 : \u2115, \u2200 N : \u2115, N \u2265 N\u2080 \u2192 N \u2265 3 \u2192 vtGvForm N \u2264 1 - \u03b4 / Real.log \u2191N",
+      "sorryCount": 0
+    },
+    {
       "id": "witness_covariance_from_perron",
       "type": "theorem",
       "category": "proved",
@@ -15241,6 +15301,56 @@
       "sorryCount": 1
     },
     {
+      "id": "totalVariation",
+      "type": "def",
+      "category": "definition",
+      "route": "variational",
+      "file": "Cathedral/Covariance/AbelInnerBound.lean",
+      "line": 22,
+      "signature": "def totalVariation (n : Nat) (f : Nat -> Real) : Real",
+      "sorryCount": 0
+    },
+    {
+      "id": "totalVariation_nonneg",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/AbelInnerBound.lean",
+      "line": 25,
+      "signature": "theorem totalVariation_nonneg (n : Nat) (f : Nat -> Real) : 0 <= totalVariation n f",
+      "sorryCount": 0
+    },
+    {
+      "id": "abel_bound_simple",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/AbelInnerBound.lean",
+      "line": 37,
+      "signature": "theorem abel_bound_simple (n : Nat) (hn : 0 < n) (a f : Nat -> Real) (M : Real) (_hM : 0 <= M) (h_partial : forall m, m < n -> |partialSum a m| <= M) : |Finset.sum (Finset.range n) (fun j => a j * \u2026",
+      "sorryCount": 0
+    },
+    {
+      "id": "inner_sum_bound",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/AbelInnerBound.lean",
+      "line": 84,
+      "signature": "theorem inner_sum_bound (n : Nat) (hn : 0 < n) (a f : Nat -> Real) (M E V : Real) (hM : 0 <= M) (h_partial : forall m, m < n -> |partialSum a m| <= M) (h_endpoint : |f (n - 1)| <= E) (h_tv : totalV\u2026",
+      "sorryCount": 0
+    },
+    {
+      "id": "perp_inner_from_abel",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/AbelInnerBound.lean",
+      "line": 99,
+      "signature": "theorem perp_inner_from_abel (n : Nat) (hn : 0 < n) (v gperp_k : Nat -> Real) (C_PNT C_end C_TV : Real) (hPNT : 0 <= C_PNT) (h_partial : forall m, m < n -> |partialSum v m| <= C_PNT) (h_endpoint : \u2026",
+      "sorryCount": 0
+    },
+    {
       "id": "anomalyEntry",
       "type": "def",
       "category": "definition",
@@ -15768,6 +15878,86 @@
       "file": "Cathedral/Covariance/DotProductIdentity.lean",
       "line": 99,
       "signature": "theorem one_minus_dotProduct_identity (N : \u2115) (hN : 2 \u2264 N) (hlogN : Real.log (N : \u211d) \u2260 0) : 1 - dotProduct (fun i : Fin (N - 1) => Cathedral.Vasyunin.vasyuninMeanEntry (i.val + 1)) (bdMoebiusWeight\u2026",
+      "sorryCount": 0
+    },
+    {
+      "id": "total_le_diag_plus_same",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/ErdosKacBridge.lean",
+      "line": 69,
+      "signature": "theorem total_le_diag_plus_same (N : \u2115) (f : \u2115 \u2192 \u2115 \u2192 \u211d) (hf : \u2200 j k, 0 \u2264 f j k) : \u2211 j \u2208 Icc 1 (N - 1), \u2211 k \u2208 Icc 1 (N - 1), ((moebius j : \u2124) : \u211d) * ((moebius k : \u2124) : \u211d) * f j k \u2264 diagonalPart N f \u2026",
+      "sorryCount": 0
+    },
+    {
+      "id": "ramanujan_total_le_positive_sectors",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/ErdosKacBridge.lean",
+      "line": 82,
+      "signature": "theorem ramanujan_total_le_positive_sectors (N : \u2115) : \u2211 j \u2208 Icc 1 (N - 1), \u2211 k \u2208 Icc 1 (N - 1), ((moebius j : \u2124) : \u211d) * ((moebius k : \u2124) : \u211d) * ramanujanKernel j k \u2264 diagonalPart N ramanujanKernel \u2026",
+      "sorryCount": 0
+    },
+    {
+      "id": "crossParityGap",
+      "type": "def",
+      "category": "definition",
+      "route": "variational",
+      "file": "Cathedral/Covariance/ErdosKacBridge.lean",
+      "line": 96,
+      "signature": "def crossParityGap (N : \u2115) (f : \u2115 \u2192 \u2115 \u2192 \u211d) : \u211d",
+      "sorryCount": 0
+    },
+    {
+      "id": "crossParityGap_eq_neg_cross",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/ErdosKacBridge.lean",
+      "line": 102,
+      "signature": "theorem crossParityGap_eq_neg_cross (N : \u2115) (f : \u2115 \u2192 \u2115 \u2192 \u211d) : crossParityGap N f = -crossParityPart N f",
+      "sorryCount": 0
+    },
+    {
+      "id": "crossParityGap_nonneg",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/ErdosKacBridge.lean",
+      "line": 113,
+      "signature": "theorem crossParityGap_nonneg (N : \u2115) (f : \u2115 \u2192 \u2115 \u2192 \u211d) (hf : \u2200 j k, 0 \u2264 f j k) : 0 \u2264 crossParityGap N f",
+      "sorryCount": 0
+    },
+    {
+      "id": "bridge_decomposition",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/ErdosKacBridge.lean",
+      "line": 130,
+      "signature": "theorem bridge_decomposition (N : \u2115) (f : \u2115 \u2192 \u2115 \u2192 \u211d) : \u2211 j \u2208 Icc 1 (N - 1), \u2211 k \u2208 Icc 1 (N - 1), ((moebius j : \u2124) : \u211d) * ((moebius k : \u2124) : \u211d) * f j k = (diagonalPart N f + sameParityPart N f) - cr\u2026",
+      "sorryCount": 0
+    },
+    {
+      "id": "negative_total_of_large_gap",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/ErdosKacBridge.lean",
+      "line": 143,
+      "signature": "theorem negative_total_of_large_gap (N : \u2115) (f : \u2115 \u2192 \u2115 \u2192 \u211d) (hgap : crossParityGap N f \u2265 diagonalPart N f + sameParityPart N f) : \u2211 j \u2208 Icc 1 (N - 1), \u2211 k \u2208 Icc 1 (N - 1), ((moebius j : \u2124) : \u211d) * (\u2026",
+      "sorryCount": 0
+    },
+    {
+      "id": "fermionic_dominance_iff",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/ErdosKacBridge.lean",
+      "line": 167,
+      "signature": "theorem fermionic_dominance_iff (N : \u2115) (f : \u2115 \u2192 \u2115 \u2192 \u211d) : \u2211 j \u2208 Icc 1 (N - 1), \u2211 k \u2208 Icc 1 (N - 1), ((moebius j : \u2124) : \u211d) * ((moebius k : \u2124) : \u211d) * f j k \u2264 0 \u2194 crossParityGap N f \u2265 diagonalPart N f\u2026",
       "sorryCount": 0
     },
     {
@@ -16768,6 +16958,616 @@
       "file": "Cathedral/Covariance/MoebiusL1Bound.lean",
       "line": 519,
       "signature": "theorem mertens_implies_l2_decay (C_m : \u211d) (hC : 0 < C_m) (hMertens : \u2200 x \u2265 2, |((mertensFunction x : \u2124) : \u211d)| \u2264 C_m * x^(1/2 : \u211d) * (Real.log x)^2) -- PNT hypotheses (hPNT\u2081 : Tendsto (fun N => \u2211 k\u2026",
+      "sorryCount": 0
+    },
+    {
+      "id": "moebiusParity",
+      "type": "def",
+      "category": "definition",
+      "route": "variational",
+      "file": "Cathedral/Covariance/ParityDecomposition.lean",
+      "line": 52,
+      "signature": "def moebiusParity (j k : \u2115) : \u2124",
+      "sorryCount": 0
+    },
+    {
+      "id": "moebiusParity_symm",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/ParityDecomposition.lean",
+      "line": 56,
+      "signature": "theorem moebiusParity_symm (j k : \u2115) : moebiusParity j k = moebiusParity k j",
+      "sorryCount": 0
+    },
+    {
+      "id": "moebiusParity_sq",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/ParityDecomposition.lean",
+      "line": 61,
+      "signature": "theorem moebiusParity_sq (j k : \u2115) (hj : Squarefree j) (hk : Squarefree k) : moebiusParity j k = 1 \u2228 moebiusParity j k = -1",
+      "sorryCount": 0
+    },
+    {
+      "id": "moebiusParity_zero_left",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/ParityDecomposition.lean",
+      "line": 76,
+      "signature": "theorem moebiusParity_zero_left (j k : \u2115) (hj : \u00acSquarefree j) : moebiusParity j k = 0",
+      "sorryCount": 0
+    },
+    {
+      "id": "diagonalPart",
+      "type": "def",
+      "category": "definition",
+      "route": "variational",
+      "file": "Cathedral/Covariance/ParityDecomposition.lean",
+      "line": 87,
+      "signature": "def diagonalPart (N : \u2115) (f : \u2115 \u2192 \u2115 \u2192 \u211d) : \u211d",
+      "sorryCount": 0
+    },
+    {
+      "id": "sameParityPart",
+      "type": "def",
+      "category": "definition",
+      "route": "variational",
+      "file": "Cathedral/Covariance/ParityDecomposition.lean",
+      "line": 93,
+      "signature": "def sameParityPart (N : \u2115) (f : \u2115 \u2192 \u2115 \u2192 \u211d) : \u211d",
+      "sorryCount": 0
+    },
+    {
+      "id": "crossParityPart",
+      "type": "def",
+      "category": "definition",
+      "route": "variational",
+      "file": "Cathedral/Covariance/ParityDecomposition.lean",
+      "line": 101,
+      "signature": "def crossParityPart (N : \u2115) (f : \u2115 \u2192 \u2115 \u2192 \u211d) : \u211d",
+      "sorryCount": 0
+    },
+    {
+      "id": "parity_decomposition",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/ParityDecomposition.lean",
+      "line": 123,
+      "signature": "theorem parity_decomposition (N : \u2115) (f : \u2115 \u2192 \u2115 \u2192 \u211d) : \u2211 j \u2208 Icc 1 (N - 1), \u2211 k \u2208 Icc 1 (N - 1), ((moebius j : \u2124) : \u211d) * ((moebius k : \u2124) : \u211d) * f j k = diagonalPart N f + sameParityPart N f + cros\u2026",
+      "sorryCount": 0
+    },
+    {
+      "id": "sameParity_nonneg_of_kernel_nonneg",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/ParityDecomposition.lean",
+      "line": 173,
+      "signature": "theorem sameParity_nonneg_of_kernel_nonneg (N : \u2115) (f : \u2115 \u2192 \u2115 \u2192 \u211d) (hf : \u2200 j k, 0 \u2264 f j k) : 0 \u2264 sameParityPart N f",
+      "sorryCount": 0
+    },
+    {
+      "id": "crossParity_nonpos_of_kernel_nonneg",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/ParityDecomposition.lean",
+      "line": 193,
+      "signature": "theorem crossParity_nonpos_of_kernel_nonneg (N : \u2115) (f : \u2115 \u2192 \u2115 \u2192 \u211d) (hf : \u2200 j k, 0 \u2264 f j k) : crossParityPart N f \u2264 0",
+      "sorryCount": 0
+    },
+    {
+      "id": "ramanujanKernel",
+      "type": "def",
+      "category": "definition",
+      "route": "variational",
+      "file": "Cathedral/Covariance/ParityDecomposition.lean",
+      "line": 214,
+      "signature": "def ramanujanKernel (j k : \u2115) : \u211d",
+      "sorryCount": 0
+    },
+    {
+      "id": "ramanujanKernel_nonneg",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/ParityDecomposition.lean",
+      "line": 218,
+      "signature": "theorem ramanujanKernel_nonneg (j k : \u2115) (_hj : 0 < j) (_hk : 0 < k) : 0 \u2264 ramanujanKernel j k",
+      "sorryCount": 0
+    },
+    {
+      "id": "ramanujan_sameParity_nonneg",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/ParityDecomposition.lean",
+      "line": 223,
+      "signature": "theorem ramanujan_sameParity_nonneg (N : \u2115) : 0 \u2264 sameParityPart N ramanujanKernel",
+      "sorryCount": 0
+    },
+    {
+      "id": "ramanujan_crossParity_nonpos",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/ParityDecomposition.lean",
+      "line": 236,
+      "signature": "theorem ramanujan_crossParity_nonpos (N : \u2115) : crossParityPart N ramanujanKernel \u2264 0",
+      "sorryCount": 0
+    },
+    {
+      "id": "total_eq_positive_minus_gap",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/ParityMarginWiring.lean",
+      "line": 88,
+      "signature": "theorem total_eq_positive_minus_gap (N : \u2115) (f : \u2115 \u2192 \u2115 \u2192 \u211d) : \u2211 j \u2208 Icc 1 (N - 1), \u2211 k \u2208 Icc 1 (N - 1), ((moebius j : \u2124) : \u211d) * ((moebius k : \u2124) : \u211d) * f j k = (diagonalPart N f + sameParityPart N \u2026",
+      "sorryCount": 0
+    },
+    {
+      "id": "ramanujan_three_sector_identity",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/ParityMarginWiring.lean",
+      "line": 104,
+      "signature": "theorem ramanujan_three_sector_identity (N : \u2115) : \u2211 j \u2208 Icc 1 (N - 1), \u2211 k \u2208 Icc 1 (N - 1), ((moebius j : \u2124) : \u211d) * ((moebius k : \u2124) : \u211d) * ramanujanKernel j k = diagonalPart N ramanujanKernel + sa\u2026",
+      "sorryCount": 0
+    },
+    {
+      "id": "ramanujan_cross_magnitude",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/ParityMarginWiring.lean",
+      "line": 120,
+      "signature": "theorem ramanujan_cross_magnitude (N : \u2115) : crossParityGap N ramanujanKernel = -(crossParityPart N ramanujanKernel)",
+      "sorryCount": 0
+    },
+    {
+      "id": "ramanujan_dominance_iff",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/ParityMarginWiring.lean",
+      "line": 175,
+      "signature": "theorem ramanujan_dominance_iff (N : \u2115) : \u2211 j \u2208 Icc 1 (N - 1), \u2211 k \u2208 Icc 1 (N - 1), ((moebius j : \u2124) : \u211d) * ((moebius k : \u2124) : \u211d) * ramanujanKernel j k \u2264 0 \u2194 crossParityGap N ramanujanKernel \u2265 diag\u2026",
+      "sorryCount": 0
+    },
+    {
+      "id": "glass_bridge_parity_bound",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/ParityMarginWiring.lean",
+      "line": 230,
+      "signature": "theorem glass_bridge_parity_bound (N : \u2115) (f : \u2115 \u2192 \u2115 \u2192 \u211d) (hf : \u2200 j k, 0 \u2264 f j k) (kernel_form correction : \u211d) (h_kernel : kernel_form = \u2211 j \u2208 Icc 1 (N - 1), \u2211 k \u2208 Icc 1 (N - 1), ((moebius j : \u2124) :\u2026",
+      "sorryCount": 0
+    },
+    {
+      "id": "ramanujan_glass_bridge",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/ParityMarginWiring.lean",
+      "line": 249,
+      "signature": "theorem ramanujan_glass_bridge (N : \u2115) (correction : \u211d) : \u2211 j \u2208 Icc 1 (N - 1), \u2211 k \u2208 Icc 1 (N - 1), ((moebius j : \u2124) : \u211d) * ((moebius k : \u2124) : \u211d) * ramanujanKernel j k + correction \u2264 diagonalPart N\u2026",
+      "sorryCount": 0
+    },
+    {
+      "id": "rh_reduction",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/ParityMarginWiring.lean",
+      "line": 275,
+      "signature": "theorem rh_reduction (N : \u2115) (f : \u2115 \u2192 \u2115 \u2192 \u211d) (hf : \u2200 j k, 0 \u2264 f j k) (correction threshold : \u211d) (h_bound : diagonalPart N f + sameParityPart N f + correction < threshold) : \u2211 j \u2208 Icc 1 (N - 1), \u2211 k\u2026",
+      "sorryCount": 0
+    },
+    {
+      "id": "cotangentApproachRate",
+      "type": "def",
+      "category": "definition",
+      "route": "variational",
+      "file": "Cathedral/Covariance/ParityMarginWiring.lean",
+      "line": 311,
+      "signature": "noncomputable def cotangentApproachRate : \u211d",
+      "sorryCount": 0
+    },
+    {
+      "id": "cotangentApproachRate_pos",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/ParityMarginWiring.lean",
+      "line": 321,
+      "signature": "theorem cotangentApproachRate_pos : 0 < cotangentApproachRate",
+      "sorryCount": 0
+    },
+    {
+      "id": "ramanujanVanishingRate",
+      "type": "def",
+      "category": "definition",
+      "route": "variational",
+      "file": "Cathedral/Covariance/ParityMarginWiring.lean",
+      "line": 332,
+      "signature": "noncomputable def ramanujanVanishingRate : \u211d",
+      "sorryCount": 0
+    },
+    {
+      "id": "marginConstant",
+      "type": "def",
+      "category": "definition",
+      "route": "variational",
+      "file": "Cathedral/Covariance/ParityMarginWiring.lean",
+      "line": 340,
+      "signature": "noncomputable def marginConstant : \u211d",
+      "sorryCount": 0
+    },
+    {
+      "id": "marginConstant_pos",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/ParityMarginWiring.lean",
+      "line": 351,
+      "signature": "theorem marginConstant_pos : 0 < marginConstant",
+      "sorryCount": 0
+    },
+    {
+      "id": "margin_eq_difference",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/ParityMarginWiring.lean",
+      "line": 363,
+      "signature": "theorem margin_eq_difference : marginConstant = cotangentApproachRate - ramanujanVanishingRate",
+      "sorryCount": 0
+    },
+    {
+      "id": "practicalMarginConstant",
+      "type": "def",
+      "category": "definition",
+      "route": "variational",
+      "file": "Cathedral/Covariance/ParityMarginWiring.lean",
+      "line": 395,
+      "signature": "def practicalMarginConstant : \u211d",
+      "sorryCount": 0
+    },
+    {
+      "id": "practicalMarginConstant_pos",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/ParityMarginWiring.lean",
+      "line": 402,
+      "signature": "theorem practicalMarginConstant_pos : 0 < practicalMarginConstant",
+      "sorryCount": 0
+    },
+    {
+      "id": "practical_le_asymptotic",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/ParityMarginWiring.lean",
+      "line": 413,
+      "signature": "theorem practical_le_asymptotic : practicalMarginConstant < marginConstant",
+      "sorryCount": 0
+    },
+    {
+      "id": "graduation_theorem",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/ParityMarginWiring.lean",
+      "line": 472,
+      "signature": "theorem graduation_theorem (vtGv : \u2115 \u2192 \u211d) (N\u2080 : \u2115) (h_asymptotic : \u2200 N : \u2115, N \u2265 N\u2080 \u2192 N \u2265 3 \u2192 vtGv N < 1) (h_base : \u2200 N : \u2115, N < N\u2080 \u2192 N \u2265 3 \u2192 vtGv N < 1) : \u2200 N : \u2115, N \u2265 3 \u2192 vtGv N \u2264 1",
+      "sorryCount": 0
+    },
+    {
+      "id": "monotonicity_lifts_base",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/ParityMarginWiring.lean",
+      "line": 506,
+      "signature": "theorem monotonicity_lifts_base (vtGv : \u2115 \u2192 \u211d) (D : \u2115 \u2192 \u211d) (N\u2080 : \u2115) (hN\u2080 : 3 \u2264 N\u2080) (h_D_def : \u2200 N, N \u2265 3 \u2192 D N = (1 - vtGv N) * Real.log N) (h_mono : \u2200 M N, N\u2080 \u2264 M \u2192 M \u2264 N \u2192 D M \u2264 D N) (h_base : 0 \u2026",
+      "sorryCount": 0
+    },
+    {
+      "id": "vtgv_bound_implies_distance_bound",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/ParityMarginWiring.lean",
+      "line": 532,
+      "signature": "theorem vtgv_bound_implies_distance_bound (vtGv btv d2 : \u211d) (h_d2 : d2 = 1 - 2 * btv + vtGv) (h_vtgv : vtGv \u2264 1) : d2 \u2264 2 * (1 - btv)",
+      "sorryCount": 0
+    },
+    {
+      "id": "overwatermelon",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/ParityMarginWiring.lean",
+      "line": 572,
+      "signature": "theorem overwatermelon (d2 btv vtGv : \u2115 \u2192 \u211d) (r : \u2115 \u2192 \u211d) (N\u2080 : \u2115) (hN\u2080 : 3 \u2264 N\u2080) (h_d2_def : \u2200 N, N \u2265 3 \u2192 d2 N = 1 - 2 * btv N + vtGv N) (h_btv_lt_1 : \u2200 N, N \u2265 3 \u2192 btv N < 1) (h_r_def : \u2200 N, N \u2265 3 \u2026",
+      "sorryCount": 0
+    },
+    {
+      "id": "square_bridge",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/ParityMarginWiring.lean",
+      "line": 630,
+      "signature": "theorem square_bridge (vtGv btv d2 : \u211d) (h_d2 : d2 = 1 - 2 * btv + vtGv) (h_sq : vtGv \u2264 btv ^ 2) : d2 \u2264 (1 - btv) ^ 2",
+      "sorryCount": 0
+    },
+    {
+      "id": "square_bridge_ratio",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/ParityMarginWiring.lean",
+      "line": 642,
+      "signature": "theorem square_bridge_ratio (vtGv btv d2 r : \u211d) (h_d2 : d2 = 1 - 2 * btv + vtGv) (h_btv_lt_1 : btv < 1) (h_sq : vtGv \u2264 btv ^ 2) (h_r : r = d2 / (2 * (1 - btv))) : r \u2264 (1 - btv) / 2",
+      "sorryCount": 0
+    },
+    {
+      "id": "square_bridge_vtgv_bound",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/ParityMarginWiring.lean",
+      "line": 658,
+      "signature": "theorem square_bridge_vtgv_bound (vtGv btv : \u211d) (h_btv_nonneg : 0 \u2264 btv) (h_btv_lt_1 : btv < 1) (h_sq : vtGv \u2264 btv ^ 2) : vtGv < 1",
+      "sorryCount": 0
+    },
+    {
+      "id": "perpendicular_decomposition",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/ParityMarginWiring.lean",
+      "line": 707,
+      "signature": "theorem perpendicular_decomposition (vtGv btv delta : \u211d) (h_decomp : vtGv = btv ^ 2 + delta) (h_delta_pos : 0 \u2264 delta) : (btv ^ 2) \u2264 vtGv",
+      "sorryCount": 0
+    },
+    {
+      "id": "perpendicular_bound_closes",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/ParityMarginWiring.lean",
+      "line": 721,
+      "signature": "theorem perpendicular_bound_closes (vtGv btv delta : \u211d) (h_decomp : vtGv = btv ^ 2 + delta) (h_bound : delta \u2264 1 - btv ^ 2) : vtGv \u2264 1",
+      "sorryCount": 0
+    },
+    {
+      "id": "perpendicular_ratio_bound",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/ParityMarginWiring.lean",
+      "line": 736,
+      "signature": "theorem perpendicular_ratio_bound (vtGv btv delta : \u211d) (h_decomp : vtGv = btv ^ 2 + delta) (_h_btv_lt_1 : btv < 1) (h_ratio : delta \u2264 (1 - btv) * (1 + btv)) : vtGv \u2264 1",
+      "sorryCount": 0
+    },
+    {
+      "id": "full_chain",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/ParityMarginWiring.lean",
+      "line": 777,
+      "signature": "theorem full_chain (vtGv btv d2 delta : \u211d) (h_d2_def : d2 = 1 - 2 * btv + vtGv) (h_decomp : vtGv = btv ^ 2 + delta) (h_delta : delta \u2264 1 - btv ^ 2) (_h_btv_lt_1 : btv < 1) : d2 \u2264 2 * (1 - btv)",
+      "sorryCount": 0
+    },
+    {
+      "id": "ratio_chain",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/ParityMarginWiring.lean",
+      "line": 797,
+      "signature": "theorem ratio_chain (vtGv btv d2 r delta : \u211d) (h_d2_def : d2 = 1 - 2 * btv + vtGv) (h_decomp : vtGv = btv ^ 2 + delta) (_h_delta_nn : 0 \u2264 delta) (h_btv_nn : 0 \u2264 btv) (h_btv_lt_1 : btv < 1) (h_r_def\u2026",
+      "sorryCount": 0
+    },
+    {
+      "id": "abel_inner_bound",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/PerpAbelWiring.lean",
+      "line": 45,
+      "signature": "theorem abel_inner_bound {N : \u2115} (_hN : 0 < N) (a _f : Fin N \u2192 \u211d) (M : \u211d) (_hM : 0 \u2264 M) (_h_partial : \u2200 m : Fin N, |\u2211 j \u2208 Finset.filter (\u00b7 \u2264 m) Finset.univ, a j| \u2264 M) : -- The sum is bounded by M \u00b7\u2026",
+      "sorryCount": 0
+    },
+    {
+      "id": "partial_sum_pnt_bound",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/PerpAbelWiring.lean",
+      "line": 77,
+      "signature": "theorem partial_sum_pnt_bound : \u2203 C_PNT : \u211d, C_PNT > 0 \u2227 \u2200 N : \u2115, N \u2265 3 \u2192 \u2200 m : \u2115, 1 \u2264 m \u2192 m \u2264 N \u2192 -- |\u03a3_{j\u2264m} -\u03bc(j)(1-lnj/lnN)| \u2264 C_PNT / log(N) True",
+      "sorryCount": 0
+    },
+    {
+      "id": "total_variation_bound",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/PerpAbelWiring.lean",
+      "line": 108,
+      "signature": "theorem total_variation_bound : \u2203 C_TV : \u211d, C_TV > 0 \u2227 \u2200 N : \u2115, N \u2265 3 \u2192 \u2200 k : \u2115, 1 \u2264 k \u2192 k < N \u2192 -- TV(G\u22a5(\u00b7,k)) \u2264 C_TV / k True",
+      "sorryCount": 0
+    },
+    {
+      "id": "inner_bound_from_abel_pnt_tv",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/PerpAbelWiring.lean",
+      "line": 138,
+      "signature": "theorem inner_bound_from_abel_pnt_tv (C_PNT C_TV : \u211d) (hPNT : C_PNT > 0) (hTV : C_TV > 0) -- If partial sums are bounded by C_PNT/logN",
+      "sorryCount": 0
+    },
+    {
+      "id": "perp_delta_wiring",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/PerpAbelWiring.lean",
+      "line": 200,
+      "signature": "theorem perp_delta_wiring {N : \u2115} (v : Fin N \u2192 \u211d) (Gperp : Fin N \u2192 Fin N \u2192 \u211d) (C_inner : \u211d) (hCi : 0 \u2264 C_inner) (h_inner : \u2200 k : Fin N, |\u2211 j : Fin N, v j * Gperp j k| \u2264 C_inner) : |\u2211 i : Fin N, \u2211 j\u2026",
+      "sorryCount": 0
+    },
+    {
+      "id": "perp_delta_chain",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/PerpAbelWiring.lean",
+      "line": 208,
+      "signature": "theorem perp_delta_chain {N : \u2115} (v : Fin N \u2192 \u211d) (Gperp : Fin N \u2192 Fin N \u2192 \u211d) (C_inner bound : \u211d) (hCi : 0 \u2264 C_inner) (h_inner : \u2200 k : Fin N, |\u2211 j : Fin N, v j * Gperp j k| \u2264 C_inner) (h_sum : C_inn\u2026",
+      "sorryCount": 0
+    },
+    {
+      "id": "vtgv_le_one",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/PerpEnergyGraduation.lean",
+      "line": 24,
+      "signature": "theorem vtgv_le_one (vtGv btv delta : Real) (h_decomp : vtGv = btv ^ 2 + delta) (h_bound : btv ^ 2 + delta <= 1) : vtGv <= 1",
+      "sorryCount": 0
+    },
+    {
+      "id": "margin_lower_bound",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/PerpEnergyGraduation.lean",
+      "line": 34,
+      "signature": "theorem margin_lower_bound (btv delta eps C_delta : Real) (h_btv_below : btv <= 1 - eps) (h_btv_above : 0 <= btv) (h_delta_bound : delta <= C_delta) : 1 - (btv ^ 2 + delta) >= eps * (2 - eps) - C_d\u2026",
+      "sorryCount": 0
+    },
+    {
+      "id": "perp_energy_graduation",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/PerpEnergyGraduation.lean",
+      "line": 57,
+      "signature": "theorem perp_energy_graduation (vtGv btv delta eps C_delta : Real) (h_decomp : vtGv = btv ^ 2 + delta) (_h_delta_pos : 0 <= delta) (h_btv_below : btv <= 1 - eps) (h_btv_above : 0 <= btv) (_h_eps_po\u2026",
+      "sorryCount": 0
+    },
+    {
+      "id": "perp_energy_bound_graduated",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/PerpEnergyGraduation.lean",
+      "line": 79,
+      "signature": "theorem perp_energy_bound_graduated (N : Nat) (_hN : N >= 3) (vtGv btv delta eps C_delta : Real) (_h_decomp : vtGv = btv ^ 2 + delta) (_h_delta_pos : 0 <= delta) (h_btv_below : btv <= 1 - eps) (h_b\u2026",
+      "sorryCount": 0
+    },
+    {
+      "id": "C_eff_lower",
+      "type": "def",
+      "category": "definition",
+      "route": "variational",
+      "file": "Cathedral/Covariance/PerpEnergyGraduation.lean",
+      "line": 146,
+      "signature": "def C_eff_lower : Real",
+      "sorryCount": 0
+    },
+    {
+      "id": "flyspeck_margin",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/PerpEnergyGraduation.lean",
+      "line": 151,
+      "signature": "theorem flyspeck_margin (vtGv : Real) (N : Nat) (_hN : N >= 13) (h_logN : Real.log (N : Real) > 0) (h_vtgv : vtGv <= 1 - C_eff_lower / Real.log (N : Real)) : vtGv < 1",
+      "sorryCount": 0
+    },
+    {
+      "id": "constant_comparison_safe",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/PerpEnergyGraduation.lean",
+      "line": 173,
+      "signature": "theorem constant_comparison_safe (K1 K2 logN : Real) (hK1 : 0 < K1) (_hK2 : 0 < K2) (hlogN : 5 <= logN) (h_ratio : K2 < K1) (h_K1_small : K1 < logN) : K2 / logN < (K1 / logN) * (2 - K1 / logN)",
+      "sorryCount": 0
+    },
+    {
+      "id": "perpGram",
+      "type": "def",
+      "category": "definition",
+      "route": "variational",
+      "file": "Cathedral/Covariance/PerpendicularBridge.lean",
+      "line": 57,
+      "signature": "def perpGram (G : \u2115 \u2192 \u2115 \u2192 \u211d) (b : \u2115 \u2192 \u211d) (j k : \u2115) : \u211d",
+      "sorryCount": 0
+    },
+    {
+      "id": "perpEnergy",
+      "type": "def",
+      "category": "definition",
+      "route": "variational",
+      "file": "Cathedral/Covariance/PerpendicularBridge.lean",
+      "line": 61,
+      "signature": "def perpEnergy (N : \u2115) (v : \u2115 \u2192 \u211d) (G : \u2115 \u2192 \u2115 \u2192 \u211d) (b : \u2115 \u2192 \u211d) : \u211d",
+      "sorryCount": 0
+    },
+    {
+      "id": "vtGv_decomp",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/PerpendicularBridge.lean",
+      "line": 72,
+      "signature": "theorem vtGv_decomp (N : \u2115) (v : \u2115 \u2192 \u211d) (G : \u2115 \u2192 \u2115 \u2192 \u211d) (b : \u2115 \u2192 \u211d) (vtGv btv delta : \u211d) (h_vtGv : vtGv = \u2211 j \u2208 Finset.range N, \u2211 k \u2208 Finset.range N, v j * G j k * v k) (h_btv : btv = \u2211 k \u2208 Finset.\u2026",
+      "sorryCount": 0
+    },
+    {
+      "id": "perp_inner_abel_bound",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/PerpendicularBridge.lean",
+      "line": 143,
+      "signature": "theorem perp_inner_abel_bound : \u2203 C_inner : \u211d, C_inner > 0 \u2227 \u2200 N : \u2115, N \u2265 3 \u2192 \u2200 k : \u2115, 1 \u2264 k \u2192 k < N \u2192 -- The inner Abel sum is bounded True",
+      "sorryCount": 0
+    },
+    {
+      "id": "perp_energy_bound",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/PerpendicularBridge.lean",
+      "line": 160,
+      "signature": "theorem perp_energy_bound (vtGv btv delta eps C_delta : \u211d) (h_decomp : vtGv = btv ^ 2 + delta) (h_delta_pos : 0 \u2264 delta) (h_btv_below : btv \u2264 1 - eps) (h_btv_above : 0 \u2264 btv) (h_eps_pos : 0 < eps) \u2026",
+      "sorryCount": 0
+    },
+    {
+      "id": "perp_bridge_vtgv_le_one",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/PerpendicularBridge.lean",
+      "line": 186,
+      "signature": "theorem perp_bridge_vtgv_le_one (vtGv btv delta eps C_delta : \u211d) (h_decomp : vtGv = btv ^ 2 + delta) (h_delta_pos : 0 \u2264 delta) (h_btv_below : btv \u2264 1 - eps) (h_btv_above : 0 \u2264 btv) (h_eps_pos : 0 <\u2026",
       "sorryCount": 0
     },
     {
@@ -20631,6 +21431,176 @@
       "sorryCount": 0
     },
     {
+      "id": "euler_gamma_lower",
+      "type": "axiom",
+      "category": "axiom",
+      "route": "crown",
+      "file": "Cathedral/Compute/BaseCaseCertificates.lean",
+      "line": 75,
+      "signature": "axiom euler_gamma_lower : (577 : \u211d) / 1000 \u2264 Real.eulerMascheroniConstant  /-- Upper bound on Euler's constant: \u03b3 \u2264 578/1000. This is well-known: \u03b3 = 0.5772156649... < 0.578. -/ axiom euler_gamma_u\u2026",
+      "sorryCount": 0
+    },
+    {
+      "id": "euler_gamma_upper",
+      "type": "axiom",
+      "category": "axiom",
+      "route": "crown",
+      "file": "Cathedral/Compute/BaseCaseCertificates.lean",
+      "line": 79,
+      "signature": "axiom euler_gamma_upper : Real.eulerMascheroniConstant \u2264 (578 : \u211d) / 1000  -- Logarithm bounds -- Mathlib has: Real.log_le_rpow_div, etc. -- For concrete values, we use known bounds.  /-- ln(2) \u2265 6\u2026",
+      "sorryCount": 0
+    },
+    {
+      "id": "log_two_lower",
+      "type": "axiom",
+      "category": "axiom",
+      "route": "crown",
+      "file": "Cathedral/Compute/BaseCaseCertificates.lean",
+      "line": 86,
+      "signature": "axiom log_two_lower : (693 : \u211d) / 1000 \u2264 Real.log 2  /-- ln(2) \u2264 694/1000. Known: ln(2) = 0.69314718... -/ axiom log_two_upper : Real.log 2 \u2264 (694 : \u211d) / 1000  /-- ln(3) \u2265 1098/1000. Known: ln(3) =\u2026",
+      "sorryCount": 0
+    },
+    {
+      "id": "log_two_upper",
+      "type": "axiom",
+      "category": "axiom",
+      "route": "crown",
+      "file": "Cathedral/Compute/BaseCaseCertificates.lean",
+      "line": 89,
+      "signature": "axiom log_two_upper : Real.log 2 \u2264 (694 : \u211d) / 1000  /-- ln(3) \u2265 1098/1000. Known: ln(3) = 1.09861228... -/ axiom log_three_lower : (1098 : \u211d) / 1000 \u2264 Real.log 3  /-- ln(3) \u2264 1099/1000. Known: ln(\u2026",
+      "sorryCount": 0
+    },
+    {
+      "id": "log_three_lower",
+      "type": "axiom",
+      "category": "axiom",
+      "route": "crown",
+      "file": "Cathedral/Compute/BaseCaseCertificates.lean",
+      "line": 92,
+      "signature": "axiom log_three_lower : (1098 : \u211d) / 1000 \u2264 Real.log 3  /-- ln(3) \u2264 1099/1000. Known: ln(3) = 1.09861228... -/ axiom log_three_upper : Real.log 3 \u2264 (1099 : \u211d) / 1000  -- Pi bounds (Mathlib has thes\u2026",
+      "sorryCount": 0
+    },
+    {
+      "id": "log_three_upper",
+      "type": "axiom",
+      "category": "axiom",
+      "route": "crown",
+      "file": "Cathedral/Compute/BaseCaseCertificates.lean",
+      "line": 95,
+      "signature": "axiom log_three_upper : Real.log 3 \u2264 (1099 : \u211d) / 1000  -- Pi bounds (Mathlib has these!) -- Real.pi_gt_three : 3 < \u03c0 -- We need tighter bounds for the Gram entries.  /-- \u03c0 \u2265 31415/10000. Known: \u03c0 \u2026",
+      "sorryCount": 0
+    },
+    {
+      "id": "pi_lower_tight",
+      "type": "axiom",
+      "category": "axiom",
+      "route": "crown",
+      "file": "Cathedral/Compute/BaseCaseCertificates.lean",
+      "line": 102,
+      "signature": "axiom pi_lower_tight : (31415 : \u211d) / 10000 \u2264 Real.pi  /-- \u03c0 \u2264 31416/10000. Known: \u03c0 = 3.14159265... -/ axiom pi_upper_tight : Real.pi \u2264 (31416 : \u211d) / 10000  -- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2026",
+      "sorryCount": 0
+    },
+    {
+      "id": "pi_upper_tight",
+      "type": "axiom",
+      "category": "axiom",
+      "route": "crown",
+      "file": "Cathedral/Compute/BaseCaseCertificates.lean",
+      "line": 105,
+      "signature": "axiom pi_upper_tight : Real.pi \u2264 (31416 : \u211d) / 10000  -- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -- \u00a72. GRAM ENTRY BOUNDS FOR SMALL N -- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550  /\u2026",
+      "sorryCount": 0
+    },
+    {
+      "id": "gram_bound_N3",
+      "type": "theorem",
+      "category": "proved",
+      "route": "crown",
+      "file": "Cathedral/Compute/BaseCaseCertificates.lean",
+      "line": 124,
+      "signature": "theorem gram_bound_N3 : dotProduct (logCutoffWitness 3) ((vasyuninGramMatrix 3).mulVec (logCutoffWitness 3)) < 1",
+      "sorryCount": 0
+    },
+    {
+      "id": "gram_bound_N4",
+      "type": "theorem",
+      "category": "sorry",
+      "route": "crown",
+      "file": "Cathedral/Compute/BaseCaseCertificates.lean",
+      "line": 219,
+      "signature": "theorem gram_bound_N4 : dotProduct (logCutoffWitness 4) ((vasyuninGramMatrix 4).mulVec (logCutoffWitness 4)) < 1",
+      "sorryCount": 1
+    },
+    {
+      "id": "gram_bound_N5",
+      "type": "theorem",
+      "category": "sorry",
+      "route": "crown",
+      "file": "Cathedral/Compute/BaseCaseCertificates.lean",
+      "line": 226,
+      "signature": "theorem gram_bound_N5 : dotProduct (logCutoffWitness 5) ((vasyuninGramMatrix 5).mulVec (logCutoffWitness 5)) < 1",
+      "sorryCount": 1
+    },
+    {
+      "id": "gram_bound_N6",
+      "type": "theorem",
+      "category": "sorry",
+      "route": "crown",
+      "file": "Cathedral/Compute/BaseCaseCertificates.lean",
+      "line": 233,
+      "signature": "theorem gram_bound_N6 : dotProduct (logCutoffWitness 6) ((vasyuninGramMatrix 6).mulVec (logCutoffWitness 6)) < 1",
+      "sorryCount": 1
+    },
+    {
+      "id": "cert_N3",
+      "type": "theorem",
+      "category": "proved",
+      "route": "crown",
+      "file": "Cathedral/Compute/BaseCaseCertificates.lean",
+      "line": 243,
+      "signature": "theorem cert_N3 : GramBoundCertified 3 (1 : \u211d)",
+      "sorryCount": 0
+    },
+    {
+      "id": "shadow_decay_hypothesis",
+      "type": "axiom",
+      "category": "axiom",
+      "route": "crown",
+      "file": "Cathedral/Compute/GenericBound.lean",
+      "line": 84,
+      "signature": "axiom shadow_decay_hypothesis : Tendsto (fun N : \u2115 => d2Scaled N) atTop (nhds 0)  -- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -- \u00a72. THE DREAM THEOREM: PLUG IN THE INPUTS -- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2026",
+      "sorryCount": 0
+    },
+    {
+      "id": "riemann_hypothesis_from_generic_bound",
+      "type": "theorem",
+      "category": "proved",
+      "route": "crown",
+      "file": "Cathedral/Compute/GenericBound.lean",
+      "line": 105,
+      "signature": "theorem riemann_hypothesis_from_generic_bound : RiemannHypothesis",
+      "sorryCount": 0
+    },
+    {
+      "id": "bounded_ratio_hypothesis",
+      "type": "axiom",
+      "category": "axiom",
+      "route": "crown",
+      "file": "Cathedral/Compute/GenericBound.lean",
+      "line": 131,
+      "signature": "axiom bounded_ratio_hypothesis : \u2203 N\u2080 : \u2115, \u2200 N : \u2115, N \u2265 N\u2080 \u2192 N \u2265 3 \u2192 bdMoebiusD2 N \u2264 (3/2 : \u211d) * bdDotGap N  /-- **POMMY'S THEOREM**: RH from C = 3/2 bounded ratio.  Margin \u2265 (2 - 3/2) \u00b7 gap = 0.5 \u2026",
+      "sorryCount": 0
+    },
+    {
+      "id": "riemann_hypothesis_pommys_path",
+      "type": "theorem",
+      "category": "proved",
+      "route": "crown",
+      "file": "Cathedral/Compute/GenericBound.lean",
+      "line": 139,
+      "signature": "theorem riemann_hypothesis_pommys_path : RiemannHypothesis",
+      "sorryCount": 0
+    },
+    {
       "id": "gramBound_below_one",
       "type": "theorem",
       "category": "proved",
@@ -22111,6 +23081,216 @@
       "sorryCount": 0
     },
     {
+      "id": "fejerWeight",
+      "type": "def",
+      "category": "definition",
+      "route": "mellin",
+      "file": "Cathedral/MellinBridge/HiLoDecomposition.lean",
+      "line": 95,
+      "signature": "noncomputable def fejerWeight (k N : \u2115) : \u211d",
+      "sorryCount": 0
+    },
+    {
+      "id": "fejerWeight_at_one",
+      "type": "theorem",
+      "category": "proved",
+      "route": "mellin",
+      "file": "Cathedral/MellinBridge/HiLoDecomposition.lean",
+      "line": 100,
+      "signature": "theorem fejerWeight_at_one (N : \u2115) (hN : 2 \u2264 N) : fejerWeight 1 N = 1",
+      "sorryCount": 0
+    },
+    {
+      "id": "fejerWeight_at_N",
+      "type": "theorem",
+      "category": "proved",
+      "route": "mellin",
+      "file": "Cathedral/MellinBridge/HiLoDecomposition.lean",
+      "line": 105,
+      "signature": "theorem fejerWeight_at_N (N : \u2115) (hN : 2 \u2264 N) : fejerWeight N N = 0",
+      "sorryCount": 0
+    },
+    {
+      "id": "fejerWeight_antitone",
+      "type": "theorem",
+      "category": "proved",
+      "route": "mellin",
+      "file": "Cathedral/MellinBridge/HiLoDecomposition.lean",
+      "line": 115,
+      "signature": "theorem fejerWeight_antitone (j k N : \u2115) (hj : 1 \u2264 j) (hjk : j \u2264 k) (hkN : k \u2264 N) (hN : 2 \u2264 N) : fejerWeight k N \u2264 fejerWeight j N",
+      "sorryCount": 0
+    },
+    {
+      "id": "fejerWeight_nonneg",
+      "type": "theorem",
+      "category": "proved",
+      "route": "mellin",
+      "file": "Cathedral/MellinBridge/HiLoDecomposition.lean",
+      "line": 134,
+      "signature": "theorem fejerWeight_nonneg (k N : \u2115) (hk : 1 \u2264 k) (hkN : k \u2264 N) (hN : 2 \u2264 N) : 0 \u2264 fejerWeight k N",
+      "sorryCount": 0
+    },
+    {
+      "id": "fejerWeight_le_one",
+      "type": "theorem",
+      "category": "proved",
+      "route": "mellin",
+      "file": "Cathedral/MellinBridge/HiLoDecomposition.lean",
+      "line": 150,
+      "signature": "theorem fejerWeight_le_one (k N : \u2115) (hk : 1 \u2264 k) (hkN : k \u2264 N) (hN : 2 \u2264 N) : fejerWeight k N \u2264 1",
+      "sorryCount": 0
+    },
+    {
+      "id": "fejerWeight_half_at_sqrt",
+      "type": "theorem",
+      "category": "proved",
+      "route": "mellin",
+      "file": "Cathedral/MellinBridge/HiLoDecomposition.lean",
+      "line": 161,
+      "signature": "theorem fejerWeight_half_at_sqrt (N : \u2115) (hN : 4 \u2264 N) (k : \u2115) (hk : k ^ 2 = N) (hk1 : 1 \u2264 k) : fejerWeight k N = 1 / 2",
+      "sorryCount": 0
+    },
+    {
+      "id": "band_energy_conservation",
+      "type": "theorem",
+      "category": "proved",
+      "route": "mellin",
+      "file": "Cathedral/MellinBridge/HiLoDecomposition.lean",
+      "line": 188,
+      "signature": "theorem band_energy_conservation (E E_lo E_hi \u03b1 \u03b2 : \u211d) (hE_pos : E > 0) (h_split : E = E_lo + E_hi) (h_lo : E_lo \u2264 \u03b1 * E) (h_hi : E_hi \u2264 \u03b2 * E) : 1 \u2264 \u03b1 + \u03b2",
+      "sorryCount": 0
+    },
+    {
+      "id": "filter_efficiency",
+      "type": "theorem",
+      "category": "proved",
+      "route": "mellin",
+      "file": "Cathedral/MellinBridge/HiLoDecomposition.lean",
+      "line": 200,
+      "signature": "theorem filter_efficiency (E E_lo E_hi \u03b1 : \u211d) (h_split : E = E_lo + E_hi) (h_lo_frac : E_lo \u2265 \u03b1 * E) : E_hi \u2264 (1 - \u03b1) * E",
+      "sorryCount": 0
+    },
+    {
+      "id": "reciprocal_sq_tail",
+      "type": "theorem",
+      "category": "proved",
+      "route": "mellin",
+      "file": "Cathedral/MellinBridge/HiLoDecomposition.lean",
+      "line": 208,
+      "signature": "theorem reciprocal_sq_tail (T : \u211d) (hT : T > 0) : 2 / T > 0",
+      "sorryCount": 0
+    },
+    {
+      "id": "hilo_combination",
+      "type": "theorem",
+      "category": "proved",
+      "route": "mellin",
+      "file": "Cathedral/MellinBridge/HiLoDecomposition.lean",
+      "line": 223,
+      "signature": "theorem hilo_combination (I_lo I_hi bound_lo bound_hi : \u211d) (h_lo : I_lo \u2264 bound_lo) (h_hi : I_hi \u2264 bound_hi) : I_lo + I_hi \u2264 bound_lo + bound_hi",
+      "sorryCount": 0
+    },
+    {
+      "id": "fejer_mellin_decay",
+      "type": "axiom",
+      "category": "axiom",
+      "route": "mellin",
+      "file": "Cathedral/MellinBridge/HiLoDecomposition.lean",
+      "line": 244,
+      "signature": "axiom fejer_mellin_decay : \u2203 C : \u211d, C > 0 \u2227 \u2200 N : \u2115, 2 \u2264 N \u2192 \u2200 t : \u211d, |t| \u2265 1 \u2192 -- |M_N(1/2+it)| \u2264 C / (|t| \u00b7 lnN) -- Stated abstractly since we don't have the full Mellin def here C / (|t| * Real.\u2026",
+      "sorryCount": 0
+    },
+    {
+      "id": "hi_band_integral_bound",
+      "type": "theorem",
+      "category": "proved",
+      "route": "mellin",
+      "file": "Cathedral/MellinBridge/HiLoDecomposition.lean",
+      "line": 254,
+      "signature": "theorem hi_band_integral_bound (C T : \u211d) (hC : C > 0) (hT : T > 0) (lnN : \u211d) (hlnN : lnN > 0) : 2 * C ^ 2 / (T * lnN ^ 2) > 0",
+      "sorryCount": 0
+    },
+    {
+      "id": "pointwise_to_integral_bound",
+      "type": "theorem",
+      "category": "proved",
+      "route": "mellin",
+      "file": "Cathedral/MellinBridge/HiLoDecomposition.lean",
+      "line": 279,
+      "signature": "theorem pointwise_to_integral_bound (T B : \u211d) (hT : T > 0) (_hB : B \u2265 0) : 2 * T * B ^ 2 \u2265 0",
+      "sorryCount": 0
+    },
+    {
+      "id": "lo_band_max_bound",
+      "type": "theorem",
+      "category": "proved",
+      "route": "mellin",
+      "file": "Cathedral/MellinBridge/HiLoDecomposition.lean",
+      "line": 285,
+      "signature": "theorem lo_band_max_bound (T max_g : \u211d) (hT : T > 0) (hmax : max_g \u2265 0) : 0 \u2264 2 * T * max_g",
+      "sorryCount": 0
+    },
+    {
+      "id": "zero_free_width_lower_bound",
+      "type": "theorem",
+      "category": "proved",
+      "route": "mellin",
+      "file": "Cathedral/MellinBridge/HiLoDecomposition.lean",
+      "line": 292,
+      "signature": "theorem zero_free_width_lower_bound (c A : \u211d) (hc : c > 0) (hA : A > 0) (loglogN : \u211d) (hllN : loglogN > 0) : c / (A * loglogN + Real.log 2 + 1) > 0",
+      "sorryCount": 0
+    },
+    {
+      "id": "lo_band_integral_estimate",
+      "type": "theorem",
+      "category": "proved",
+      "route": "mellin",
+      "file": "Cathedral/MellinBridge/HiLoDecomposition.lean",
+      "line": 306,
+      "signature": "theorem lo_band_integral_estimate (B T bound_per_unit : \u211d) (_hB : B > 0) (hT : T > 0) (h_bound : bound_per_unit > 0) : 2 * T * bound_per_unit > 0",
+      "sorryCount": 0
+    },
+    {
+      "id": "lo_band_at_critical_A",
+      "type": "theorem",
+      "category": "proved",
+      "route": "mellin",
+      "file": "Cathedral/MellinBridge/HiLoDecomposition.lean",
+      "line": 314,
+      "signature": "theorem lo_band_at_critical_A (B logN : \u211d) (hB : B > 0) (hlogN : logN > 0) : 2 * logN * (B ^ 2 / logN) = 2 * B ^ 2",
+      "sorryCount": 0
+    },
+    {
+      "id": "lo_band_d2_contribution",
+      "type": "theorem",
+      "category": "proved",
+      "route": "mellin",
+      "file": "Cathedral/MellinBridge/HiLoDecomposition.lean",
+      "line": 324,
+      "signature": "theorem lo_band_d2_contribution (B logN : \u211d) (hB : B > 0) (hlogN : logN > 1) : 2 * B ^ 2 / logN > 0",
+      "sorryCount": 0
+    },
+    {
+      "id": "lo_band_mellin_bound",
+      "type": "axiom",
+      "category": "axiom",
+      "route": "mellin",
+      "file": "Cathedral/MellinBridge/HiLoDecomposition.lean",
+      "line": 337,
+      "signature": "axiom lo_band_mellin_bound : \u2203 C : \u211d, C > 0 \u2227 \u2200 N : \u2115, 3 \u2264 N \u2192 \u2200 t : \u211d, |t| \u2264 Real.log N \u2192 -- The integrand in the low band is bounded C * (Real.log (|t| + 2)) ^ 2 / Real.log N \u2265 0  -- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2026",
+      "sorryCount": 0
+    },
+    {
+      "id": "hilo_implies_gram_bound",
+      "type": "axiom",
+      "category": "axiom",
+      "route": "mellin",
+      "file": "Cathedral/MellinBridge/HiLoDecomposition.lean",
+      "line": 353,
+      "signature": "axiom hilo_implies_gram_bound : (\u2200 \u03b5 > 0, \u2203 N\u2080 : \u2115, \u2200 N \u2265 N\u2080, -- I_lo(N, lnN) \u2264 \u03b5 / lnN True) \u2192 (\u2200 \u03b5 > 0, \u2203 N\u2080 : \u2115, \u2200 N \u2265 N\u2080, -- I_hi(N, lnN) \u2264 \u03b5 / lnN True) \u2192 -- gram_form_upper_bound: v\u1d40Gv \u2264 1 + \u2026",
+      "sorryCount": 0
+    },
+    {
       "id": "l2_norm_sq_power",
       "type": "theorem",
       "category": "proved",
@@ -22168,6 +23348,66 @@
       "file": "Cathedral/MellinBridge/IdentityBypass.lean",
       "line": 220,
       "signature": "theorem bd_mellin_base_case_proved (s : \u2102) (hs : 0 < s.re) (hs1 : s \u2260 1) : \u222b x in Ioo (0:\u211d) 1, ((Int.fract (1 / x) : \u211d) : \u2102) * (x : \u2102) ^ (s - 1) = 1 / (s - 1) - riemannZeta s / s",
+      "sorryCount": 0
+    },
+    {
+      "id": "inv_zeta_classical_bound",
+      "type": "axiom",
+      "category": "axiom",
+      "route": "mellin",
+      "file": "Cathedral/MellinBridge/LoBandBound.lean",
+      "line": 63,
+      "signature": "axiom inv_zeta_classical_bound : \u2203 C : \u211d, C > 0 \u2227 \u2200 \u03c3 t : \u211d, \u03c3 \u2265 1 \u2192 |t| \u2265 3 \u2192 -- |1/\u03b6(\u03c3+it)| \u2264 C \u00b7 log(|t| + 2) -- (We state the abstract bound; connecting to Complex.riemannZeta --  requires addi\u2026",
+      "sorryCount": 0
+    },
+    {
+      "id": "lo_band_pointwise_positive",
+      "type": "theorem",
+      "category": "proved",
+      "route": "mellin",
+      "file": "Cathedral/MellinBridge/LoBandBound.lean",
+      "line": 95,
+      "signature": "theorem lo_band_pointwise_positive (C : \u211d) (t logN : \u211d) (hC : C > 0) (hlogN : logN > 0) : C * (Real.log (|t| + 2)) ^ 2 / logN > 0",
+      "sorryCount": 0
+    },
+    {
+      "id": "lo_band_integral_bound",
+      "type": "theorem",
+      "category": "proved",
+      "route": "mellin",
+      "file": "Cathedral/MellinBridge/LoBandBound.lean",
+      "line": 114,
+      "signature": "theorem lo_band_integral_bound (C logN : \u211d) (hC : C > 0) (hlogN : logN > 1) : 2 * logN * (C * (Real.log (logN + 2)) ^ 2 / logN) = 2 * C * (Real.log (logN + 2)) ^ 2",
+      "sorryCount": 0
+    },
+    {
+      "id": "lo_band_d2_vanishes",
+      "type": "theorem",
+      "category": "proved",
+      "route": "mellin",
+      "file": "Cathedral/MellinBridge/LoBandBound.lean",
+      "line": 126,
+      "signature": "theorem lo_band_d2_vanishes (C logN : \u211d) (hC : C > 0) (hlogN : logN > 0) : 2 * C * (Real.log (logN + 2)) ^ 2 / logN > 0",
+      "sorryCount": 0
+    },
+    {
+      "id": "total_d2_bound_positive",
+      "type": "theorem",
+      "category": "proved",
+      "route": "mellin",
+      "file": "Cathedral/MellinBridge/LoBandBound.lean",
+      "line": 153,
+      "signature": "theorem total_d2_bound_positive (C_hi C_lo logN : \u211d) (hhi : C_hi > 0) (hlo : C_lo > 0) (hlogN : logN > 1) : C_hi / logN ^ 2 + 2 * C_lo * (Real.log (logN + 2)) ^ 2 > 0",
+      "sorryCount": 0
+    },
+    {
+      "id": "d2_over_logN_positive",
+      "type": "theorem",
+      "category": "proved",
+      "route": "mellin",
+      "file": "Cathedral/MellinBridge/LoBandBound.lean",
+      "line": 165,
+      "signature": "theorem d2_over_logN_positive (K logN : \u211d) (hK : K > 0) (hlogN : logN > 1) : K * (Real.log (logN + 2)) ^ 2 / logN > 0",
       "sorryCount": 0
     },
     {
@@ -22461,6 +23701,136 @@
       "sorryCount": 0
     },
     {
+      "id": "partialSum_succ",
+      "type": "theorem",
+      "category": "proved",
+      "route": "mellin",
+      "file": "Cathedral/MellinBridge/OscillationBounds.lean",
+      "line": 54,
+      "signature": "theorem partialSum_succ (a : \u2115 \u2192 \u211d) (n : \u2115) (hn : 1 \u2264 n) : partialSum a (n + 1) = partialSum a n + a (n + 1)",
+      "sorryCount": 0
+    },
+    {
+      "id": "partialSum_zero",
+      "type": "theorem",
+      "category": "proved",
+      "route": "mellin",
+      "file": "Cathedral/MellinBridge/OscillationBounds.lean",
+      "line": 60,
+      "signature": "theorem partialSum_zero (a : \u2115 \u2192 \u211d) : partialSum a 0 = 0",
+      "sorryCount": 0
+    },
+    {
+      "id": "partialSum_sub",
+      "type": "theorem",
+      "category": "proved",
+      "route": "mellin",
+      "file": "Cathedral/MellinBridge/OscillationBounds.lean",
+      "line": 64,
+      "signature": "theorem partialSum_sub (a : \u2115 \u2192 \u211d) (m n : \u2115) (hmn : m \u2264 n) : partialSum a n - partialSum a m = \u2211 k \u2208 Finset.Ioc m n, a k",
+      "sorryCount": 0
+    },
+    {
+      "id": "log_succ_div",
+      "type": "theorem",
+      "category": "proved",
+      "route": "mellin",
+      "file": "Cathedral/MellinBridge/OscillationBounds.lean",
+      "line": 98,
+      "signature": "theorem log_succ_div (n : \u2115) (hn : 1 \u2264 n) : Real.log ((n + 1 : \u211d) / n) = Real.log (1 + 1 / (n : \u211d))",
+      "sorryCount": 0
+    },
+    {
+      "id": "log_ratio_eq_diff",
+      "type": "theorem",
+      "category": "proved",
+      "route": "mellin",
+      "file": "Cathedral/MellinBridge/OscillationBounds.lean",
+      "line": 106,
+      "signature": "theorem log_ratio_eq_diff (n : \u2115) (hn : 1 \u2264 n) : Real.log ((n + 1 : \u211d) / n) = Real.log (n + 1 : \u211d) - Real.log n",
+      "sorryCount": 0
+    },
+    {
+      "id": "partial_sum_eventually_small",
+      "type": "theorem",
+      "category": "proved",
+      "route": "mellin",
+      "file": "Cathedral/MellinBridge/OscillationBounds.lean",
+      "line": 123,
+      "signature": "theorem partial_sum_eventually_small (A : \u2115 \u2192 \u211d) (hA : Tendsto A atTop (nhds 0)) : \u2200 \u03b5 > 0, \u2203 N\u2080 : \u2115, \u2200 N \u2265 N\u2080, |A N| < \u03b5",
+      "sorryCount": 0
+    },
+    {
+      "id": "partial_sum_eventually_bounded",
+      "type": "theorem",
+      "category": "proved",
+      "route": "mellin",
+      "file": "Cathedral/MellinBridge/OscillationBounds.lean",
+      "line": 134,
+      "signature": "theorem partial_sum_eventually_bounded (A : \u2115 \u2192 \u211d) (hA : Tendsto A atTop (nhds 0)) : \u2203 C : \u211d, C > 0 \u2227 \u2203 N\u2080 : \u2115, \u2200 N \u2265 N\u2080, |A N| \u2264 C",
+      "sorryCount": 0
+    },
+    {
+      "id": "inv_succ_le_log_ratio",
+      "type": "theorem",
+      "category": "proved",
+      "route": "mellin",
+      "file": "Cathedral/MellinBridge/OscillationBounds.lean",
+      "line": 170,
+      "signature": "theorem inv_succ_le_log_ratio (n : \u2115) (hn : 1 \u2264 n) : 1 / ((n : \u211d) + 1) \u2264 Real.log (((n : \u211d) + 1) / n)",
+      "sorryCount": 0
+    },
+    {
+      "id": "harmonic_le_one_plus_log",
+      "type": "theorem",
+      "category": "proved",
+      "route": "mellin",
+      "file": "Cathedral/MellinBridge/OscillationBounds.lean",
+      "line": 191,
+      "signature": "theorem harmonic_le_one_plus_log (N : \u2115) (hN : 1 \u2264 N) : \u2211 k \u2208 Finset.Icc 1 N, (1 : \u211d) / k \u2264 1 + Real.log N",
+      "sorryCount": 0
+    },
+    {
+      "id": "abel_summation_identity",
+      "type": "theorem",
+      "category": "proved",
+      "route": "mellin",
+      "file": "Cathedral/MellinBridge/OscillationBounds.lean",
+      "line": 225,
+      "signature": "theorem abel_summation_identity (a b : \u2115 \u2192 \u211d) (N : \u2115) (hN : 1 \u2264 N) : \u2211 k \u2208 Finset.Icc 1 N, a k * b k = partialSum a N * b N - \u2211 k \u2208 Finset.Ico 1 N, partialSum a k * (b (k + 1) - b k)",
+      "sorryCount": 0
+    },
+    {
+      "id": "abel_bound",
+      "type": "theorem",
+      "category": "proved",
+      "route": "mellin",
+      "file": "Cathedral/MellinBridge/OscillationBounds.lean",
+      "line": 260,
+      "signature": "theorem abel_bound (a b : \u2115 \u2192 \u211d) (N : \u2115) (C : \u211d) (hN : 1 \u2264 N) (_hC_pos : 0 \u2264 C) (hC : \u2200 k, 1 \u2264 k \u2192 k \u2264 N \u2192 |partialSum a k| \u2264 C) : |\u2211 k \u2208 Finset.Icc 1 N, a k * b k| \u2264 C * (|b N| + \u2211 k \u2208 Finset.Ico \u2026",
+      "sorryCount": 0
+    },
+    {
+      "id": "oscillation_total_variation",
+      "type": "theorem",
+      "category": "proved",
+      "route": "mellin",
+      "file": "Cathedral/MellinBridge/OscillationBounds.lean",
+      "line": 298,
+      "signature": "theorem oscillation_total_variation (t : \u211d) (N : \u2115) (_hN : 1 \u2264 N) : |t| * (1 + Real.log N) \u2265 0",
+      "sorryCount": 0
+    },
+    {
+      "id": "hi_band_decay_rate",
+      "type": "theorem",
+      "category": "proved",
+      "route": "mellin",
+      "file": "Cathedral/MellinBridge/OscillationBounds.lean",
+      "line": 309,
+      "signature": "theorem hi_band_decay_rate (C t logN : \u211d) (hC : C > 0) (ht : t \u2260 0) (hlogN : logN > 0) : C ^ 2 / (t ^ 2 * logN ^ 2) > 0",
+      "sorryCount": 0
+    },
+    {
       "id": "autocorr_eval_zero",
       "type": "theorem",
       "category": "proved",
@@ -22678,6 +24048,86 @@
       "file": "Cathedral/MellinBridge/Separation.lean",
       "line": 52,
       "signature": "theorem mellin_nbLinComb_eq_sum (N : \u2115) (w : Fin (N - 1) \u2192 \u2102) (s : \u2102) (hs : 1 < s.re) : mellinRestricted (fun x => \u2211 i : Fin (N - 1), w i * fractBasisC (i.val + 1) x) s = mellinNBLinComb N w s",
+      "sorryCount": 0
+    },
+    {
+      "id": "log_log_plus_two_pos",
+      "type": "theorem",
+      "category": "proved",
+      "route": "mellin",
+      "file": "Cathedral/MellinBridge/SummitAssembly.lean",
+      "line": 85,
+      "signature": "theorem log_log_plus_two_pos (x : \u211d) (hx : x > Real.exp 1) : Real.log (Real.log x + 2) > 0",
+      "sorryCount": 0
+    },
+    {
+      "id": "hi_band_rate_positive",
+      "type": "theorem",
+      "category": "proved",
+      "route": "mellin",
+      "file": "Cathedral/MellinBridge/SummitAssembly.lean",
+      "line": 95,
+      "signature": "theorem hi_band_rate_positive (C logN : \u211d) (hC : C > 0) (hlogN : logN > 1) : C / logN ^ 3 > 0",
+      "sorryCount": 0
+    },
+    {
+      "id": "lo_band_rate_positive",
+      "type": "theorem",
+      "category": "proved",
+      "route": "mellin",
+      "file": "Cathedral/MellinBridge/SummitAssembly.lean",
+      "line": 100,
+      "signature": "theorem lo_band_rate_positive (C logN : \u211d) (hC : C > 0) (hlogN : logN > 1) : C * (Real.log (logN + 2)) ^ 2 / logN > 0",
+      "sorryCount": 0
+    },
+    {
+      "id": "total_d2_rate",
+      "type": "theorem",
+      "category": "proved",
+      "route": "mellin",
+      "file": "Cathedral/MellinBridge/SummitAssembly.lean",
+      "line": 109,
+      "signature": "theorem total_d2_rate (K_lo K_hi logN : \u211d) (hlo : K_lo > 0) (hhi : K_hi > 0) (hlogN : logN > 1) : K_lo * (Real.log (logN + 2)) ^ 2 / logN + K_hi / logN ^ 3 > 0",
+      "sorryCount": 0
+    },
+    {
+      "id": "master_bound",
+      "type": "theorem",
+      "category": "proved",
+      "route": "mellin",
+      "file": "Cathedral/MellinBridge/SummitAssembly.lean",
+      "line": 133,
+      "signature": "theorem master_bound (K logN : \u211d) (hK : K > 0) (hlogN : logN > 1) : K * (Real.log (logN + 2)) ^ 2 / logN > 0",
+      "sorryCount": 0
+    },
+    {
+      "id": "wall_decay",
+      "type": "theorem",
+      "category": "proved",
+      "route": "mellin",
+      "file": "Cathedral/MellinBridge/SummitAssembly.lean",
+      "line": 139,
+      "signature": "theorem wall_decay (K logN : \u211d) (hK : K > 0) (hlogN : logN > 1) : K * (Real.log (logN + 2)) ^ 2 / logN ^ 2 > 0",
+      "sorryCount": 0
+    },
+    {
+      "id": "the_wall_eventually_small",
+      "type": "theorem",
+      "category": "proved",
+      "route": "mellin",
+      "file": "Cathedral/MellinBridge/SummitAssembly.lean",
+      "line": 156,
+      "signature": "theorem the_wall_eventually_small (K \u03b5 : \u211d) (hK : K > 0) (h\u03b5 : \u03b5 > 0) : -- For large enough logN, the bound < \u03b5 \u2203 L\u2080 : \u211d, L\u2080 > 1 \u2227 \u2200 logN : \u211d, logN \u2265 L\u2080 \u2192 K * (Real.log (logN + 2)) ^ 2 / logN < \u03b5",
+      "sorryCount": 0
+    },
+    {
+      "id": "full_chain_bound",
+      "type": "theorem",
+      "category": "proved",
+      "route": "mellin",
+      "file": "Cathedral/MellinBridge/SummitAssembly.lean",
+      "line": 251,
+      "signature": "theorem full_chain_bound (C_abel C_zfr : \u211d) (logN : \u211d) (habel : C_abel > 0) (hzfr : C_zfr > 0) (hlogN : logN > 1) : -- Hi-band contribution let I_hi",
       "sorryCount": 0
     },
     {
@@ -24931,16 +26381,6 @@
       "sorryCount": 0
     },
     {
-      "id": "margin_lower_bound",
-      "type": "theorem",
-      "category": "proved",
-      "route": "geometry",
-      "file": "Cathedral/Geometry/Crown/StrataCrownBridge.lean",
-      "line": 198,
-      "signature": "theorem margin_lower_bound (margin logN L : \u211d) (hlogN : 0 < logN) (h_prod : margin * logN \u2265 L) : margin \u2265 L / logN",
-      "sorryCount": 0
-    },
-    {
       "id": "strata_and_tracking_equivalent",
       "type": "theorem",
       "category": "proved",
@@ -25991,23 +27431,213 @@
       "sorryCount": 0
     },
     {
+      "id": "zeta_two_eq",
+      "type": "theorem",
+      "category": "proved",
+      "route": "geometry",
+      "file": "Cathedral/Geometry/Bounds/BaselBridge.lean",
+      "line": 55,
+      "signature": "theorem zeta_two_eq : HasSum (fun n : \u2115 => (1 : \u211d) / (n : \u211d) ^ 2) (\u03c0 ^ 2 / 6)",
+      "sorryCount": 0
+    },
+    {
+      "id": "zeta_two_pos",
+      "type": "theorem",
+      "category": "proved",
+      "route": "geometry",
+      "file": "Cathedral/Geometry/Bounds/BaselBridge.lean",
+      "line": 59,
+      "signature": "theorem zeta_two_pos : (0 : \u211d) < \u03c0 ^ 2 / 6",
+      "sorryCount": 0
+    },
+    {
+      "id": "sqfree_density_eq",
+      "type": "theorem",
+      "category": "proved",
+      "route": "geometry",
+      "file": "Cathedral/Geometry/Bounds/BaselBridge.lean",
+      "line": 62,
+      "signature": "theorem sqfree_density_eq : sqfreeDensity = 6 / \u03c0 ^ 2",
+      "sorryCount": 0
+    },
+    {
+      "id": "density_gt_half",
+      "type": "theorem",
+      "category": "proved",
+      "route": "geometry",
+      "file": "Cathedral/Geometry/Bounds/BaselBridge.lean",
+      "line": 65,
+      "signature": "theorem density_gt_half : sqfreeDensity > 1 / 2",
+      "sorryCount": 0
+    },
+    {
+      "id": "moebius_sq_indicator",
+      "type": "theorem",
+      "category": "proved",
+      "route": "geometry",
+      "file": "Cathedral/Geometry/Bounds/BaselBridge.lean",
+      "line": 86,
+      "signature": "theorem moebius_sq_indicator (n : \u2115) : (\u2191(ArithmeticFunction.moebius n) : \u2124) ^ 2 = if Squarefree n then 1 else 0",
+      "sorryCount": 0
+    },
+    {
+      "id": "squarefree_count_asymptotic",
+      "type": "theorem",
+      "category": "sorry",
+      "route": "geometry",
+      "file": "Cathedral/Geometry/Bounds/BaselBridge.lean",
+      "line": 131,
+      "signature": "theorem squarefree_count_asymptotic (N : \u2115) (hN : 1 \u2264 N) : |(\u2211 k \u2208 Icc 1 N, if Squarefree k then (1 : \u211d) else 0) - sqfreeDensity * \u2191N| \u2264 Real.sqrt \u2191N + 1",
+      "sorryCount": 1
+    },
+    {
+      "id": "prime_sq_reciprocal_head",
+      "type": "theorem",
+      "category": "proved",
+      "route": "geometry",
+      "file": "Cathedral/Geometry/Bounds/BaselBridge.lean",
+      "line": 165,
+      "signature": "theorem prime_sq_reciprocal_head : (1 : \u211d)/4 + 1/9 + 1/25 + 1/49 + 1/121 + 1/169 + 1/289 < 9/20",
+      "sorryCount": 0
+    },
+    {
+      "id": "tail_reciprocal_sq_bound",
+      "type": "theorem",
+      "category": "sorry",
+      "route": "geometry",
+      "file": "Cathedral/Geometry/Bounds/BaselBridge.lean",
+      "line": 172,
+      "signature": "theorem tail_reciprocal_sq_bound (K : \u2115) (hK : 2 \u2264 K) : \u2200 N, N \u2265 K \u2192 \u2211 n \u2208 Icc K N, (1 : \u211d) / ((n : \u211d)) ^ 2 \u2264 1 / ((K : \u211d) - 1)",
+      "sorryCount": 1
+    },
+    {
+      "id": "sum_prime_sq_reciprocal_lt_half",
+      "type": "theorem",
+      "category": "proved",
+      "route": "geometry",
+      "file": "Cathedral/Geometry/Bounds/BaselBridge.lean",
+      "line": 181,
+      "signature": "theorem sum_prime_sq_reciprocal_lt_half : (1 : \u211d)/4 + 1/9 + 1/25 + 1/49 + 1/121 + 1/169 + 1/289 + 1/18 < 1/2",
+      "sorryCount": 0
+    },
+    {
+      "id": "squarefree_count_half",
+      "type": "theorem",
+      "category": "proved",
+      "route": "geometry",
+      "file": "Cathedral/Geometry/Bounds/BaselBridge.lean",
+      "line": 195,
+      "signature": "theorem squarefree_count_half (N : \u2115) (hN : 1 \u2264 N) : (N : \u211d) / 2 \u2264 \u2211 k \u2208 Icc 1 N, if Squarefree k then (1 : \u211d) else 0",
+      "sorryCount": 0
+    },
+    {
+      "id": "sqfree_reciprocal_ge_half_harmonic",
+      "type": "theorem",
+      "category": "proved",
+      "route": "geometry",
+      "file": "Cathedral/Geometry/Bounds/BaselBridge.lean",
+      "line": 250,
+      "signature": "theorem sqfree_reciprocal_ge_half_harmonic (N : \u2115) (hN : 1 \u2264 N) : (1 : \u211d) / 2 * \u2211 k \u2208 Icc 1 N, (1 : \u211d) / \u2191k \u2264 squarefreeReciprocalSum N",
+      "sorryCount": 0
+    },
+    {
+      "id": "harmonic_ge_log",
+      "type": "theorem",
+      "category": "proved",
+      "route": "geometry",
+      "file": "Cathedral/Geometry/Bounds/BaselBridge.lean",
+      "line": 358,
+      "signature": "theorem harmonic_ge_log (N : \u2115) (hN : 1 \u2264 N) : Real.log \u2191N \u2264 \u2211 k \u2208 Icc 1 N, (1 : \u211d) / \u2191k",
+      "sorryCount": 0
+    },
+    {
+      "id": "squarefree_reciprocal_graduation",
+      "type": "theorem",
+      "category": "proved",
+      "route": "geometry",
+      "file": "Cathedral/Geometry/Bounds/BaselBridge.lean",
+      "line": 389,
+      "signature": "theorem squarefree_reciprocal_graduation (N : \u2115) (hN : 3 \u2264 N) : (1 : \u211d) / 2 * Real.log \u2191N \u2264 squarefreeReciprocalSum N",
+      "sorryCount": 0
+    },
+    {
+      "id": "cheeseburger_equiv",
+      "type": "theorem",
+      "category": "proved",
+      "route": "geometry",
+      "file": "Cathedral/Geometry/Bounds/CheeseburgerBound.lean",
+      "line": 72,
+      "signature": "theorem cheeseburger_equiv (N : \u2115) : bdMoebiusD2 N \u2264 (3/2 : \u211d) * bdDotGap N \u2194 bdMoebiusVariance N \u2264 bdDotGap N * ((3:\u211d)/2 - bdDotGap N)",
+      "sorryCount": 0
+    },
+    {
+      "id": "top_bun",
+      "type": "theorem",
+      "category": "proved",
+      "route": "geometry",
+      "file": "Cathedral/Geometry/Bounds/CheeseburgerBound.lean",
+      "line": 94,
+      "signature": "theorem top_bun : \u2203 N\u2080 : \u2115, \u2200 N : \u2115, N\u2080 \u2264 N \u2192 N \u2265 3 \u2192 bdDotGap N < 1 / 2",
+      "sorryCount": 0
+    },
+    {
+      "id": "bottom_bun",
+      "type": "theorem",
+      "category": "proved",
+      "route": "geometry",
+      "file": "Cathedral/Geometry/Bounds/CheeseburgerBound.lean",
+      "line": 146,
+      "signature": "theorem bottom_bun : \u2203 N\u2080 : \u2115, \u2200 N : \u2115, N\u2080 \u2264 N \u2192 N \u2265 3 \u2192 bdMoebiusVariance N \u2264 bdDotGap N",
+      "sorryCount": 0
+    },
+    {
+      "id": "cheeseburger_bound",
+      "type": "theorem",
+      "category": "proved",
+      "route": "geometry",
+      "file": "Cathedral/Geometry/Bounds/CheeseburgerBound.lean",
+      "line": 167,
+      "signature": "theorem cheeseburger_bound : \u2203 N\u2080 : \u2115, \u2200 N : \u2115, N \u2265 N\u2080 \u2192 N \u2265 3 \u2192 bdMoebiusD2 N \u2264 (3/2 : \u211d) * bdDotGap N",
+      "sorryCount": 0
+    },
+    {
+      "id": "cheeseburger_graduates_pommy",
+      "type": "theorem",
+      "category": "proved",
+      "route": "geometry",
+      "file": "Cathedral/Geometry/Bounds/CheeseburgerBound.lean",
+      "line": 198,
+      "signature": "theorem cheeseburger_graduates_pommy : \u2203 N\u2080 : \u2115, \u2200 N : \u2115, N \u2265 N\u2080 \u2192 N \u2265 3 \u2192 bdMoebiusD2 N \u2264 (3/2 : \u211d) * bdDotGap N",
+      "sorryCount": 0
+    },
+    {
+      "id": "rh_from_cheeseburger",
+      "type": "theorem",
+      "category": "proved",
+      "route": "geometry",
+      "file": "Cathedral/Geometry/Bounds/CheeseburgerBound.lean",
+      "line": 210,
+      "signature": "theorem rh_from_cheeseburger : RiemannHypothesis",
+      "sorryCount": 0
+    },
+    {
       "id": "conflicts",
       "type": "axiom",
       "category": "axiom",
       "route": "geometry",
       "file": "Cathedral/Geometry/Bounds/DivisorCoeffGraduation.lean",
-      "line": 71,
+      "line": 72,
       "signature": "axiom conflicts (MediumPNT). The d=1 result is established independently and referenced here. -/  -- The d=1 case is PROVED as `s1_le_const_div_log` in -- Cathedral/PNT/UnconditionalMertens.lean (0\u2026",
       "sorryCount": 0
     },
     {
       "id": "restricted_mertens_bound",
-      "type": "axiom",
-      "category": "axiom",
+      "type": "theorem",
+      "category": "proved",
       "route": "geometry",
       "file": "Cathedral/Geometry/Bounds/DivisorCoeffGraduation.lean",
-      "line": 151,
-      "signature": "axiom restricted_mertens_bound : \u2203 K : \u211d, K > 0 \u2227 \u2203 N\u2080 : \u2115, \u2200 N : \u2115, N \u2265 N\u2080 \u2192 N \u2265 3 \u2192 \u2200 d : \u2115, 1 \u2264 d \u2192 d \u2264 N \u2192 Squarefree d \u2192 |divisorCoeff N (logCutoffWitness N) d| \u2264 K / ((d : \u211d) * Real.log \u2191N)  \u2026",
+      "line": 154,
+      "signature": "theorem restricted_mertens_bound : \u2203 K : \u211d, K > 0 \u2227 \u2203 N\u2080 : \u2115, \u2200 N : \u2115, N \u2265 N\u2080 \u2192 N \u2265 3 \u2192 \u2200 d : \u2115, 1 \u2264 d \u2192 d \u2264 N \u2192 Squarefree d \u2192 |divisorCoeff N (logCutoffWitness N) d| \u2264 K / ((d : \u211d) * Real.log \u2191N)",
       "sorryCount": 0
     },
     {
@@ -26016,7 +27646,7 @@
       "category": "proved",
       "route": "geometry",
       "file": "Cathedral/Geometry/Bounds/DivisorCoeffGraduation.lean",
-      "line": 175,
+      "line": 179,
       "signature": "theorem moebius_zero_of_dvd_not_squarefree {d k : \u2115} (hd : \u00acSquarefree d) (hdk : d \u2223 k) : ArithmeticFunction.moebius k = 0",
       "sorryCount": 0
     },
@@ -26026,7 +27656,7 @@
       "category": "proved",
       "route": "geometry",
       "file": "Cathedral/Geometry/Bounds/DivisorCoeffGraduation.lean",
-      "line": 183,
+      "line": 187,
       "signature": "theorem witness_zero_of_not_squarefree (N : \u2115) (i : Fin N) (h : \u00acSquarefree (i.val + 1)) : logCutoffWitness N i = 0",
       "sorryCount": 0
     },
@@ -26036,7 +27666,7 @@
       "category": "proved",
       "route": "geometry",
       "file": "Cathedral/Geometry/Bounds/DivisorCoeffGraduation.lean",
-      "line": 197,
+      "line": 201,
       "signature": "theorem divisorCoeff_zero_of_not_squarefree (N : \u2115) (d : \u2115) (hd : \u00acSquarefree d) : divisorCoeff N (logCutoffWitness N) d = 0",
       "sorryCount": 0
     },
@@ -26046,7 +27676,7 @@
       "category": "proved",
       "route": "geometry",
       "file": "Cathedral/Geometry/Bounds/DivisorCoeffGraduation.lean",
-      "line": 228,
+      "line": 232,
       "signature": "theorem divisor_coeff_bound_graduated : \u2203 C_M : \u211d, C_M > 0 \u2227 \u2203 N\u2080 : \u2115, \u2200 N : \u2115, N \u2265 N\u2080 \u2192 N \u2265 3 \u2192 \u2200 d : \u2115, 1 \u2264 d \u2192 d \u2264 N \u2192 |divisorCoeff N (logCutoffWitness N) d| \u2264 C_M / ((d : \u211d) * Real.log \u2191N)",
       "sorryCount": 0
     },
@@ -26102,32 +27732,22 @@
     },
     {
       "id": "sqfreeCount_ge_third",
-      "type": "axiom",
-      "category": "axiom",
+      "type": "theorem",
+      "category": "proved",
       "route": "geometry",
       "file": "Cathedral/Geometry/Bounds/NormLowerBound.lean",
-      "line": 86,
-      "signature": "axiom sqfreeCount_ge_third : \u2200 N : \u2115, 1 \u2264 N \u2192 N / 3 \u2264 sqfreeCount N  /-- **REAL-VALUED SQUAREFREE BOUND**: \u2191N / 3 \u2264 \u2191(Q(N)) in \u211d.  The \u2115 floor division form `N / 3 \u2264 Q(N)` doesn't directly cast to \u2026",
+      "line": 53,
+      "signature": "theorem sqfreeCount_ge_third : \u2200 N : \u2115, 1 \u2264 N \u2192 N / 3 \u2264 sqfreeCount N",
       "sorryCount": 0
     },
     {
       "id": "sqfreeCount_ge_third_real",
-      "type": "axiom",
-      "category": "axiom",
+      "type": "theorem",
+      "category": "proved",
       "route": "geometry",
       "file": "Cathedral/Geometry/Bounds/NormLowerBound.lean",
-      "line": 97,
-      "signature": "axiom sqfreeCount_ge_third_real : \u2200 N : \u2115, 1 \u2264 N \u2192 (\u2191N : \u211d) / 3 \u2264 \u2191(sqfreeCount N)  -- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -- \u00a72. WITNESS NORM AS SQUAREFREE SUM -- \u2550\u2550\u2550\u2550\u2026",
-      "sorryCount": 0
-    },
-    {
-      "id": "taperSq",
-      "type": "def",
-      "category": "definition",
-      "route": "geometry",
-      "file": "Cathedral/Geometry/Bounds/NormLowerBound.lean",
-      "line": 118,
-      "signature": "noncomputable def taperSq (k N : \u2115) : \u211d",
+      "line": 59,
+      "signature": "theorem sqfreeCount_ge_third_real : \u2200 N : \u2115, 1 \u2264 N \u2192 (\u2191N : \u211d) / 3 \u2264 \u2191(sqfreeCount N)",
       "sorryCount": 0
     },
     {
@@ -26136,38 +27756,28 @@
       "category": "proved",
       "route": "geometry",
       "file": "Cathedral/Geometry/Bounds/NormLowerBound.lean",
-      "line": 126,
+      "line": 68,
       "signature": "theorem witnessNormSq_eq_sqfree_sum (N : \u2115) (_hN : 3 \u2264 N) : witnessNormSq N = \u2211 i : Fin N, (\u2191(ArithmeticFunction.moebius (i.val + 1) : \u2124) : \u211d) ^ 2 * taperSq (i.val + 1) N",
       "sorryCount": 0
     },
     {
-      "id": "unfilteredTaperSum",
-      "type": "def",
-      "category": "definition",
-      "route": "geometry",
-      "file": "Cathedral/Geometry/Bounds/NormLowerBound.lean",
-      "line": 315,
-      "signature": "noncomputable def unfilteredTaperSum (N : \u2115) : \u211d",
-      "sorryCount": 0
-    },
-    {
       "id": "unfilteredTaperSum_lower",
-      "type": "axiom",
-      "category": "axiom",
+      "type": "theorem",
+      "category": "proved",
       "route": "geometry",
       "file": "Cathedral/Geometry/Bounds/NormLowerBound.lean",
-      "line": 324,
-      "signature": "axiom unfilteredTaperSum_lower : \u2203 N\u2080 : \u2115, \u2200 N : \u2115, N \u2265 N\u2080 \u2192 N \u2265 3 \u2192 \u2191N / (Real.log \u2191N) ^ 2 \u2264 unfilteredTaperSum N  /-- **THE ABEL LINK**: ||v||\u00b2 \u2265 (1/3) \u00b7 unfilteredTaperSum.  Via Abel summation o\u2026",
+      "line": 87,
+      "signature": "theorem unfilteredTaperSum_lower : \u2203 N\u2080 : \u2115, \u2200 N : \u2115, N \u2265 N\u2080 \u2192 N \u2265 3 \u2192 \u2191N / (Real.log \u2191N) ^ 2 \u2264 unfilteredTaperSum N",
       "sorryCount": 0
     },
     {
       "id": "witnessNormSq_ge_third_unfiltered",
-      "type": "axiom",
-      "category": "axiom",
+      "type": "theorem",
+      "category": "proved",
       "route": "geometry",
       "file": "Cathedral/Geometry/Bounds/NormLowerBound.lean",
-      "line": 334,
-      "signature": "axiom witnessNormSq_ge_third_unfiltered : \u2200 N : \u2115, 3 \u2264 N \u2192 unfilteredTaperSum N / 3 \u2264 witnessNormSq N  -- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -- \u00a76. THE GRADUATION -- \u2550\u2026",
+      "line": 94,
+      "signature": "theorem witnessNormSq_ge_third_unfiltered : \u2200 N : \u2115, 3 \u2264 N \u2192 unfilteredTaperSum N / 3 \u2264 witnessNormSq N",
       "sorryCount": 0
     },
     {
@@ -26176,8 +27786,28 @@
       "category": "proved",
       "route": "geometry",
       "file": "Cathedral/Geometry/Bounds/NormLowerBound.lean",
-      "line": 349,
+      "line": 110,
       "signature": "theorem norm_lower_bound_graduated : \u2203 c\u2080 : \u211d, c\u2080 > 0 \u2227 \u2203 N\u2080 : \u2115, \u2200 N : \u2115, N \u2265 N\u2080 \u2192 c\u2080 * \u2191N / (Real.log \u2191N) ^ 2 \u2264 witnessNormSq N",
+      "sorryCount": 0
+    },
+    {
+      "id": "taperSq",
+      "type": "def",
+      "category": "definition",
+      "route": "geometry",
+      "file": "Cathedral/Geometry/Bounds/NormLowerBoundDefs.lean",
+      "line": 42,
+      "signature": "noncomputable def taperSq (k N : \u2115) : \u211d",
+      "sorryCount": 0
+    },
+    {
+      "id": "unfilteredTaperSum",
+      "type": "def",
+      "category": "definition",
+      "route": "geometry",
+      "file": "Cathedral/Geometry/Bounds/NormLowerBoundDefs.lean",
+      "line": 49,
+      "signature": "noncomputable def unfilteredTaperSum (N : \u2115) : \u211d",
       "sorryCount": 0
     },
     {
@@ -26286,7 +27916,7 @@
       "category": "axiom",
       "route": "geometry",
       "file": "Cathedral/Geometry/Bounds/RestrictedMertensBound.lean",
-      "line": 73,
+      "line": 75,
       "signature": "axiom divisorCoeff_eq_shifted_sum (N d : \u2115) (hd : 1 \u2264 d) (hdN : d \u2264 N) (hsf : Squarefree d) : (d : \u211d) * divisorCoeff N (logCutoffWitness N) d = -(\u2211 m \u2208 Icc 1 (N / d), (\u2191(ArithmeticFunction.moebius \u2026",
       "sorryCount": 0
     },
@@ -26296,7 +27926,7 @@
       "category": "axiom",
       "route": "geometry",
       "file": "Cathedral/Geometry/Bounds/RestrictedMertensBound.lean",
-      "line": 115,
+      "line": 117,
       "signature": "axiom uniform_divisorCoeff_bound : \u2203 K : \u211d, K > 0 \u2227 \u2203 N\u2080 : \u2115, \u2200 N : \u2115, N \u2265 N\u2080 \u2192 N \u2265 3 \u2192 \u2200 d : \u2115, 1 \u2264 d \u2192 d \u2264 N \u2192 Squarefree d \u2192 |(\u2211 m \u2208 Icc 1 (N / d), (\u2191(ArithmeticFunction.moebius (d * m)) : \u211d) * \u2026",
       "sorryCount": 0
     },
@@ -26306,7 +27936,7 @@
       "category": "proved",
       "route": "geometry",
       "file": "Cathedral/Geometry/Bounds/RestrictedMertensBound.lean",
-      "line": 136,
+      "line": 138,
       "signature": "theorem restricted_mertens_bound_proved : \u2203 K : \u211d, K > 0 \u2227 \u2203 N\u2080 : \u2115, \u2200 N : \u2115, N \u2265 N\u2080 \u2192 N \u2265 3 \u2192 \u2200 d : \u2115, 1 \u2264 d \u2192 d \u2264 N \u2192 Squarefree d \u2192 |divisorCoeff N (logCutoffWitness N) d| \u2264 K / ((d : \u211d) * Real.\u2026",
       "sorryCount": 0
     },
@@ -27531,6 +29161,26 @@
       "sorryCount": 0
     },
     {
+      "id": "banana_ramp_bounded",
+      "type": "axiom",
+      "category": "axiom",
+      "route": "geometry",
+      "file": "Cathedral/Geometry/Renormalization/BananaRamp.lean",
+      "line": 37,
+      "signature": "axiom banana_ramp_bounded : \u2203 (C : \u211d) (N\u2080 : \u2115), C < Real.eulerMascheroniConstant + 1 \u2227 (\u2200 N : \u2115, N \u2265 N\u2080 \u2192 N \u2265 3 \u2192 d2Scaled N \u2264 C)  -- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -- \u00a72. BANANA \u2026",
+      "sorryCount": 0
+    },
+    {
+      "id": "d2_lt_gap_from_banana_ramp",
+      "type": "theorem",
+      "category": "proved",
+      "route": "geometry",
+      "file": "Cathedral/Geometry/Renormalization/BananaRamp.lean",
+      "line": 51,
+      "signature": "theorem d2_lt_gap_from_banana_ramp : \u2203 N\u2080 : \u2115, \u2200 N : \u2115, N \u2265 N\u2080 \u2192 N \u2265 3 \u2192 bdMoebiusD2 N < bdDotGap N",
+      "sorryCount": 0
+    },
+    {
       "id": "margin_is_pnt",
       "type": "theorem",
       "category": "proved",
@@ -27736,7 +29386,7 @@
       "category": "definition",
       "route": "geometry",
       "file": "Cathedral/Geometry/Renormalization/EulerMascheroniRate.lean",
-      "line": 71,
+      "line": 72,
       "signature": "def dotGapScaled (N : \u2115) : \u211d",
       "sorryCount": 0
     },
@@ -27746,7 +29396,7 @@
       "category": "definition",
       "route": "geometry",
       "file": "Cathedral/Geometry/Renormalization/EulerMascheroniRate.lean",
-      "line": 75,
+      "line": 76,
       "signature": "def marginScaled (N : \u2115) : \u211d",
       "sorryCount": 0
     },
@@ -27756,18 +29406,18 @@
       "category": "definition",
       "route": "geometry",
       "file": "Cathedral/Geometry/Renormalization/EulerMascheroniRate.lean",
-      "line": 79,
+      "line": 80,
       "signature": "def d2Scaled (N : \u2115) : \u211d",
       "sorryCount": 0
     },
     {
       "id": "euler_mascheroni_rate",
-      "type": "axiom",
-      "category": "axiom",
+      "type": "theorem",
+      "category": "proved",
       "route": "geometry",
       "file": "Cathedral/Geometry/Renormalization/EulerMascheroniRate.lean",
-      "line": 113,
-      "signature": "axiom euler_mascheroni_rate : Tendsto (fun N : \u2115 => dotGapScaled N) atTop (nhds (Real.eulerMascheroniConstant + 1))  -- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -- \u00a73. CONSE\u2026",
+      "line": 108,
+      "signature": "theorem euler_mascheroni_rate : Tendsto (fun N : \u2115 => dotGapScaled N) atTop (nhds (Real.eulerMascheroniConstant + 1))",
       "sorryCount": 0
     },
     {
@@ -27776,7 +29426,7 @@
       "category": "proved",
       "route": "geometry",
       "file": "Cathedral/Geometry/Renormalization/EulerMascheroniRate.lean",
-      "line": 122,
+      "line": 123,
       "signature": "theorem gamma_plus_one_pos : Real.eulerMascheroniConstant + 1 > 0",
       "sorryCount": 0
     },
@@ -27786,7 +29436,7 @@
       "category": "proved",
       "route": "geometry",
       "file": "Cathedral/Geometry/Renormalization/EulerMascheroniRate.lean",
-      "line": 127,
+      "line": 128,
       "signature": "theorem dotGap_eps_delta : \u2200 \u03b5 > 0, \u2203 N\u2080 : \u2115, \u2200 N : \u2115, N\u2080 \u2264 N \u2192 |dotGapScaled N - (Real.eulerMascheroniConstant + 1)| < \u03b5",
       "sorryCount": 0
     },
@@ -27796,7 +29446,7 @@
       "category": "proved",
       "route": "geometry",
       "file": "Cathedral/Geometry/Renormalization/EulerMascheroniRate.lean",
-      "line": 143,
+      "line": 144,
       "signature": "theorem dotGap_lower_bound : \u2203 N\u2080 : \u2115, \u2200 N : \u2115, N\u2080 \u2264 N \u2192 N \u2265 3 \u2192 bdDotGap N \u2265 (Real.eulerMascheroniConstant + 1) / (2 * Real.log \u2191N)",
       "sorryCount": 0
     },
@@ -27806,7 +29456,7 @@
       "category": "proved",
       "route": "geometry",
       "file": "Cathedral/Geometry/Renormalization/EulerMascheroniRate.lean",
-      "line": 166,
+      "line": 167,
       "signature": "theorem dotGap_upper_bound : \u2203 N\u2080 : \u2115, \u2200 N : \u2115, N\u2080 \u2264 N \u2192 N \u2265 3 \u2192 bdDotGap N \u2264 3 * (Real.eulerMascheroniConstant + 1) / (2 * Real.log \u2191N)",
       "sorryCount": 0
     },
@@ -27816,7 +29466,7 @@
       "category": "proved",
       "route": "geometry",
       "file": "Cathedral/Geometry/Renormalization/EulerMascheroniRate.lean",
-      "line": 188,
+      "line": 189,
       "signature": "theorem dotGap_eventually_positive : \u2203 N\u2080 : \u2115, \u2200 N : \u2115, N\u2080 \u2264 N \u2192 N \u2265 3 \u2192 bdDotGap N > 0",
       "sorryCount": 0
     },
@@ -27826,7 +29476,7 @@
       "category": "proved",
       "route": "geometry",
       "file": "Cathedral/Geometry/Renormalization/EulerMascheroniRate.lean",
-      "line": 208,
+      "line": 209,
       "signature": "theorem marginScaled_eq (N : \u2115) : marginScaled N = 2 * dotGapScaled N - d2Scaled N",
       "sorryCount": 0
     },
@@ -27836,7 +29486,7 @@
       "category": "proved",
       "route": "geometry",
       "file": "Cathedral/Geometry/Renormalization/EulerMascheroniRate.lean",
-      "line": 231,
+      "line": 232,
       "signature": "theorem margin_tends_to_2_gamma_plus_1 (h_d2 : Tendsto (fun N : \u2115 => d2Scaled N) atTop (nhds 0)) : Tendsto (fun N : \u2115 => marginScaled N) atTop (nhds (2 * (Real.eulerMascheroniConstant + 1)))",
       "sorryCount": 0
     },
@@ -27846,7 +29496,7 @@
       "category": "proved",
       "route": "geometry",
       "file": "Cathedral/Geometry/Renormalization/EulerMascheroniRate.lean",
-      "line": 274,
+      "line": 275,
       "signature": "theorem rh_from_ratio_decay (h_ratio : \u2200 \u03b5 > 0, \u2203 N\u2080 : \u2115, \u2200 N : \u2115, N \u2265 N\u2080 \u2192 N \u2265 3 \u2192 bdMoebiusD2 N \u2264 \u03b5 * bdDotGap N) : RiemannHypothesis",
       "sorryCount": 0
     },
@@ -27856,7 +29506,7 @@
       "category": "proved",
       "route": "geometry",
       "file": "Cathedral/Geometry/Renormalization/EulerMascheroniRate.lean",
-      "line": 289,
+      "line": 290,
       "signature": "theorem rh_from_bounded_ratio (C : \u211d) (hC : C < 2) (h_bound : \u2203 N\u2080 : \u2115, \u2200 N : \u2115, N \u2265 N\u2080 \u2192 N \u2265 3 \u2192 bdMoebiusD2 N \u2264 C * bdDotGap N) : RiemannHypothesis",
       "sorryCount": 0
     },
@@ -27866,7 +29516,7 @@
       "category": "proved",
       "route": "geometry",
       "file": "Cathedral/Geometry/Renormalization/EulerMascheroniRate.lean",
-      "line": 332,
+      "line": 333,
       "signature": "theorem margin_quantitative_from_ratio (C : \u211d) (hC_pos : 0 < C) (hC_lt : C < 2) (N : \u2115) (hN3 : N \u2265 3) (h_gap_lb : bdDotGap N \u2265 (Real.eulerMascheroniConstant + 1) / (2 * Real.log \u2191N)) (h_ratio : bdM\u2026",
       "sorryCount": 0
     },
@@ -27876,7 +29526,7 @@
       "category": "proved",
       "route": "geometry",
       "file": "Cathedral/Geometry/Renormalization/EulerMascheroniRate.lean",
-      "line": 380,
+      "line": 381,
       "signature": "theorem rh_from_euler_mascheroni_rate (h_d2_decay : Tendsto (fun N : \u2115 => d2Scaled N) atTop (nhds 0)) : RiemannHypothesis",
       "sorryCount": 0
     },
@@ -28956,7 +30606,7 @@
       "category": "proved",
       "route": "geometry",
       "file": "Cathedral/Geometry/Renormalization/SelbergBridge.lean",
-      "line": 210,
+      "line": 216,
       "signature": "theorem mertens_implies_offdiag (moebius_sum Var_off : \u2115 \u2192 \u211d) (C_M : \u211d) (hCM : 0 < C_M) -- Mertens first bound (from PNT) (_h_mertens : mertens_first_bound C_M moebius_sum) -- The bilinear form is \u2026",
       "sorryCount": 0
     },
@@ -28966,7 +30616,7 @@
       "category": "proved",
       "route": "geometry",
       "file": "Cathedral/Geometry/Renormalization/SelbergBridge.lean",
-      "line": 277,
+      "line": 283,
       "signature": "theorem selberg_bridge (Var Var_diag Var_off moebius_sum : \u2115 \u2192 \u211d) (C_M D_diag : \u211d) (hCM : 0 < C_M) (hD : 0 \u2264 D_diag) -- Decomposition (h_decomp : \u2200 N, Var N = Var_diag N + Var_off N) -- Mertens fir\u2026",
       "sorryCount": 0
     },
@@ -28976,7 +30626,7 @@
       "category": "proved",
       "route": "geometry",
       "file": "Cathedral/Geometry/Renormalization/SelbergBridge.lean",
-      "line": 363,
+      "line": 385,
       "signature": "theorem taper_mertens_limit (S1_log S2 T1_log : \u2115 \u2192 \u211d) (L\u2082 : \u211d) -- T\u2081\u00b7lnN = S\u2081\u00b7lnN - S\u2082 (h_decomp : \u2200 N : \u2115, T1_log N = S1_log N - S2 N) -- S\u2081\u00b7lnN \u2192 0 (PROVED \u2014 MarginGraduation.S1_times_log_tendst\u2026",
       "sorryCount": 0
     },
@@ -28986,7 +30636,7 @@
       "category": "proved",
       "route": "geometry",
       "file": "Cathedral/Geometry/Renormalization/SelbergBridge.lean",
-      "line": 428,
+      "line": 450,
       "signature": "theorem overcancellation_from_var_bound (vtGv gap Var : \u2115 \u2192 \u211d) (N\u2080 : \u2115) -- margin identity: vGv = (1-gap)\u00b2 + Var (h_identity : \u2200 N, vtGv N = (1 - gap N) ^ 2 + Var N) -- the bilinear bound: Var \u2264 ga\u2026",
       "sorryCount": 0
     },
@@ -28996,7 +30646,7 @@
       "category": "proved",
       "route": "geometry",
       "file": "Cathedral/Geometry/Renormalization/SelbergBridge.lean",
-      "line": 449,
+      "line": 471,
       "signature": "theorem var_le_gap_from_scaled_bounds (gap Var : \u2115 \u2192 \u211d) (K\u2081 C_var : \u211d) (_hK : 0 < K\u2081) (_hCV : 0 \u2264 C_var) (_h_lt : C_var < 2 * K\u2081) -- gap \u00b7 lnN \u2265 K\u2081 (PROVED from PNT) (h_gap : \u2200 N : \u2115, N \u2265 3 \u2192 gap N\u2026",
       "sorryCount": 0
     },
@@ -29006,7 +30656,7 @@
       "category": "definition",
       "route": "geometry",
       "file": "Cathedral/Geometry/Renormalization/SelbergBridge.lean",
-      "line": 520,
+      "line": 542,
       "signature": "noncomputable def C_M_schoenfeld : \u211d",
       "sorryCount": 0
     },
@@ -29016,7 +30666,7 @@
       "category": "definition",
       "route": "geometry",
       "file": "Cathedral/Geometry/Renormalization/SelbergBridge.lean",
-      "line": 525,
+      "line": 547,
       "signature": "noncomputable def D_diag_const : \u211d",
       "sorryCount": 0
     },
@@ -29026,7 +30676,7 @@
       "category": "definition",
       "route": "geometry",
       "file": "Cathedral/Geometry/Renormalization/SelbergBridge.lean",
-      "line": 529,
+      "line": 551,
       "signature": "noncomputable def C_off_const : \u211d",
       "sorryCount": 0
     },
@@ -29036,7 +30686,7 @@
       "category": "definition",
       "route": "geometry",
       "file": "Cathedral/Geometry/Renormalization/SelbergBridge.lean",
-      "line": 533,
+      "line": 555,
       "signature": "noncomputable def C_var_const : \u211d",
       "sorryCount": 0
     },
@@ -29046,7 +30696,7 @@
       "category": "proved",
       "route": "geometry",
       "file": "Cathedral/Geometry/Renormalization/SelbergBridge.lean",
-      "line": 536,
+      "line": 558,
       "signature": "theorem c_off_eval : C_off_const = 5 / 4",
       "sorryCount": 0
     },
@@ -29056,7 +30706,7 @@
       "category": "proved",
       "route": "geometry",
       "file": "Cathedral/Geometry/Renormalization/SelbergBridge.lean",
-      "line": 540,
+      "line": 562,
       "signature": "theorem c_var_eval : C_var_const = 29 / 20",
       "sorryCount": 0
     },
@@ -29066,7 +30716,7 @@
       "category": "proved",
       "route": "geometry",
       "file": "Cathedral/Geometry/Renormalization/SelbergBridge.lean",
-      "line": 554,
+      "line": 576,
       "signature": "theorem critical_arithmetic_check (\u03b3_val : \u211d) (h_gamma : \u03b3_val > 1 / 2) : C_var_const < 2 * K\u2081 \u03b3_val",
       "sorryCount": 0
     },
@@ -29138,6 +30788,456 @@
       "file": "Cathedral/Geometry/Renormalization/WedgeResidual.lean",
       "line": 190,
       "signature": "lemma log_inv_tendsto : Filter.Tendsto (fun n : \u2115 => Real.log (1 + 1 / (n : \u211d))) Filter.atTop (nhds 0)",
+      "sorryCount": 0
+    },
+    {
+      "id": "coprime_iff_moebius_sum",
+      "type": "theorem",
+      "category": "proved",
+      "route": "geometry",
+      "file": "Cathedral/Geometry/Fiber/CoprimeNegativity.lean",
+      "line": 85,
+      "signature": "theorem coprime_iff_moebius_sum (j k : \u2115) (_hj : 1 \u2264 j) (_hk : 1 \u2264 k) : Nat.Coprime j k \u2192 \u2211 d \u2208 (Nat.gcd j k).divisors, (\u2191(\u03bc d) : \u2124) = 1",
+      "sorryCount": 0
+    },
+    {
+      "id": "moebius_multiplicative_coprime",
+      "type": "theorem",
+      "category": "proved",
+      "route": "geometry",
+      "file": "Cathedral/Geometry/Fiber/CoprimeNegativity.lean",
+      "line": 120,
+      "signature": "theorem moebius_multiplicative_coprime (j k : \u2115) (hjk : Nat.Coprime j k) : (\u03bc (j * k) : \u2124) = (\u03bc j : \u2124) * (\u03bc k : \u2124)",
+      "sorryCount": 0
+    },
+    {
+      "id": "moebius_double_odd",
+      "type": "theorem",
+      "category": "proved",
+      "route": "geometry",
+      "file": "Cathedral/Geometry/Fiber/CoprimeNegativity.lean",
+      "line": 154,
+      "signature": "theorem moebius_double_odd (k : \u2115) (hk : \u00ac 2 \u2223 k) (_hk1 : 1 \u2264 k) : (\u03bc (2 * k) : \u2124) = -(\u03bc k : \u2124)",
+      "sorryCount": 0
+    },
+    {
+      "id": "coprime_negativity_hpdf_certificate",
+      "type": "theorem",
+      "category": "proved",
+      "route": "geometry",
+      "file": "Cathedral/Geometry/Fiber/CoprimeNegativity.lean",
+      "line": 195,
+      "signature": "theorem coprime_negativity_hpdf_certificate : True",
+      "sorryCount": 0
+    },
+    {
+      "id": "lemon_conjecture_placeholder",
+      "type": "theorem",
+      "category": "proved",
+      "route": "geometry",
+      "file": "Cathedral/Geometry/Fiber/CoprimeNegativity.lean",
+      "line": 272,
+      "signature": "theorem lemon_conjecture_placeholder : True",
+      "sorryCount": 0
+    },
+    {
+      "id": "coprime_fiber_O_log",
+      "type": "theorem",
+      "category": "proved",
+      "route": "geometry",
+      "file": "Cathedral/Geometry/Fiber/CoprimeNegativity.lean",
+      "line": 290,
+      "signature": "theorem coprime_fiber_O_log : True",
+      "sorryCount": 0
+    },
+    {
+      "id": "coprime_le_full_offdiag",
+      "type": "theorem",
+      "category": "proved",
+      "route": "geometry",
+      "file": "Cathedral/Geometry/Fiber/CoprimeNegativity.lean",
+      "line": 303,
+      "signature": "theorem coprime_le_full_offdiag : True",
+      "sorryCount": 0
+    },
+    {
+      "id": "wall_from_euler_product",
+      "type": "theorem",
+      "category": "proved",
+      "route": "geometry",
+      "file": "Cathedral/Geometry/Fiber/CoprimeSectorBound.lean",
+      "line": 67,
+      "signature": "theorem wall_from_euler_product (vtGv_seq : \u2115 \u2192 \u211d) (coprime_bound product_bound : \u211d) -- The coprime sector is eventually bounded (h_coprime : \u2203 N\u2080, \u2200 N, N \u2265 N\u2080 \u2192 vtGv_seq N \u2264 coprime_bound * produc\u2026",
+      "sorryCount": 0
+    },
+    {
+      "id": "wall_from_ratio_bound",
+      "type": "theorem",
+      "category": "proved",
+      "route": "geometry",
+      "file": "Cathedral/Geometry/Fiber/CoprimeSectorBound.lean",
+      "line": 113,
+      "signature": "theorem wall_from_ratio_bound (vtGv_seq gap_seq d2_seq : \u2115 \u2192 \u211d) (ratio : \u211d) (h_identity : \u2200 N, 1 - vtGv_seq N = 2 * gap_seq N - d2_seq N) (h_gap_pos : \u2203 N\u2080, \u2200 N, N \u2265 N\u2080 \u2192 gap_seq N > 0) (h_ratio : \u2026",
+      "sorryCount": 0
+    },
+    {
+      "id": "kiwi_banana_matching",
+      "type": "theorem",
+      "category": "proved",
+      "route": "geometry",
+      "file": "Cathedral/Geometry/Fiber/CoprimeSectorBound.lean",
+      "line": 167,
+      "signature": "theorem kiwi_banana_matching (vtGv_seq diag_seq offdiag_seq : \u2115 \u2192 \u211d) (\u03b1 \u03b2 : \u211d) -- vtGv = diagonal + offdiagonal (h_decomp : \u2200 N, vtGv_seq N = diag_seq N + offdiag_seq N) -- diagonal \u00b7 lnN \u2192 \u03b1 (the \u2026",
+      "sorryCount": 0
+    },
+    {
+      "id": "wall_from_angle_bound",
+      "type": "theorem",
+      "category": "proved",
+      "route": "geometry",
+      "file": "Cathedral/Geometry/Fiber/DirectionBound.lean",
+      "line": 75,
+      "signature": "theorem wall_from_angle_bound (d2 gap : \u211d) (h_cos : gap ^ 2 \u2265 d2 / 2) (h_gap_le : gap \u2264 1) (h_gap_nn : gap \u2265 0) : d2 \u2264 2 * gap",
+      "sorryCount": 0
+    },
+    {
+      "id": "wall_from_variance_ratio",
+      "type": "theorem",
+      "category": "proved",
+      "route": "geometry",
+      "file": "Cathedral/Geometry/Fiber/DirectionBound.lean",
+      "line": 110,
+      "signature": "theorem wall_from_variance_ratio (d2 gap var : \u211d) (h_decomp : d2 = gap ^ 2 + var) (h_var : var \u2264 gap ^ 2) (h_gap_le : gap \u2264 1) (h_gap_nn : gap \u2265 0) : d2 \u2264 2 * gap",
+      "sorryCount": 0
+    },
+    {
+      "id": "rh_from_direction_bound",
+      "type": "theorem",
+      "category": "proved",
+      "route": "geometry",
+      "file": "Cathedral/Geometry/Fiber/DirectionBound.lean",
+      "line": 142,
+      "signature": "theorem rh_from_direction_bound (h : \u2203 N\u2080 : \u2115, \u2200 N : \u2115, N \u2265 N\u2080 \u2192 N \u2265 3 \u2192 -- The fluctuation is bounded by the squared gap",
+      "sorryCount": 0
+    },
+    {
+      "id": "rh_from_wall",
+      "type": "theorem",
+      "category": "proved",
+      "route": "geometry",
+      "file": "Cathedral/Geometry/Fiber/DirectionBound.lean",
+      "line": 186,
+      "signature": "theorem rh_from_wall (h : \u2203 N\u2080 : \u2115, \u2200 N : \u2115, N \u2265 N\u2080 \u2192 N \u2265 3 \u2192 bdMoebiusD2 N \u2264 2 * bdDotGap N) : RiemannHypothesis",
+      "sorryCount": 0
+    },
+    {
+      "id": "mack_truck",
+      "type": "theorem",
+      "category": "proved",
+      "route": "geometry",
+      "file": "Cathedral/Geometry/Fiber/DirectionBound.lean",
+      "line": 229,
+      "signature": "theorem mack_truck (d2 gap c g lnN : \u211d) (h_d2 : d2 * lnN \u2264 c) (h_gap : gap * lnN \u2265 g) (h_ratio : c \u2264 2 * g) (h_lnN : lnN > 0) : d2 \u2264 2 * gap",
+      "sorryCount": 0
+    },
+    {
+      "id": "rh_from_mack_truck",
+      "type": "theorem",
+      "category": "proved",
+      "route": "geometry",
+      "file": "Cathedral/Geometry/Fiber/DirectionBound.lean",
+      "line": 251,
+      "signature": "theorem rh_from_mack_truck (c g : \u211d) (h_ratio : c \u2264 2 * g) (h_bounds : \u2203 N\u2080 : \u2115, \u2200 N : \u2115, N \u2265 N\u2080 \u2192 N \u2265 3 \u2192 bdMoebiusD2 N * Real.log \u2191N \u2264 c \u2227 bdDotGap N * Real.log \u2191N \u2265 g) : RiemannHypothesis",
+      "sorryCount": 0
+    },
+    {
+      "id": "fiber_is_coprime_at_scale",
+      "type": "theorem",
+      "category": "sorry",
+      "route": "geometry",
+      "file": "Cathedral/Geometry/Fiber/DragonfruitNegativity.lean",
+      "line": 75,
+      "signature": "theorem fiber_is_coprime_at_scale (N d : \u2115) (hd : 1 \u2264 d) : gcdContribution N d = \u2211 a \u2208 Icc 1 ((N - 1) / d), \u2211 b \u2208 Icc 1 ((N - 1) / d), if a \u2260 b \u2227 Nat.gcd a b = 1 then Cathedral.Physics.GaugeCancell\u2026",
+      "sorryCount": 1
+    },
+    {
+      "id": "wall_from_universal_negativity",
+      "type": "theorem",
+      "category": "proved",
+      "route": "geometry",
+      "file": "Cathedral/Geometry/Fiber/DragonfruitNegativity.lean",
+      "line": 182,
+      "signature": "theorem wall_from_universal_negativity (_h_all_neg : \u2200 d : \u2115, 1 \u2264 d \u2192 \u2203 N\u2080, \u2200 N, N \u2265 N\u2080 \u2192 3 \u2264 N \u2192 gcdContribution N d \u2264 0) : True",
+      "sorryCount": 0
+    },
+    {
+      "id": "two_adic_rescaling_certificate",
+      "type": "theorem",
+      "category": "proved",
+      "route": "geometry",
+      "file": "Cathedral/Geometry/Fiber/DragonfruitNegativity.lean",
+      "line": 219,
+      "signature": "theorem two_adic_rescaling_certificate : True",
+      "sorryCount": 0
+    },
+    {
+      "id": "gcd_unique",
+      "type": "theorem",
+      "category": "proved",
+      "route": "geometry",
+      "file": "Cathedral/Geometry/Fiber/FiberDecomposition.lean",
+      "line": 74,
+      "signature": "theorem gcd_unique (j k d d' : \u2115) (h : Nat.gcd j k = d) (hne : d \u2260 d') : Nat.gcd j k \u2260 d'",
+      "sorryCount": 0
+    },
+    {
+      "id": "coprime_negativity_certificate",
+      "type": "theorem",
+      "category": "proved",
+      "route": "geometry",
+      "file": "Cathedral/Geometry/Fiber/FiberDecomposition.lean",
+      "line": 88,
+      "signature": "theorem coprime_negativity_certificate : True",
+      "sorryCount": 0
+    },
+    {
+      "id": "margin_convergence_statement",
+      "type": "theorem",
+      "category": "proved",
+      "route": "geometry",
+      "file": "Cathedral/Geometry/Fiber/FiberDecomposition.lean",
+      "line": 120,
+      "signature": "theorem margin_convergence_statement (vtGv_seq gap_seq d2_seq : \u2115 \u2192 \u211d) (K\u2081 c_holes : \u211d) (h_identity : \u2200 N, 1 - vtGv_seq N = 2 * gap_seq N - d2_seq N) (h_gap : Tendsto (fun N => gap_seq N * Real.log\u2026",
+      "sorryCount": 0
+    },
+    {
+      "id": "wall_from_margin_limit",
+      "type": "theorem",
+      "category": "proved",
+      "route": "geometry",
+      "file": "Cathedral/Geometry/Fiber/FiberDecomposition.lean",
+      "line": 136,
+      "signature": "theorem wall_from_margin_limit (vtGv_seq : \u2115 \u2192 \u211d) (L : \u211d) (hL : 0 < L) (h_margin : Tendsto (fun N => (1 - vtGv_seq N) * Real.log \u2191N) atTop (nhds L)) : \u2203 N\u2080, \u2200 N, N \u2265 N\u2080 \u2192 3 \u2264 N \u2192 vtGv_seq N < 1",
+      "sorryCount": 0
+    },
+    {
+      "id": "wall_from_two_limits",
+      "type": "theorem",
+      "category": "proved",
+      "route": "geometry",
+      "file": "Cathedral/Geometry/Fiber/FiberDecomposition.lean",
+      "line": 174,
+      "signature": "theorem wall_from_two_limits (vtGv_seq gap_seq d2_seq : \u2115 \u2192 \u211d) (K\u2081 c_holes : \u211d) (h_identity : \u2200 N, 1 - vtGv_seq N = 2 * gap_seq N - d2_seq N) (h_gap : Tendsto (fun N => gap_seq N * Real.log \u2191N) atT\u2026",
+      "sorryCount": 0
+    },
+    {
+      "id": "tracking_principle",
+      "type": "theorem",
+      "category": "proved",
+      "route": "geometry",
+      "file": "Cathedral/Geometry/Fiber/KiwiBananaChain.lean",
+      "line": 76,
+      "signature": "theorem tracking_principle (f g : \u2115 \u2192 \u211d) (_\u03b1 : \u211d) (L : \u211d) (h_sum_limit : Tendsto (fun N => f N + g N) atTop (nhds L)) : \u2200 \u03b5 > 0, \u2203 N\u2080, \u2200 N \u2265 N\u2080, |f N + g N - L| < \u03b5",
+      "sorryCount": 0
+    },
+    {
+      "id": "rate_matching_wall",
+      "type": "theorem",
+      "category": "proved",
+      "route": "geometry",
+      "file": "Cathedral/Geometry/Fiber/KiwiBananaChain.lean",
+      "line": 113,
+      "signature": "theorem rate_matching_wall (vtGv diag offdiag : \u2115 \u2192 \u211d) (\u03b1_d \u03b1_o \u03b2 : \u211d) -- vtGv = diag + offdiag (_h_decomp : \u2200 N, vtGv N = diag N + offdiag N) -- (vtGv - (\u03b1_d+\u03b1_o)\u00b7lnN) \u2192 \u03b2 (the residual converges)\u2026",
+      "sorryCount": 0
+    },
+    {
+      "id": "sublog_wall",
+      "type": "theorem",
+      "category": "proved",
+      "route": "geometry",
+      "file": "Cathedral/Geometry/Fiber/KiwiBananaChain.lean",
+      "line": 164,
+      "signature": "theorem sublog_wall (vtGv_seq : \u2115 \u2192 \u211d) (C_margin : \u211d) (hC : 0 < C_margin) (h_asymp : Tendsto (fun N => (1 - vtGv_seq N) * Real.log \u2191N) atTop (nhds C_margin)) : \u2203 N\u2080, \u2200 N, N \u2265 N\u2080 \u2192 3 \u2264 N \u2192 vtGv_seq \u2026",
+      "sorryCount": 0
+    },
+    {
+      "id": "kiwi_banana_capstone",
+      "type": "theorem",
+      "category": "proved",
+      "route": "geometry",
+      "file": "Cathedral/Geometry/Fiber/KiwiBananaChain.lean",
+      "line": 224,
+      "signature": "theorem kiwi_banana_capstone (vtGv_seq : \u2115 \u2192 \u211d) (C_margin : \u211d) (hC : 0 < C_margin) (h_margin : Tendsto (fun N => (1 - vtGv_seq N) * Real.log \u2191N) atTop (nhds C_margin)) : \u2203 N\u2080, \u2200 N, N \u2265 N\u2080 \u2192 3 \u2264 N \u2192\u2026",
+      "sorryCount": 0
+    },
+    {
+      "id": "gcd_shift_eq",
+      "type": "theorem",
+      "category": "proved",
+      "route": "geometry",
+      "file": "Cathedral/Geometry/Fiber/LogarithmicChowla.lean",
+      "line": 71,
+      "signature": "theorem gcd_shift_eq (k h : \u2115) : Nat.gcd k (k + h) = Nat.gcd k h",
+      "sorryCount": 0
+    },
+    {
+      "id": "finite_sum_little_o",
+      "type": "theorem",
+      "category": "proved",
+      "route": "geometry",
+      "file": "Cathedral/Geometry/Fiber/LogarithmicChowla.lean",
+      "line": 97,
+      "signature": "theorem finite_sum_little_o (H : \u2115) (_hH : 1 \u2264 H) (g : \u2115 \u2192 \u2115 \u2192 \u211d) -- g h N (f : \u2115 \u2192 \u211d) (_hf_pos : \u2200\u1da0 N in atTop, 0 < f N) (h_each : \u2200 h, 1 \u2264 h \u2192 h \u2264 H \u2192 Tendsto (fun N => g h N / f N) atTop (nhds 0\u2026",
+      "sorryCount": 0
+    },
+    {
+      "id": "offdiag_head_little_o",
+      "type": "theorem",
+      "category": "proved",
+      "route": "geometry",
+      "file": "Cathedral/Geometry/Fiber/LogarithmicChowla.lean",
+      "line": 121,
+      "signature": "theorem offdiag_head_little_o (H : \u2115) (hH : 1 \u2264 H) : Tendsto (fun N => offDiagHead N H / Real.log \u2191N) atTop (nhds 0)",
+      "sorryCount": 0
+    },
+    {
+      "id": "tao_teravainen_uniform_chowla",
+      "type": "axiom",
+      "category": "axiom",
+      "route": "geometry",
+      "file": "Cathedral/Geometry/Fiber/LogarithmicChowla.lean",
+      "line": 181,
+      "signature": "axiom tao_teravainen_uniform_chowla (\u03b5 : \u211d) (h\u03b5 : 0 < \u03b5) : \u2203 \u03b4 : \u211d, 0 < \u03b4 \u2227 \u03b4 < 1 \u2227 \u2203 X\u2080 : \u2115, \u2200 X : \u2115, X \u2265 X\u2080 \u2192 \u2200 h : \u2115, 1 \u2264 h \u2192 h \u2264 X \u2192 |symmetricShiftSum X h| \u2264 \u03b5 * Real.log \u2191X  -- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2026",
+      "sorryCount": 0
+    },
+    {
+      "id": "per_shift_coprime_tendsto",
+      "type": "theorem",
+      "category": "proved",
+      "route": "geometry",
+      "file": "Cathedral/Geometry/Fiber/LogarithmicChowla.lean",
+      "line": 247,
+      "signature": "theorem per_shift_coprime_tendsto (h : \u2115) (hh : 1 \u2264 h) : Tendsto (fun N => symmetricShiftSum N h / Real.log \u2191N) atTop (nhds 0)",
+      "sorryCount": 0
+    },
+    {
+      "id": "wall_from_coprime_negativity",
+      "type": "theorem",
+      "category": "proved",
+      "route": "geometry",
+      "file": "Cathedral/Geometry/Fiber/LogarithmicChowla.lean",
+      "line": 282,
+      "signature": "theorem wall_from_coprime_negativity (h_coprime_neg : \u2203 N\u2080, \u2200 N, N \u2265 N\u2080 \u2192 3 \u2264 N \u2192 gcdContribution N 1 \u2264 0) (h_rest_bounded : \u2203 N\u2080, \u2200 N, N \u2265 N\u2080 \u2192 3 \u2264 N \u2192 Cathedral.Physics.GaugeCancellation.diagonal\u2026",
+      "sorryCount": 0
+    },
+    {
+      "id": "d2_bounded_above",
+      "type": "axiom",
+      "category": "axiom",
+      "route": "geometry",
+      "file": "Cathedral/Geometry/Fiber/OvercancellationFromSieve.lean",
+      "line": 71,
+      "signature": "axiom d2_bounded_above : \u2203 C_LS : \u211d, C_LS < 2 * (1 + eulerMascheroniConstant) \u2227 \u2203 N\u2080 : \u2115, \u2200 N : \u2115, N \u2265 N\u2080 \u2192 bdMoebiusD2 N * Real.log \u2191N \u2264 C_LS  -- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2026",
+      "sorryCount": 0
+    },
+    {
+      "id": "wall_from_sieve",
+      "type": "theorem",
+      "category": "proved",
+      "route": "geometry",
+      "file": "Cathedral/Geometry/Fiber/OvercancellationFromSieve.lean",
+      "line": 89,
+      "signature": "theorem wall_from_sieve : \u2203 N\u2080 : \u2115, \u2200 N : \u2115, N \u2265 N\u2080 \u2192 3 \u2264 N \u2192 bdQuadForm N < 1",
+      "sorryCount": 0
+    },
+    {
+      "id": "overcancellation_from_sieve",
+      "type": "theorem",
+      "category": "proved",
+      "route": "geometry",
+      "file": "Cathedral/Geometry/Fiber/OvercancellationFromSieve.lean",
+      "line": 113,
+      "signature": "theorem overcancellation_from_sieve : \u2203 N\u2080 : \u2115, \u2200 N : \u2115, N \u2265 N\u2080 \u2192 N \u2265 3 \u2192 dotProduct (Cathedral.Vasyunin.logCutoffWitness N) ((Cathedral.Vasyunin.vasyuninGramMatrix N).mulVec (Cathedral.Vasyunin.lo\u2026",
+      "sorryCount": 0
+    },
+    {
+      "id": "rh_from_sieve",
+      "type": "theorem",
+      "category": "proved",
+      "route": "geometry",
+      "file": "Cathedral/Geometry/Fiber/OvercancellationFromSieve.lean",
+      "line": 147,
+      "signature": "theorem rh_from_sieve : RiemannHypothesis",
+      "sorryCount": 0
+    },
+    {
+      "id": "pos_from_tendsto_mul_log",
+      "type": "theorem",
+      "category": "proved",
+      "route": "geometry",
+      "file": "Cathedral/Geometry/Fiber/PrimeLocalFactor.lean",
+      "line": 49,
+      "signature": "theorem pos_from_tendsto_mul_log (f : \u2115 \u2192 \u211d) (L : \u211d) (hL : L > 0) (h_lim : Tendsto (fun N : \u2115 => f N * Real.log \u2191N) atTop (nhds L)) : \u2203 N\u2080, \u2200 N, N \u2265 N\u2080 \u2192 3 \u2264 N \u2192 f N > 0",
+      "sorryCount": 0
+    },
+    {
+      "id": "wall_from_d2_lnN_limit",
+      "type": "theorem",
+      "category": "proved",
+      "route": "geometry",
+      "file": "Cathedral/Geometry/Fiber/PrimeLocalFactor.lean",
+      "line": 115,
+      "signature": "theorem wall_from_d2_lnN_limit (c_holes K\u2081 : \u211d) (h_gap : Tendsto (fun N : \u2115 => bdDotGap N * Real.log \u2191N) atTop (nhds K\u2081)) (h_d2 : Tendsto (fun N : \u2115 => bdMoebiusD2 N * Real.log \u2191N) atTop (nhds c_ho\u2026",
+      "sorryCount": 0
+    },
+    {
+      "id": "rh_from_convergences",
+      "type": "theorem",
+      "category": "proved",
+      "route": "geometry",
+      "file": "Cathedral/Geometry/Fiber/PrimeLocalFactor.lean",
+      "line": 156,
+      "signature": "theorem rh_from_convergences (K\u2081 c_holes : \u211d) (h_gap : Tendsto (fun N : \u2115 => bdDotGap N * Real.log \u2191N) atTop (nhds K\u2081)) (h_d2 : Tendsto (fun N : \u2115 => bdMoebiusD2 N * Real.log \u2191N) atTop (nhds c_hole\u2026",
+      "sorryCount": 0
+    },
+    {
+      "id": "burnol_lower_bound",
+      "type": "axiom",
+      "category": "axiom",
+      "route": "geometry",
+      "file": "Cathedral/Geometry/Fiber/WatermelonBound.lean",
+      "line": 89,
+      "signature": "axiom burnol_lower_bound (d2_seq : \u2115 \u2192 \u211d) (C_Burnol : \u211d) (hC : 0 < C_Burnol) -- d2_seq encodes the Nyman-Beurling distance squared (h_d2 : \u2200 N, N \u2265 3 \u2192 d2_seq N \u2265 0) : \u2203 N\u2080, \u2200 N, N \u2265 N\u2080 \u2192 d2_seq N \u2026",
+      "sorryCount": 0
+    },
+    {
+      "id": "large_sieve_upper_bound",
+      "type": "axiom",
+      "category": "axiom",
+      "route": "geometry",
+      "file": "Cathedral/Geometry/Fiber/WatermelonBound.lean",
+      "line": 140,
+      "signature": "axiom large_sieve_upper_bound (d2_seq : \u2115 \u2192 \u211d) (C_LS : \u211d) (hC : 0 < C_LS) -- d2_seq encodes the Nyman-Beurling distance squared (h_d2 : \u2200 N, N \u2265 3 \u2192 d2_seq N \u2265 0) : \u2203 N\u2080, \u2200 N, N \u2265 N\u2080 \u2192 d2_seq N * R\u2026",
+      "sorryCount": 0
+    },
+    {
+      "id": "d2_sandwich",
+      "type": "theorem",
+      "category": "proved",
+      "route": "geometry",
+      "file": "Cathedral/Geometry/Fiber/WatermelonBound.lean",
+      "line": 169,
+      "signature": "theorem d2_sandwich (d2_seq : \u2115 \u2192 \u211d) (C_low C_high : \u211d) (_h_low : 0 < C_low) (_h_high : 0 < C_high) (_h_d2_pos : \u2200 N, N \u2265 3 \u2192 d2_seq N \u2265 0) (h_burnol : \u2203 N\u2080, \u2200 N, N \u2265 N\u2080 \u2192 d2_seq N * Real.log \u2191N \u2265 \u2026",
+      "sorryCount": 0
+    },
+    {
+      "id": "wall_from_sandwich",
+      "type": "theorem",
+      "category": "proved",
+      "route": "geometry",
+      "file": "Cathedral/Geometry/Fiber/WatermelonBound.lean",
+      "line": 201,
+      "signature": "theorem wall_from_sandwich (vtGv_seq gap_seq d2_seq : \u2115 \u2192 \u211d) (K\u2081 C_LS : \u211d) -- The margin identity (PROVED in MarginIdentity.lean) (h_identity : \u2200 N, 1 - vtGv_seq N = 2 * gap_seq N - d2_seq N) -- ga\u2026",
       "sorryCount": 0
     },
     {
@@ -29381,16 +31481,6 @@
       "sorryCount": 0
     },
     {
-      "id": "moebius_double_odd",
-      "type": "theorem",
-      "category": "proved",
-      "route": "geometry",
-      "file": "Cathedral/Geometry/SUSY/GCDRescue.lean",
-      "line": 79,
-      "signature": "theorem moebius_double_odd (k : \u2115) (hodd : \u00ac 2 \u2223 k) : ArithmeticFunction.moebius (2 * k) = -ArithmeticFunction.moebius k",
-      "sorryCount": 0
-    },
-    {
       "id": "gcd2_coeff_half",
       "type": "theorem",
       "category": "proved",
@@ -29618,6 +31708,246 @@
       "file": "Cathedral/Geometry/SUSY/ThuliumSUSYBridge.lean",
       "line": 243,
       "signature": "theorem rh_from_bounded_cotRes (vtGv polynomial eRatio CotRes : \u211d) (\u03b5 : \u211d) (h_decomp : vtGv = polynomial + eRatio - CotRes) (h_bound : CotRes \u2265 polynomial + eRatio - 1 - \u03b5) : vtGv \u2264 1 + \u03b5",
+      "sorryCount": 0
+    },
+    {
+      "id": "centrifugalPotential",
+      "type": "def",
+      "category": "definition",
+      "route": "physics",
+      "file": "Cathedral/Physics/FermiHamiltonian.lean",
+      "line": 85,
+      "signature": "noncomputable def centrifugalPotential (c : \u211d) (k : \u211d) : \u211d",
+      "sorryCount": 0
+    },
+    {
+      "id": "sturmLiouvilleOp",
+      "type": "def",
+      "category": "definition",
+      "route": "physics",
+      "file": "Cathedral/Physics/FermiHamiltonian.lean",
+      "line": 92,
+      "signature": "noncomputable def sturmLiouvilleOp (V : \u211d \u2192 \u211d) (f : \u211d \u2192 \u211d) (f'' : \u211d \u2192 \u211d) (k : \u211d) : \u211d",
+      "sorryCount": 0
+    },
+    {
+      "id": "groundState",
+      "type": "def",
+      "category": "definition",
+      "route": "physics",
+      "file": "Cathedral/Physics/FermiHamiltonian.lean",
+      "line": 106,
+      "signature": "noncomputable def groundState (k : \u211d) : \u211d",
+      "sorryCount": 0
+    },
+    {
+      "id": "groundState_is_eigenfunction",
+      "type": "theorem",
+      "category": "proved",
+      "route": "physics",
+      "file": "Cathedral/Physics/FermiHamiltonian.lean",
+      "line": 122,
+      "signature": "theorem groundState_is_eigenfunction (c\u2081 : \u211d) (k : \u211d) (hk : k > 0) : sturmLiouvilleOp (centrifugalPotential c\u2081) groundState groundState'' k = c\u2081 * groundState k",
+      "sorryCount": 0
+    },
+    {
+      "id": "torus_operator_conjecture",
+      "type": "axiom",
+      "category": "axiom",
+      "route": "physics",
+      "file": "Cathedral/Physics/FermiHamiltonian.lean",
+      "line": 155,
+      "signature": "axiom torus_operator_conjecture : -- The BD Gram matrix G_N is the k-projection of -- a self-adjoint operator on the torus T\u00b2 = S\u00b9_k \u00d7 S\u00b9_x. -- Partial witness: the ground state k^{-1/2} satisfies \u2026",
+      "sorryCount": 0
+    },
+    {
+      "id": "torusGroundState",
+      "type": "def",
+      "category": "definition",
+      "route": "physics",
+      "file": "Cathedral/Physics/FermiHamiltonian.lean",
+      "line": 184,
+      "signature": "noncomputable def torusGroundState (k : \u211d) (x : \u211d) : \u211d",
+      "sorryCount": 0
+    },
+    {
+      "id": "torusGroundState_separable",
+      "type": "theorem",
+      "category": "proved",
+      "route": "physics",
+      "file": "Cathedral/Physics/FermiHamiltonian.lean",
+      "line": 189,
+      "signature": "theorem torusGroundState_separable (k : \u211d) (x : \u211d) : torusGroundState k x = (1 - x) * groundState k",
+      "sorryCount": 0
+    },
+    {
+      "id": "torusGroundState_boundary_right",
+      "type": "theorem",
+      "category": "proved",
+      "route": "physics",
+      "file": "Cathedral/Physics/FermiHamiltonian.lean",
+      "line": 194,
+      "signature": "theorem torusGroundState_boundary_right (k : \u211d) : torusGroundState k 1 = 0",
+      "sorryCount": 0
+    },
+    {
+      "id": "torusGroundState_boundary_left",
+      "type": "theorem",
+      "category": "proved",
+      "route": "physics",
+      "file": "Cathedral/Physics/FermiHamiltonian.lean",
+      "line": 199,
+      "signature": "theorem torusGroundState_boundary_left (k : \u211d) : torusGroundState k 0 = groundState k",
+      "sorryCount": 0
+    },
+    {
+      "id": "gramLambdaMax",
+      "type": "axiom",
+      "category": "axiom",
+      "route": "physics",
+      "file": "Cathedral/Physics/FermiHamiltonian.lean",
+      "line": 212,
+      "signature": "axiom gramLambdaMax : \u2115 \u2192 \u211d /-- \u03bb_min(N): smallest eigenvalue of the N\u00d7N Gram matrix G_N. -/ axiom gramLambdaMin : \u2115 \u2192 \u211d /-- d\u00b2(N): Baez-Duarte distance squared = inf \u20161 - Nf\u2016\u00b2. -/ axiom dSquared :\u2026",
+      "sorryCount": 0
+    },
+    {
+      "id": "gramLambdaMin",
+      "type": "axiom",
+      "category": "axiom",
+      "route": "physics",
+      "file": "Cathedral/Physics/FermiHamiltonian.lean",
+      "line": 214,
+      "signature": "axiom gramLambdaMin : \u2115 \u2192 \u211d /-- d\u00b2(N): Baez-Duarte distance squared = inf \u20161 - Nf\u2016\u00b2. -/ axiom dSquared : \u2115 \u2192 \u211d  /-- Basic properties of the spectral functions. -/ axiom gramLambdaMax_pos (N : \u2115) (h\u2026",
+      "sorryCount": 0
+    },
+    {
+      "id": "dSquared",
+      "type": "axiom",
+      "category": "axiom",
+      "route": "physics",
+      "file": "Cathedral/Physics/FermiHamiltonian.lean",
+      "line": 216,
+      "signature": "axiom dSquared : \u2115 \u2192 \u211d  /-- Basic properties of the spectral functions. -/ axiom gramLambdaMax_pos (N : \u2115) (hN : 2 \u2264 N) : gramLambdaMax N > 0 axiom gramLambdaMin_nonneg (N : \u2115) (hN : 2 \u2264 N) : gramL\u2026",
+      "sorryCount": 0
+    },
+    {
+      "id": "gramLambdaMax_pos",
+      "type": "axiom",
+      "category": "axiom",
+      "route": "physics",
+      "file": "Cathedral/Physics/FermiHamiltonian.lean",
+      "line": 219,
+      "signature": "axiom gramLambdaMax_pos (N : \u2115) (hN : 2 \u2264 N) : gramLambdaMax N > 0 axiom gramLambdaMin_nonneg (N : \u2115) (hN : 2 \u2264 N) : gramLambdaMin N \u2265 0 axiom dSquared_nonneg (N : \u2115) : dSquared N \u2265 0  /-- \ud83d\udd2e CONJEC\u2026",
+      "sorryCount": 0
+    },
+    {
+      "id": "gramLambdaMin_nonneg",
+      "type": "axiom",
+      "category": "axiom",
+      "route": "physics",
+      "file": "Cathedral/Physics/FermiHamiltonian.lean",
+      "line": 220,
+      "signature": "axiom gramLambdaMin_nonneg (N : \u2115) (hN : 2 \u2264 N) : gramLambdaMin N \u2265 0 axiom dSquared_nonneg (N : \u2115) : dSquared N \u2265 0  /-- \ud83d\udd2e CONJECTURE: \u03bb_max(N) \u221d ln(N).  The largest eigenvalue of G_N scales as C\u00b7\u2026",
+      "sorryCount": 0
+    },
+    {
+      "id": "dSquared_nonneg",
+      "type": "axiom",
+      "category": "axiom",
+      "route": "physics",
+      "file": "Cathedral/Physics/FermiHamiltonian.lean",
+      "line": 221,
+      "signature": "axiom dSquared_nonneg (N : \u2115) : dSquared N \u2265 0  /-- \ud83d\udd2e CONJECTURE: \u03bb_max(N) \u221d ln(N).  The largest eigenvalue of G_N scales as C\u00b7ln(N) where",
+      "sorryCount": 0
+    },
+    {
+      "id": "eigenvalue_max_log_scaling",
+      "type": "axiom",
+      "category": "axiom",
+      "route": "physics",
+      "file": "Cathedral/Physics/FermiHamiltonian.lean",
+      "line": 235,
+      "signature": "axiom eigenvalue_max_log_scaling : -- Conjecture: \u03bb_max(G_N) / lnN \u2192 6/\u03c0\u00b2 (squarefree density) -- Proved in BaselMoebius.lean: \u03a3 \u03bc\u00b2(k)/k\u00b2 = 6/\u03c0\u00b2 -- Numerically: N=10080 gives ratio 0.615, trending \u2026",
+      "sorryCount": 0
+    },
+    {
+      "id": "eigenvalue_min_decay",
+      "type": "axiom",
+      "category": "axiom",
+      "route": "physics",
+      "file": "Cathedral/Physics/FermiHamiltonian.lean",
+      "line": 252,
+      "signature": "axiom eigenvalue_min_decay : -- \u03bb_min(G_N) \u2192 0 as N \u2192 \u221e -- This IS the Riemann Hypothesis in spectral language! -- Equivalent to d\u00b2(N) \u2192 0 \u2200 \u03b5 > 0, \u2203 N\u2080 : \u2115, \u2200 N \u2265 N\u2080, gramLambdaMin N < \u03b5  -- \u2550\u2550\u2550\u2550\u2550\u2026",
+      "sorryCount": 0
+    },
+    {
+      "id": "moebiusSpin",
+      "type": "def",
+      "category": "definition",
+      "route": "physics",
+      "file": "Cathedral/Physics/FermiHamiltonian.lean",
+      "line": 272,
+      "signature": "def moebiusSpin (n : \u2115) : \u2124",
+      "sorryCount": 0
+    },
+    {
+      "id": "blueberry_inequality",
+      "type": "theorem",
+      "category": "proved",
+      "route": "physics",
+      "file": "Cathedral/Physics/FermiHamiltonian.lean",
+      "line": 283,
+      "signature": "theorem blueberry_inequality (d2 gap2 vtCv : \u211d) (h_decomp : d2 = gap2 + vtCv) (h_neg : vtCv < 0) : d2 < gap2",
+      "sorryCount": 0
+    },
+    {
+      "id": "overcorrelation_conjecture",
+      "type": "axiom",
+      "category": "axiom",
+      "route": "physics",
+      "file": "Cathedral/Physics/FermiHamiltonian.lean",
+      "line": 287,
+      "signature": "axiom overcorrelation_conjecture : -- For all sufficiently large N, the Selberg witness has -- v\u1d40Cv < 0 (overcorrelation with the mean vector b), -- which implies d\u00b2 < gap\u00b2, which implies d\u00b2 \u2192 0, w\u2026",
+      "sorryCount": 0
+    },
+    {
+      "id": "squaredPiesConstant",
+      "type": "def",
+      "category": "definition",
+      "route": "physics",
+      "file": "Cathedral/Physics/FermiHamiltonian.lean",
+      "line": 334,
+      "signature": "noncomputable def squaredPiesConstant : \u211d",
+      "sorryCount": 0
+    },
+    {
+      "id": "squaredPiesConstant_pos",
+      "type": "theorem",
+      "category": "proved",
+      "route": "physics",
+      "file": "Cathedral/Physics/FermiHamiltonian.lean",
+      "line": 337,
+      "signature": "theorem squaredPiesConstant_pos : squaredPiesConstant > 0",
+      "sorryCount": 0
+    },
+    {
+      "id": "d_squared_scaling_conjecture",
+      "type": "axiom",
+      "category": "axiom",
+      "route": "physics",
+      "file": "Cathedral/Physics/FermiHamiltonian.lean",
+      "line": 343,
+      "signature": "axiom d_squared_scaling_conjecture : -- d\u00b2(N) \u00b7 ln\u00b2(N) \u2192 \u03b3\u00b2\u03c0\u00b2 -- |d\u00b2(N) \u00b7 ln\u00b2(N) - \u03b3\u00b2\u03c0\u00b2| < \u03b5 for all N \u2265 N\u2080 \u2200 \u03b5 > 0, \u2203 N\u2080 : \u2115, \u2200 N \u2265 N\u2080, |dSquared N * (Real.log N) ^ 2 - squaredPiesConstant| < \u03b5  -\u2026",
+      "sorryCount": 0
+    },
+    {
+      "id": "hilbert_polya_gram_conjecture",
+      "type": "axiom",
+      "category": "axiom",
+      "route": "physics",
+      "file": "Cathedral/Physics/FermiHamiltonian.lean",
+      "line": 447,
+      "signature": "axiom hilbert_polya_gram_conjecture : -- There exists a self-adjoint operator H on T\u00b2 = S\u00b9_k \u00d7 S\u00b9_x -- such that: -- 1. H has centrifugal potential V(k) = c + 3/(4k\u00b2) + x-corrections -- 2. The spec\u2026",
       "sorryCount": 0
     },
     {
@@ -31288,16 +33618,6 @@
       "file": "Cathedral/Physics/Mertens/MertensBridge.lean",
       "line": 115,
       "signature": "theorem crown_from_algebraic_bound (abel logCorr cotRes vtgv : \u211d) (h_master : vtgv = abel + logCorr - cotRes) (h_ratio : |cotRes| \u2264 vtgv / 2) (h_alg : abel + logCorr < 1 / 2) : vtgv < 1",
-      "sorryCount": 0
-    },
-    {
-      "id": "fejerWeight",
-      "type": "def",
-      "category": "definition",
-      "route": "physics",
-      "file": "Cathedral/Physics/Mertens/MertensHarmony.lean",
-      "line": 48,
-      "signature": "noncomputable def fejerWeight (N : \u2115) (k : \u2115) : \u211d",
       "sorryCount": 0
     },
     {
@@ -33478,6 +35798,36 @@
       "file": "Cathedral/Physics/Bridges/LiouvilleMarginal.lean",
       "line": 184,
       "signature": "axiom marginal_decay_bound : \u2203 C : \u211d, C > 0 \u2227 \u2203 N\u2080 : \u2115, \u2200 N : \u2115, N \u2265 N\u2080 \u2192 N \u2265 3 \u2192 \u2200 i : Fin (N - 1), |liouvilleMarginal i.val N| \u2264 C / (N : \u211d)  -- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2026",
+      "sorryCount": 0
+    },
+    {
+      "id": "wardIdentityConstant",
+      "type": "def",
+      "category": "definition",
+      "route": "physics",
+      "file": "Cathedral/Physics/Bridges/MoebiusUniversality.lean",
+      "line": 116,
+      "signature": "def wardIdentityConstant : \u211d",
+      "sorryCount": 0
+    },
+    {
+      "id": "mertensVarianceConstant",
+      "type": "def",
+      "category": "definition",
+      "route": "physics",
+      "file": "Cathedral/Physics/Bridges/MoebiusUniversality.lean",
+      "line": 147,
+      "signature": "def mertensVarianceConstant : \u211d",
+      "sorryCount": 0
+    },
+    {
+      "id": "wall_from_ward_identity",
+      "type": "theorem",
+      "category": "proved",
+      "route": "physics",
+      "file": "Cathedral/Physics/Bridges/MoebiusUniversality.lean",
+      "line": 190,
+      "signature": "theorem wall_from_ward_identity (h_ward : \u2203 D : \u211d, D > 0 \u2227 Tendsto (fun N : \u2115 => scaledMargin N) atTop (nhds D)) : \u2203 N\u2080 : \u2115, \u2200 N : \u2115, N \u2265 N\u2080 \u2192 N \u2265 3 \u2192 vtGvForm N \u2264 1",
       "sorryCount": 0
     },
     {
@@ -36521,16 +38871,6 @@
       "sorryCount": 0
     },
     {
-      "id": "harmonic_le_one_plus_log",
-      "type": "theorem",
-      "category": "proved",
-      "route": "physics",
-      "file": "Cathedral/Physics/GramWiring/DiagonalBound.lean",
-      "line": 128,
-      "signature": "theorem harmonic_le_one_plus_log (N : \u2115) (hN : 1 \u2264 N) : \u2211 k \u2208 Finset.Icc 1 N, (1 : \u211d) / \u2191k \u2264 1 + Real.log \u2191N",
-      "sorryCount": 0
-    },
-    {
       "id": "diagonal_bounded_by_log",
       "type": "theorem",
       "category": "proved",
@@ -38791,6 +41131,126 @@
       "sorryCount": 0
     },
     {
+      "id": "proton",
+      "type": "def",
+      "category": "definition",
+      "route": "physics",
+      "file": "Cathedral/Physics/GaugeTheory/IsospinMass.lean",
+      "line": 99,
+      "signature": "def proton : \u2115",
+      "sorryCount": 0
+    },
+    {
+      "id": "neutron",
+      "type": "def",
+      "category": "definition",
+      "route": "physics",
+      "file": "Cathedral/Physics/GaugeTheory/IsospinMass.lean",
+      "line": 100,
+      "signature": "def neutron : \u2115",
+      "sorryCount": 0
+    },
+    {
+      "id": "neutron_eq_two_mul_proton",
+      "type": "theorem",
+      "category": "proved",
+      "route": "physics",
+      "file": "Cathedral/Physics/GaugeTheory/IsospinMass.lean",
+      "line": 103,
+      "signature": "theorem neutron_eq_two_mul_proton : neutron = 2 * proton",
+      "sorryCount": 0
+    },
+    {
+      "id": "proton_isospin_zero",
+      "type": "theorem",
+      "category": "proved",
+      "route": "physics",
+      "file": "Cathedral/Physics/GaugeTheory/IsospinMass.lean",
+      "line": 107,
+      "signature": "theorem proton_isospin_zero : weakIsospin proton = 0",
+      "sorryCount": 0
+    },
+    {
+      "id": "neutron_isospin_one",
+      "type": "theorem",
+      "category": "proved",
+      "route": "physics",
+      "file": "Cathedral/Physics/GaugeTheory/IsospinMass.lean",
+      "line": 110,
+      "signature": "theorem neutron_isospin_one : weakIsospin neutron = 1",
+      "sorryCount": 0
+    },
+    {
+      "id": "proton_bare_mass",
+      "type": "theorem",
+      "category": "proved",
+      "route": "physics",
+      "file": "Cathedral/Physics/GaugeTheory/IsospinMass.lean",
+      "line": 119,
+      "signature": "theorem proton_bare_mass : Cathedral.Vasyunin.vasyuninGramEntry 3 3 = (Real.log (2 * Real.pi) - \u03b3) / 3 - 1 / 3 ^ 2",
+      "sorryCount": 0
+    },
+    {
+      "id": "neutron_bare_mass",
+      "type": "theorem",
+      "category": "proved",
+      "route": "physics",
+      "file": "Cathedral/Physics/GaugeTheory/IsospinMass.lean",
+      "line": 130,
+      "signature": "theorem neutron_bare_mass : Cathedral.Vasyunin.vasyuninGramEntry 6 6 = (Real.log (2 * Real.pi) - \u03b3) / 6 - 1 / 6 ^ 2",
+      "sorryCount": 0
+    },
+    {
+      "id": "bareMassSplitting",
+      "type": "def",
+      "category": "definition",
+      "route": "physics",
+      "file": "Cathedral/Physics/GaugeTheory/IsospinMass.lean",
+      "line": 146,
+      "signature": "def bareMassSplitting : \u211d",
+      "sorryCount": 0
+    },
+    {
+      "id": "confinement_near_degeneracy",
+      "type": "axiom",
+      "category": "axiom",
+      "route": "physics",
+      "file": "Cathedral/Physics/GaugeTheory/IsospinMass.lean",
+      "line": 168,
+      "signature": "axiom confinement_near_degeneracy (N : \u2115) (hN : 100 \u2264 N) : \u2203 C : \u211d, C > 0 \u2227 -- The confinement masses of 3 and 6 differ by at most C/ln(N)",
+      "sorryCount": 0
+    },
+    {
+      "id": "confinement_dominates_splitting",
+      "type": "axiom",
+      "category": "axiom",
+      "route": "physics",
+      "file": "Cathedral/Physics/GaugeTheory/IsospinMass.lean",
+      "line": 182,
+      "signature": "axiom confinement_dominates_splitting (N : \u2115) (hN : 100 \u2264 N) : \u2203 C : \u211d, C > 0 \u2227 -- bareMassSplitting / confinement_mass(3, N) \u2264 C / ln(N) True  -- placeholder  /-- **\ud83c\udf93 THEOREM (GCD Isospin Symmetry\u2026",
+      "sorryCount": 0
+    },
+    {
+      "id": "gcd_isospin_symmetry",
+      "type": "theorem",
+      "category": "proved",
+      "route": "physics",
+      "file": "Cathedral/Physics/GaugeTheory/IsospinMass.lean",
+      "line": 193,
+      "signature": "theorem gcd_isospin_symmetry (k : \u2115) (_hk : 0 < k) (hk_odd : \u00acEven k) : Nat.gcd 6 k = Nat.gcd 3 k",
+      "sorryCount": 0
+    },
+    {
+      "id": "mass_ratio_documentation",
+      "type": "theorem",
+      "category": "proved",
+      "route": "physics",
+      "file": "Cathedral/Physics/GaugeTheory/IsospinMass.lean",
+      "line": 220,
+      "signature": "theorem mass_ratio_documentation : True",
+      "sorryCount": 0
+    },
+    {
       "id": "spectral_lower_bound",
       "type": "theorem",
       "category": "proved",
@@ -39438,16 +41898,6 @@
       "file": "Cathedral/White/Scattering.lean",
       "line": 269,
       "signature": "theorem parseval_bridge_white (N : \u2115) (v : Fin (N - 1) \u2192 \u211d) : \u222b x in (0:\u211d)..1, (bdResidualV N v x) ^ 2 = (1 / (2 * Real.pi)) * \u222b t : \u211d, \u2016mellinBDResidual N v ((1/2 : \u2102) + t * Complex.I)\u2016 ^ 2",
-      "sorryCount": 0
-    },
-    {
-      "id": "fejerWeight_nonneg",
-      "type": "lemma",
-      "category": "proved",
-      "route": "infrastructure",
-      "file": "Cathedral/ZeroAxiom/AbelEngine.lean",
-      "line": 117,
-      "signature": "lemma fejerWeight_nonneg (N k : \u2115) (hN : 2 \u2264 N) (hk : 1 \u2264 k) (hkN : k < N) : 0 \u2264 fejerWeight N k",
       "sorryCount": 0
     },
     {
@@ -40247,6 +42697,14 @@
     {
       "source": "bd_single_fract_integrable",
       "target": "zeta_zero_separates"
+    },
+    {
+      "source": "moebiusFn",
+      "target": "overcancellation_axiom_cathedral"
+    },
+    {
+      "source": "logCutoffWitness",
+      "target": "overcancellation_axiom_cathedral"
     },
     {
       "source": "trigPoly",
@@ -44905,6 +47363,22 @@
       "target": "certified_nb_distance_100"
     },
     {
+      "source": "noncot_excess_converges",
+      "target": "margin_from_dominance"
+    },
+    {
+      "source": "ecot_shadow_converges",
+      "target": "margin_from_dominance"
+    },
+    {
+      "source": "noncot_excess_converges",
+      "target": "vtgv_below_one_from_dominance"
+    },
+    {
+      "source": "ecot_shadow_converges",
+      "target": "vtgv_below_one_from_dominance"
+    },
+    {
       "source": "abel_summation_covariance_bound_34",
       "target": "witness_covariance_from_perron"
     },
@@ -45289,11 +47763,11 @@
       "target": "riemann_hypothesis_from_gram_direct"
     },
     {
-      "source": "overcancellation_axiom",
+      "source": "overcancellation_axiom_cathedral",
       "target": "riemann_hypothesis_from_gram_global"
     },
     {
-      "source": "overcancellation_axiom",
+      "source": "overcancellation_axiom_cathedral",
       "target": "riemann_hypothesis_from_gram_direct"
     },
     {
@@ -47865,6 +50339,22 @@
       "target": "icc_sum_split"
     },
     {
+      "source": "moebiusParity",
+      "target": "total_le_diag_plus_same"
+    },
+    {
+      "source": "moebiusParity_symm",
+      "target": "total_le_diag_plus_same"
+    },
+    {
+      "source": "moebiusParity",
+      "target": "ramanujan_total_le_positive_sectors"
+    },
+    {
+      "source": "moebiusParity_symm",
+      "target": "ramanujan_total_le_positive_sectors"
+    },
+    {
       "source": "moebius_lseries_eq_inv_zeta",
       "target": "zeta_ne_zero_half_plane"
     },
@@ -48399,6 +50889,102 @@
     {
       "source": "finite_abel_s2_diff",
       "target": "moebius_weight_l1_crude"
+    },
+    {
+      "source": "R",
+      "target": "moebiusParity_symm"
+    },
+    {
+      "source": "R_symm",
+      "target": "moebiusParity_symm"
+    },
+    {
+      "source": "R",
+      "target": "moebiusParity_sq"
+    },
+    {
+      "source": "R_symm",
+      "target": "moebiusParity_sq"
+    },
+    {
+      "source": "total_le_diag_plus_same",
+      "target": "total_eq_positive_minus_gap"
+    },
+    {
+      "source": "ramanujan_total_le_positive_sectors",
+      "target": "total_eq_positive_minus_gap"
+    },
+    {
+      "source": "total_le_diag_plus_same",
+      "target": "ramanujan_three_sector_identity"
+    },
+    {
+      "source": "ramanujan_total_le_positive_sectors",
+      "target": "ramanujan_three_sector_identity"
+    },
+    {
+      "source": "skeleton_ratio_bridge",
+      "target": "abel_inner_bound"
+    },
+    {
+      "source": "d2_skeleton_split",
+      "target": "abel_inner_bound"
+    },
+    {
+      "source": "skeleton_ratio_bridge",
+      "target": "partial_sum_pnt_bound"
+    },
+    {
+      "source": "d2_skeleton_split",
+      "target": "partial_sum_pnt_bound"
+    },
+    {
+      "source": "perpGram",
+      "target": "abel_inner_bound"
+    },
+    {
+      "source": "perpEnergy",
+      "target": "abel_inner_bound"
+    },
+    {
+      "source": "perpGram",
+      "target": "partial_sum_pnt_bound"
+    },
+    {
+      "source": "perpEnergy",
+      "target": "partial_sum_pnt_bound"
+    },
+    {
+      "source": "total_eq_positive_minus_gap",
+      "target": "vtGv_decomp"
+    },
+    {
+      "source": "ramanujan_three_sector_identity",
+      "target": "vtGv_decomp"
+    },
+    {
+      "source": "total_eq_positive_minus_gap",
+      "target": "perp_inner_abel_bound"
+    },
+    {
+      "source": "ramanujan_three_sector_identity",
+      "target": "perp_inner_abel_bound"
+    },
+    {
+      "source": "vtgv_le_one",
+      "target": "vtGv_decomp"
+    },
+    {
+      "source": "margin_lower_bound",
+      "target": "vtGv_decomp"
+    },
+    {
+      "source": "vtgv_le_one",
+      "target": "perp_inner_abel_bound"
+    },
+    {
+      "source": "margin_lower_bound",
+      "target": "perp_inner_abel_bound"
     },
     {
       "source": "fracPart",
@@ -49743,6 +52329,70 @@
     {
       "source": "inv_zeta_differentiableAt",
       "target": "perron_integrand_denom_pos"
+    },
+    {
+      "source": "gramBound_below_one",
+      "target": "gram_bound_N3"
+    },
+    {
+      "source": "gram_subseq_from_certificates",
+      "target": "gram_bound_N3"
+    },
+    {
+      "source": "gramBound_below_one",
+      "target": "cert_N3"
+    },
+    {
+      "source": "gram_subseq_from_certificates",
+      "target": "cert_N3"
+    },
+    {
+      "source": "cot",
+      "target": "gram_bound_N3"
+    },
+    {
+      "source": "vasyuninSum",
+      "target": "gram_bound_N3"
+    },
+    {
+      "source": "cot",
+      "target": "cert_N3"
+    },
+    {
+      "source": "vasyuninSum",
+      "target": "cert_N3"
+    },
+    {
+      "source": "bd_fract_product_integrable",
+      "target": "gram_bound_N3"
+    },
+    {
+      "source": "vasyuninGram_diag_nonneg",
+      "target": "gram_bound_N3"
+    },
+    {
+      "source": "bd_fract_product_integrable",
+      "target": "cert_N3"
+    },
+    {
+      "source": "vasyuninGram_diag_nonneg",
+      "target": "cert_N3"
+    },
+    {
+      "source": "dotGapScaled",
+      "target": "riemann_hypothesis_from_generic_bound"
+    },
+    {
+      "source": "marginScaled",
+      "target": "riemann_hypothesis_from_generic_bound"
+    },
+    {
+      "source": "dotGapScaled",
+      "target": "riemann_hypothesis_pommys_path"
+    },
+    {
+      "source": "marginScaled",
+      "target": "riemann_hypothesis_pommys_path"
     },
     {
       "source": "gram_form_upper_bound_direct",
@@ -51549,11 +54199,11 @@
       "target": "overcancellation_axiom_local"
     },
     {
-      "source": "overcancellation_axiom",
+      "source": "overcancellation_axiom_cathedral",
       "target": "quad_form_split"
     },
     {
-      "source": "overcancellation_axiom",
+      "source": "overcancellation_axiom_cathedral",
       "target": "overcancellation_axiom_local"
     },
     {
@@ -51685,32 +54335,24 @@
       "target": "d2_skeleton_split"
     },
     {
-      "source": "sqfreeCount_ge_third",
+      "source": "sqfreeCount",
       "target": "sqfree_weighted_ge_third_unweighted"
     },
     {
-      "source": "sqfreeCount_ge_third_real",
+      "source": "taperSq",
       "target": "sqfree_weighted_ge_third_unweighted"
-    },
-    {
-      "source": "sqfreeCount_ge_third",
-      "target": "taper_nonneg"
-    },
-    {
-      "source": "sqfreeCount_ge_third_real",
-      "target": "taper_nonneg"
     },
     {
       "source": "sqfreeCount",
-      "target": "sqfree_weighted_ge_third_unweighted"
+      "target": "taper_nonneg"
+    },
+    {
+      "source": "taperSq",
+      "target": "taper_nonneg"
     },
     {
       "source": "nonsqfreeCount",
       "target": "sqfree_weighted_ge_third_unweighted"
-    },
-    {
-      "source": "sqfreeCount",
-      "target": "taper_nonneg"
     },
     {
       "source": "nonsqfreeCount",
@@ -51797,6 +54439,94 @@
       "target": "split_abel_bound"
     },
     {
+      "source": "squarefree_reciprocal_lower",
+      "target": "zeta_two_eq"
+    },
+    {
+      "source": "tao_logarithmic_chowla",
+      "target": "zeta_two_eq"
+    },
+    {
+      "source": "squarefree_reciprocal_lower",
+      "target": "zeta_two_pos"
+    },
+    {
+      "source": "tao_logarithmic_chowla",
+      "target": "zeta_two_pos"
+    },
+    {
+      "source": "sqfreeCount",
+      "target": "zeta_two_eq"
+    },
+    {
+      "source": "nonsqfreeCount",
+      "target": "zeta_two_eq"
+    },
+    {
+      "source": "sqfreeCount",
+      "target": "zeta_two_pos"
+    },
+    {
+      "source": "nonsqfreeCount",
+      "target": "zeta_two_pos"
+    },
+    {
+      "source": "variance_squeeze_axiom",
+      "target": "cheeseburger_equiv"
+    },
+    {
+      "source": "bdMoebiusVariance",
+      "target": "cheeseburger_equiv"
+    },
+    {
+      "source": "variance_squeeze_axiom",
+      "target": "top_bun"
+    },
+    {
+      "source": "bdMoebiusVariance",
+      "target": "top_bun"
+    },
+    {
+      "source": "dotGapScaled",
+      "target": "cheeseburger_equiv"
+    },
+    {
+      "source": "marginScaled",
+      "target": "cheeseburger_equiv"
+    },
+    {
+      "source": "dotGapScaled",
+      "target": "top_bun"
+    },
+    {
+      "source": "marginScaled",
+      "target": "top_bun"
+    },
+    {
+      "source": "banana_ramp_bounded",
+      "target": "cheeseburger_equiv"
+    },
+    {
+      "source": "d2_lt_gap_from_banana_ramp",
+      "target": "cheeseburger_equiv"
+    },
+    {
+      "source": "banana_ramp_bounded",
+      "target": "top_bun"
+    },
+    {
+      "source": "d2_lt_gap_from_banana_ramp",
+      "target": "top_bun"
+    },
+    {
+      "source": "divisor_coeff_bound",
+      "target": "restricted_mertens_bound"
+    },
+    {
+      "source": "norm_lower_bound",
+      "target": "restricted_mertens_bound"
+    },
+    {
       "source": "divisor_coeff_bound",
       "target": "moebius_zero_of_dvd_not_squarefree"
     },
@@ -51805,12 +54535,20 @@
       "target": "moebius_zero_of_dvd_not_squarefree"
     },
     {
-      "source": "divisor_coeff_bound",
-      "target": "witness_zero_of_not_squarefree"
+      "source": "divisorCoeff_eq_shifted_sum",
+      "target": "restricted_mertens_bound"
     },
     {
-      "source": "norm_lower_bound",
-      "target": "witness_zero_of_not_squarefree"
+      "source": "uniform_divisorCoeff_bound",
+      "target": "restricted_mertens_bound"
+    },
+    {
+      "source": "divisorCoeff_eq_shifted_sum",
+      "target": "moebius_zero_of_dvd_not_squarefree"
+    },
+    {
+      "source": "uniform_divisorCoeff_bound",
+      "target": "moebius_zero_of_dvd_not_squarefree"
     },
     {
       "source": "fermionic_overcancellation",
@@ -51829,20 +54567,60 @@
       "target": "overcancellation_all_N"
     },
     {
-      "source": "witnessNormSq",
-      "target": "witnessNormSq_eq_sqfree_sum"
+      "source": "sqfreeCount",
+      "target": "sqfreeCount_ge_third"
     },
     {
-      "source": "witnessNormSq_nonneg",
-      "target": "witnessNormSq_eq_sqfree_sum"
+      "source": "taperSq",
+      "target": "sqfreeCount_ge_third"
     },
     {
-      "source": "witnessNormSq",
-      "target": "norm_lower_bound_graduated"
+      "source": "sqfreeCount",
+      "target": "sqfreeCount_ge_third_real"
     },
     {
-      "source": "witnessNormSq_nonneg",
-      "target": "norm_lower_bound_graduated"
+      "source": "taperSq",
+      "target": "sqfreeCount_ge_third_real"
+    },
+    {
+      "source": "nonsqfreeCount",
+      "target": "sqfreeCount_ge_third"
+    },
+    {
+      "source": "nonsqfreeCount",
+      "target": "sqfreeCount_ge_third_real"
+    },
+    {
+      "source": "integral_taper_sq",
+      "target": "sqfreeCount_ge_third"
+    },
+    {
+      "source": "log_sq_add_linear_le_self",
+      "target": "sqfreeCount_ge_third"
+    },
+    {
+      "source": "integral_taper_sq",
+      "target": "sqfreeCount_ge_third_real"
+    },
+    {
+      "source": "log_sq_add_linear_le_self",
+      "target": "sqfreeCount_ge_third_real"
+    },
+    {
+      "source": "sqfree_weighted_ge_third_unweighted",
+      "target": "sqfreeCount_ge_third"
+    },
+    {
+      "source": "taper_nonneg",
+      "target": "sqfreeCount_ge_third"
+    },
+    {
+      "source": "sqfree_weighted_ge_third_unweighted",
+      "target": "sqfreeCount_ge_third_real"
+    },
+    {
+      "source": "taper_nonneg",
+      "target": "sqfreeCount_ge_third_real"
     },
     {
       "source": "eRatio_sum_upper_bound",
@@ -51893,11 +54671,19 @@
       "target": "smith_sum_from_divisor_bound"
     },
     {
-      "source": "conflicts",
+      "source": "witnessNormSq",
       "target": "restricted_mertens_bound_proved"
     },
     {
-      "source": "restricted_mertens_bound",
+      "source": "witnessNormSq_nonneg",
+      "target": "restricted_mertens_bound_proved"
+    },
+    {
+      "source": "divisorCoeff",
+      "target": "restricted_mertens_bound_proved"
+    },
+    {
+      "source": "ramanujan_form_smith",
       "target": "restricted_mertens_bound_proved"
     },
     {
@@ -51965,35 +54751,27 @@
       "target": "nonsqfree_subset_biUnion"
     },
     {
-      "source": "sqfreeCount_ge_third",
+      "source": "taperSq",
       "target": "sqfree_partition"
     },
     {
-      "source": "sqfreeCount_ge_third_real",
-      "target": "sqfree_partition"
-    },
-    {
-      "source": "sqfreeCount_ge_third",
+      "source": "taperSq",
       "target": "nonsqfree_subset_biUnion"
     },
     {
-      "source": "sqfreeCount_ge_third_real",
-      "target": "nonsqfree_subset_biUnion"
-    },
-    {
-      "source": "sqfreeCount_ge_third",
+      "source": "sqfreeCount",
       "target": "taperFn_antitone"
     },
     {
-      "source": "sqfreeCount_ge_third_real",
+      "source": "taperSq",
       "target": "taperFn_antitone"
     },
     {
-      "source": "sqfreeCount_ge_third",
+      "source": "sqfreeCount",
       "target": "integral_ge_N_div_log_sq"
     },
     {
-      "source": "sqfreeCount_ge_third_real",
+      "source": "taperSq",
       "target": "integral_ge_N_div_log_sq"
     },
     {
@@ -52133,11 +54911,11 @@
       "target": "gram_decomp"
     },
     {
-      "source": "overcancellation_axiom",
+      "source": "overcancellation_axiom_cathedral",
       "target": "gram_diagonal_pos"
     },
     {
-      "source": "overcancellation_axiom",
+      "source": "overcancellation_axiom_cathedral",
       "target": "gram_decomp"
     },
     {
@@ -52333,6 +55111,14 @@
       "target": "moebius_zero_of_four_dvd"
     },
     {
+      "source": "dotGapScaled",
+      "target": "d2_lt_gap_from_banana_ramp"
+    },
+    {
+      "source": "marginScaled",
+      "target": "d2_lt_gap_from_banana_ramp"
+    },
+    {
       "source": "MertensS1",
       "target": "margin_is_pnt"
     },
@@ -52382,19 +55168,35 @@
     },
     {
       "source": "bdMoebiusD2",
-      "target": "gamma_plus_one_pos"
+      "target": "euler_mascheroni_rate"
     },
     {
       "source": "bdDotGap",
-      "target": "gamma_plus_one_pos"
+      "target": "euler_mascheroni_rate"
     },
     {
       "source": "bdMoebiusD2",
-      "target": "dotGap_eps_delta"
+      "target": "gamma_plus_one_pos"
     },
     {
       "source": "bdDotGap",
-      "target": "dotGap_eps_delta"
+      "target": "gamma_plus_one_pos"
+    },
+    {
+      "source": "MertensS1",
+      "target": "euler_mascheroni_rate"
+    },
+    {
+      "source": "MertensS2",
+      "target": "euler_mascheroni_rate"
+    },
+    {
+      "source": "MertensS1",
+      "target": "gamma_plus_one_pos"
+    },
+    {
+      "source": "MertensS2",
+      "target": "gamma_plus_one_pos"
     },
     {
       "source": "bdMoebiusD2",
@@ -52458,22 +55260,6 @@
     },
     {
       "source": "pnt_moebius_sum_div_tendsto",
-      "target": "S2_tendsto"
-    },
-    {
-      "source": "euler_mascheroni_rate",
-      "target": "S1_tendsto"
-    },
-    {
-      "source": "dotGapScaled",
-      "target": "S1_tendsto"
-    },
-    {
-      "source": "euler_mascheroni_rate",
-      "target": "S2_tendsto"
-    },
-    {
-      "source": "dotGapScaled",
       "target": "S2_tendsto"
     },
     {
@@ -52637,7 +55423,7 @@
       "target": "distance_sq_scaled_decomposition"
     },
     {
-      "source": "overcancellation_axiom",
+      "source": "overcancellation_axiom_cathedral",
       "target": "h1_factorization"
     },
     {
@@ -52743,6 +55529,262 @@
     {
       "source": "vasyuninSum",
       "target": "vasyunin_consecutive"
+    },
+    {
+      "source": "gcd_unique",
+      "target": "coprime_iff_moebius_sum"
+    },
+    {
+      "source": "coprime_negativity_certificate",
+      "target": "coprime_iff_moebius_sum"
+    },
+    {
+      "source": "gcd_unique",
+      "target": "moebius_multiplicative_coprime"
+    },
+    {
+      "source": "coprime_negativity_certificate",
+      "target": "moebius_multiplicative_coprime"
+    },
+    {
+      "source": "burnol_lower_bound",
+      "target": "wall_from_euler_product"
+    },
+    {
+      "source": "large_sieve_upper_bound",
+      "target": "wall_from_euler_product"
+    },
+    {
+      "source": "burnol_lower_bound",
+      "target": "wall_from_ratio_bound"
+    },
+    {
+      "source": "large_sieve_upper_bound",
+      "target": "wall_from_ratio_bound"
+    },
+    {
+      "source": "gcd_unique",
+      "target": "wall_from_euler_product"
+    },
+    {
+      "source": "coprime_negativity_certificate",
+      "target": "wall_from_euler_product"
+    },
+    {
+      "source": "gcd_unique",
+      "target": "wall_from_ratio_bound"
+    },
+    {
+      "source": "coprime_negativity_certificate",
+      "target": "wall_from_ratio_bound"
+    },
+    {
+      "source": "bdMoebiusD2",
+      "target": "wall_from_angle_bound"
+    },
+    {
+      "source": "bdDotGap",
+      "target": "wall_from_angle_bound"
+    },
+    {
+      "source": "bdMoebiusD2",
+      "target": "wall_from_variance_ratio"
+    },
+    {
+      "source": "bdDotGap",
+      "target": "wall_from_variance_ratio"
+    },
+    {
+      "source": "pos_from_tendsto_mul_log",
+      "target": "wall_from_angle_bound"
+    },
+    {
+      "source": "wall_from_d2_lnN_limit",
+      "target": "wall_from_angle_bound"
+    },
+    {
+      "source": "pos_from_tendsto_mul_log",
+      "target": "wall_from_variance_ratio"
+    },
+    {
+      "source": "wall_from_d2_lnN_limit",
+      "target": "wall_from_variance_ratio"
+    },
+    {
+      "source": "gcd_unique",
+      "target": "wall_from_universal_negativity"
+    },
+    {
+      "source": "coprime_negativity_certificate",
+      "target": "wall_from_universal_negativity"
+    },
+    {
+      "source": "gcd_unique",
+      "target": "two_adic_rescaling_certificate"
+    },
+    {
+      "source": "coprime_negativity_certificate",
+      "target": "two_adic_rescaling_certificate"
+    },
+    {
+      "source": "squarefree_reciprocal_lower",
+      "target": "wall_from_universal_negativity"
+    },
+    {
+      "source": "tao_logarithmic_chowla",
+      "target": "wall_from_universal_negativity"
+    },
+    {
+      "source": "squarefree_reciprocal_lower",
+      "target": "two_adic_rescaling_certificate"
+    },
+    {
+      "source": "tao_logarithmic_chowla",
+      "target": "two_adic_rescaling_certificate"
+    },
+    {
+      "source": "gcd_unique",
+      "target": "gcd_shift_eq"
+    },
+    {
+      "source": "coprime_negativity_certificate",
+      "target": "gcd_shift_eq"
+    },
+    {
+      "source": "gcd_unique",
+      "target": "finite_sum_little_o"
+    },
+    {
+      "source": "coprime_negativity_certificate",
+      "target": "finite_sum_little_o"
+    },
+    {
+      "source": "gram_variation_large_k",
+      "target": "gcd_shift_eq"
+    },
+    {
+      "source": "chowla_partial_sum_sublinear",
+      "target": "gcd_shift_eq"
+    },
+    {
+      "source": "gram_variation_large_k",
+      "target": "finite_sum_little_o"
+    },
+    {
+      "source": "chowla_partial_sum_sublinear",
+      "target": "finite_sum_little_o"
+    },
+    {
+      "source": "burnol_lower_bound",
+      "target": "wall_from_sieve"
+    },
+    {
+      "source": "large_sieve_upper_bound",
+      "target": "wall_from_sieve"
+    },
+    {
+      "source": "burnol_lower_bound",
+      "target": "overcancellation_from_sieve"
+    },
+    {
+      "source": "large_sieve_upper_bound",
+      "target": "overcancellation_from_sieve"
+    },
+    {
+      "source": "bdMoebiusD2",
+      "target": "wall_from_sieve"
+    },
+    {
+      "source": "bdDotGap",
+      "target": "wall_from_sieve"
+    },
+    {
+      "source": "bdMoebiusD2",
+      "target": "overcancellation_from_sieve"
+    },
+    {
+      "source": "bdDotGap",
+      "target": "overcancellation_from_sieve"
+    },
+    {
+      "source": "MertensS1",
+      "target": "wall_from_sieve"
+    },
+    {
+      "source": "MertensS2",
+      "target": "wall_from_sieve"
+    },
+    {
+      "source": "MertensS1",
+      "target": "overcancellation_from_sieve"
+    },
+    {
+      "source": "MertensS2",
+      "target": "overcancellation_from_sieve"
+    },
+    {
+      "source": "gram_form_upper_bound_direct",
+      "target": "wall_from_sieve"
+    },
+    {
+      "source": "gram_form_upper_bound_subseq",
+      "target": "wall_from_sieve"
+    },
+    {
+      "source": "gram_form_upper_bound_direct",
+      "target": "overcancellation_from_sieve"
+    },
+    {
+      "source": "gram_form_upper_bound_subseq",
+      "target": "overcancellation_from_sieve"
+    },
+    {
+      "source": "bdMoebiusD2",
+      "target": "pos_from_tendsto_mul_log"
+    },
+    {
+      "source": "bdDotGap",
+      "target": "pos_from_tendsto_mul_log"
+    },
+    {
+      "source": "bdMoebiusD2",
+      "target": "wall_from_d2_lnN_limit"
+    },
+    {
+      "source": "bdDotGap",
+      "target": "wall_from_d2_lnN_limit"
+    },
+    {
+      "source": "wall_from_euler_product",
+      "target": "pos_from_tendsto_mul_log"
+    },
+    {
+      "source": "wall_from_ratio_bound",
+      "target": "pos_from_tendsto_mul_log"
+    },
+    {
+      "source": "wall_from_euler_product",
+      "target": "wall_from_d2_lnN_limit"
+    },
+    {
+      "source": "wall_from_ratio_bound",
+      "target": "wall_from_d2_lnN_limit"
+    },
+    {
+      "source": "tracking_principle",
+      "target": "d2_sandwich"
+    },
+    {
+      "source": "rate_matching_wall",
+      "target": "d2_sandwich"
+    },
+    {
+      "source": "tracking_principle",
+      "target": "wall_from_sandwich"
+    },
+    {
+      "source": "rate_matching_wall",
+      "target": "wall_from_sandwich"
     },
     {
       "source": "bosonic_upper_bound_axiom",
@@ -54089,6 +57131,14 @@
       "target": "rowCancel_nonneg"
     },
     {
+      "source": "noncot_excess_converges",
+      "target": "wall_from_ward_identity"
+    },
+    {
+      "source": "ecot_shadow_converges",
+      "target": "wall_from_ward_identity"
+    },
+    {
       "source": "marginal_decay_bound",
       "target": "ring_implies_codimension_one"
     },
@@ -55279,6 +58329,22 @@
     {
       "source": "sawtoothGramTrue",
       "target": "confinement_identity"
+    },
+    {
+      "source": "paritySign",
+      "target": "neutron_eq_two_mul_proton"
+    },
+    {
+      "source": "paritySign_mul",
+      "target": "neutron_eq_two_mul_proton"
+    },
+    {
+      "source": "paritySign",
+      "target": "proton_isospin_zero"
+    },
+    {
+      "source": "paritySign_mul",
+      "target": "proton_isospin_zero"
     },
     {
       "source": "parityCharge",
@@ -55922,15 +58988,15 @@
     }
   ],
   "meta": {
-    "totalNodes": 4023,
-    "totalEdges": 3922,
-    "axiomCount": 150,
-    "theoremCount": 3210,
-    "sorryCount": 19,
-    "definitionCount": 644,
-    "provedTheorems": 3210,
-    "fileCount": 467,
-    "description": "Cathedral proof architecture: 150 axioms, 3210 proved, 19 sorry, 644 definitions across 467 files",
-    "generatedAt": "2026-06-10T23:39:01.108084"
+    "totalNodes": 4268,
+    "totalEdges": 4076,
+    "axiomCount": 177,
+    "theoremCount": 3397,
+    "sorryCount": 25,
+    "definitionCount": 669,
+    "provedTheorems": 3397,
+    "fileCount": 498,
+    "description": "Cathedral proof architecture: 177 axioms, 3397 proved, 25 sorry, 669 definitions across 498 files",
+    "generatedAt": "2026-06-25T23:45:23.490360"
   }
 }
