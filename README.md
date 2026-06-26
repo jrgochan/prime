@@ -280,6 +280,10 @@ cd papers && ./build.sh
 
 This project was built through a tripartite human-AI collaboration over 86 days:
 a human computer scientist providing architectural vision and experimental design,
+[(and fruit based intution, apparently), also, since this is the Methodology section;
+as has been tradition, I haven't written a line in a file, on purpose, in about two years,
+so, umm... my deepest respect, and gratitude to Claude, and Gemini <3>. Anyway, back to the
+regularly scheduled programming...], 
 Google DeepMind's Gemini providing mathematical strategy and deep analytic intuition,
 and Anthropic's Claude (Antigravity) providing Lean 4 proof engineering and
 sorry elimination. All proofs are compiler-verified. The physics dictionary
@@ -322,7 +326,7 @@ Apache 2.0
          Hypothesis via the Nyman--Beurling Criterion},
   author={Gochanour, Jason Robert},
   year={2026},
-  doi={10.5281/zenodo.XXXXXXX},
+  doi={10.5281/zenodo.20803093},
   url={https://github.com/jrgochan/prime}
 }
 ```
