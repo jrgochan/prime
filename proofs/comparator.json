@@ -5,7 +5,10 @@
   "permitted_axioms": [
     "propext",
     "Quot.sound",
-    "Classical.choice"
+    "Classical.choice",
+    "overcancellation_axiom",
+    "pnt_mu_log_sq_div_k",
+    "frac_error_isLittleO"
   ],
   "enable_nanoda": false
 }
