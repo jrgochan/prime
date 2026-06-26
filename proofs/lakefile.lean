@@ -405,6 +405,12 @@ lean_lib «Cathedral» where
     `Cathedral.Physics.GaugeTheory.Confinement,
     -- Physics: Isospin Mass (proton–neutron near-degeneracy, gcd_isospin_symmetry 🎓, June 22)
     `Cathedral.Physics.GaugeTheory.IsospinMass,
+    -- Physics: 3 Generations (Erdős-Kac → why 3 fermion families, Day 87) 🧬
+    `Cathedral.Physics.GaugeTheory.ArithmeticGenerations,
+    -- Physics: CKM Mixing + Neutrino Oscillations (Gram eigenvectors → flavor mixing, Day 87) 🌀
+    `Cathedral.Physics.GaugeTheory.ArithmeticMixing,
+    -- Physics: Graviton (G(k,k) ~ 1/k diagonal decay → mass hierarchy, Day 87) 🌌
+    `Cathedral.Physics.GaugeTheory.ArithmeticGravity,
     -- Physics: Gauge Cancellation (vᵀGv SUSY decomposition, Exploration 36)
     `Cathedral.Physics.Cancellation.GaugeCancellation,
     -- Physics: Diagonal Bound (D(N) = O(ln N) unconditional, Exploration 36)
