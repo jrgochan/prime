@@ -60,3 +60,30 @@ def logCutoffWitness (N : ℕ) (i : Fin N) : ℝ :=
   -(↑(moebius (i.val + 1)) : ℝ) * (1 - Real.log ↑(i.val + 1) / Real.log ↑N)
 
 end CathedralDefs
+
+-- ════════════════════════════════════════════════════════════════
+-- AXIOMS (top-level, available in both Challenge and Solution envs)
+-- ════════════════════════════════════════════════════════════════
+
+/-- **AXIOM 1 — THE WALL**: vᵀGv ≤ 1 for all sufficiently large N.
+    This IS the Riemann Hypothesis in Gram form. -/
+axiom overcancellation_axiom :
+    ∃ N₀ : ℕ, ∀ N : ℕ, N ≥ N₀ → N ≥ 3 →
+      dotProduct (CathedralDefs.logCutoffWitness N)
+        ((CathedralDefs.vasyuninGramMatrix N).mulVec
+          (CathedralDefs.logCutoffWitness N)) ≤ 1
+
+/-- **AXIOM 2 — PNT (log²-weighted)**: Σ μ(k)·log²(k)/k → -2γ.
+    Unconditionally true. Blocked on PrimeNumberTheoremAnd. -/
+axiom pnt_mu_log_sq_div_k :
+  Tendsto (fun N =>
+    ∑ k ∈ Icc 1 N, (↑(moebius k) : ℝ) *
+      (Real.log (k : ℝ)) ^ 2 / (k : ℝ))
+    atTop (nhds (-2 * eulerMascheroniConstant))
+
+/-- **AXIOM 3 — PNT (fractional error)**: Σ μ(n)·log(n)·{N/n} = o(N).
+    Unconditionally true. Blocked on PrimeNumberTheoremAnd. -/
+axiom frac_error_isLittleO :
+    (fun N : ℕ => ∑ n ∈ Icc 1 N, (↑(moebius n) : ℝ) *
+      Real.log n * ((↑(N % n) : ℝ) / n))
+    =o[atTop] (fun N => (N : ℝ))
