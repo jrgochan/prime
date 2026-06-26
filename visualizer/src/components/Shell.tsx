@@ -60,6 +60,7 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { href: "/hyperplane-trap", label: "Hyperplane Trap", icon: "\uD83D\uDD73\uFE0F" },
       { href: "/robin-lagarias", label: "Robin\u2013Lagarias", icon: "\uD83C\uDFC6" },
+      { href: "/standard-model", label: "Standard Model", icon: "\u269B\uFE0F" },
     ],
   },
 ];
@@ -141,7 +142,7 @@ export default function Shell({ children }: { children: ReactNode }) {
           <div className="flex items-center gap-2 mt-1.5">
             <span className="text-[10px] text-slate-500">Proof Visualizer</span>
             <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 font-mono font-bold border border-amber-500/20">
-              v26
+              v27
             </span>
           </div>
         </div>
@@ -155,7 +156,7 @@ export default function Shell({ children }: { children: ReactNode }) {
         <div className="p-4 border-t border-[#1e2148] space-y-2">
           <div className="flex items-center gap-2 text-xs text-slate-500">
             <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span>Penta-Crown &middot; 0 sorry on crown &middot; ~4,600 thms</span>
+            <span>Penta-Crown &middot; 0 sorry on crown &middot; ~4,009 proved</span>
           </div>
           <div className="w-full h-1 bg-[#1e2148] rounded-full overflow-hidden">
             <div
@@ -164,7 +165,7 @@ export default function Shell({ children }: { children: ReactNode }) {
             />
           </div>
           <div className="text-[10px] text-slate-600">
-            ~149K lines &middot; 474 files &middot; 8,818 targets
+            ~159K lines &middot; 508 files &middot; 174 axioms
           </div>
         </div>
       </nav>

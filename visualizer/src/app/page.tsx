@@ -84,6 +84,16 @@ const CARDS: CardInfo[] = [
     border: "border-emerald-500/20",
   },
   {
+    href: "/standard-model",
+    title: "Standard Model Explorer",
+    description:
+      "The complete Arithmetic Standard Model: 12 fermions, 12 bosons, and the graviton. Every SM particle mapped to an arithmetic entity. Zero free parameters.",
+    icon: "\u269B\uFE0F",
+    stats: "25 particles \u00B7 87+ theorems \u00B7 0 free params",
+    gradient: "from-indigo-500/20 to-violet-500/20",
+    border: "border-indigo-500/20",
+  },
+  {
     href: "/robin-lagarias",
     title: "Robin\u2013Lagarias Dashboard",
     description:
