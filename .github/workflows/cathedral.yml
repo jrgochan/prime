@@ -204,9 +204,7 @@ jobs:
           echo "✅ comparator built"
 
       - name: Run full comparator
-        continue-on-error: true
         run: |
           echo "=== Running leanprover/comparator (full sandboxed) ==="
-          echo "NOTE: Cathedral axioms not in Challenge env — expected failure."
           lake env /tmp/comparator/.lake/build/bin/comparator comparator.json
           echo "✅ Full comparator verification passed"
