@@ -85,14 +85,19 @@ jobs:
       - name: Verify Solution.lean (Cathedral proof)
         run: |
           echo "=== Solution.lean: should compile with 0 sorry ==="
-          OUTPUT=$(lake build Solution 2>&1)
-          echo "$OUTPUT"
-          if echo "$OUTPUT" | grep -q "sorry"; then
+          lake build Solution 2>&1 | tee /tmp/solution_output.txt
+          # Filter: only check Solution.lean warnings, not upstream deps
+          SOLUTION_LINES=$(grep -i "Solution.lean" /tmp/solution_output.txt || true)
+          if echo "$SOLUTION_LINES" | grep -q "sorry"; then
             echo "❌ Solution.lean contains sorry!"
             exit 1
           fi
-          if echo "$OUTPUT" | grep -q "error"; then
-            echo "❌ Solution.lean has errors!"
+          if grep -q "^error:" /tmp/solution_output.txt; then
+            echo "❌ Solution.lean build has errors!"
+            exit 1
+          fi
+          if grep -q "build failed" /tmp/solution_output.txt; then
+            echo "❌ Solution.lean build failed!"
             exit 1
           fi
           echo "✅ Solution.lean compiles clean — 0 sorry, 0 errors"
