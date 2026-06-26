@@ -21,6 +21,7 @@
   The Solution.lean file fills in the sorry with the Cathedral proof.
 
   Created: June 23, 2026 — Port 22 Day + 1
+  Refactored: June 25, 2026 — comparator compatibility
 -/
 
 import Mathlib.NumberTheory.LSeries.RiemannZeta
@@ -38,12 +39,17 @@ open Real Matrix Finset Filter ArithmeticFunction
 -- §1. INLINED DEFINITIONS (from Cathedral.Vasyunin.Defs/Witness)
 -- ════════════════════════════════════════════════════════════════
 
+-- Definitions are in a namespace so Solution.lean can import and
+-- reuse them directly (required for leanprover/comparator).
+
+namespace CathedralChallenge
+
 /-- The cotangent function: cot(x) = cos(x)/sin(x) -/
-private def cotFn (x : ℝ) : ℝ := Real.cos x / Real.sin x
+def cotFn (x : ℝ) : ℝ := Real.cos x / Real.sin x
 
 /-- The Vasyunin cotangent sum:
     V(a, b) = Σ_{m=1}^{a-1} {mb/a} · cot(πm/a) -/
-private def vasyuninSum (a b : ℕ) : ℝ :=
+def vasyuninSum (a b : ℕ) : ℝ :=
   if a ≤ 1 then 0
   else ∑ m ∈ Ico 1 a,
     Int.fract ((m * b : ℕ) / (a : ℝ)) * cotFn (Real.pi * m / a)
@@ -54,7 +60,7 @@ private def vasyuninSum (a b : ℕ) : ℝ :=
               - πd/(2jk) · (V(j',k') + V(k',j'))
               - 1/(jk)
     where d = gcd(j,k), j' = j/d, k' = k/d. -/
-private def vasyuninGramEntry (j k : ℕ) : ℝ :=
+def vasyuninGramEntry (j k : ℕ) : ℝ :=
   let d := Nat.gcd j k
   let jp := j / d
   let kp := k / d
@@ -71,13 +77,15 @@ private def vasyuninGramEntry (j k : ℕ) : ℝ :=
     term1 + term2 - term3 - term4
 
 /-- The N×N exact discrete Gram matrix. -/
-private def vasyuninGramMatrix (N : ℕ) : Matrix (Fin N) (Fin N) ℝ :=
+def vasyuninGramMatrix (N : ℕ) : Matrix (Fin N) (Fin N) ℝ :=
   Matrix.of (fun i j => vasyuninGramEntry (i.val + 1) (j.val + 1))
 
 /-- The logarithmic cutoff Möbius witness vector:
     v_k = -μ(k) · (1 - ln(k)/ln(N)) -/
-private def logCutoffWitness (N : ℕ) (i : Fin N) : ℝ :=
+def logCutoffWitness (N : ℕ) (i : Fin N) : ℝ :=
   -(↑(moebius (i.val + 1)) : ℝ) * (1 - Real.log ↑(i.val + 1) / Real.log ↑N)
+
+end CathedralChallenge
 
 -- ════════════════════════════════════════════════════════════════
 -- §2. THE THREE AXIOMS
@@ -93,8 +101,8 @@ private def logCutoffWitness (N : ℕ) (i : Fin N) : ℝ :=
     Margin: vᵀGv ≤ 0.74 (26% below the threshold). -/
 axiom overcancellation_axiom :
     ∃ N₀ : ℕ, ∀ N : ℕ, N ≥ N₀ → N ≥ 3 →
-      dotProduct (logCutoffWitness N)
-        ((vasyuninGramMatrix N).mulVec (logCutoffWitness N)) ≤ 1
+      dotProduct (CathedralChallenge.logCutoffWitness N)
+        ((CathedralChallenge.vasyuninGramMatrix N).mulVec (CathedralChallenge.logCutoffWitness N)) ≤ 1
 
 /-- **AXIOM 2 — PNT (log²-weighted)**: Σ μ(k)·log²(k)/k → -2γ.
     From the second derivative of 1/ζ(s) at s=1.
@@ -140,7 +148,7 @@ axiom frac_error_isLittleO :
     Uses Mathlib's `RiemannHypothesis` definition directly. -/
 theorem cathedral_main_theorem :
     (∃ N₀ : ℕ, ∀ N : ℕ, N ≥ N₀ → N ≥ 3 →
-      dotProduct (logCutoffWitness N)
-        ((vasyuninGramMatrix N).mulVec (logCutoffWitness N)) ≤ 1) →
+      dotProduct (CathedralChallenge.logCutoffWitness N)
+        ((CathedralChallenge.vasyuninGramMatrix N).mulVec (CathedralChallenge.logCutoffWitness N)) ≤ 1) →
     RiemannHypothesis := by
   sorry
