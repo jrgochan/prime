@@ -843,8 +843,13 @@ lean_lib «Cathedral» where
     `Cathedral.Geometry.Fiber.DragonfruitNegativity,
   ]
 
--- Comparator interface: Challenge (Mathlib-only statement) + Solution (Cathedral proof).
--- These are separate targets so lean4export can export them independently.
+-- Comparator interface: shared defs + Challenge + Solution.
+-- CathedralDefs: Mathlib-only definitions used by both.
+-- Challenge: theorem statement with sorry.
+-- Solution: Cathedral proof.
+lean_lib «CathedralDefs» where
+  roots := #[`CathedralDefs]
+
 lean_lib «Challenge» where
   roots := #[`Challenge]
 
