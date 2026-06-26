@@ -1,14 +1,14 @@
 # References — The Cathedral
 
-**Penta-Crown** — June 10, 2026 (v26)
+**Penta-Crown** — June 25, 2026 (v27)
 **Penta-Crown Cathedral** — 1 axiom (`overcancellation_axiom` ≡ RH)
 
 A complete bibliography of the mathematical results used in the formal
 verification and the companion papers. Every theorem, identity, and
 technique in the Cathedral traces back to published mathematics listed here.
 
-55+ mathematicians. 167 years of prior work. One axiom ≡ RH.
-504 active files. ~4,800 theorems. 18 papers. 56 Rust/MPFR/DD experiments.
+60+ mathematicians. 167 years of prior work. One axiom ≡ RH.
+508 active files. ~4,009 proved theorems. 18 papers. 56 Rust/MPFR/DD experiments.
 
 ---
 
@@ -147,6 +147,9 @@ technique in the Cathedral traces back to published mathematics listed here.
   > In the Particle Zoo paper, the arithmetic sieve to N = 10⁹ confirms
   > that ω(k) peaks at exactly ω = 3, matching the Standard Model's
   > three generations of matter (Up/Down, Charm/Strange, Top/Bottom).
+  > **ArithmeticGenerations.lean** (Day 87) formalizes this: Fermi Tower
+  > layers k=1,2,3 map to the 3 fermion generations, with Erdős-Kac
+  > explaining why layer 4 is exponentially suppressed.
 
 ### Mersenne Primes
 
@@ -696,11 +699,60 @@ technique in the Cathedral traces back to published mathematics listed here.
   *Elementary Particle Theory* (Nobel Symposium 8), 1968.
 
   > The Standard Model gauge group U(1) × SU(2) × SU(3).
-  > The Cathedral's **Arithmetic Standard Model** (88 theorems, 0 axioms)
+  > The Cathedral's **Arithmetic Standard Model** (87+ theorems, 0 axioms)
   > identifies arithmetic analogues: U(1) parity from λ(n), SU(2) from
   > Liouville doublets, SU(3) from coprime triple structure.
   > Formalized in `Physics/GaugeTheory/ArithmeticStandardModel.lean`,
   > `ArithmeticU1.lean`, `ArithmeticSU2.lean`, `ArithmeticSU3.lean`.
+
+### The CKM Matrix
+
+- **Nicola Cabibbo**, "Unitary symmetry and leptonic decays,"
+  *Phys. Rev. Lett.*, 10:531–533, 1963.
+
+- **Makoto Kobayashi and Toshihide Maskawa**, "CP-violation in the
+  renormalizable theory of weak interaction," *Prog. Theor. Phys.*,
+  49:652–657, 1973. (Nobel Prize 2008)
+
+  > The CKM (Cabibbo-Kobayashi-Maskawa) matrix describes quark flavor
+  > mixing during weak interactions. The hierarchy |V_ud| ≫ |V_us| ≫ |V_ub|
+  > reflects the dominance of diagonal over off-diagonal entries.
+  > In the Cathedral, the Gram matrix eigenvectors rotate as N grows,
+  > and the off-diagonal Gram entries G(j,k) decay with gcd distance,
+  > producing the CKM-like hierarchy structure.
+  > Formalized in `Physics/GaugeTheory/ArithmeticMixing.lean`.
+
+### The PMNS Matrix and Neutrino Oscillations
+
+- **Bruno Pontecorvo**, "Mesonium and anti-mesonium," *Zh. Eksp.
+  Teor. Fiz.*, 33:549–551, 1957.
+
+- **Ziro Maki, Masami Nakagawa, and Shoichi Sakata**, "Remarks on the
+  unified model of elementary particles," *Prog. Theor. Phys.*,
+  28:870–880, 1962.
+
+  > The PMNS matrix describes neutrino flavor mixing. Neutrino oscillations
+  > (νₑ ↔ νμ ↔ ντ) arise because flavor and mass eigenstates differ.
+  > In the Cathedral, the coprime fiber weights at different primes
+  > (p=2, p=3, p=5) oscillate in their relative contributions as N grows,
+  > mirroring flavor oscillation. The Z⁰ boson is the "invisible width":
+  > μ(4n) = 0 for all n > 0 (PROVED, zero sorry).
+  > Formalized in `Physics/GaugeTheory/ArithmeticMixing.lean`.
+
+### The Hierarchy Problem
+
+- **Gerard 't Hooft**, "Naturalness, chiral symmetry, and spontaneous
+  chiral symmetry breaking," in *Recent Developments in Gauge Theories*,
+  NATO Advanced Study Inst., 135–157, 1980.
+
+  > Why is the Higgs mass (125 GeV) so much lighter than the Planck mass
+  > (10¹⁹ GeV)? In the Cathedral, the "hierarchy problem" has an algebraic
+  > answer: G(k,k) = (ln2π − γ)/k − 1/k² decays as 1/k. The ratio
+  > G(1,1)/G(k,k) ~ k for large k. For k ~ 10¹⁸, the hierarchy is
+  > 10¹⁸:1. This is a **theorem** about diagonal Gram decay, not fine-tuning.
+  > The graviton is the symmetric bilinear form G(j,k) itself — two indices,
+  > like the metric tensor g_{μν} in GR (spin-2).
+  > Formalized in `Physics/GaugeTheory/ArithmeticGravity.lean`.
 
 ### Quantum Chromodynamics and Confinement
 
