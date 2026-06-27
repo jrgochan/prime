@@ -52,10 +52,10 @@ axioms: ## List all axioms in the Cathedral
 	@echo "  🏛️  Cathedral Axioms"
 	@echo "  ═══════════════════════════════════════════"
 	@echo ""
-	@printf "  Total: " && find proofs/Cathedral -name '*.lean' -not -path '*/Archive/*' -not -path '*/.lake/*' -exec grep -c '^axiom ' {} + 2>/dev/null | awk -F: '{s+=$$2}END{print s}'
+	@printf "  Total: " && find proofs/Cathedral -name '*.lean' -not -path '*/Archive/*' -not -path '*/.lake/*' -exec grep -cE '^axiom [a-zA-Z][a-zA-Z0-9]*[_A-Z]' {} + 2>/dev/null | awk -F: '{s+=$$2}END{print s}'
 	@echo ""
 	@find proofs/Cathedral -name '*.lean' -not -path '*/Archive/*' -not -path '*/.lake/*' \
-		-exec grep -Hn '^axiom ' {} \; 2>/dev/null | \
+		-exec grep -HnE '^axiom [a-zA-Z][a-zA-Z0-9]*[_A-Z]' {} \; 2>/dev/null | \
 		sed 's|proofs/Cathedral/||' | \
 		awk -F: '{printf "  %-50s %s:%s\n", $$3, $$1, $$2}' | \
 		sed 's/axiom //' | sort
@@ -267,7 +267,7 @@ audit: ## Full Cathedral sorry/axiom audit
 	@echo "  ═══════════════════════════════════════════"
 	@echo ""
 	@echo "  ── Axioms ──"
-	@printf "  Total: " && find proofs/Cathedral -name '*.lean' -not -path '*/Archive/*' -not -path '*/.lake/*' -exec grep -c '^axiom ' {} + 2>/dev/null | awk -F: '{s+=$$2}END{print s}'
+	@printf "  Total: " && find proofs/Cathedral -name '*.lean' -not -path '*/Archive/*' -not -path '*/.lake/*' -exec grep -cE '^axiom [a-zA-Z][a-zA-Z0-9]*[_A-Z]' {} + 2>/dev/null | awk -F: '{s+=$$2}END{print s}'
 	@echo ""
 	@echo "  ── Sorry Details ──"
 	@find proofs/Cathedral -name '*.lean' -not -path '*/Archive/*' -not -path '*/Scratch/*' \
@@ -406,7 +406,7 @@ stats: ## Show project statistics
 	@printf "    Rust experiments: " && find experiments -maxdepth 1 -type d | tail -n +2 | wc -l | tr -d ' '
 	@echo ""
 	@echo "  Axiom / Sorry Audit:"
-	@printf "    Axioms (active):  " && find proofs/Cathedral -name '*.lean' -not -path '*/Archive/*' -not -path '*/.lake/*' -exec grep -c '^axiom ' {} + 2>/dev/null | awk -F: '{s+=$$2}END{print s}'
+	@printf "    Axioms (active):  " && find proofs/Cathedral -name '*.lean' -not -path '*/Archive/*' -not -path '*/.lake/*' -exec grep -cE '^axiom [a-zA-Z][a-zA-Z0-9]*[_A-Z]' {} + 2>/dev/null | awk -F: '{s+=$$2}END{print s}'
 	@printf "    Sorries:          " && find proofs/Cathedral -name '*.lean' -not -path '*/Archive/*' -not -path '*/.lake/*' -exec grep -c '^\s*sorry$$' {} + 2>/dev/null | awk -F: '{s+=$$2}END{print s}'
 	@printf "    Sorry files:      " && find proofs/Cathedral -name '*.lean' -not -path '*/Archive/*' -not -path '*/.lake/*' -exec grep -l '^\s*sorry$$' {} + 2>/dev/null | wc -l | tr -d ' '
 	@echo ""

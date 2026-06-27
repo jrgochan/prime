@@ -213,7 +213,7 @@ proofs/Cathedral/
 ```
 Cathedral:      508 active Lean files, 117 archived, ~159K lines
 Full build:     664 Lean files (incl. PNTAnd, LeanCert), 8,854 jobs
-Axioms:         1 on crown (≡ RH), 2 PNT bureaucracy, ~193 total
+Axioms:         1 on crown (≡ RH), 2 PNT bureaucracy, 188 total
 Sorry:          5 off-crown (4 files)
 Errors:         0
 Theorems:       ~4,800+ proved
