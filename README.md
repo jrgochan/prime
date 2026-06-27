@@ -7,35 +7,43 @@
 
 A machine-checked proof architecture in **Lean 4** + **Mathlib** that reduces
 the Riemann Hypothesis to the decay of the Nyman–Beurling distance.
-**504 active Lean files** (~158,000 lines) across 25+ modules, with
+**547 active Lean files** (~167,500 lines) across 25+ modules, with
 **1 axiom equivalent to RH** on the crown path (verified by `#print axioms`),
 and an independent **Oracle Bridge** from GPU-certified computation.
 
-> **The Penta-Crown Cathedral (v26).** The sole axiom is
-> `overcancellation_axiom` — formally proved *equivalent* to the
-> Riemann Hypothesis via the Glass Box architecture (7 sub-axioms, 5 graduated).
-> The converse direction uses **zero custom axioms**.
-> Five independent crown paths; the cleanest (PATH 1) uses only 2 PNT axioms.
->
-> The **Oracle Bridge** proves RH from **one** trusted GPU measurement:
-> DD-precision Gram quadratic form v^T G v < 1 at highly composite numbers.
+> 📖 **New here?** Start with the [Origin Story](ORIGIN-STORY.md) — how a blind
+> eigensolver spontaneously derived the Möbius function and collided with
+> Selberg's Parity Barrier. It explains the *why* behind this repository.
 
-> **Release: v26 — Penta-Crown + Path B** — June 22, 2026
->
-> **Latest**: 504 files, ~158K lines, 1 axiom (≡ RH), 4 sorry (off-crown),
-> 0 errors, 8,848+ build jobs, 7 proof paths, 101 Standard Model theorems
->
-> 🚛 **Path B (The Mack Truck)**: `d² ≤ 2·gap` — the constant-ratio sieve
-> criterion with a **67× safety margin**. 7 new Fiber modules, 24 theorems, 0 sorry.
->
-> 📖 *New here? Read the [Origin Story](ORIGIN-STORY.md) — how a blind eigensolver
-> spontaneously derived the Möbius function and collided with Selberg's Parity Barrier.*
+## What This Is
+
+The Cathedral formally verifies:
+
+```
+RH ↔ d²_N → 0  (the Nyman–Beurling–Báez-Duarte equivalence)
+```
+
+Both directions are machine-checked. The converse uses **zero custom axioms**.
+The forward direction depends on **1 axiom** that is formally proved
+**equivalent** to the Riemann Hypothesis itself.
+
+## What This Is NOT
+
+- **This is not a claimed proof of RH.** The sole crown axiom IS the Riemann
+  Hypothesis, restated in the language of the Cathedral. Graduating the axiom
+  is equivalent to proving RH.
+- **The physics dictionary is structural, not a unification theory.** The
+  Arithmetic Standard Model identifies structural parallels between the proof
+  architecture and the Standard Model. These are mathematical theorems about
+  number-theoretic objects, not physics claims.
+- **The 4 remaining `sorry` are all off-crown.** Zero sorry on any of the
+  seven proof paths to the crown theorem.
 
 ## Quick Start
 
 ```bash
 cd proofs
-lake build          # 504 active Cathedral files, 114 archived
+lake build          # 547 active Cathedral files, 117 archived
 ```
 
 Requires: [Lean v4.29.0](https://leanprover.github.io/lean4/doc/setup.html) and Mathlib.
@@ -98,6 +106,18 @@ The sole crown axiom decomposes into **7 transparent sub-axioms** (5 graduated):
 | Wall consolidation | **THEOREM** | Triplicate → single |
 | Dedekind reciprocity (partial) | **PARTIAL** | 3-file architecture |
 
+## Seven Proof Paths (Penta-Crown + Path B + Converse)
+
+| Path | Target | Crown Axioms | Status |
+|------|--------|-------------|--------|
+| **PATH 1 Overcancellation** | `overcancellation_implies_rh` | 2 PNT axioms | **Cleanest** |
+| **Analytic Crown (F)** | `baez_duarte_forward` | `overcancellation_axiom` | **Primary** |
+| **Oracle Crown (D)** | `rh_from_oracle` | `oracle_certificates` | 0 sorry |
+| **Gram Crown (E)** | `rh_from_convergences` | Direct Gram bound | 0 sorry |
+| **Path B (Mack Truck)** 🚛 | `rh_from_mack_truck` | `d2_bounded_above` | **0 sorry, 67× margin** |
+| **Arakelov Crown** | `rh_from_arakelov` | `hodge_index_eigenvalue_bound` | 0 sorry |
+| Converse | `nyman_beurling_converse` | **0 axioms** | 0 sorry |
+
 ## The Parseval Bridge & Mellin Crown
 
 The forward direction routes through the **frequency domain** using the
@@ -121,6 +141,25 @@ theorem cholesky_decrement :
 Each new basis function extracts vacuum energy monotonically.
 The NB distance is a non-increasing sequence: d²₂ ≥ d²₃ ≥ d²₄ ≥ ⋯ ≥ L ≥ 0.
 RH ⟺ L = 0. Numerical scaling: d² ≈ 1.005/ln N (confirmed to N = 55,440).
+
+## Key Results (All Machine-Verified)
+
+| Result | Status |
+|--------|--------|
+| `baez_duarte_forward` — RH → d²_N → 0 | **Proved** (1 axiom ≡ RH) |
+| `nyman_beurling_converse` — d²→0 ⟹ RH | **Proved** (0 axioms!) |
+| `witness_covariance_decay_iff_rh` — dRH ⟺ RH | **Proved** |
+| `cholesky_decrement` — d²(N+1) = d²(N) − y²_new | **Proved** (0 axioms) |
+| `parseval_bridge_white` — L²(0,1) = Mellin L² | **Proved** (0 axioms) |
+| `rh_from_oracle` — RH from GPU computation | **Proved** (1 oracle axiom) |
+| `augmentedGramMatrix_posDef` — G_N PD for all N ≥ 1 | **Proved** (0 axioms) |
+| Robin ⟺ NB ⟺ Lagarias ⟺ RH | **Proved** (1 off-path axiom) |
+| Bose–Einstein / Fermi–Dirac prime gas | **Proved** (0 axioms) |
+| Arithmetic Standard Model (101 theorems) | **Proved** (0 axioms) |
+| Mass Renormalization (γ cancels) | **Proved** (0 sorry, 2 axioms) |
+| Dedekind reciprocity law | **Partial** (3-file architecture) |
+| `rh_from_mack_truck` — d² ≤ 2·gap → RH | **Proved** (0 sorry, 67× margin) |
+| `rh_from_convergences` — 2 Tendsto → RH | **Proved** (0 sorry) |
 
 ## Architecture
 
@@ -161,56 +200,25 @@ proofs/Cathedral/
 ├── Gram/            (7)     ← Gram matrix bounds
 ├── IntegralBasis/   (5)     ← BD basis formalization
 ├── Sieve/           (4)     ← Bilinear sieve
-└── Archive/       (114)     ← Preserved exploratory paths
+└── Archive/       (117)     ← Preserved exploratory paths
 ```
 
 ## Build Stats
 
 ```
-Active files:   504 Lean files across 25+ modules
-Archived:       114 Lean files in Archive/
-Total:          618 Lean files, ~184K lines
+Active files:   547 Lean files across 25+ modules
+Archived:       117 Lean files in Archive/
+Total:          664 Lean files, ~200K lines
 Axioms:         1 on crown (≡ RH), 2 PNT bureaucracy
 Sorry:          4 off-crown
 Errors:         0
-Build jobs:     8,818+
-Lines:          ~158,000 (active), ~184K (full proofs/)
+Build jobs:     8,854+
+Lines:          ~167,500 (active), ~200K (full proofs/)
 Theorems:       ~4,800+ proved
 Papers:         4 core + 14 working drafts (18 total, all build)
 Experiments:    56 Rust/MPFR/DD (f64–512 bit + DD 31-digit precision)
 Release:        v26 — Penta-Crown + Path B (June 12, 2026)
 ```
-
-## Seven Proof Paths (Penta-Crown + Path B + Converse)
-
-| Path | Target | Crown Axioms | Status |
-|------|--------|-------------|--------|
-| **PATH 1 Overcancellation** | `overcancellation_implies_rh` | 2 PNT axioms | **Cleanest** |
-| **Analytic Crown (F)** | `baez_duarte_forward` | `overcancellation_axiom` | **Primary** |
-| **Oracle Crown (D)** | `rh_from_oracle` | `oracle_certificates` | 0 sorry |
-| **Gram Crown (E)** | `rh_from_convergences` | Direct Gram bound | 0 sorry |
-| **Path B (Mack Truck)** 🚛 | `rh_from_mack_truck` | `d2_bounded_above` | **0 sorry, 67× margin** |
-| **Arakelov Crown** | `rh_from_arakelov` | `hodge_index_eigenvalue_bound` | 0 sorry |
-| Converse | `nyman_beurling_converse` | **0 axioms** | 0 sorry |
-
-## Key Results (All Machine-Verified)
-
-| Result | Status |
-|--------|--------|
-| `baez_duarte_forward` — RH → d²_N → 0 | **Proved** (1 axiom ≡ RH) |
-| `nyman_beurling_converse` — d²→0 ⟹ RH | **Proved** (0 axioms!) |
-| `witness_covariance_decay_iff_rh` — dRH ⟺ RH | **Proved** |
-| `cholesky_decrement` — d²(N+1) = d²(N) − y²_new | **Proved** (0 axioms) |
-| `parseval_bridge_white` — L²(0,1) = Mellin L² | **Proved** (0 axioms) |
-| `rh_from_oracle` — RH from GPU computation | **Proved** (1 oracle axiom) |
-| `augmentedGramMatrix_posDef` — G_N PD for all N ≥ 1 | **Proved** (0 axioms) |
-| Robin ⟺ NB ⟺ Lagarias ⟺ RH | **Proved** (1 off-path axiom) |
-| Bose–Einstein / Fermi–Dirac prime gas | **Proved** (0 axioms) |
-| Arithmetic Standard Model (101 theorems) | **Proved** (0 axioms) |
-| Mass Renormalization (γ cancels) | **Proved** (0 sorry, 2 axioms) |
-| Dedekind reciprocity law | **Partial** (3-file architecture) |
-| `rh_from_mack_truck` — d² ≤ 2·gap → RH | **Proved** (0 sorry, 67× margin) |
-| `rh_from_convergences` — 2 Tendsto → RH | **Proved** (0 sorry) |
 
 ## Numerical Validation (Rust)
 
@@ -229,7 +237,26 @@ The monotonic decrease d²(N) ~ 1.005/ln(N) is the numerical
 signature of the Riemann Hypothesis. See `experiments/certified-distance/`
 and `experiments/nb-witness-scan/` for independently verifiable data.
 
-## Documentation Suite
+## Five Discoveries
+
+1. **The High-Frequency Trap**: The generalized basis {θ/x} for θ > 1 spans L²
+   unconditionally. The true Báez-Duarte basis {1/(kx)} is essential.
+
+2. **The False Dedekind Reciprocity**: A candidate axiom for harmonic sum
+   reciprocity was numerically false at (a,b) = (3,2).
+
+3. **The Triangle Inequality Trap**: ‖1 − f‖₂ ≤ 1 + ‖f‖₂ yields d²_N ≤ 4
+   for a quantity → 0. The Parseval Bridge is mathematically *necessary*.
+
+4. **The Selberg Revelation**: The sole axiom `overcancellation_axiom`
+   is not an intermediate lemma — it IS the Riemann Hypothesis, stated in
+   the language of the Cathedral. The irreducible content is the fermionic
+   overcancellation in the BD optimal weights.
+
+5. **The Cholesky Miracle**: d²(N+1) = d²(N) − y²_new. The NB distance
+   decreases monotonically. RH ⟺ the cooling protocol reaches absolute zero.
+
+## Documentation
 
 4 core papers + 14 working drafts (18 total, all build with `./build.sh`):
 
@@ -257,47 +284,41 @@ Build all PDFs:
 cd papers && ./build.sh
 ```
 
-## Five Discoveries
-
-1. **The High-Frequency Trap**: The generalized basis {θ/x} for θ > 1 spans L²
-   unconditionally. The true Báez-Duarte basis {1/(kx)} is essential.
-
-2. **The False Dedekind Reciprocity**: A candidate axiom for harmonic sum
-   reciprocity was numerically false at (a,b) = (3,2).
-
-3. **The Triangle Inequality Trap**: ‖1 − f‖₂ ≤ 1 + ‖f‖₂ yields d²_N ≤ 4
-   for a quantity → 0. The Parseval Bridge is mathematically *necessary*.
-
-4. **The Selberg Revelation**: The sole axiom `overcancellation_axiom`
-   is not an intermediate lemma — it IS the Riemann Hypothesis, stated in
-   the language of the Cathedral. The irreducible content is the fermionic
-   overcancellation in the BD optimal weights.
-
-5. **The Cholesky Miracle**: d²(N+1) = d²(N) − y²_new. The NB distance
-   decreases monotonically. RH ⟺ the cooling protocol reaches absolute zero.
+For the full technical overview of the proof chain, see [docs/OVERVIEW.md](docs/OVERVIEW.md).
 
 ## Methodology
 
-This project was built through a tripartite human-AI collaboration over 86 days:
-a human computer scientist providing architectural vision and experimental design,
-[(and fruit based intution, apparently), also, since this is the Methodology section;
-as has been tradition, I haven't written a line in a file, on purpose, well, for the nonce,
-so, umm... my deepest respect, and gratitude to Claude, and Gemini <3>. Anyway, back to the
-regularly scheduled programming...], 
-Google DeepMind's Gemini providing mathematical strategy and deep analytic intuition,
-and Anthropic's Claude (Antigravity) providing Lean 4 proof engineering and
-sorry elimination. All proofs are compiler-verified. The physics dictionary
-(76 pages) was co-authored and peer-reviewed.
+This project was built through a tripartite human-AI collaboration over 88 days
+(March 30 – June 26, 2026): a human computer scientist providing architectural
+vision and experimental design, Google DeepMind's Gemini providing mathematical
+strategy and deep analytic intuition, and Anthropic's Claude (Antigravity)
+providing Lean 4 proof engineering and sorry elimination. All proofs are
+compiler-verified. The physics dictionary (76 pages) was co-authored and
+peer-reviewed across all three contributors.
 
 The formal theorem names reflect the cognitive compression algorithm
 ("Agricultural Salad Topology") that made the formalization tractable.
 See the module docstrings for the mathematical dictionary.
 
+### A Note from the Author
+
+The entire AI collaboration record is published in `docs/ai/` — complete,
+unedited transcripts of every session. This includes false starts, dead ends,
+fruit-based intuition, and the natural chaos of discovery. The proofs are
+what the compiler verifies; the transcripts are the lab notebook.
+
+I haven't written a line of Lean in this repository myself — by design.
+My role was architecture, direction, and the memory bus connecting two AI
+systems across 88 days. My deepest respect and gratitude to Claude and Gemini.
+
+See [docs/AUTHORSHIP.md](docs/AUTHORSHIP.md) for the Authorship Gram Matrix —
+our framework for attributing contributions across a human-AI collaboration.
+
 ## Repository Structure
 
 ```
 prime/
-├── proofs/          🏛️  THE CATHEDRAL — 504 active Lean files, 114 archived
+├── proofs/          🏛️  THE CATHEDRAL — 547 active Lean files, 117 archived
 ├── papers/          📄  18 papers (4 core + 14 working drafts)
 │   ├── core/                  The mathematical claim
 │   └── working_drafts/        Science, applications, humanities, public, policy

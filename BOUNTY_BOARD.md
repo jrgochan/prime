@@ -134,7 +134,7 @@ The following were previously axioms and are now proved theorems:
 - MellinBridge / alternative paths (47 axioms)
 - Physics / Glass Bridge (various)
 
-These do not affect the crown theorem. See [OVERVIEW.md](OVERVIEW.md) for the full registry.
+These do not affect the crown theorem. See [docs/OVERVIEW.md](docs/OVERVIEW.md) for the full registry.
 
 ---
 

@@ -2,7 +2,7 @@
 
 ## A Confession and an Invitation
 
-I need to be radically honest upfront: I am not a professional mathematician, I do not have a background in analytic number theory, and I did not write a single line of the Lean 4 code in this repository myself.
+I need to be radically honest upfront: I am not a professional mathematician, I do not have a background in analytic number theory, and I did not write more than a few lines in this repository myself.
 
 My background is in computer science supporting particle physics. This project did not begin as a formal proof attempt, but as a highly unorthodox geometric experiment.
 

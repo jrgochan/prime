@@ -71,7 +71,7 @@ Several Mathlib PRs would unlock further improvements:
 
 ```bash
 # Lean proofs
-cd proofs && lake build    # 504 files, 8818+ jobs
+cd proofs && lake build    # 547 files, 8854+ jobs
 
 # Papers (all 18)
 cd papers && ./build.sh
@@ -90,7 +90,7 @@ cd experiments/hilbert-spectral && cargo run --release -- --N 1000
 ## Project Structure
 
 See [README.md](README.md) for the full architecture.
-See [OVERVIEW.md](OVERVIEW.md) for the detailed proof chain.
+See [docs/OVERVIEW.md](docs/OVERVIEW.md) for the detailed proof chain.
 See [BOUNTY_BOARD.md](BOUNTY_BOARD.md) for open problems.
 See [ORIGIN-STORY.md](ORIGIN-STORY.md) for how the project began.
 
