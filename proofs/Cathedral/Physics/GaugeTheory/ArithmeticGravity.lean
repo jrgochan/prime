@@ -92,7 +92,7 @@ def higgsMass : ℝ := Cathedral.Vasyunin.vasyuninGramEntry 2 2
 /-- **DIAGONAL FORMULA**: G(k,k) = (log(2π) - γ)/k - 1/k².
 
     PROVED from the Vasyunin formula definition (diagonal case). -/
-theorem diagonal_formula (k : ℕ) (hk : 0 < k) :
+theorem diagonal_formula (k : ℕ) (_hk : 0 < k) :
     Cathedral.Vasyunin.vasyuninGramEntry k k =
     (Real.log (2 * Real.pi) - eulerMascheroniConstant) / (k : ℝ)
     - 1 / (k : ℝ) ^ 2 := by
