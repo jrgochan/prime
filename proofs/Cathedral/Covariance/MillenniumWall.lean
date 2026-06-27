@@ -4,7 +4,7 @@
   ## The Millennium Wall: Gram Form & Covariance Graduation 🎓🎓
 
   Contains:
-  - gram_form_upper_bound (AXIOM — the Gram form bound)
+  - gram_form_upper_bound_conditional (DEPRECATED AXIOM — conditional on Mertens)
   - millennium_covariance_cancellation (GRADUATED theorem! 🎓🎓)
   - quadratic_from_mean_and_cov (The Quadratic Shredder)
   - moebius_quadratic_finite_bound (the full quadratic bound)
@@ -28,7 +28,7 @@ open Real Matrix Finset MeasureTheory Cathedral.Vasyunin
 -- of Mertens. This axiom is retained for the "alternative chain"
 -- (not on the Direct BD Crown Path).
 -- The correct proof chain: Crown Axiom 1 (Mellin) → Parseval → gram form.
-axiom gram_form_upper_bound
+axiom gram_form_upper_bound_conditional
     (C_m : ℝ) (hC : 0 < C_m)
     (hMertens : ∀ x : ℝ, x ≥ 2 →
       |((mertensFunction x : ℤ) : ℝ)| ≤ C_m * x ^ ((3:ℝ)/4)) :
@@ -42,7 +42,7 @@ axiom gram_form_upper_bound
 
     PROOF (Variance Decomposition via CovarianceAbel):
     1. G = C + bbᵀ ⟹ vᵀCv = vᵀGv - (bᵀv)²  [cov_form_eq_gram_minus_sq]
-    2. vᵀGv ≤ 1 + K_G/logN                   [gram_form_upper_bound]
+    2. vᵀGv ≤ 1 + K_G/logN                   [gram_form_upper_bound_conditional]
     3. |bᵀv - 1| ≤ K₁/logN                    [moebius_mean_finite_bound]
     4. ⟹ (bᵀv)² ≥ 1 - 2K₁/logN              [sq_ge_one_minus_from_abs]
     5. vᵀCv ≤ (K_G + 2K₁)/logN                [cov_bound_from_gram_and_mean]
@@ -56,7 +56,7 @@ theorem millennium_covariance_cancellation
     realQuadForm (Cathedral.Vasyunin.vasyuninCovMatrix (N - 1))
       (bdMoebiusWeight N) ≤ K_cov / Real.log (N : ℝ) := by
   -- Get the two independent bounds
-  obtain ⟨K_G, hKG_pos, h_gram⟩ := gram_form_upper_bound C_m hC hMertens
+  obtain ⟨K_G, hKG_pos, h_gram⟩ := gram_form_upper_bound_conditional C_m hC hMertens
   obtain ⟨K₁, hK1_pos, h_mean⟩ := moebius_mean_finite_bound C_m hC hMertens
   -- Set K_cov = K_G + 2·K₁
   use K_G + 2 * K₁
