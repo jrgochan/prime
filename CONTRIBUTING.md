@@ -71,7 +71,7 @@ Several Mathlib PRs would unlock further improvements:
 
 ```bash
 # Lean proofs
-cd proofs && lake build    # 547 files, 8854+ jobs
+cd proofs && lake build    # 508 Cathedral files, 8854+ jobs
 
 # Papers (all 18)
 cd papers && ./build.sh

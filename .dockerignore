@@ -1,0 +1,39 @@
+# Build artifacts
+target/
+proofs/.lake/
+*.olean
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Node
+node_modules/
+
+# Experiments output
+results/
+
+# Large data files
+*.mmap
+*.bin
+
+# Git
+.git/
+
+# Documentation artifacts (not needed for build)
+docs/
+papers/
+tools/
+visualizer/
+experiments/
+cathedral-clock/
+zenodo-upload/
+*.md
+!proofs/**/*.md
+LICENSE
+Cargo.lock
+Cargo.toml

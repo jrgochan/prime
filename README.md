@@ -7,7 +7,7 @@
 
 A machine-checked proof architecture in **Lean 4** + **Mathlib** that reduces
 the Riemann Hypothesis to the decay of the Nyman–Beurling distance.
-**547 active Lean files** (~167,500 lines) across 25+ modules, with
+**508 active Cathedral files** (~159,000 lines) across 25+ modules, with
 **1 axiom equivalent to RH** on the crown path (verified by `#print axioms`),
 and an independent **Oracle Bridge** from GPU-certified computation.
 
@@ -43,10 +43,15 @@ The forward direction depends on **1 axiom** that is formally proved
 
 ```bash
 cd proofs
-lake build          # 547 active Cathedral files, 117 archived
+lake build          # 508 active Cathedral files, 117 archived
 ```
 
 Requires: [Lean v4.29.0](https://leanprover.github.io/lean4/doc/setup.html) and Mathlib.
+
+**New here?** See [Getting Started](docs/GETTING-STARTED.md) for full setup on any OS, or use Docker:
+```bash
+docker build -t cathedral:latest . && docker run cathedral:latest
+```
 
 ## The Crown Theorem
 
@@ -206,17 +211,14 @@ proofs/Cathedral/
 ## Build Stats
 
 ```
-Active files:   547 Lean files across 25+ modules
-Archived:       117 Lean files in Archive/
-Total:          664 Lean files, ~200K lines
-Axioms:         1 on crown (≡ RH), 2 PNT bureaucracy
-Sorry:          4 off-crown
+Cathedral:      508 active Lean files, 117 archived, ~159K lines
+Full build:     664 Lean files (incl. PNTAnd, LeanCert), 8,854 jobs
+Axioms:         1 on crown (≡ RH), 2 PNT bureaucracy, ~193 total
+Sorry:          5 off-crown (4 files)
 Errors:         0
-Build jobs:     8,854+
-Lines:          ~167,500 (active), ~200K (full proofs/)
 Theorems:       ~4,800+ proved
 Papers:         4 core + 14 working drafts (18 total, all build)
-Experiments:    56 Rust/MPFR/DD (f64–512 bit + DD 31-digit precision)
+Experiments:    57 Rust (f64–512 bit + DD 31-digit precision)
 Release:        v26 — Penta-Crown + Path B (June 12, 2026)
 ```
 

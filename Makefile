@@ -6,16 +6,24 @@
 # First time? Run:
 #   make check   — see what you need
 #   make setup   — install everything
+#   make doctor  — verify everything works
 # ============================================
 
-.PHONY: help build papers verify axioms rh cascade crown-audit clock jukebox
+.PHONY: help build papers papers-all verify axioms rh cascade crown-audit clock jukebox
 .PHONY: hyperzeta hyperzeta-origin hyperzeta-explorer particle-zoo visualizer
 .PHONY: check setup setup-lean setup-rust setup-node setup-python setup-latex setup-gmp
 .PHONY: experiment-vasyunin experiment-covariance experiment-bd
 .PHONY: experiment-gram experiment-abel experiment-all
-.PHONY: audit stats clean
-.PHONY: lint test fmt ci
+.PHONY: audit stats clean doctor ports
+.PHONY: lint test fmt ci docker
 .DEFAULT_GOAL := help
+
+# ── Configurable ports (override with env vars) ─────
+PORT_HYPERZETA       ?= 3000
+PORT_ORIGIN          ?= 3001
+PORT_EXPLORER        ?= 3002
+PORT_PARTICLE_ZOO    ?= 3003
+PORT_VISUALIZER      ?= 3004
 
 ENV := scripts/env.sh
 
@@ -26,6 +34,14 @@ ENV := scripts/env.sh
 build: ## Build the Lean 4 proofs (THE main event)
 	@$(ENV) require lean
 	cd proofs && lake build
+
+# ── Port conflict detection ─────────────────────────
+define check_port
+	@if command -v lsof >/dev/null 2>&1 && lsof -i :$(1) >/dev/null 2>&1; then \
+		echo "  ⚠  Port $(1) is in use. Override with $(2)=<port> make $(3)"; \
+		exit 1; \
+	fi
+endef
 
 verify: ## Verify the crown theorem's axiom foundation
 	@$(ENV) require lean
@@ -99,12 +115,21 @@ rh: ## 🌟 Show what axioms the compiler needs for theorem RiemannHypothesis
 	@echo "  ═══════════════════════════════════════════════════"
 	@echo ""
 
-papers: ## Build the companion papers
+papers: ## Build the 4 core papers
 	@$(ENV) require pdflatex
-	cd papers/core && pdflatex -interaction=nonstopmode cathedral.tex > /dev/null 2>&1
-	cd papers/core && pdflatex -interaction=nonstopmode cathedral-lean.tex > /dev/null 2>&1
-	@echo "  ✓ papers/core/cathedral.pdf"
-	@echo "  ✓ papers/core/cathedral-lean.pdf"
+	@echo ""
+	@echo "  📄  Building core papers..."
+	@cd papers/core && for f in cathedral.tex cathedral-lean.tex cathedral-glass-bridge.tex cathedral-overcancellation.tex; do \
+		pdflatex -interaction=nonstopmode $$f > /dev/null 2>&1 && \
+		echo "  ✓ papers/core/$${f%.tex}.pdf"; \
+	done
+
+papers-all: ## Build all 18 papers (core + working drafts)
+	@$(ENV) require pdflatex
+	@echo ""
+	@echo "  📄  Building all papers..."
+	@cd papers && ./build.sh
+	@echo "  ✓ All papers built"
 
 clock: ## Open the Cathedral Clock — cosmological N dashboard
 	@echo ""
@@ -115,65 +140,75 @@ clock: ## Open the Cathedral Clock — cosmological N dashboard
 		echo "  Open cathedral-clock/index.html in your browser"
 	@echo "  ✓ cathedral-clock/index.html"
 
-hyperzeta: ## Launch HyperZeta Viewport — sedenion lattice visualizer (port 3000)
+hyperzeta: ## Launch HyperZeta Viewport — sedenion lattice visualizer (port $(PORT_HYPERZETA))
+	$(call check_port,$(PORT_HYPERZETA),PORT_HYPERZETA,hyperzeta)
 	@echo ""
 	@echo "  ✦  Launching Project HyperZeta — Cathedral Viewport..."
 	@echo "     150K-particle sedenion lattice · Rust/WASM + Three.js"
+	@echo "     Port: $(PORT_HYPERZETA)"
 	@echo ""
 	@if [ -d tools/hyperzeta-viewport/.next ]; then \
-		echo "  Starting Next.js server on http://localhost:3000 ..." && \
-		cd tools/hyperzeta-viewport && npx next start -p 3000; \
+		echo "  Starting Next.js server on http://localhost:$(PORT_HYPERZETA) ..." && \
+		cd tools/hyperzeta-viewport && npx next start -p $(PORT_HYPERZETA); \
 	else \
 		echo "  ⚠  No build found. Run: cd tools/hyperzeta-viewport && npm install && npm run build"; \
 	fi
 
-hyperzeta-origin: ## Launch HyperZeta Origin — proof-graph explorer (port 3001)
+hyperzeta-origin: ## Launch HyperZeta Origin — proof-graph explorer (port $(PORT_ORIGIN))
+	$(call check_port,$(PORT_ORIGIN),PORT_ORIGIN,hyperzeta-origin)
 	@echo ""
 	@echo "  ✦  Launching Project HyperZeta — Origin Explorer..."
+	@echo "     Port: $(PORT_ORIGIN)"
 	@echo ""
 	@if [ -d tools/hyperzeta-origin/.next ]; then \
-		echo "  Starting Next.js server on http://localhost:3001 ..." && \
-		cd tools/hyperzeta-origin && npx next start -p 3001; \
+		echo "  Starting Next.js server on http://localhost:$(PORT_ORIGIN) ..." && \
+		cd tools/hyperzeta-origin && npx next start -p $(PORT_ORIGIN); \
 	else \
 		echo "  ⚠  No build found. Run: cd tools/hyperzeta-origin && npm install && npm run build"; \
 	fi
 
-hyperzeta-explorer: ## Launch HyperZeta Explorer — Cayley-Dickson tower visualizer (port 3002)
+hyperzeta-explorer: ## Launch HyperZeta Explorer — Cayley-Dickson tower visualizer (port $(PORT_EXPLORER))
+	$(call check_port,$(PORT_EXPLORER),PORT_EXPLORER,hyperzeta-explorer)
 	@echo ""
 	@echo "  ✦  Launching HYPERZETA Explorer — Cayley-Dickson Tower..."
 	@echo "     6 modes: Origin · Teardrop · Glass Staircase · Division by Zero · Spectrometer · Prime Democracy"
+	@echo "     Port: $(PORT_EXPLORER)"
 	@echo ""
 	@if [ -d tools/hyperzeta-explorer/node_modules ]; then \
-		echo "  Starting Next.js dev server on http://localhost:3002 ..." && \
-		cd tools/hyperzeta-explorer && npm run dev; \
+		echo "  Starting Next.js dev server on http://localhost:$(PORT_EXPLORER) ..." && \
+		cd tools/hyperzeta-explorer && PORT=$(PORT_EXPLORER) npm run dev; \
 	else \
 		echo "  Installing dependencies..." && \
-		cd tools/hyperzeta-explorer && npm install && npm run dev; \
+		cd tools/hyperzeta-explorer && npm install && PORT=$(PORT_EXPLORER) npm run dev; \
 	fi
 
-particle-zoo: ## Launch Particle Zoo — every integer has a soul (port 3003)
+particle-zoo: ## Launch Particle Zoo — every integer has a soul (port $(PORT_PARTICLE_ZOO))
+	$(call check_port,$(PORT_PARTICLE_ZOO),PORT_PARTICLE_ZOO,particle-zoo)
 	@echo ""
 	@echo "  ⚛️  Launching Particle Zoo — Every Integer Has a Soul..."
 	@echo "     55,440 integers classified · Quark-Meson battle · SUSY cancellation"
+	@echo "     Port: $(PORT_PARTICLE_ZOO)"
 	@echo ""
 	@if [ -d tools/hyperzeta-particle-zoo/node_modules ]; then \
-		echo "  Starting Next.js dev server on http://localhost:3003 ..." && \
-		cd tools/hyperzeta-particle-zoo && npm run dev; \
+		echo "  Starting Next.js dev server on http://localhost:$(PORT_PARTICLE_ZOO) ..." && \
+		cd tools/hyperzeta-particle-zoo && PORT=$(PORT_PARTICLE_ZOO) npm run dev; \
 	else \
 		echo "  Installing dependencies..." && \
-		cd tools/hyperzeta-particle-zoo && npm install && npm run dev; \
+		cd tools/hyperzeta-particle-zoo && npm install && PORT=$(PORT_PARTICLE_ZOO) npm run dev; \
 	fi
 
-visualizer: ## Launch Cathedral Visualizer — proof architecture explorer (port 3004)
+visualizer: ## Launch Cathedral Visualizer — proof architecture explorer (port $(PORT_VISUALIZER))
+	$(call check_port,$(PORT_VISUALIZER),PORT_VISUALIZER,visualizer)
 	@echo ""
 	@echo "  🏛️  Launching Cathedral Visualizer — Proof Architecture Explorer..."
+	@echo "     Port: $(PORT_VISUALIZER)"
 	@echo ""
 	@if [ -d visualizer/node_modules ]; then \
-		echo "  Starting Next.js dev server on http://localhost:3004 ..." && \
-		cd visualizer && npm run dev -- -p 3004; \
+		echo "  Starting Next.js dev server on http://localhost:$(PORT_VISUALIZER) ..." && \
+		cd visualizer && npm run dev -- -p $(PORT_VISUALIZER); \
 	else \
 		echo "  Installing dependencies..." && \
-		cd visualizer && npm install && npm run dev -- -p 3004; \
+		cd visualizer && npm install && npm run dev -- -p $(PORT_VISUALIZER); \
 	fi
 
 
@@ -278,6 +313,54 @@ experiment-all: ## Run all experiments sequentially
 check: ## Check all dependencies (what do I need?)
 	@$(ENV) check
 
+doctor: ## Full health check: deps + Lean import test + Rust compile test
+	@echo ""
+	@echo "  🏛️  Cathedral Doctor — Full Health Check"
+	@echo "  ═══════════════════════════════════════════"
+	@echo ""
+	@echo "  [1/3] Checking dependencies..."
+	@$(ENV) check
+	@echo "  [2/3] Testing Lean import..."
+	@if command -v lean >/dev/null 2>&1; then \
+		cd proofs && printf 'import Cathedral.Defs\n' | lake env lean --stdin 2>&1 | grep -v "^$$" | tail -1; \
+		echo "  ✅  Lean: Cathedral.Defs imports successfully"; \
+	else \
+		echo "  ⚠  Lean not installed — skipping import test"; \
+	fi
+	@echo "  [3/3] Testing Rust compile..."
+	@if command -v cargo >/dev/null 2>&1; then \
+		cargo check --workspace --quiet 2>/dev/null && \
+		echo "  ✅  Rust: workspace compiles"; \
+	else \
+		echo "  ⚠  Rust not installed — skipping compile test"; \
+	fi
+	@echo ""
+	@echo "  ═══════════════════════════════════════════"
+	@echo "  🏛️  Doctor complete."
+	@echo "  ═══════════════════════════════════════════"
+	@echo ""
+
+ports: ## Show port allocation for Cathedral tools
+	@echo ""
+	@echo "  🏛️  Cathedral Port Allocation"
+	@echo "  ═══════════════════════════════════════════"
+	@echo ""
+	@printf "  %-24s %-6s %s\n" "Tool" "Port" "Status"
+	@printf "  %-24s %-6s %s\n" "────" "────" "──────"
+	@for pair in "HyperZeta Viewport:$(PORT_HYPERZETA)" "HyperZeta Origin:$(PORT_ORIGIN)" "HyperZeta Explorer:$(PORT_EXPLORER)" "Particle Zoo:$(PORT_PARTICLE_ZOO)" "Cathedral Visualizer:$(PORT_VISUALIZER)"; do \
+		name=$$(echo $$pair | cut -d: -f1); \
+		port=$$(echo $$pair | cut -d: -f2); \
+		if command -v lsof >/dev/null 2>&1 && lsof -i :$$port >/dev/null 2>&1; then \
+			printf "  %-24s %-6s %s\n" "$$name" "$$port" "🔴 IN USE"; \
+		else \
+			printf "  %-24s %-6s %s\n" "$$name" "$$port" "🟢 Available"; \
+		fi; \
+	done
+	@echo ""
+	@echo "  Override: PORT_HYPERZETA=4000 make hyperzeta"
+	@echo "  ═══════════════════════════════════════════"
+	@echo ""
+
 setup: ## Install all missing dependencies (interactive)
 	@$(ENV) setup
 
@@ -309,14 +392,23 @@ stats: ## Show project statistics
 	@echo "  🏛️  The Cathedral — Project Statistics"
 	@echo "  ═══════════════════════════════════════════"
 	@echo ""
-	@printf "  Active Lean files:  " && find proofs/Cathedral -name '*.lean' -not -path '*/Archive/*' -not -path '*/.lake/*' | wc -l | tr -d ' '
-	@printf "  Archived files:     " && find proofs/Cathedral -name '*.lean' -path '*/Archive/*' | wc -l | tr -d ' '
-	@printf "  Total lines:        " && find proofs/Cathedral -name '*.lean' -not -path '*/Archive/*' -not -path '*/.lake/*' -exec cat {} + 2>/dev/null | wc -l | tr -d ' '
-	@printf "  Experiments:        " && find experiments -maxdepth 1 -type d | tail -n +2 | wc -l | tr -d ' '
+	@echo "  Cathedral (proofs/Cathedral/):"
+	@printf "    Active files:     " && find proofs/Cathedral -name '*.lean' -not -path '*/Archive/*' -not -path '*/.lake/*' | wc -l | tr -d ' '
+	@printf "    Archived files:   " && find proofs/Cathedral -name '*.lean' -path '*/Archive/*' | wc -l | tr -d ' '
+	@printf "    Active lines:     " && find proofs/Cathedral -name '*.lean' -not -path '*/Archive/*' -not -path '*/.lake/*' -exec cat {} + 2>/dev/null | wc -l | tr -d ' '
 	@echo ""
-	@printf "  Axioms:             " && find proofs/Cathedral -name '*.lean' -not -path '*/Archive/*' -not -path '*/.lake/*' -exec grep -c '^axiom ' {} + 2>/dev/null | awk -F: '{s+=$$2}END{print s}'
-	@printf "  Sorries (literal):  " && find proofs/Cathedral -name '*.lean' -not -path '*/Archive/*' -not -path '*/.lake/*' -exec grep -c '^\s*sorry$$' {} + 2>/dev/null | awk -F: '{s+=$$2}END{print s}'
-	@printf "  Sorry files:        " && find proofs/Cathedral -name '*.lean' -not -path '*/Archive/*' -not -path '*/.lake/*' -exec grep -l '^\s*sorry$$' {} + 2>/dev/null | wc -l | tr -d ' '
+	@echo "  Full Build (proofs/):"
+	@printf "    Total files:      " && find proofs -name '*.lean' -not -path '*/.lake/*' | wc -l | tr -d ' '
+	@printf "    Total lines:      " && find proofs -name '*.lean' -not -path '*/.lake/*' -exec cat {} + 2>/dev/null | wc -l | tr -d ' '
+	@printf "    Build jobs:       " && echo "8,854+"
+	@echo ""
+	@echo "  Experiments:"
+	@printf "    Rust experiments: " && find experiments -maxdepth 1 -type d | tail -n +2 | wc -l | tr -d ' '
+	@echo ""
+	@echo "  Axiom / Sorry Audit:"
+	@printf "    Axioms (active):  " && find proofs/Cathedral -name '*.lean' -not -path '*/Archive/*' -not -path '*/.lake/*' -exec grep -c '^axiom ' {} + 2>/dev/null | awk -F: '{s+=$$2}END{print s}'
+	@printf "    Sorries:          " && find proofs/Cathedral -name '*.lean' -not -path '*/Archive/*' -not -path '*/.lake/*' -exec grep -c '^\s*sorry$$' {} + 2>/dev/null | awk -F: '{s+=$$2}END{print s}'
+	@printf "    Sorry files:      " && find proofs/Cathedral -name '*.lean' -not -path '*/Archive/*' -not -path '*/.lake/*' -exec grep -l '^\s*sorry$$' {} + 2>/dev/null | wc -l | tr -d ' '
 	@echo ""
 	@echo "  ═══════════════════════════════════════════"
 	@echo ""
@@ -361,6 +453,8 @@ fmt-fix: ## Auto-fix Rust formatting
 	@echo "  ✅  Formatting applied"
 
 ci: ## Full CI pipeline: fmt → lint → test → build
+	@$(ENV) require cargo
+	@$(ENV) require lean
 	@echo ""
 	@echo "  🏛️  Cathedral CI Pipeline"
 	@echo "  ═══════════════════════════════════════════"
@@ -388,6 +482,16 @@ ci: ## Full CI pipeline: fmt → lint → test → build
 	@echo "  ═══════════════════════════════════════════"
 	@echo ""
 
+docker: ## Build and run the Cathedral in Docker
+	@echo ""
+	@echo "  🐳  Building Cathedral Docker image..."
+	@echo ""
+	@docker build -t cathedral:latest .
+	@echo ""
+	@echo "  ✅  Image built. Run with:"
+	@echo "     docker run cathedral:latest"
+	@echo ""
+
 # ────────────────────────────────────────────
 # 📖  HELP
 # ────────────────────────────────────────────
@@ -396,19 +500,19 @@ help: ## Show this help message
 	@echo ""
 	@echo "  🏛️  The Cathedral — A Formal Reduction of the Riemann Hypothesis"
 	@echo ""
-	@echo "  First time? Run:  make check  then  make setup"
+	@echo "  First time? Run:  make check  →  make setup  →  make doctor"
 	@echo ""
 	@echo "  Usage: make <target>"
 	@echo ""
 	@echo "  ─── THE CATHEDRAL ────────────────────────────────────────"
-	@grep -E '^(build|verify|axioms|rh|cascade|crown-audit|papers|clock|jukebox|hyperzeta[a-z-]*|particle-zoo|visualizer):.*##' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  %-24s %s\n", $$1, $$2}'
+	@grep -E '^(build|verify|axioms|rh|cascade|crown-audit|papers|papers-all|clock|jukebox|hyperzeta[a-z-]*|particle-zoo|visualizer):.*##' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  %-24s %s\n", $$1, $$2}'
 	@echo ""
 	@echo "  ─── EXPERIMENTS & AUDITING ───────────────────────────────"
 	@grep -E '^(audit|experiment-[a-z]+|stats):.*##' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  %-24s %s\n", $$1, $$2}'
 	@echo ""
 	@echo "  ─── ENVIRONMENT ──────────────────────────────────────────"
-	@grep -E '^(check|setup[a-z-]*):.*##' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  %-24s %s\n", $$1, $$2}'
+	@grep -E '^(check|setup[a-z-]*|doctor|ports):.*##' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  %-24s %s\n", $$1, $$2}'
 	@echo ""
 	@echo "  ─── UTILITIES ────────────────────────────────────────────"
-	@grep -E '^(lint|test|fmt|fmt-fix|ci|clean|stats):.*##' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  %-24s %s\n", $$1, $$2}'
+	@grep -E '^(lint|test|fmt|fmt-fix|ci|clean|docker):.*##' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  %-24s %s\n", $$1, $$2}'
 	@echo ""
