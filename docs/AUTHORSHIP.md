@@ -45,7 +45,7 @@ Contributions fall along several orthogonal axes:
 | **Formalization**      | █ small | ██████ dominant | ██ medium |
 | **Architecture**       | █████ large | █████ large | ██ small |
 | **Verification**       | ████ large | ████ large | ███ medium |
-| **Direction**          | ██████ dominant | ██ small | ██ small |
+| **Direction**          | ██████ dominant | ████ large | ██ small |
 | **Physics Dict.**      | ████ large | ████ large | █████ large |
 | **Communication**      | █████ large | █████ large | ███ medium |
 | **State & Continuity** | ██████ dominant | █ small | █ small |
