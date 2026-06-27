@@ -26,7 +26,7 @@ fn big_omega(n: usize) -> usize {
     let mut m = n;
     let mut p = 2;
     while p * p <= m {
-        while m % p == 0 {
+        while m.is_multiple_of(p) {
             count += 1;
             m /= p;
         }
@@ -39,7 +39,7 @@ fn big_omega(n: usize) -> usize {
 }
 
 fn liouville(n: usize) -> f64 {
-    if big_omega(n) % 2 == 0 {
+    if big_omega(n).is_multiple_of(2) {
         1.0
     } else {
         -1.0
@@ -342,12 +342,10 @@ fn ratio_mean(ev: &[f64]) -> f64 {
 }
 
 fn classify(rm: f64) -> &'static str {
-    let d = vec![
-        ("Poisson", 0.3863),
+    let d = [("Poisson", 0.3863),
         ("GOE", 0.5307),
         ("GUE", 0.5996),
-        ("GSE", 0.6744),
-    ];
+        ("GSE", 0.6744)];
     d.iter()
         .min_by(|a, b| (rm - a.1).abs().partial_cmp(&(rm - b.1).abs()).unwrap())
         .unwrap()

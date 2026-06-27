@@ -84,7 +84,7 @@ fn mobius_sieve(n: usize) -> Vec<i8> {
         }
         if sq {
             mu[k] = 0;
-        } else if nf % 2 == 0 {
+        } else if nf.is_multiple_of(2) {
             mu[k] = 1;
         } else {
             mu[k] = -1;
@@ -329,7 +329,7 @@ fn main() {
     );
     println!(
         "  {DIM}  G(2,2) = {:.14}, G(10,10) = {:.14}{RESET}",
-        gram[1 * max_dim + 1],
+        gram[max_dim + 1],
         gram[9 * max_dim + 9]
     );
     println!();

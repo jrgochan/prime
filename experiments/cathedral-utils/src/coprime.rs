@@ -83,8 +83,8 @@ fn euler_totient_single(n: usize) -> usize {
     let mut m = n;
     let mut p = 2;
     while p * p <= m {
-        if m % p == 0 {
-            while m % p == 0 {
+        if m.is_multiple_of(p) {
+            while m.is_multiple_of(p) {
                 m /= p;
             }
             result = result / p * (p - 1);

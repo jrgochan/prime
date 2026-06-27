@@ -1,3 +1,4 @@
+#![allow(dead_code, unused_variables, unused_imports, unused_assignments, clippy::needless_range_loop, clippy::doc_lazy_continuation, non_snake_case, clippy::empty_line_after_doc_comments)]
 /// Harmonic Projection Probe — Path 4 Closure Validator
 ///
 /// Computes the quantities from OvercancellationAssembly.lean:

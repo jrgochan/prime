@@ -34,7 +34,7 @@ pub fn mobius_sieve(n: usize) -> Vec<i8> {
         }
         if sq {
             mu[k] = 0;
-        } else if nf % 2 == 0 {
+        } else if nf.is_multiple_of(2) {
             mu[k] = 1;
         } else {
             mu[k] = -1;

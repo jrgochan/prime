@@ -29,7 +29,7 @@ pub fn frac_part(x: f64) -> f64 {
 /// For table-based computation, use [`liouville_table`] instead.
 #[inline]
 pub fn liouville(n: usize) -> f64 {
-    if big_omega(n) % 2 == 0 {
+    if big_omega(n).is_multiple_of(2) {
         1.0
     } else {
         -1.0
@@ -98,7 +98,7 @@ pub fn mobius_table(max_n: usize) -> Vec<i8> {
         if has_square[n] {
             mu[n] = 0;
         } else {
-            mu[n] = if prime_count[n] % 2 == 0 { 1 } else { -1 };
+            mu[n] = if prime_count[n].is_multiple_of(2) { 1 } else { -1 };
         }
     }
     mu
@@ -126,7 +126,7 @@ pub fn liouville_table(max_n: usize) -> Vec<i8> {
         }
     }
     (0..=max_n)
-        .map(|n| if omega[n] % 2 == 0 { 1i8 } else { -1i8 })
+        .map(|n| if omega[n].is_multiple_of(2) { 1i8 } else { -1i8 })
         .collect()
 }
 
@@ -155,9 +155,9 @@ pub fn factorize(n: usize) -> String {
     let mut rem = n;
     let mut p = 2;
     while p * p <= rem {
-        if rem % p == 0 {
+        if rem.is_multiple_of(p) {
             let mut exp = 0;
-            while rem % p == 0 {
+            while rem.is_multiple_of(p) {
                 rem /= p;
                 exp += 1;
             }
@@ -190,9 +190,9 @@ pub fn small_omega(n: usize) -> u32 {
     let mut rem = n;
     let mut p = 2;
     while p * p <= rem {
-        if rem % p == 0 {
+        if rem.is_multiple_of(p) {
             count += 1;
-            while rem % p == 0 {
+            while rem.is_multiple_of(p) {
                 rem /= p;
             }
         }
@@ -226,8 +226,8 @@ pub fn von_mangoldt(n: usize) -> f64 {
     let mut rem = n;
     let mut p = 2;
     while p * p <= rem {
-        if rem % p == 0 {
-            while rem % p == 0 {
+        if rem.is_multiple_of(p) {
+            while rem.is_multiple_of(p) {
                 rem /= p;
             }
             return if rem == 1 { (p as f64).ln() } else { 0.0 };
@@ -247,7 +247,7 @@ pub fn big_omega(n: usize) -> u32 {
     let mut rem = n;
     let mut p = 2;
     while p * p <= rem {
-        while rem % p == 0 {
+        while rem.is_multiple_of(p) {
             count += 1;
             rem /= p;
         }
@@ -260,7 +260,7 @@ pub fn big_omega(n: usize) -> u32 {
 }
 
 /// Euler-Mascheroni constant γ ≈ 0.5772156649...
-pub const EULER_GAMMA: f64 = 0.5772156649015328606;
+pub const EULER_GAMMA: f64 = 0.577_215_664_901_532_9;
 
 /// Sum-of-divisors σ₁(n) for a single n.
 pub fn sigma1(n: usize) -> usize {
@@ -270,7 +270,7 @@ pub fn sigma1(n: usize) -> usize {
     let mut s = 0usize;
     let mut d = 1;
     while d * d <= n {
-        if n % d == 0 {
+        if n.is_multiple_of(d) {
             s += d;
             if d != n / d {
                 s += n / d;
@@ -299,7 +299,7 @@ pub fn sigma1_table(max_n: usize) -> Vec<usize> {
 ///   ch=2: (1,-1,1,-1) — Kronecker symbol (2/·)
 ///   ch=3: (1,1,-1,-1) — Kronecker symbol (-1/·)
 pub fn chi8(ch: usize, n: usize) -> i64 {
-    if n % 2 == 0 {
+    if n.is_multiple_of(2) {
         return 0;
     }
     match ch {

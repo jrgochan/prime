@@ -59,7 +59,7 @@ pub fn build_block_matrix(n: usize, d: usize) -> (Vec<f64>, usize) {
             let val = gram_entry_f64(ji, jj);
 
             let count = done.fetch_add(1, Ordering::Relaxed);
-            if block_dim > 500 && count % (total / 20).max(1) == 0 && count > 0 {
+            if block_dim > 500 && count.is_multiple_of((total / 20).max(1)) && count > 0 {
                 eprint!(
                     "\r    d={d} dim={block_dim}: {count}/{total} ({:.0}%) {:.0}s    ",
                     count as f64 / total as f64 * 100.0,
@@ -217,7 +217,7 @@ pub fn analyze_all_blocks(n: usize, vram_mb: usize, max_block_dim: usize) -> Vec
                 let lmin = evals[0];
 
                 let count = done.fetch_add(1, Ordering::Relaxed);
-                if small.len() > 100 && count % (small.len() / 10).max(1) == 0 {
+                if small.len() > 100 && count.is_multiple_of((small.len() / 10).max(1)) {
                     eprint!(
                         "\r    small blocks: {count}/{} ({:.0}%)    ",
                         small.len(),

@@ -1,3 +1,4 @@
+#![allow(dead_code, unused_variables, unused_imports, unused_assignments, clippy::needless_range_loop, clippy::doc_lazy_continuation, non_snake_case, clippy::empty_line_after_doc_comments)]
 /// TRIGINTADUONION SPECTRAL PROBE
 ///
 /// Four experiments probing whether 32D hypercomplex structure

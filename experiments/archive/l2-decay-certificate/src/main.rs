@@ -50,7 +50,7 @@ fn l2_decomposition(n: usize, mu: &[i8]) -> L2Result {
     let w = sieve::log_cutoff_weights(n, mu);
 
     // bᵀv = Σ v_k · b_k
-    let b_entries: Vec<Float> = (1..n).map(|k| gram::mean_entry(k)).collect();
+    let b_entries: Vec<Float> = (1..n).map(gram::mean_entry).collect();
     let mut bt_v = Float::with_val(P, 0);
     for k in 0..w.len() {
         bt_v += Float::with_val(P, &w[k] * &b_entries[k]);

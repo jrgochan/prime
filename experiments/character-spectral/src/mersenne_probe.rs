@@ -35,12 +35,12 @@ fn is_prime(n: usize) -> bool {
     if n < 4 {
         return true;
     }
-    if n % 2 == 0 || n % 3 == 0 {
+    if n.is_multiple_of(2) || n.is_multiple_of(3) {
         return false;
     }
     let mut i = 5;
     while i * i <= n {
-        if n % i == 0 || n % (i + 2) == 0 {
+        if n.is_multiple_of(i) || n.is_multiple_of(i + 2) {
             return false;
         }
         i += 6;
@@ -52,9 +52,9 @@ fn factorize(mut n: usize) -> Vec<(usize, u32)> {
     let mut factors = Vec::new();
     let mut d = 2;
     while d * d <= n {
-        if n % d == 0 {
+        if n.is_multiple_of(d) {
             let mut exp = 0;
-            while n % d == 0 {
+            while n.is_multiple_of(d) {
                 n /= d;
                 exp += 1;
             }
@@ -383,19 +383,19 @@ fn analyze(candidates: &[usize], weights: &[f64], lambda_min: f64, n: usize) {
 
         let family_weight: f64 = infos
             .iter()
-            .filter(|i| !i.is_prime && i.k as u64 % mp == 0)
+            .filter(|i| !i.is_prime && (i.k as u64).is_multiple_of(mp))
             .map(|i| i.weight)
             .sum();
 
         let family_count = infos
             .iter()
-            .filter(|i| !i.is_prime && i.k as u64 % mp == 0)
+            .filter(|i| !i.is_prime && (i.k as u64).is_multiple_of(mp))
             .count();
 
         // Find the heaviest member
         let best = infos
             .iter()
-            .filter(|i| !i.is_prime && i.k as u64 % mp == 0)
+            .filter(|i| !i.is_prime && (i.k as u64).is_multiple_of(mp))
             .max_by(|a, b| a.weight.partial_cmp(&b.weight).unwrap());
 
         if let Some(b) = best {

@@ -109,7 +109,7 @@ fn num_divisors(n: usize) -> usize {
     let mut count = 0;
     let mut d = 1;
     while d * d <= n {
-        if n % d == 0 {
+        if n.is_multiple_of(d) {
             count += 2;
             if d * d == n {
                 count -= 1;

@@ -106,7 +106,7 @@ fn build_gram_matrix_mpfr(n: usize, prec: u32) -> Vec<Vec<Float>> {
         .map(|&(i, j)| {
             let val = gram_entry_mpfr128(i + 1, j + 1, prec);
             let c = computed.fetch_add(1, Ordering::Relaxed) + 1;
-            if c % 500 == 0 || c == total {
+            if c.is_multiple_of(500) || c == total {
                 eprint!(
                     "\r    G: [{:5.1}%] {}/{}   ",
                     c as f64 / total as f64 * 100.0,
@@ -279,7 +279,7 @@ pub fn analyze_f64(n: usize, _g_f64: &[Vec<f64>], _b_f64: &[f64]) -> BDResult {
     let ln_n = (n as f64).ln();
     let x_over_ln_n = if ln_n > 0.0 { x_val / ln_n } else { 0.0 };
 
-    let bd_const = 2.0 + 0.5772156649015328606 - (4.0 * std::f64::consts::PI).ln();
+    let bd_const = 2.0 + 0.577_215_664_901_532_9 - (4.0 * std::f64::consts::PI).ln();
     let bd_predicted = bd_const / ln_n;
 
     BDResult {

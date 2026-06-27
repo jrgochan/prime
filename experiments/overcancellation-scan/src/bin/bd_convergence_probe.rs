@@ -1,3 +1,4 @@
+#![allow(dead_code, unused_variables, unused_imports, unused_assignments, clippy::needless_range_loop, clippy::doc_lazy_continuation, non_snake_case, clippy::empty_line_after_doc_comments)]
 // overcancellation-scan/src/bin/bd_convergence_probe.rs
 //
 // ╔═══════════════════════════════════════════════════════════════════╗
@@ -97,9 +98,9 @@ fn prime_factors(n: usize) -> Vec<usize> {
     let mut m = n;
     let mut p = 2;
     while p * p <= m {
-        if m % p == 0 {
+        if m.is_multiple_of(p) {
             factors.push(p);
-            while m % p == 0 { m /= p; }
+            while m.is_multiple_of(p) { m /= p; }
         }
         p += 1;
     }

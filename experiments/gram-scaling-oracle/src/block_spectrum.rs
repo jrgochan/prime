@@ -488,7 +488,7 @@ pub fn analyze_blocks_raw(
             };
 
             let count = done.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
-            if small.len() > 100 && count % (small.len() / 10).max(1) == 0 {
+            if small.len() > 100 && count.is_multiple_of((small.len() / 10).max(1)) {
                 eprint!(
                     "\r  \x1b[2m     small: {count}/{} ({:.0}%)\x1b[0m          ",
                     small.len(),

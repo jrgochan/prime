@@ -197,11 +197,11 @@ fn main() {
     // For matches within 5%, try α-corrections
     let mut corrections: Vec<(String, String, f64, String, f64, f64)> = Vec::new();
 
-    for &(tname, tsym, tval, _tcat) in &targets {
+    for &(_tname, tsym, tval, _tcat) in &targets {
         for (fname, fval) in &formulas {
             let base_err = ((fval / tval) - 1.0).abs() * 100.0;
             if base_err > 0.001 && base_err < 5.0 {
-                let delta = tval / fval - 1.0;
+                let _delta = tval / fval - 1.0;
                 // Try correction = 1 + α^a * ζ(k)^b * c
                 let correction_candidates: Vec<(&str, f64)> = vec![
                     ("α²/3", alpha*alpha/3.0),
@@ -241,7 +241,7 @@ fn main() {
     writeln!(grid_report, "|---|---|---|---|---|---|").unwrap();
     for n in 1..=10 {
         let mut row = format!("| π^{} |", n);
-        for &(k, zk) in &zetas[..5] {
+        for &(_k, zk) in &zetas[..5] {
             let val = PI.powi(n) / zk;
             // Check if this matches any target
             let mut best_match = String::new();

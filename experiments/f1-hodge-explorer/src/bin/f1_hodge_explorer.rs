@@ -14,7 +14,6 @@
 // ═══════════════════════════════════════════════════════════════════════════
 
 use cathedral_utils::arith;
-use cathedral_utils::mertens;
 use nalgebra::{DMatrix, DVector};
 use rayon::prelude::*;
 use std::path::{Path, PathBuf};

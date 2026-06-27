@@ -163,7 +163,7 @@ fn run_gap_decomposition(n: usize) -> GapDecomposition {
                 continue;
             }
             let k = ii + 1;
-            let gap = if j > k { j - k } else { k - j };
+            let gap = j.abs_diff(k);
             let excess = gram_entry(j, k) - 0.25;
             *by_gap.entry(gap).or_insert(0.0) += excess;
             *pair_count.entry(gap).or_insert(0) += 1;
@@ -259,8 +259,8 @@ fn main() {
     eprintln!("═══════════════════════════════════════════\n");
 
     let test_sizes = vec![10, 20, 30, 50, 75, 100, 150, 200, 300];
-    let gap_sizes = vec![50, 100, 200];
-    let variance_sizes = vec![10, 20, 50, 100, 200];
+    let gap_sizes = [50, 100, 200];
+    let variance_sizes = [10, 20, 50, 100, 200];
 
     // Experiment 1: Aggregate excess
     eprintln!("▸ Experiment 1: Aggregate excess ratios");
@@ -378,7 +378,7 @@ fn main() {
 
     // Experiment 5: GCD analysis
     eprintln!("\n▸ Experiment 5: GCD structure");
-    let gcd_sizes = vec![50, 100, 200];
+    let gcd_sizes = [50, 100, 200];
     let gcd_analysis: Vec<GcdResult> = gcd_sizes
         .iter()
         .map(|&n| {

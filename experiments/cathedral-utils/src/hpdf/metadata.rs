@@ -439,7 +439,7 @@ fn divisor_stats(n: usize) -> (usize, usize) {
     let mut tau = 0usize;
     let mut sigma = 0usize;
     for d in 1..=n {
-        if n % d == 0 {
+        if n.is_multiple_of(d) {
             tau += 1;
             sigma += d;
         }

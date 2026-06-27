@@ -162,7 +162,7 @@ impl ConjugateGradientAgent {
         // This costs one extra matvec but prevents CG from "wandering"
         // after thousands of iterations. The search direction p is
         // reset to M⁻¹r (restart) since the old conjugacy is lost.
-        if self.step_count > 0 && self.step_count % self.reset_interval == 0 {
+        if self.step_count > 0 && self.step_count.is_multiple_of(self.reset_interval) {
             // r = b - G·v_current (v_current is env.v which was updated externally)
             env.matvec_into(&env.v, &mut self.gp);
             for i in 0..dim {

@@ -184,7 +184,7 @@ impl RowResult {
 
 fn compute_row(j: usize, v: &[f64], dim: usize,
                big_omega: &[u32], mu: &[i8], lambda: &[i8],
-               small_omega: &[u32], n_total: usize) -> RowResult {
+               small_omega: &[u32], _n_total: usize) -> RowResult {
     let vj = v[j - 1];
     let mut diag = 0.0f64;
     let mut bosonic_off = 0.0f64;
@@ -198,8 +198,8 @@ fn compute_row(j: usize, v: &[f64], dim: usize,
         if j == k {
             diag = term;
         } else {
-            let omega_sum = big_omega[j] as u32 + big_omega[k] as u32;
-            if omega_sum % 2 == 0 {
+            let omega_sum = big_omega[j] + big_omega[k];
+            if omega_sum.is_multiple_of(2) {
                 bosonic_off += term;
             } else {
                 fermionic_off += term;

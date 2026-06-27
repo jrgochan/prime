@@ -12,6 +12,7 @@
 
 /// Bernoulli numbers B_0, B_1, B_2, ..., B_max.
 /// Uses the standard convention: B_1 = -1/2.
+#[allow(clippy::needless_range_loop)]
 pub fn bernoulli_numbers(max: usize) -> Vec<f64> {
     let mut b = vec![0.0f64; max + 1];
     b[0] = 1.0;
@@ -30,6 +31,7 @@ pub fn bernoulli_numbers(max: usize) -> Vec<f64> {
 ///
 /// Uses the explicit expansion:
 ///   B_n(x) = Σ_{k=0}^{n} C(n,k) · B_k · x^{n-k}
+#[allow(clippy::needless_range_loop)]
 pub fn bernoulli_poly(n: usize, x: f64, bernoulli_nums: &[f64]) -> f64 {
     let mut result = 0.0;
     for k in 0..=n {
@@ -73,7 +75,7 @@ pub fn b4(x: f64) -> f64 {
 #[inline]
 pub fn b6(x: f64) -> f64 {
     let x2 = x * x;
-    let x3 = x2 * x;
+    let _x3 = x2 * x;
     let x4 = x2 * x2;
     x4 * x2 - 3.0 * x4 * x + 2.5 * x4 - 0.5 * x2 + 1.0 / 42.0
 }

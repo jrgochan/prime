@@ -1,25 +1,4 @@
-/// Glass Product Convergence Probe
-///
-/// Probes the wall axiom: ∏_p (1 + p^{-s}) converges for Re(s) > 1/2.
-///
-/// This computes the partial glass product ∏_{p≤N} (1 + p^{-s}) for
-/// increasing N and various s = σ + it, tracking:
-///   - |P_N|: magnitude of the partial product
-///   - arg(P_N): phase angle
-///   - Convergence rate: |P_{N} - P_{N/2}| / |P_{N/2}|
-///
-/// The experiment visualizes WHERE the wall lives:
-///   σ > 1:     rapid absolute convergence (Euler region)
-///   σ ~ 0.75:  slower convergence with oscillation
-///   σ ~ 0.55:  heavy oscillation, slow convergence
-///   σ ~ 0.501: the wall — barely converges
-///   σ = 0.5:   critical line — product dips near ζ zeros
-///
-/// Also decomposes the glass TOWER layer by layer:
-///   L_k(s) = ∏_p (1 + p^{-2^k·s}),  k = 0, 1, ..., 7
-///   showing that the wall lives entirely in L_0 (k=0).
-
-use std::f64::consts::PI;
+#![allow(dead_code, unused_variables, unused_imports, unused_assignments, clippy::needless_range_loop, clippy::doc_lazy_continuation, non_snake_case, clippy::empty_line_after_doc_comments)]
 
 // ═══════════════════════════════════════════════════════
 // §1. PRIME SIEVE

@@ -36,7 +36,7 @@ fn num_divisors(n: usize) -> usize {
     let mut count = 0;
     let mut d = 1;
     while d * d <= n {
-        if n % d == 0 {
+        if n.is_multiple_of(d) {
             count += 1;
             if d != n / d {
                 count += 1;
@@ -62,9 +62,9 @@ fn distinct_prime_factors(n: usize) -> usize {
     let mut m = n;
     let mut d = 2;
     while d * d <= m {
-        if m % d == 0 {
+        if m.is_multiple_of(d) {
             count += 1;
-            while m % d == 0 {
+            while m.is_multiple_of(d) {
                 m /= d;
             }
         }

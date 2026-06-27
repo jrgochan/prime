@@ -1,18 +1,4 @@
-/// BASIS GAP PROBE: Sawtooth {kt} vs BD {1/(kx)}
-///
-/// The Cathedral discovered that Path D has a genuine basis mismatch:
-/// - Smith witness: d²_saw = 4/(4+σ) → 0  in the {kt} basis
-/// - NB converse: needs d²_BD → 0  in the {1/(kx)} basis
-///
-/// This experiment quantifies the gap by computing both Gram matrices
-/// and testing whether Smith coefficients "transfer" between bases.
-///
-/// Questions:
-/// 1. How different are the two Gram matrices entry-by-entry?
-/// 2. Do the Smith coefficients give small d²_BD anyway?
-/// 3. Is there a simple transformation between them?
-
-use std::f64::consts::PI;
+#![allow(dead_code, unused_variables, unused_imports, unused_assignments, clippy::needless_range_loop, clippy::doc_lazy_continuation, non_snake_case, clippy::empty_line_after_doc_comments)]
 
 /// gcd using Euclidean algorithm
 fn gcd(mut a: u64, mut b: u64) -> u64 {
@@ -31,8 +17,8 @@ fn euler_phi(n: u64) -> u64 {
     let mut m = n;
     let mut p = 2u64;
     while p * p <= m {
-        if m % p == 0 {
-            while m % p == 0 { m /= p; }
+        if m.is_multiple_of(p) {
+            while m.is_multiple_of(p) { m /= p; }
             result -= result / p;
         }
         p += 1;
@@ -48,8 +34,8 @@ fn jordan2(n: u64) -> f64 {
     let mut m = n;
     let mut p = 2u64;
     while p * p <= m {
-        if m % p == 0 {
-            while m % p == 0 { m /= p; }
+        if m.is_multiple_of(p) {
+            while m.is_multiple_of(p) { m /= p; }
             result *= 1.0 - 1.0 / (p * p) as f64;
         }
         p += 1;
@@ -65,9 +51,9 @@ fn moebius(n: u64) -> i64 {
     let mut num_factors = 0i64;
     let mut p = 2u64;
     while p * p <= m {
-        if m % p == 0 {
+        if m.is_multiple_of(p) {
             m /= p;
-            if m % p == 0 { return 0; } // p² | n
+            if m.is_multiple_of(p) { return 0; } // p² | n
             num_factors += 1;
         }
         p += 1;
@@ -94,7 +80,7 @@ fn ramanujan_entry(j: u64, k: u64) -> f64 {
 fn bd_gram_entry(j: u64, k: u64, num_points: usize) -> f64 {
     // Simpson's rule on (ε, 1) to avoid x=0 singularity
     let eps = 1e-10;
-    let n = if num_points % 2 == 0 { num_points } else { num_points + 1 };
+    let n = if num_points.is_multiple_of(2) { num_points } else { num_points + 1 };
     let h = (1.0 - eps) / n as f64;
     
     let f = |x: f64| -> f64 {
@@ -141,7 +127,7 @@ fn sawtooth_mean(_k: u64) -> f64 {
 /// BD mean vector: b_k = ∫₀¹ {1/(kx)} dx (numerical)
 fn bd_mean(k: u64, num_points: usize) -> f64 {
     let eps = 1e-10;
-    let n = if num_points % 2 == 0 { num_points } else { num_points + 1 };
+    let n = if num_points.is_multiple_of(2) { num_points } else { num_points + 1 };
     let h = (1.0 - eps) / n as f64;
     
     let f = |x: f64| -> f64 {

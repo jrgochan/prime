@@ -79,7 +79,7 @@ impl Quat {
 fn sigma1(n: usize) -> usize {
     let mut s = 0;
     for d in 1..=n {
-        if n % d == 0 {
+        if n.is_multiple_of(d) {
             s += d;
         }
     }
@@ -128,7 +128,7 @@ fn r4_jacobi(n: usize) -> usize {
     // r₄(n) = 8·Σ_{d|n, 4∤d} d
     let mut s = 0;
     for d in 1..=n {
-        if n % d == 0 && d % 4 != 0 {
+        if n.is_multiple_of(d) && d % 4 != 0 {
             s += d;
         }
     }
@@ -575,7 +575,7 @@ fn main() {
     // Normalized eigenvalue: a_p = τ(p)/p^{11/2} satisfies |a_p| ≤ 2
     // This is the Sato-Tate distribution (semicircle law)
     println!("  Sato-Tate distribution of normalized eigenvalues:");
-    let mut hist = vec![0usize; 20];
+    let mut hist = [0usize; 20];
     for &p in primes.iter() {
         if p > max_n {
             break;
@@ -637,7 +637,7 @@ fn main() {
         let interp = if n <= 5 {
             format!("= Σ_ρ 2(1-cos({}α_ρ)) ≥ 0", n)
         } else {
-            format!("≈ n/2·ln(n/(2π)) + O(1)")
+            "≈ n/2·ln(n/(2π)) + O(1)".to_string()
         };
 
         println!(

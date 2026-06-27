@@ -37,7 +37,7 @@ fn main() {
 
     // 4. Print top results
     println!("  ══ TOP 25 MATCHES ══\n");
-    println!("  {:>4} {:>20} {:>30} {:>10} {}", "Rank", "Target", "Formula", "Error", "");
+    println!("  {:>4} {:>20} {:>30} {:>10} ", "Rank", "Target", "Formula", "Error");
     println!("  {}", "─".repeat(72));
     for (i, m) in matches.iter().take(25).enumerate() {
         println!("  {:>4} {:>20} {:>30} {:>9.5}% {}",

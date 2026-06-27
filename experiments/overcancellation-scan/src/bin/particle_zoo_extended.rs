@@ -1,3 +1,4 @@
+#![allow(dead_code, unused_variables, unused_imports, unused_assignments, clippy::needless_range_loop, clippy::doc_lazy_continuation, non_snake_case, clippy::empty_line_after_doc_comments)]
 // overcancellation-scan/src/bin/particle_zoo_extended.rs
 //
 // ╔═══════════════════════════════════════════════════════════════════╗
@@ -76,7 +77,7 @@ fn compute_arith_data(max_n: usize) -> ArithData {
     mu[1] = 1;
     for n in 1..=max_n {
         mu[n] = mu_table[n];
-        lambda[n] = if big_omega[n] % 2 == 0 { 1 } else { -1 };
+        lambda[n] = if big_omega[n].is_multiple_of(2) { 1 } else { -1 };
     }
 
     is_squarefree[0] = false;
@@ -212,7 +213,7 @@ fn compute_row_contrib(j: usize, v: &[f64], n: usize, data: &ArithData) -> RowCo
             diag = term;
         } else {
             let omega_sum = data.big_omega[j] + data.big_omega[k];
-            if omega_sum % 2 == 0 {
+            if omega_sum.is_multiple_of(2) {
                 bosonic_off += term;
             } else {
                 fermionic_off += term;

@@ -1,3 +1,4 @@
+#![allow(dead_code, unused_variables, unused_imports, unused_assignments, clippy::needless_range_loop, clippy::doc_lazy_continuation, non_snake_case, clippy::empty_line_after_doc_comments)]
 /// Path 3 Probe: B₁ Bilinear Decomposition + Large Sieve
 ///
 /// From BilinearSieve.lean's PROVED theorem `bilinear_b1_decomposition`:

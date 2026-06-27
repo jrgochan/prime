@@ -139,7 +139,7 @@ fn prime_factors(mut n: usize) -> Vec<usize> {
     let mut factors = Vec::new();
     let mut p = 2;
     while p * p <= n {
-        while n % p == 0 {
+        while n.is_multiple_of(p) {
             factors.push(p);
             n /= p;
         }
@@ -192,7 +192,7 @@ fn liouville(n: usize) -> i32 {
     let mut omega = 0;
     let mut p = 2;
     while p * p <= val {
-        while val % p == 0 {
+        while val.is_multiple_of(p) {
             omega += 1;
             val /= p;
         }
@@ -280,7 +280,7 @@ fn main() {
     let mut diff_count = 0;
 
     let max_k = 200;
-    let phis: Vec<Oct> = (0..=max_k).map(|k| int_to_octonion(k)).collect();
+    let phis: Vec<Oct> = (0..=max_k).map(int_to_octonion).collect();
     let omegas: Vec<usize> = (0..=max_k).map(|k| prime_factors(k).len()).collect();
 
     for j in 2..=max_k {

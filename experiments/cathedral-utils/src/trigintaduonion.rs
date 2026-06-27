@@ -305,7 +305,7 @@ pub fn prime_factors_u64(mut n: u64) -> Vec<u64> {
     let mut f = Vec::new();
     let mut p = 2u64;
     while p * p <= n {
-        while n % p == 0 {
+        while n.is_multiple_of(p) {
             f.push(p);
             n /= p;
         }
@@ -478,7 +478,7 @@ mod tests {
         let mut indices = std::collections::HashSet::new();
         for &p in PRIMES_31.iter() {
             let idx = prime_to_trig_basis(p);
-            assert!(idx >= 1 && idx <= 31);
+            assert!((1..=31).contains(&idx));
             assert!(indices.insert(idx),
                     "Prime {} collides at basis index {}", p, idx);
         }

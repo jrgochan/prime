@@ -1,3 +1,4 @@
+#![allow(dead_code, unused_variables, unused_imports, unused_assignments, clippy::needless_range_loop, clippy::doc_lazy_continuation, non_snake_case, clippy::empty_line_after_doc_comments)]
 // overcancellation-scan/src/bin/torus_projection.rs
 //
 // ╔═══════════════════════════════════════════════════════════════╗
@@ -33,9 +34,9 @@ fn moebius(n: usize) -> i64 {
     let mut num_factors = 0i64;
     let mut d = 2usize;
     while d * d <= m {
-        if m % d == 0 {
+        if m.is_multiple_of(d) {
             m /= d;
-            if m % d == 0 { return 0; } // p² | n
+            if m.is_multiple_of(d) { return 0; } // p² | n
             num_factors += 1;
         }
         d += 1;

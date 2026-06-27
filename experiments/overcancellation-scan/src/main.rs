@@ -1,3 +1,4 @@
+#![allow(dead_code, unused_imports, unused_variables, clippy::needless_range_loop, clippy::empty_line_after_doc_comments)]
 //! # Overcancellation Scan v3: GCD Fourier Decomposition
 //!
 //! Computes the GCD Fourier decomposition of vᵀRv for multiple weight types:
@@ -123,7 +124,7 @@ struct ScanResult {
     j2_contribs: Vec<f64>,
 }
 
-fn scan(mu: &[i8], j2: &[f64], phi: &[usize], n: usize, wtype: &WeightType) -> ScanResult {
+fn scan(mu: &[i8], j2: &[f64], _phi: &[usize], n: usize, wtype: &WeightType) -> ScanResult {
     let v = build_weights(mu, n, wtype);
     let f = gcd_fourier_coeffs(&v, n);
 

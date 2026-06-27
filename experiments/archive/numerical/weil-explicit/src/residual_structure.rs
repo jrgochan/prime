@@ -117,7 +117,7 @@ fn int_to_octonion(k: usize) -> Oct {
     let mut n = k;
     let mut p = 2;
     while p * p <= n {
-        while n % p == 0 {
+        while n.is_multiple_of(p) {
             r = r.mul(&Oct::basis(prime_to_basis(p)));
             n /= p;
         }
@@ -336,9 +336,9 @@ fn main() {
             "level", "bilinear_sum", "cumulative", "% of total"
         );
 
-        let mut level_bilinear = vec![0.0f64; 20];
-        let mut level_lambda_eff_sum = vec![0.0f64; 20];
-        let mut level_count = vec![0usize; 20];
+        let mut level_bilinear = [0.0f64; 20];
+        let mut level_lambda_eff_sum = [0.0f64; 20];
+        let mut level_count = [0usize; 20];
 
         for m1 in 0..8 {
             for m2 in (m1 + 1)..8 {

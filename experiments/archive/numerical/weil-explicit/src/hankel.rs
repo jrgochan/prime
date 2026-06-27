@@ -354,7 +354,7 @@ fn main() {
         let mut t = vec![vec![0.0; size]; size];
         for i in 0..size {
             for j in 0..size {
-                let diff = if i >= j { i - j } else { j - i };
+                let diff = i.abs_diff(j);
                 t[i][j] = cos_sums[diff];
             }
         }

@@ -31,7 +31,7 @@ pub fn h9_participation_ratio_harmonics(keys: &[SemiprimeKey], cache: &GramCache
             if harmonic > 3 {
                 probe_points.push((harmonic - 1, false));
             }
-            if harmonic + 1 <= 2500 {
+            if harmonic < 2500 {
                 probe_points.push((harmonic + 1, false));
             }
         }

@@ -27,10 +27,10 @@ pub struct KeyClass {
 fn is_prime(n: u64) -> bool {
     if n < 2 { return false; }
     if n < 4 { return true; }
-    if n % 2 == 0 || n % 3 == 0 { return false; }
+    if n.is_multiple_of(2) || n.is_multiple_of(3) { return false; }
     let mut i = 5u64;
     while i * i <= n {
-        if n % i == 0 || n % (i + 2) == 0 { return false; }
+        if n.is_multiple_of(i) || n.is_multiple_of(i + 2) { return false; }
         i += 6;
     }
     true
@@ -65,7 +65,7 @@ pub fn generate_test_suite() -> Vec<KeyClass> {
             let p = random_prime(p_lo, p_hi);
             let q = random_prime(q_lo, q_hi);
             let (p, q) = if p < q { (p, q) } else { (q, p) };
-            let n = p as u64 * q as u64;
+            let n = p * q;
             let actual_bits = 64 - n.leading_zeros();
             keys.push(SemiprimeKey { n, p, q, bits: actual_bits });
         }

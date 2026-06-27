@@ -174,7 +174,7 @@ fn compute_nb_distance(n: usize, alpha: f64) -> NbResult {
     let b_norm_sq: f64 = b.iter().map(|bi| bi.norm_sqr()).sum();
 
     // Method 1: Complex Cholesky solve
-    let d2_cholesky = if let Some(l) = complex_cholesky(&gram) {
+    if let Some(l) = complex_cholesky(&gram) {
         let coeffs = cholesky_solve(&l, &b);
         // d² = 1 - Re(b†c) = 1 - Re(Σ conj(b_i) * c_i)
         let btc: C64 = b
@@ -221,7 +221,7 @@ fn compute_nb_distance(n: usize, alpha: f64) -> NbResult {
     } else {
         // Cholesky failed — matrix not positive definite
         let (lmin, lmax) = eigenvalues_via_embedding(&gram, dim);
-        return NbResult {
+        NbResult {
             n,
             alpha,
             d2_cholesky: f64::NAN,
@@ -234,8 +234,8 @@ fn compute_nb_distance(n: usize, alpha: f64) -> NbResult {
                 f64::INFINITY
             },
             b_norm_sq,
-        };
-    };
+        }
+    }
 }
 
 /// Compute eigenvalues via 2n×2n real symmetric embedding

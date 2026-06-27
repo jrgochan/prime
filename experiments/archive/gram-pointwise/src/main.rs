@@ -424,7 +424,7 @@ fn main() {
     let deep_ns: Vec<usize> = test_ns
         .iter()
         .copied()
-        .filter(|&n| n >= 50 && n <= 10_000)
+        .filter(|&n| (50..=10_000).contains(&n))
         .collect();
     for &n in &deep_ns {
         let t = Instant::now();

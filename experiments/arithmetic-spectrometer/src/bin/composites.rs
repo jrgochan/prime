@@ -13,14 +13,13 @@
 //! - Swapping u↔d should produce predictable Δm values
 
 use std::f64::consts::PI;
-use std::fmt::Write;
 
 fn main() {
     let zeta2 = PI * PI / 6.0;
     let zeta4 = PI.powi(4) / 90.0;
-    let zeta6 = PI.powi(6) / 945.0;
-    let alpha = 1.0 / 137.035999084;
-    let glass = 15.0 / (PI * PI);
+    let _zeta6 = PI.powi(6) / 945.0;
+    let _alpha = 1.0 / 137.035999084;
+    let _glass = 15.0 / (PI * PI);
     let m_e = 0.51099895; // MeV
 
     println!("╔══════════════════════════════════════════════════════════════════╗");
@@ -49,7 +48,7 @@ fn main() {
     println!("  c      {:.0}     m_c/m_s = {:.2}  ?                 searching...",
         m_c, m_c/m_s);
     println!("  b      {:.0}     m_b/m_c = {:.3}   2·ζ(2) = {:.3}   {:.2}%",
-        m_b, m_b/m_c, 2.0*zeta2, ((2.0*zeta2)/(m_b as f64/m_c as f64) - 1.0).abs() * 100.0);
+        m_b, m_b/m_c, 2.0*zeta2, ((2.0*zeta2)/(m_b/m_c) - 1.0).abs() * 100.0);
     println!("  t      {:.0}  m_t/m_b = {:.2}  ?                 searching...",
         m_t, m_t/m_b);
 
@@ -67,6 +66,7 @@ fn main() {
     // but the DIFFERENCES between hadrons in the same multiplet
     // come from quark mass differences + EM effects.
 
+    #[allow(dead_code)]
     struct Hadron {
         name: &'static str,
         symbol: &'static str,

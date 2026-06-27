@@ -1,3 +1,4 @@
+#![allow(dead_code, unused_variables, unused_imports, unused_assignments, clippy::needless_range_loop, clippy::doc_lazy_continuation, non_snake_case, clippy::empty_line_after_doc_comments)]
 /// Ramanujan Spectral Probe — Does Parseval capture Möbius cancellation?
 ///
 /// The B₁ skeleton decomposes via J₂(d) (Jordan totient):
@@ -38,9 +39,9 @@ fn jordan_j2(n: usize) -> f64 {
     let mut m = n;
     let mut p = 2;
     while p * p <= m {
-        if m % p == 0 {
+        if m.is_multiple_of(p) {
             result *= 1.0 - 1.0 / (p * p) as f64;
-            while m % p == 0 { m /= p; }
+            while m.is_multiple_of(p) { m /= p; }
         }
         p += 1;
     }
@@ -218,7 +219,7 @@ fn main() {
     println!();
 
     // Compute the d=1 contribution vs rest
-    let t1_contrib = jordan_j2(1) as f64 * t_1 * t_1 / 12.0;
+    let t1_contrib = jordan_j2(1) * t_1 * t_1 / 12.0;
     println!("  d=1 contribution:  {:.8} (= J₂(1)·T_1²/12 = T_1²/12)", t1_contrib);
     println!("  d≥2 contributions: {:.8}", total - t1_contrib);
     println!("  Total vᵀA₁v:      {:.8}", total);

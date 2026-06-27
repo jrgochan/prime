@@ -60,12 +60,12 @@ pub fn is_prime(n: usize) -> bool {
     if n < 4 {
         return true;
     }
-    if n % 2 == 0 || n % 3 == 0 {
+    if n.is_multiple_of(2) || n.is_multiple_of(3) {
         return false;
     }
     let mut d = 5;
     while d * d <= n {
-        if n % d == 0 || n % (d + 2) == 0 {
+        if n.is_multiple_of(d) || n.is_multiple_of(d + 2) {
             return false;
         }
         d += 6;

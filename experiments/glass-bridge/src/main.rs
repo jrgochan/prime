@@ -20,7 +20,6 @@
 
 use std::f64::consts::PI;
 use std::fmt::Write;
-use std::fs;
 
 fn gcd(a: usize, b: usize) -> usize {
     if b == 0 { a } else { gcd(b, a % b) }
@@ -32,7 +31,7 @@ fn mobius(n: usize) -> i64 {
     let mut nf = 0;
     let mut d = 2;
     while d * d <= m {
-        if m % d == 0 { m /= d; if m % d == 0 { return 0; } nf += 1; }
+        if m.is_multiple_of(d) { m /= d; if m.is_multiple_of(d) { return 0; } nf += 1; }
         d += 1;
     }
     if m > 1 { nf += 1; }
@@ -45,9 +44,9 @@ fn jordan2(d: usize) -> f64 {
     let mut m = d;
     let mut p = 2;
     while p * p <= m {
-        if m % p == 0 {
+        if m.is_multiple_of(p) {
             result *= 1.0 - 1.0 / (p * p) as f64;
-            while m % p == 0 { m /= p; }
+            while m.is_multiple_of(p) { m /= p; }
         }
         p += 1;
     }
@@ -61,7 +60,7 @@ fn prime_factors(n: usize) -> Vec<usize> {
     let mut m = n;
     let mut d = 2;
     while d * d <= m {
-        if m % d == 0 { factors.push(d); while m % d == 0 { m /= d; } }
+        if m.is_multiple_of(d) { factors.push(d); while m.is_multiple_of(d) { m /= d; } }
         d += 1;
     }
     if m > 1 { factors.push(m); }
@@ -95,6 +94,7 @@ fn y_d_numerical(d: usize, n: usize) -> f64 {
     sum
 }
 
+#[allow(non_snake_case)]
 fn main() {
     println!("╔══════════════════════════════════════════════════════════════════╗");
     println!("║   THE y_d ANALYSIS: WHERE THE ARITHMETIC LIVES                 ║");
@@ -388,7 +388,7 @@ fn main() {
 
         // Build Φ⁻¹·D: (Φ⁻¹D)_{d,k} = μ(d/k)·[k|d]·k
         let phi_inv_d = |d: usize, k: usize| -> f64 {
-            if d % k != 0 { return 0.0; }
+            if !d.is_multiple_of(k) { return 0.0; }
             mobius(d / k) as f64 * k as f64
         };
 
@@ -533,7 +533,7 @@ fn main() {
         }
 
         // Mean vector b
-        let b_vec: Vec<f64> = (1..=n_size).map(|k| b_entry(k)).collect();
+        let b_vec: Vec<f64> = (1..=n_size).map(&b_entry).collect();
 
         // Ones vector
         let ones: Vec<f64> = vec![1.0; n_size];
@@ -589,7 +589,7 @@ fn main() {
         let mut g_mat: Vec<Vec<f64>> = Vec::new();
         for j in 1..=n_size { let mut row = Vec::new();
             for k in 1..=n_size { row.push(g_entry(j, k)); } g_mat.push(row); }
-        let b_vec: Vec<f64> = (1..=n_size).map(|k| b_entry(k)).collect();
+        let b_vec: Vec<f64> = (1..=n_size).map(&b_entry).collect();
         let ones: Vec<f64> = vec![1.0; n_size];
         let r_inv = match mat_inverse(&r_mat) { Some(inv) => inv, None => continue };
         let w = mat_vec_mul(&r_inv, &ones);
@@ -646,7 +646,7 @@ fn main() {
 
         // Compute full quadratic form for random-ish vector (1/k normalized)
         let test_v: Vec<f64> = (1..=n_size).map(|k| 1.0 / k as f64).collect();
-        let norm_sq: f64 = test_v.iter().map(|x| x*x).sum();
+        let _norm_sq: f64 = test_v.iter().map(|x| x*x).sum();
         let mut qf_g = 0.0;
         let mut qf_r = 0.0;
         for i in 0..n_size { for j in 0..n_size {
@@ -680,7 +680,7 @@ fn main() {
             }
             g_mat.push(g_row); r_mat.push(r_row);
         }
-        let b_vec: Vec<f64> = (1..=n_size).map(|k| b_entry(k)).collect();
+        let b_vec: Vec<f64> = (1..=n_size).map(&b_entry).collect();
         let ones: Vec<f64> = vec![1.0; n_size];
 
         let r_inv = match mat_inverse(&r_mat) { Some(inv) => inv, None => continue };
@@ -706,7 +706,7 @@ fn main() {
             for k in 1..=n_smith_c { row.push(g_entry(j, k)); }
             g_mat.push(row);
         }
-        let b_vec: Vec<f64> = (1..=n_smith_c).map(|k| b_entry(k)).collect();
+        let b_vec: Vec<f64> = (1..=n_smith_c).map(b_entry).collect();
         let g_inv = mat_inverse(&g_mat).unwrap();
         let v_star = mat_vec_mul(&g_inv, &b_vec);
 
@@ -727,7 +727,7 @@ fn main() {
         // Rotate both to Smith basis via Φ⁻¹·D
         // (Φ⁻¹D)_{d,k} = μ(d/k)·[k|d]·k
         let phi_inv_d_mat = |d: usize, k: usize| -> f64 {
-            if d % k != 0 { return 0.0; }
+            if !d.is_multiple_of(k) { return 0.0; }
             mobius(d / k) as f64 * k as f64
         };
 
@@ -802,9 +802,9 @@ fn main() {
         let mut m = n;
         let mut p = 2;
         while p * p <= m {
-            if m % p == 0 {
+            if m.is_multiple_of(p) {
                 // Check if n = p^k
-                while m % p == 0 { m /= p; }
+                while m.is_multiple_of(p) { m /= p; }
                 return if m == 1 { (p as f64).ln() } else { 0.0 };
             }
             p += 1;
@@ -819,9 +819,9 @@ fn main() {
         let mut m = n;
         let mut p = 2;
         while p * p <= m {
-            if m % p == 0 {
+            if m.is_multiple_of(p) {
                 let mut k = 0;
-                while m % p == 0 { m /= p; k += 1; }
+                while m.is_multiple_of(p) { m /= p; k += 1; }
                 return if m == 1 { Some((p, k)) } else { None };
             }
             p += 1;
@@ -834,7 +834,7 @@ fn main() {
         let mut divs = Vec::new();
         let mut i = 1;
         while i * i <= d {
-            if d % i == 0 {
+            if d.is_multiple_of(i) {
                 divs.push(i);
                 if i != d / i { divs.push(d / i); }
             }
@@ -962,12 +962,11 @@ fn main() {
         cum_c2 += c_d * c_d;
 
         // Track prime contribution
-        if let Some((p, _)) = prime_power_decomp(d) {
-            if d >= 2 {
+        if let Some((p, _)) = prime_power_decomp(d)
+            && d >= 2 {
                 let lnp = (p as f64).ln();
                 cum_prime_lnp2 += lnp * lnp;
             }
-        }
 
         // Print at select values
         if d <= 10 || d % 10 == 0 {
@@ -1000,7 +999,7 @@ fn main() {
         cum_c2_full += c_d * c_d;
 
         // Count primes
-        if d >= 2 && prime_power_decomp(d).map_or(false, |(_, k)| k == 1) {
+        if d >= 2 && prime_power_decomp(d).is_some_and(|(_, k)| k == 1) {
             prime_count += 1;
         }
 

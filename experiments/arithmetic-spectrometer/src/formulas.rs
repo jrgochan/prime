@@ -44,6 +44,12 @@ pub struct ZetaConstants {
     pub zetas: Vec<(usize, f64, &'static str)>,
 }
 
+impl Default for ZetaConstants {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl ZetaConstants {
     pub fn new() -> Self {
         let alpha = 1.0 / 137.035999084;

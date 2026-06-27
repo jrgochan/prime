@@ -14,10 +14,10 @@
 use std::f64::consts::PI;
 
 /// Euler-Mascheroni constant γ ≈ 0.5772156649...
-pub const EULER_GAMMA: f64 = 0.5772156649015328606;
+pub const EULER_GAMMA: f64 = 0.577_215_664_901_532_9;
 
 /// ln(2π) ≈ 1.8378770664...
-pub const LN_TWO_PI: f64 = 1.8378770664093454836;
+pub const LN_TWO_PI: f64 = 1.837_877_066_409_345_6;
 
 /// Compute the Vasyunin cotangent sum V(a, b).
 /// V(a, b) = Σ_{m=1}^{a-1} frac(m·b/a) · cot(π·m/a)

@@ -118,7 +118,7 @@ pub fn decompose(n: usize) -> SusySectors {
             vtgv += term;
 
             let omega_sum = omega[j] as u32 + omega[k] as u32;
-            if omega_sum % 2 == 0 {
+            if omega_sum.is_multiple_of(2) {
                 bosonic_off += term;
                 num_bosonic += 1;
             } else {
@@ -178,7 +178,7 @@ pub fn decompose_from_gram(n: usize, gram_flat: &[f64]) -> SusySectors {
                 diagonal += term;
             } else {
                 let omega_sum = omega[j] as u32 + omega[k] as u32;
-                if omega_sum % 2 == 0 {
+                if omega_sum.is_multiple_of(2) {
                     bosonic_off += term;
                     num_bosonic += 1;
                 } else {

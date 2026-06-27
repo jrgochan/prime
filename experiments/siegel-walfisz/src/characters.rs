@@ -10,7 +10,7 @@
 /// χ₃ = (-2|k)
 /// χ₄ = (-1|k) = Legendre symbol
 pub fn chi8(i: usize, k: usize) -> i64 {
-    if k % 2 == 0 {
+    if k.is_multiple_of(2) {
         return 0; // all characters vanish on even integers
     }
     match i {

@@ -54,12 +54,12 @@ fn min_factor(n: usize) -> usize {
     if n <= 1 {
         return n;
     }
-    if n % 2 == 0 {
+    if n.is_multiple_of(2) {
         return 2;
     }
     let mut d = 3;
     while d * d <= n {
-        if n % d == 0 {
+        if n.is_multiple_of(d) {
             return d;
         }
         d += 2;

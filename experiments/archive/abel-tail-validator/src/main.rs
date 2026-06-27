@@ -92,7 +92,7 @@ fn mobius_sieve(n: usize) -> Vec<i8> {
         }
         if has_sq {
             mu[k] = 0;
-        } else if num_factors % 2 == 0 {
+        } else if num_factors.is_multiple_of(2) {
             mu[k] = 1;
         } else {
             mu[k] = -1;

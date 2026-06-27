@@ -176,7 +176,7 @@ fn analyze_full(n: usize) -> FullResult {
                 // Layer classification
                 if d % 2 == 1 {
                     row_l0 += cot_contrib;  // odd gcd → layer 0
-                } else if d % 4 != 0 {
+                } else if !d.is_multiple_of(4) {
                     row_l1 += cot_contrib;  // 2||d → layer 1
                 }
                 // d % 4 == 0 → layer ≥ 2, should be ≈0 for BD weights

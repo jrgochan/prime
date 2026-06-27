@@ -63,7 +63,7 @@ fn mobius_sieve(n: usize) -> Vec<i8> {
 
         mu[k] = if has_sq {
             0
-        } else if num_factors % 2 == 0 {
+        } else if num_factors.is_multiple_of(2) {
             1
         } else {
             -1
@@ -163,7 +163,7 @@ fn compute_gram_matrix(n: usize) -> Vec<Vec<f64>> {
 fn compute_basis_prods(n: usize) -> Vec<f64> {
     (2..=n)
         .into_par_iter()
-        .map(|k| basis_inner_prod(k))
+        .map(basis_inner_prod)
         .collect()
 }
 
@@ -256,9 +256,9 @@ fn analyze_n(
     for k in 2..n {
         let mk = mertens_fn[k] as f64;
         let bk = basis[k - 2];
-        let bk1 = if k + 1 <= n { basis[k - 1] } else { 0.0 };
+        let bk1 = if k < n { basis[k - 1] } else { 0.0 };
         let wk = 1.0 - (k as f64).ln() / ln_n;
-        let wk1 = if k + 1 <= n {
+        let wk1 = if k < n {
             1.0 - ((k + 1) as f64).ln() / ln_n
         } else {
             0.0

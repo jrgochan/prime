@@ -4,7 +4,7 @@
 //! 1. Electromagnetic self-energy (Q²·α per quark)
 //! 2. Generation anomaly cancellation (quarks + leptons = 0)
 //! 3. Strange quark mass corrections
-//! improves the compositeness predictions.
+//!    improves the compositeness predictions.
 //!
 //! Key physics: The n-p splitting works because EM and QCD
 //! nearly cancel. Other hadrons need both terms.
@@ -15,7 +15,7 @@ fn main() {
     let zeta2: f64 = PI * PI / 6.0;
     let zeta4: f64 = PI.powi(4) / 90.0;
     let zeta6: f64 = PI.powi(6) / 945.0;
-    let alpha: f64 = 1.0 / 137.035999084;
+    let _alpha: f64 = 1.0 / 137.035999084;
     let glass: f64 = 15.0 / (PI * PI);
     let m_e: f64 = 0.51099895; // MeV
 
@@ -28,6 +28,7 @@ fn main() {
     println!("  ═══ ANOMALY CANCELLATION CHECK ═══\n");
     println!("  Each SM generation: sum of (Y·Q) = 0\n");
 
+    #[allow(dead_code)]
     struct Fermion {
         name: &'static str,
         charge: f64,      // electric charge
@@ -206,7 +207,7 @@ fn main() {
     println!("  Classical SU(3) flavor result: relates baryon masses.\n");
 
     let m_n: f64 = 939.565;
-    let m_p: f64 = 938.272;
+    let _m_p: f64 = 938.272;
     let m_lambda: f64 = 1115.683;
     let m_sigma0: f64 = 1192.642;
     let m_xi0: f64 = 1314.86;

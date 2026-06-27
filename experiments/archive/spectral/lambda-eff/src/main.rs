@@ -50,7 +50,7 @@ fn run_for_n(n: usize, multi: &MultiProgress) -> NResult {
         .collect();
 
     println!("  Partition: {} non-empty classes", non_empty.len());
-    for &(m, ref cls) in &non_empty {
+    for &(m, cls) in &non_empty {
         println!("    {} : |S| = {}", partition::class_name(m), cls.len());
     }
 
@@ -67,7 +67,7 @@ fn run_for_n(n: usize, multi: &MultiProgress) -> NResult {
     );
 
     let mut block_matrices: Vec<(usize, Vec<f64>, usize)> = Vec::new();
-    for &(m, ref indices) in &non_empty {
+    for &(m, indices) in &non_empty {
         let dim = indices.len();
         if dim < 2 {
             continue;
@@ -351,7 +351,7 @@ fn main() {
 
     // Save results to JSON
     let json = serde_json::to_string_pretty(&results).unwrap();
-    let out_path = format!("results/lambda_eff_results.json");
+    let out_path = "results/lambda_eff_results.json".to_string();
     if let Err(e) = std::fs::write(&out_path, &json) {
         eprintln!("  Warning: Could not write {}: {}", out_path, e);
     } else {

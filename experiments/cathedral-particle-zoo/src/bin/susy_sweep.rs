@@ -153,7 +153,7 @@ fn decompose_from_hpdf(path: &Path) -> Option<SusyResult> {
                 diagonal += term;
             } else {
                 let omega_sum = omega[j] + omega[k];
-                if omega_sum % 2 == 0 {
+                if omega_sum.is_multiple_of(2) {
                     bosonic_off += term;
                     num_bosonic += 1;
                 } else {
@@ -166,7 +166,7 @@ fn decompose_from_hpdf(path: &Path) -> Option<SusyResult> {
 
     let off_diagonal = bosonic_off + fermionic_off;
     let gap = 1.0 - vtgv;
-    let elapsed_susy = t0.elapsed().as_secs_f64();
+    let _elapsed_susy = t0.elapsed().as_secs_f64();
 
     let hc_vals = [2, 4, 6, 12, 24, 36, 48, 60, 120, 180, 240, 360, 720, 840,
                    1260, 1680, 2520, 5040, 7560, 10080, 15120, 20160, 25200,
@@ -183,7 +183,7 @@ fn decompose_from_hpdf(path: &Path) -> Option<SusyResult> {
     // Liouville signs: λ(k) = (-1)^Ω(k)
     let lambda: Vec<f64> = (0..dim).map(|i| {
         let k = i + 2;
-        if omega[k] % 2 == 0 { 1.0 } else { -1.0 }
+        if omega[k].is_multiple_of(2) { 1.0 } else { -1.0 }
     }).collect();
 
     // Liouville-weighted witness: λ(k) · |v(k)| = λ(k) · |μ(k)| · w(k)
@@ -209,7 +209,7 @@ fn decompose_from_hpdf(path: &Path) -> Option<SusyResult> {
 
     // Channel 2b: Raw Liouville partial sum L(N) = Σ_{k=1}^{N} λ(k)
     let liouville_raw_sum: i64 = (1..=n).map(|k| {
-        if omega[k] % 2 == 0 { 1i64 } else { -1 }
+        if omega[k].is_multiple_of(2) { 1i64 } else { -1 }
     }).sum();
 
     // Channel 3: Per-row cancellation ratio c(i) = |Σ_{j≠i} lw(j)·G(i,j)| / Σ_{j≠i} |lw(j)·G(i,j)|
@@ -377,11 +377,10 @@ fn main() {
             if name.starts_with("gram_N") && name.ends_with(".h5") && !name.contains("_p") {
                 let n_str = name.strip_prefix("gram_N")?.strip_suffix(".h5")?;
                 let n: usize = n_str.parse().ok()?;
-                if n <= cli.max_n && n >= 6 {
-                    if cli.n_values.is_empty() || cli.n_values.contains(&n) {
+                if n <= cli.max_n && n >= 6
+                    && (cli.n_values.is_empty() || cli.n_values.contains(&n)) {
                         return Some((n, e.path()));
                     }
-                }
                 None
             } else {
                 None

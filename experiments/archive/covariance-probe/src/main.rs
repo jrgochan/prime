@@ -142,7 +142,7 @@ fn main() {
 
     // Write eigenvalue files for selected N values
     for &n in &probe_ns {
-        if n <= 200 && n >= 3 {
+        if (3..=200).contains(&n) {
             let g = covariance::build_gram_matrix(n);
             let b = covariance::build_mean_vector(n);
             let c = covariance::build_covariance(&g, &b);

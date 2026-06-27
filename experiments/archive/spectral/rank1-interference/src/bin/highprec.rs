@@ -37,7 +37,7 @@ fn big_omega(mut n: usize) -> usize {
     let mut c = 0;
     let mut d = 2;
     while d * d <= n {
-        while n % d == 0 {
+        while n.is_multiple_of(d) {
             c += 1;
             n /= d;
         }
@@ -55,9 +55,9 @@ fn mobius(mut n: usize) -> i32 {
     let mut c = 0;
     let mut d = 2;
     while d * d <= n {
-        if n % d == 0 {
+        if n.is_multiple_of(d) {
             n /= d;
-            if n % d == 0 {
+            if n.is_multiple_of(d) {
                 return 0;
             }
             c += 1;
@@ -175,7 +175,7 @@ fn gram_hp(j: usize, k: usize) -> f64 {
 }
 
 // f64 version for precision comparison
-const EG: f64 = 0.5772156649015328606;
+const EG: f64 = 0.577_215_664_901_532_9;
 
 fn vasyunin_f64(a: usize, b: usize) -> f64 {
     if a <= 1 {
@@ -918,8 +918,8 @@ fn run(n: usize) -> NResult {
         .collect();
     b1e.sort_by(|a, b| a.partial_cmp(b).unwrap());
 
-    let df1 = vm.dot(&(&gb1 * &vm));
-    let cf1 = vm.dot(&(&gc1 * &vm));
+    let df1 = vm.dot(&(&gb1 * vm));
+    let cf1 = vm.dot(&(&gc1 * vm));
     let rr_trivial = if df1.abs() > 1e-30 {
         cf1.abs() / df1
     } else {
@@ -941,8 +941,8 @@ fn run(n: usize) -> NResult {
         .collect();
     b8e.sort_by(|a, b| a.partial_cmp(b).unwrap());
 
-    let df = vm.dot(&(&gb2 * &vm));
-    let cf = vm.dot(&(&gc2 * &vm));
+    let df = vm.dot(&(&gb2 * vm));
+    let cf = vm.dot(&(&gc2 * vm));
     let rr = if df.abs() > 1e-30 {
         cf.abs() / df
     } else {

@@ -43,7 +43,7 @@ fn big_omega(mut n: usize) -> usize {
     let mut count = 0;
     let mut d = 2;
     while d * d <= n {
-        while n % d == 0 {
+        while n.is_multiple_of(d) {
             count += 1;
             n /= d;
         }
@@ -62,9 +62,9 @@ fn mobius(mut n: usize) -> i32 {
     let mut count = 0;
     let mut d = 2;
     while d * d <= n {
-        if n % d == 0 {
+        if n.is_multiple_of(d) {
             n /= d;
-            if n % d == 0 {
+            if n.is_multiple_of(d) {
                 return 0;
             } // squared factor
             count += 1;
@@ -81,7 +81,7 @@ fn mobius(mut n: usize) -> i32 {
 // VASYUNIN FORMULA
 // ═══════════════════════════════════════════════════════════════════════
 
-const EULER_GAMMA: f64 = 0.5772156649015328606;
+const EULER_GAMMA: f64 = 0.577_215_664_901_532_9;
 type VCache = Mutex<HashMap<(usize, usize), f64>>;
 
 fn vasyunin_sum(a: usize, b: usize) -> f64 {
@@ -356,8 +356,8 @@ fn run_eigenbasis_experiment(n: usize, cache: &VCache) {
         }
     }
     let v_min = eig_g.eigenvectors.column(min_idx);
-    let diag_form = v_min.dot(&(&g_block * &v_min));
-    let cross_form = v_min.dot(&(&g_cross * &v_min));
+    let diag_form = v_min.dot(&(&g_block * v_min));
+    let cross_form = v_min.dot(&(&g_cross * v_min));
     let r_ratio = if diag_form.abs() > 1e-30 {
         cross_form.abs() / diag_form
     } else {

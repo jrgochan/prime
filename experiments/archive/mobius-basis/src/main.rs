@@ -51,7 +51,7 @@ fn omega(mut n: usize) -> usize {
     let mut c = 0;
     let mut d = 2;
     while d * d <= n {
-        while n % d == 0 {
+        while n.is_multiple_of(d) {
             c += 1;
             n /= d;
         }
@@ -70,12 +70,12 @@ fn is_prime_fn(n: usize) -> bool {
     if n < 4 {
         return true;
     }
-    if n % 2 == 0 || n % 3 == 0 {
+    if n.is_multiple_of(2) || n.is_multiple_of(3) {
         return false;
     }
     let mut d = 5;
     while d * d <= n {
-        if n % d == 0 || n % (d + 2) == 0 {
+        if n.is_multiple_of(d) || n.is_multiple_of(d + 2) {
             return false;
         }
         d += 6;
@@ -225,7 +225,7 @@ fn build_gram_matrix(n: usize) -> DMatrix<f64> {
         .map(|&(i, j)| {
             let val = gram_entry_mpfr(i + 2, j + 2);
             let c = computed.fetch_add(1, std::sync::atomic::Ordering::Relaxed) + 1;
-            if c % 200 == 0 || c == total {
+            if c.is_multiple_of(200) || c == total {
                 eprint!(
                     "\r    G: [{:5.1}%] {}/{}   ",
                     c as f64 / total as f64 * 100.0,

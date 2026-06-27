@@ -120,13 +120,13 @@ pub fn classify_physics(
     pr.row_ward.add(g_jk * v_k);
 
     // §15: Gauge decomposition by gcd structure
-    if d % 2 != 0 {
+    if !d.is_multiple_of(2) {
         // odd gcd → U(1) sector
         pr.gauge_u1.add(term);
-    } else if d % 4 != 0 {
+    } else if !d.is_multiple_of(4) {
         // 2|gcd but not 4 → SU(2) sector
         pr.gauge_su2.add(term);
-    } else if d % 3 == 0 {
+    } else if d.is_multiple_of(3) {
         // 3|gcd → SU(3) sector
         pr.gauge_su3.add(term);
     } else {

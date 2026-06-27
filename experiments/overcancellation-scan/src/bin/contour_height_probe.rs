@@ -1,17 +1,4 @@
-/// Contour Height Probe — Where Does Convergence Start?
-///
-/// The Dirichlet series 1/ζ(s) = Σ μ(n)/n^s converges:
-///   - Absolutely for Re(s) > 1
-///   - Conditionally in the zero-free region (σ > 1 - c/log|t|)
-///   - At Re(s) = 1/2: convergence ↔ RH
-///
-/// The spectral error E_N(σ+it) = ζ(σ+it)·D_N(σ+it) + 1/(σ+it)
-/// measures how well D_N approximates -1/(s·ζ(s)).
-///
-/// This probe computes E_N at various heights σ to find the
-/// transition from convergent to non-convergent.
-
-use std::f64::consts::PI;
+#![allow(clippy::needless_range_loop, clippy::let_and_return)]
 
 fn mobius_sieve(n: usize) -> Vec<i32> {
     let mut mu = vec![0i32; n + 1];
@@ -186,9 +173,6 @@ fn main() {
 
         let dt = 0.2;
         let t_max = 100.0;
-        let mut int_half = 0.0;
-        let mut int_one = 0.0;
-        let mut int_zfr = 0.0; // at σ = 1 - 1/log(N)
 
         let sigma_zfr = 1.0 - 1.0 / ln_n; // zero-free region boundary
 
@@ -217,9 +201,9 @@ fn main() {
             t += dt;
         }
 
-        int_half = integrals[0];
-        int_zfr = integrals[1];
-        int_one = integrals[2];
+        let int_half = integrals[0];
+        let int_zfr = integrals[1];
+        let int_one = integrals[2];
 
         let gap_half_one = int_half - int_one;
         let gap_zfr_one = int_zfr - int_one;

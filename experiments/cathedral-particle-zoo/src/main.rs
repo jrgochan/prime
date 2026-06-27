@@ -230,7 +230,7 @@ fn analyze_coefficients(label: &str, coeffs: &[(usize, f64)], n_max: usize, shie
         coeffs.to_vec()
     } else {
         coeffs.iter().map(|&(n, a)| {
-            let shielded = shield.iter().any(|&p| n as u64 % p == 0);
+            let shielded = shield.iter().any(|&p| (n as u64).is_multiple_of(p));
             if shielded { (n, 0.0) } else { (n, a) }
         }).collect()
     };

@@ -307,7 +307,7 @@ pub fn write_prime_core_json(result: &PrimeCoreResult, dir: &str) -> std::io::Re
     std::fs::create_dir_all(dir)?;
     let path = format!("{dir}/prime_core_N{}.json", result.n);
     let json_str = serde_json::to_string_pretty(result)
-        .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e))?;
+        .map_err(std::io::Error::other)?;
     std::fs::write(&path, json_str)?;
     eprintln!("  ✓ Prime core → {path}");
     Ok(())

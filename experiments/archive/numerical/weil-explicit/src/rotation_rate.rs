@@ -32,7 +32,7 @@ fn big_omega(n: usize) -> u32 {
     let mut m = n;
     let mut p = 2;
     while p * p <= m {
-        while m % p == 0 {
+        while m.is_multiple_of(p) {
             count += 1;
             m /= p;
         }
@@ -45,7 +45,7 @@ fn big_omega(n: usize) -> u32 {
 }
 
 fn liouville(n: usize) -> f64 {
-    if big_omega(n) % 2 == 0 {
+    if big_omega(n).is_multiple_of(2) {
         1.0
     } else {
         -1.0
@@ -244,7 +244,7 @@ fn main() {
         };
 
         // ── LIOUVILLE PARTIAL SUMS ──
-        let liou_sum: f64 = (2..=n).map(|k| liouville(k)).sum();
+        let liou_sum: f64 = (2..=n).map(liouville).sum();
         let liou_normalized = liou_sum.abs() / (n as f64).sqrt();
 
         let elapsed = t0.elapsed().as_secs_f64();
@@ -349,7 +349,7 @@ fn main() {
     println!("  {}", "─".repeat(45));
     for i in 0..proj_data.len() {
         let (n, proj) = proj_data[i];
-        let liou_sum: f64 = (2..=n as usize).map(|k| liouville(k)).sum();
+        let liou_sum: f64 = (2..=n as usize).map(liouville).sum();
         println!(
             "  {:5} {:10.0} {:10.6} {:10.6}",
             n as usize,

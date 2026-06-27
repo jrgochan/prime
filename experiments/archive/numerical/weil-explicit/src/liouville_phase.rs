@@ -45,7 +45,7 @@ fn big_omega(n: usize) -> usize {
     let mut m = n;
     let mut p = 2;
     while p * p <= m {
-        while m % p == 0 {
+        while m.is_multiple_of(p) {
             count += 1;
             m /= p;
         }
@@ -59,7 +59,7 @@ fn big_omega(n: usize) -> usize {
 
 /// Liouville function λ(n) = (-1)^Ω(n)
 fn liouville(n: usize) -> f64 {
-    if big_omega(n) % 2 == 0 {
+    if big_omega(n).is_multiple_of(2) {
         1.0
     } else {
         -1.0
@@ -288,12 +288,10 @@ fn ratio_mean(eigenvalues: &[f64]) -> f64 {
 }
 
 fn classify_beta(r_mean: f64) -> (&'static str, f64) {
-    let fits = vec![
-        ("Poisson", 0.3863),
+    let fits = [("Poisson", 0.3863),
         ("GOE (β=1)", 0.5307),
         ("GUE (β=2)", 0.5996),
-        ("GSE (β=4)", 0.6744),
-    ];
+        ("GSE (β=4)", 0.6744)];
     let best = fits
         .iter()
         .min_by(|a, b| {
@@ -334,7 +332,7 @@ fn main() {
     let dim = max_n - 1;
 
     // Precompute Ω values
-    let omegas: Vec<usize> = (0..=max_n + 1).map(|k| big_omega(k)).collect();
+    let omegas: Vec<usize> = (0..=max_n + 1).map(big_omega).collect();
     println!("  Liouville signs for k = 2..20:");
     print!("    ");
     for k in 2..=20 {

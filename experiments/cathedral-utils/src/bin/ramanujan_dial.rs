@@ -1,3 +1,4 @@
+#![allow(dead_code, unused_variables, clippy::needless_range_loop, clippy::empty_line_after_doc_comments, clippy::doc_lazy_continuation)]
 //! ═══════════════════════════════════════════════════════════════════════════
 //!  RAMANUJAN DIAL — The N-Analysis Experiment (Massively Parallel)
 //!
@@ -620,7 +621,7 @@ fn count_divisors_brute(n: usize) -> usize {
     let mut c = 0;
     let mut d = 1;
     while d * d <= n {
-        if n % d == 0 {
+        if n.is_multiple_of(d) {
             c += 1;
             if d != n / d {
                 c += 1;
@@ -638,12 +639,12 @@ fn is_prime_simple(n: usize) -> bool {
     if n < 4 {
         return true;
     }
-    if n % 2 == 0 || n % 3 == 0 {
+    if n.is_multiple_of(2) || n.is_multiple_of(3) {
         return false;
     }
     let mut i = 5;
     while i * i <= n {
-        if n % i == 0 || n % (i + 2) == 0 {
+        if n.is_multiple_of(i) || n.is_multiple_of(i + 2) {
             return false;
         }
         i += 6;

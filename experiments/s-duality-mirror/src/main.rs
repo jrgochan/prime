@@ -25,10 +25,10 @@ fn moebius(n: u64) -> i64 {
     // Trial division
     let mut p = 2u64;
     while p * p <= m {
-        if m % p == 0 {
+        if m.is_multiple_of(p) {
             m /= p;
             num_factors += 1;
-            if m % p == 0 {
+            if m.is_multiple_of(p) {
                 // p² divides n → μ(n) = 0
                 return 0;
             }
@@ -46,10 +46,10 @@ fn moebius(n: u64) -> i64 {
 fn is_prime(n: u64) -> bool {
     if n < 2 { return false; }
     if n < 4 { return true; }
-    if n % 2 == 0 || n % 3 == 0 { return false; }
+    if n.is_multiple_of(2) || n.is_multiple_of(3) { return false; }
     let mut i = 5;
     while i * i <= n {
-        if n % i == 0 || n % (i + 2) == 0 { return false; }
+        if n.is_multiple_of(i) || n.is_multiple_of(i + 2) { return false; }
         i += 6;
     }
     true
@@ -60,7 +60,7 @@ fn num_divisors(n: u64) -> u64 {
     let mut count = 0;
     let mut i = 1;
     while i * i <= n {
-        if n % i == 0 {
+        if n.is_multiple_of(i) {
             count += 1;
             if i != n / i {
                 count += 1;
@@ -132,9 +132,9 @@ fn jordan_totient4(n: u64) -> f64 {
     let mut m = n;
     let mut p = 2u64;
     while p * p <= m {
-        if m % p == 0 {
+        if m.is_multiple_of(p) {
             product *= 1.0 - 1.0 / (p as f64).powi(4);
-            while m % p == 0 {
+            while m.is_multiple_of(p) {
                 m /= p;
             }
         }

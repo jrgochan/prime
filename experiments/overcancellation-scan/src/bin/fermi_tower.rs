@@ -1,3 +1,4 @@
+#![allow(dead_code, unused_variables, unused_imports, unused_assignments, clippy::needless_range_loop, clippy::doc_lazy_continuation, non_snake_case, clippy::empty_line_after_doc_comments)]
 // overcancellation-scan/src/bin/fermi_tower.rs
 //
 // ╔═══════════════════════════════════════════════════════════════════════╗
@@ -206,7 +207,7 @@ fn main() {
         let cross = blocks.get(&(1, 2)).copied().unwrap_or(0.0)
                   + blocks.get(&(2, 1)).copied().unwrap_or(0.0);
         let l12: f64 = blocks.iter()
-            .filter(|(&(i, j), _)| i >= 1 && i <= 2 && j >= 1 && j <= 2)
+            .filter(|(&(i, j), _)| (1..=2).contains(&i) && (1..=2).contains(&j))
             .map(|(_, v)| v).sum();
         let l3: f64 = blocks.iter()
             .filter(|(&(i, j), _)| i.max(j) == 3)

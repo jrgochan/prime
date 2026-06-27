@@ -135,7 +135,7 @@ pub fn run_microscope(n: usize) -> Decomp {
                 decomp.max_band,
             );
             let cnt = done.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
-            if cnt % (n_active / 20).max(1) == 0 && cnt > 0 {
+            if cnt.is_multiple_of((n_active / 20).max(1)) && cnt > 0 {
                 let pct = cnt as f64 / n_active as f64 * 100.0;
                 let el = t0.elapsed().as_secs_f64();
                 let eta =

@@ -43,8 +43,8 @@ fn euler_totient(n: usize) -> usize {
     let mut m = n;
     let mut p = 2;
     while p * p <= m {
-        if m % p == 0 {
-            while m % p == 0 {
+        if m.is_multiple_of(p) {
+            while m.is_multiple_of(p) {
                 m /= p;
             }
             result -= result / p;
@@ -79,9 +79,9 @@ fn primitive_root(q: usize) -> Option<usize> {
     let mut m = phi;
     let mut p = 2;
     while p * p <= m {
-        if m % p == 0 {
+        if m.is_multiple_of(p) {
             factors.push(p);
-            while m % p == 0 {
+            while m.is_multiple_of(p) {
                 m /= p;
             }
         }
@@ -185,7 +185,7 @@ fn is_char_primitive(q: usize, vr: &[f64], _vi: &[f64]) -> bool {
         return false;
     }
     for d in 2..q {
-        if q % d != 0 {
+        if !q.is_multiple_of(d) {
             continue;
         }
         let mut factors_through = true;

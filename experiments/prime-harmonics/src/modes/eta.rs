@@ -16,22 +16,20 @@
 //! Also tracks inter-prime cancellation: how composites between
 //! consecutive primes restore balance.
 
-use std::f64::consts::PI;
-use std::io::Write;
 use std::time::Instant;
 
 /// First 30 nontrivial zeta zeros (imaginary parts).
 const ZEROS: [f64; 30] = [
-    14.134725141734693, 21.022039638771555, 25.010857580145688,
-    30.424876125859513, 32.935061587739189, 37.586178158825671,
-    40.918719012147495, 43.327073280914999, 48.005150881167159,
-    49.773832477672302, 52.970321477714460, 56.446247697063394,
-    59.347044002602353, 60.831778524609809, 65.112544048081607,
-    67.079810529494173, 69.546401711696542, 72.067157674481907,
-    75.704690699083933, 77.144840068874805, 79.337375020249367,
-    82.910380854086030, 84.735492980517050, 87.425274613125196,
-    88.809111207634465, 92.491899270558484, 94.651344040519838,
-    95.870634228245309, 98.831194218193692, 101.31785100573139,
+    14.134725141734693, 21.022039638771555, 25.010_857_580_145_69,
+    30.424876125859513, 32.935_061_587_739_19, 37.586_178_158_825_67,
+    40.918_719_012_147_5, 43.327_073_280_915, 48.005_150_881_167_16,
+    49.773_832_477_672_3, 52.970_321_477_714_46, 56.446_247_697_063_39,
+    59.347_044_002_602_35, 60.831_778_524_609_81, 65.112_544_048_081_6,
+    67.079_810_529_494_17, 69.546_401_711_696_55, 72.067_157_674_481_9,
+    75.704_690_699_083_93, 77.144_840_068_874_8, 79.337_375_020_249_37,
+    82.910_380_854_086_03, 84.735_492_980_517_05, 87.425_274_613_125_2,
+    88.809_111_207_634_46, 92.491_899_270_558_48, 94.651_344_040_519_83,
+    95.870_634_228_245_31, 98.831_194_218_193_69, 101.31785100573139,
 ];
 
 /// Sieve Möbius function for all n ≤ limit.
@@ -61,7 +59,7 @@ fn sieve_moebius(limit: usize) -> Vec<i8> {
     for n in 2..=limit {
         let p = min_factor[n] as usize;
         let m = n / p;
-        if m % p == 0 {
+        if m.is_multiple_of(p) {
             // p^2 | n, so μ(n) = 0
             mu[n] = 0;
         } else {
@@ -92,13 +90,13 @@ fn sieve_primes(limit: usize) -> Vec<bool> {
 }
 
 /// Number of distinct prime factors.
-fn omega(mut n: usize, is_prime: &[bool]) -> u32 {
+fn omega(mut n: usize, _is_prime: &[bool]) -> u32 {
     let mut count = 0;
     let mut d = 2;
     while d * d <= n {
-        if n % d == 0 {
+        if n.is_multiple_of(d) {
             count += 1;
-            while n % d == 0 { n /= d; }
+            while n.is_multiple_of(d) { n /= d; }
         }
         d += 1;
     }
@@ -122,7 +120,7 @@ struct EtaStats {
     eta_im: Vec<f64>,
 }
 
-pub fn run(n_max: usize, num_zeros: usize, verbose: bool) {
+pub fn run(n_max: usize, num_zeros: usize, _verbose: bool) {
     let gamma_count = num_zeros.min(ZEROS.len());
     let gammas = &ZEROS[..gamma_count];
 
@@ -270,13 +268,11 @@ pub fn run(n_max: usize, num_zeros: usize, verbose: bool) {
     println!("{}", "-".repeat(80));
 
     let max_intervals = 50;
-    let mut interval_count = 0;
-    let mut last_prime_idx = 0;
 
     // Add n=1 contribution
     eta1_re += 1.0; // (-1)^2 · 1^{-1/2} · cos(0) = 1
 
-    for pi in 0..primes.len().min(n_max) {
+    for (interval_count, pi) in (0..primes.len().min(n_max)).enumerate() {
         let p = primes[pi];
         let p_next = if pi + 1 < primes.len() { primes[pi + 1] } else { break };
 
@@ -305,16 +301,13 @@ pub fn run(n_max: usize, num_zeros: usize, verbose: bool) {
 
         let n_composites = if pi == 0 { p_next - 2 } else { p_next - primes[pi - 1] - 1 };
 
-        // Only print first max_intervals and then milestones
-        if interval_count < max_intervals || p > n_max / 2 {
-            if interval_count < max_intervals {
+        // Only print first max_intervals
+        if interval_count < max_intervals {
                 println!("  [{:>6}, {:>6}) {:>10} {:>12.6} {:>12.6} {:>+12.6} {:>12.4}",
                          if pi == 0 { 2 } else { primes[pi-1] + 1 }, p_next,
                          n_composites, mag_before, mag_after, delta,
                          if mag_before > 0.001 { delta / mag_before } else { 0.0 });
             }
-        }
-        interval_count += 1;
     }
 
     println!();

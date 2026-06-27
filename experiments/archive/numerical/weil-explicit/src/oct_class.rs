@@ -129,7 +129,7 @@ fn int_to_octonion(k: usize) -> Oct {
     let mut n = k;
     let mut p = 2;
     while p * p <= n {
-        while n % p == 0 {
+        while n.is_multiple_of(p) {
             r = r.mul(&Oct::basis(prime_to_basis(p)));
             n /= p;
         }
@@ -151,7 +151,7 @@ fn liouville(n: usize) -> i32 {
     let mut o = 0;
     let mut p = 2;
     while p * p <= v {
-        while v % p == 0 {
+        while v.is_multiple_of(p) {
             o += 1;
             v /= p;
         }

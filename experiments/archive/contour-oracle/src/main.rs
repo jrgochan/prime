@@ -43,10 +43,10 @@ fn moebius(n: usize) -> i64 {
     let mut factors = 0i64;
     let mut d = 2;
     while d * d <= m {
-        if m % d == 0 {
+        if m.is_multiple_of(d) {
             m /= d;
             factors += 1;
-            if m % d == 0 {
+            if m.is_multiple_of(d) {
                 return 0;
             }
         }

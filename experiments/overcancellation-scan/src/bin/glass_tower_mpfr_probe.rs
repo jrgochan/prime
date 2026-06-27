@@ -1,3 +1,4 @@
+#![allow(dead_code, unused_variables, unused_imports, unused_assignments, clippy::needless_range_loop, clippy::doc_lazy_continuation, non_snake_case, clippy::empty_line_after_doc_comments)]
 /// Glass Tower MPFR Probe — Arbitrary Precision
 ///
 /// Uses MPFR (via rug) to compute the glass tower layer deviations
@@ -9,8 +10,7 @@
 /// because log(1+x) ≈ x for small x, and the Euler product
 /// at level k involves p^{-2^k·σ} which squares at each step.
 
-use rug::{Assign, Float, ops::Pow};
-use rug::float::Round;
+use rug::Float;
 
 // ═══════════════════════════════════════════════════════
 // §1. PRIME SIEVE
@@ -150,8 +150,8 @@ fn main() {
     println!("  N = {} primes", primes.iter().filter(|&&p| p <= n_primes).count());
     println!();
 
-    println!("  {:>5}  {:>7}  {:>20}  {:>8}  {}", "k", "dim", "|L_k - 1|", "log₁₀", "squaring?");
-    println!("  {:>5}  {:>7}  {:>20}  {:>8}  {}", "─", "───", "──────────────", "─────", "─────────");
+    println!("  {:>5}  {:>7}  {:>20}  {:>8}  squaring?", "k", "dim", "|L_k - 1|", "log₁₀");
+    println!("  {:>5}  {:>7}  {:>20}  {:>8}  ─────────", "─", "───", "──────────────", "─────");
 
     let mut prev_log10: Option<f64> = None;
 

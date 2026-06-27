@@ -1,3 +1,4 @@
+#![allow(dead_code, unused_variables, unused_imports, unused_assignments, clippy::needless_range_loop, clippy::doc_lazy_continuation, non_snake_case, clippy::empty_line_after_doc_comments)]
 // overcancellation-scan/src/bin/d6_anomaly_probe.rs
 //
 // ╔═══════════════════════════════════════════════════════════════════╗
@@ -22,10 +23,10 @@ use std::time::Instant;
 fn is_prime(n: usize) -> bool {
     if n < 2 { return false; }
     if n < 4 { return true; }
-    if n % 2 == 0 || n % 3 == 0 { return false; }
+    if n.is_multiple_of(2) || n.is_multiple_of(3) { return false; }
     let mut i = 5;
     while i * i <= n {
-        if n % i == 0 || n % (i + 2) == 0 { return false; }
+        if n.is_multiple_of(i) || n.is_multiple_of(i + 2) { return false; }
         i += 6;
     }
     true
@@ -35,7 +36,7 @@ fn num_divisors(n: usize) -> usize {
     let mut count = 0;
     let mut d = 1;
     while d * d <= n {
-        if n % d == 0 {
+        if n.is_multiple_of(d) {
             count += 1;
             if d != n / d { count += 1; }
         }
@@ -51,7 +52,7 @@ fn factorize(n: usize) -> Vec<(usize, usize)> {
     let mut p = 2;
     while p * p <= m {
         let mut e = 0;
-        while m % p == 0 {
+        while m.is_multiple_of(p) {
             m /= p;
             e += 1;
         }

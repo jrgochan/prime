@@ -25,8 +25,8 @@ fn euler_phi(n: usize) -> usize {
     let mut m = n;
     let mut p = 2;
     while p * p <= m {
-        if m % p == 0 {
-            while m % p == 0 {
+        if m.is_multiple_of(p) {
+            while m.is_multiple_of(p) {
                 m /= p;
             }
             result -= result / p;
@@ -47,10 +47,10 @@ fn mobius(n: usize) -> i64 {
     let mut num_factors = 0;
     let mut p = 2;
     while p * p <= m {
-        if m % p == 0 {
+        if m.is_multiple_of(p) {
             m /= p;
             num_factors += 1;
-            if m % p == 0 {
+            if m.is_multiple_of(p) {
                 return 0;
             } // p² | n
         }
@@ -73,8 +73,8 @@ fn von_mangoldt(n: usize) -> f64 {
     let mut m = n;
     let mut p = 2;
     while p * p <= m {
-        if m % p == 0 {
-            while m % p == 0 {
+        if m.is_multiple_of(p) {
+            while m.is_multiple_of(p) {
                 m /= p;
             }
             return if m == 1 { (p as f64).ln() } else { 0.0 };
@@ -91,11 +91,11 @@ fn ramanujan_sum(q: usize, n: usize) -> i64 {
     let mut sum: i64 = 0;
     let mut d = 1;
     while d * d <= g {
-        if g % d == 0 {
+        if g.is_multiple_of(d) {
             sum += mobius(q / d) * d as i64;
             if d != g / d {
                 let d2 = g / d;
-                if q % d2 == 0 {
+                if q.is_multiple_of(d2) {
                     sum += mobius(q / d2) * d2 as i64;
                 }
             }
@@ -105,7 +105,7 @@ fn ramanujan_sum(q: usize, n: usize) -> i64 {
     // Recompute properly
     sum = 0;
     for d in 1..=g {
-        if g % d == 0 && q % d == 0 {
+        if g.is_multiple_of(d) && q.is_multiple_of(d) {
             sum += mobius(q / d) * d as i64;
         }
     }

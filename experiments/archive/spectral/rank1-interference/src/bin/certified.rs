@@ -47,9 +47,9 @@ fn mobius(mut n: usize) -> i32 {
     let mut c = 0;
     let mut d = 2;
     while d * d <= n {
-        if n % d == 0 {
+        if n.is_multiple_of(d) {
             n /= d;
-            if n % d == 0 {
+            if n.is_multiple_of(d) {
                 return 0;
             }
             c += 1;
@@ -66,7 +66,7 @@ fn mobius(mut n: usize) -> i32 {
 // 256-BIT GRAM MATRIX CONSTRUCTION
 // ═══════════════════════════════════════════════
 
-const EG: f64 = 0.5772156649015328606;
+const EG: f64 = 0.577_215_664_901_532_9;
 
 fn vasyunin_hp(a: usize, b: usize) -> Float {
     if a <= 1 {
@@ -444,7 +444,7 @@ fn cert_to_json(c: &Certificate) -> String {
     j += &format!("    \"v_dot_Gv\": {:.15},\n", c.v_dot_gv);
     j += &format!("    \"d_sq\": {:.15},\n", c.d_sq);
     j += &format!("    \"d_sq_positive\": {},\n", c.d_sq_positive);
-    j += &format!("    \"d_sq_formula\": \"1 - 2*b^T*v + v^T*G*v\",\n");
+    j += &"    \"d_sq_formula\": \"1 - 2*b^T*v + v^T*G*v\",\n".to_string();
     // Lean bridge
     j += "    \"lean_bridge\": {\n";
     j += "      \"theorem\": \"existential_implies_infimum\",\n";
@@ -741,7 +741,7 @@ fn write_certificates(certs: &[Certificate], dir: &str) {
     mono_json += "  ],\n";
     let all_mono = certs.windows(2).all(|w| w[0].lambda_min >= w[1].lambda_min);
     mono_json += &format!("  \"chain_valid\": {},\n", all_mono);
-    mono_json += &format!("  \"lean_theorem\": \"lambdaMin_shifted_antitone\",\n");
+    mono_json += &"  \"lean_theorem\": \"lambdaMin_shifted_antitone\",\n".to_string();
     mono_json += &format!(
         "  \"conclusion\": \"G_N positive definite for all N <= {}\"\n",
         certs.last().unwrap().n

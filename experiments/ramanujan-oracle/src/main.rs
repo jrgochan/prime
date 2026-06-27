@@ -19,6 +19,7 @@
 //  All steps are O(N log N) Dirichlet convolutions. No dense matrix.
 // ═══════════════════════════════════════════════════════════════════════
 
+#[allow(unused_imports)]
 use rayon::prelude::*;
 use serde::Serialize;
 use std::f64::consts::PI;
@@ -38,9 +39,9 @@ fn jordan2(d: usize) -> f64 {
     let mut m = d;
     let mut p = 2;
     while p * p <= m {
-        if m % p == 0 {
+        if m.is_multiple_of(p) {
             result *= 1.0 - 1.0 / (p * p) as f64;
-            while m % p == 0 {
+            while m.is_multiple_of(p) {
                 m /= p;
             }
         }
@@ -57,7 +58,7 @@ fn divisors(n: usize) -> Vec<usize> {
     let mut divs = Vec::new();
     let mut d = 1;
     while d * d <= n {
-        if n % d == 0 {
+        if n.is_multiple_of(d) {
             divs.push(d);
             if d != n / d {
                 divs.push(n / d);
@@ -74,7 +75,7 @@ fn ndivisors(n: usize) -> usize {
     let mut count = 0;
     let mut d = 1;
     while d * d <= n {
-        if n % d == 0 {
+        if n.is_multiple_of(d) {
             count += 1;
             if d != n / d {
                 count += 1;
@@ -494,9 +495,9 @@ fn main() {
         println!("  {:>10} {:>10} {:>12}", "N₁ → N₂", "σ ratio", "α (local)");
         println!("  {}", "─".repeat(36));
         for w in valid.windows(2) {
-            let ln_n_ratio = (w[1].n as f64).ln() / (w[0].n as f64).ln();
-            let ln_sigma_ratio = w[1].sigma.ln() / w[0].sigma.ln();
-            let alpha = (w[1].sigma.ln() - w[0].sigma.ln())
+            let _ln_n_ratio = (w[1].n as f64).ln() / (w[0].n as f64).ln();
+            let _ln_sigma_ratio = w[1].sigma.ln() / w[0].sigma.ln();
+            let _alpha = (w[1].sigma.ln() - w[0].sigma.ln())
                 / (w[1].n as f64).ln().max(1.0).min(f64::MAX)
                 .max(1.0);
             // Better: direct exponent from two points

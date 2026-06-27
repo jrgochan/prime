@@ -74,7 +74,7 @@ pub fn segmented_sieve(limit: usize) -> Vec<usize> {
 
             for &p in &small_primes {
                 // Find first multiple of p >= seg_start
-                let start = if seg_start % p == 0 {
+                let start = if seg_start.is_multiple_of(p) {
                     seg_start
                 } else {
                     seg_start + p - (seg_start % p)

@@ -908,7 +908,7 @@ impl GramMatrix {
 
                 // Progress tracking
                 let count = done.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
-                if dim > 200 && count % (total_entries / 100).max(1) == 0 && count > 0 {
+                if dim > 200 && count.is_multiple_of((total_entries / 100).max(1)) && count > 0 {
                     let elapsed = t0.elapsed().as_secs_f64();
                     let frac = count as f64 / total_entries as f64;
                     let eta = elapsed / frac * (1.0 - frac);
@@ -968,7 +968,7 @@ impl GramMatrix {
                 let val = gram_entry_fast(row + 2, col + 2, ln_n_table).to_f64();
 
                 let count = done.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
-                if dim > 200 && count % (total_entries / 100).max(1) == 0 && count > 0 {
+                if dim > 200 && count.is_multiple_of((total_entries / 100).max(1)) && count > 0 {
                     let elapsed = t0.elapsed().as_secs_f64();
                     let frac = count as f64 / total_entries as f64;
                     let eta = elapsed / frac * (1.0 - frac);
@@ -1035,7 +1035,7 @@ impl GramMatrix {
                 };
 
                 let count = done.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
-                if dim > 200 && count % (total_entries / 100).max(1) == 0 && count > 0 {
+                if dim > 200 && count.is_multiple_of((total_entries / 100).max(1)) && count > 0 {
                     let elapsed = t0.elapsed().as_secs_f64();
                     let frac = count as f64 / total_entries as f64;
                     let eta = elapsed / frac * (1.0 - frac);
@@ -1093,7 +1093,7 @@ impl GramMatrix {
                 let val = gram_entry_fast(row + 2, col + 2, ln_n_table);
 
                 let count = done.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
-                if dim > 200 && count % (total_entries / 100).max(1) == 0 && count > 0 {
+                if dim > 200 && count.is_multiple_of((total_entries / 100).max(1)) && count > 0 {
                     let elapsed = t0.elapsed().as_secs_f64();
                     let frac = count as f64 / total_entries as f64;
                     let eta = elapsed / frac * (1.0 - frac);
@@ -1146,7 +1146,7 @@ impl GramMatrix {
                 let val = gram_entry_dd(row + 2, col + 2, dd_table);
 
                 let count = done.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
-                if dim > 200 && count % (total_entries / 100).max(1) == 0 && count > 0 {
+                if dim > 200 && count.is_multiple_of((total_entries / 100).max(1)) && count > 0 {
                     let elapsed = t0.elapsed().as_secs_f64();
                     let frac = count as f64 / total_entries as f64;
                     let eta = elapsed / frac * (1.0 - frac);
@@ -1259,7 +1259,7 @@ pub fn build_upper_triangle_f64(max_n: usize) -> Vec<f64> {
             *val = gram_entry_f64(row + 2, col + 2);
 
             let count = done.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
-            if count % (tri_len / 100).max(1) == 0 && count > 0 {
+            if count.is_multiple_of((tri_len / 100).max(1)) && count > 0 {
                 let elapsed = t0.elapsed().as_secs_f64();
                 let frac = count as f64 / tri_len as f64;
                 let eta = elapsed / frac * (1.0 - frac);
@@ -1328,7 +1328,7 @@ pub fn build_upper_triangle_fast_dd(
                         };
 
                         let count = done.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
-                        if count % (tri_len / 100).max(1) == 0 && count > 0 {
+                        if count.is_multiple_of((tri_len / 100).max(1)) && count > 0 {
                             let elapsed = t0.elapsed().as_secs_f64();
                             let frac = count as f64 / tri_len as f64;
                             let eta = elapsed / frac * (1.0 - frac);

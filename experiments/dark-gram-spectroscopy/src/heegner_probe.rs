@@ -46,10 +46,10 @@ fn euler_poly(n: i64) -> i64 {
 fn is_prime(n: u64) -> bool {
     if n < 2 { return false; }
     if n < 4 { return true; }
-    if n % 2 == 0 || n % 3 == 0 { return false; }
+    if n.is_multiple_of(2) || n.is_multiple_of(3) { return false; }
     let mut i = 5u64;
     while i * i <= n {
-        if n % i == 0 || n % (i + 2) == 0 { return false; }
+        if n.is_multiple_of(i) || n.is_multiple_of(i + 2) { return false; }
         i += 6;
     }
     true
@@ -189,7 +189,7 @@ fn analyze_heegner_dim(dim: usize) -> HeegnerResult {
     // Print eigenvalue spectrum (up to 20 values)
     let show = dim.min(20);
     eprintln!("    Eigenvalues (bottom {show}):");
-    for i in 0..show {
+    for (i, _eigenvalue) in eigenvalues.iter().enumerate().take(show) {
         let marker = if i == 0 { " ← min" } else { "" };
         eprintln!("      λ_{i:>3} = {:.10e}{}", eigenvalues[i], marker);
     }

@@ -524,7 +524,7 @@ fn main() {
             let mut lock = offdiag_mutex.lock().unwrap();
             lock.push(entry);
             // Print progress every 100 pairs
-            if lock.len() % 100 == 0 || lock.len() == n_pairs {
+            if lock.len().is_multiple_of(100) || lock.len() == n_pairs {
                 eprint!(
                     "\r  Progress: {}/{} pairs ({:.0}%)",
                     lock.len(),

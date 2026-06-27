@@ -1,20 +1,4 @@
-/// Mellin-Parseval Spectral Probe — ζ(s) on the Critical Line
-///
-/// The Báez-Duarte approach: the BD distance d² is controlled by
-/// the Mellin-Parseval integral on Re(s) = 1/2:
-///
-///   d²_N ~ ∫ |1 - ζ(s)·D_N(s)|² · |ds| / |s(1-s)|
-///
-/// where D_N(s) = -Σ_{k=1}^{N} μ(k)(1-lnk/lnN)/k^s is our witness
-/// Dirichlet polynomial.
-///
-/// Key: ζ(s)·D_N(s) should approximate -1/s (the Mellin transform of 1)
-/// when the witness approximates the constant function 1 in L²(0,1).
-///
-/// The spectral error |1 + s·ζ(s)·D_N(s)|² at each frequency t
-/// shows WHERE the approximation fails.
-
-use std::f64::consts::PI;
+#![allow(clippy::needless_range_loop)]
 
 fn mobius_sieve(n: usize) -> Vec<i32> {
     let mut mu = vec![0i32; n + 1];

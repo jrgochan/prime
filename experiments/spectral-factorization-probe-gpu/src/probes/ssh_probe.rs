@@ -465,7 +465,7 @@ pub fn print_ssh_summary(results: &[SshProbeResult]) {
 
 /// Convert hex string to bytes (public wrapper for cross-module use).
 fn hex_to_bytes_pub(hex: &str) -> Vec<u8> {
-    let hex = hex.replace(':', "").replace(' ', "");
+    let hex = hex.replace([':', ' '], "");
     let hex = if hex.len() % 2 == 1 { format!("0{}", hex) } else { hex };
     (0..hex.len())
         .step_by(2)

@@ -31,7 +31,7 @@ fn big_omega(mut n: usize) -> usize {
     let mut count = 0;
     let mut d = 2;
     while d * d <= n {
-        while n % d == 0 {
+        while n.is_multiple_of(d) {
             count += 1;
             n /= d;
         }
@@ -45,7 +45,7 @@ fn big_omega(mut n: usize) -> usize {
 
 /// Liouville function: λ(n) = (-1)^Ω(n)
 fn liouville(n: usize) -> f64 {
-    if big_omega(n) % 2 == 0 {
+    if big_omega(n).is_multiple_of(2) {
         1.0
     } else {
         -1.0
@@ -96,7 +96,7 @@ fn partition_by_parity(n: usize) -> (Vec<usize>, Vec<usize>) {
     let mut odd_indices = Vec::new();
     for i in 0..(n - 1) {
         let k = i + 2;
-        if big_omega(k) % 2 == 0 {
+        if big_omega(k).is_multiple_of(2) {
             even_indices.push(i);
         } else {
             odd_indices.push(i);
@@ -418,7 +418,7 @@ fn main() {
         6.0 / (std::f64::consts::PI * std::f64::consts::PI)
     )
     .unwrap();
-    writeln!(f, "").unwrap();
+    writeln!(f).unwrap();
     writeln!(
         f,
         "{:>5} {:>5} {:>5} {:>12} {:>12} {:>12} {:>12} {:>10} {:>10}",
@@ -434,13 +434,13 @@ fn main() {
         )
         .unwrap();
     }
-    writeln!(f, "").unwrap();
+    writeln!(f).unwrap();
     writeln!(f, "Scaling: log(N) · λ_min(H_eff)").unwrap();
     writeln!(f, "{:>5} {:>12}", "N", "log(N)·λ").unwrap();
     for r in &results {
         writeln!(f, "{:>5} {:>12.8}", r.n, r.log_n_times_lmin_heff).unwrap();
     }
-    writeln!(f, "").unwrap();
+    writeln!(f).unwrap();
     writeln!(f, "Key findings:").unwrap();
     writeln!(
         f,

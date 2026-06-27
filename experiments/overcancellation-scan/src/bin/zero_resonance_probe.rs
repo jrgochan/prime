@@ -1,3 +1,4 @@
+#![allow(dead_code, unused_variables, unused_imports, unused_assignments, clippy::needless_range_loop, clippy::doc_lazy_continuation, non_snake_case, clippy::empty_line_after_doc_comments)]
 // overcancellation-scan/src/bin/zero_resonance_probe.rs
 //
 // ╔═══════════════════════════════════════════════════════════════════╗
@@ -30,10 +31,10 @@ use std::time::Instant;
 fn is_prime(n: usize) -> bool {
     if n < 2 { return false; }
     if n < 4 { return true; }
-    if n % 2 == 0 || n % 3 == 0 { return false; }
+    if n.is_multiple_of(2) || n.is_multiple_of(3) { return false; }
     let mut i = 5;
     while i * i <= n {
-        if n % i == 0 || n % (i + 2) == 0 { return false; }
+        if n.is_multiple_of(i) || n.is_multiple_of(i + 2) { return false; }
         i += 6;
     }
     true
@@ -231,7 +232,7 @@ fn main() {
 
     for (i, &(freq, power)) in sorted_spec.iter().take(15).enumerate() {
         // Convert frequency to "angular frequency" and compare to γₖ
-        let omega = freq * 2.0 * PI; // doesn't directly correspond...
+        let _omega = freq * 2.0 * PI; // doesn't directly correspond...
         // Actually the N-index Fourier frequency corresponds to
         // oscillation per unit N. The zeta zeros create oscillations
         // in the Mellin integral at "log-frequency" γₖ.
@@ -310,7 +311,7 @@ fn main() {
             .map(|&g| (g, (omega - g).abs()))
             .min_by(|a, b| a.1.partial_cmp(&b.1).unwrap());
         let (near_g, near_dist) = nearest.unwrap_or((0.0, f64::INFINITY));
-        let match_pct = if near_g > 0.0 { 100.0 * (1.0 - near_dist / near_g) } else { 0.0 };
+        let _match_pct = if near_g > 0.0 { 100.0 * (1.0 - near_dist / near_g) } else { 0.0 };
         let flag = if near_dist < 0.5 { " ★" } else if near_dist < 1.5 { " ●" } else { "" };
 
         println!("  {:6} {:12.4} {:14.6e}    γ={:.3} (Δ={:.2}){}", 

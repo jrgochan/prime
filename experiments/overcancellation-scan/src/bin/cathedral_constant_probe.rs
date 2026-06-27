@@ -1,3 +1,4 @@
+#![allow(dead_code, unused_variables, unused_imports, unused_assignments, clippy::needless_range_loop, clippy::doc_lazy_continuation, non_snake_case, clippy::empty_line_after_doc_comments)]
 // overcancellation-scan/src/bin/cathedral_constant_probe.rs
 //
 // ╔════════════════════════════════════════════════════════════════════╗
@@ -35,9 +36,9 @@ fn jordan_totient2(d: usize) -> f64 {
     let mut n = d;
     let mut p = 2usize;
     while p * p <= n {
-        if n % p == 0 {
+        if n.is_multiple_of(p) {
             result *= 1.0 - 1.0 / (p as f64 * p as f64);
-            while n % p == 0 { n /= p; }
+            while n.is_multiple_of(p) { n /= p; }
         }
         p += 1;
     }
