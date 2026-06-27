@@ -140,7 +140,7 @@ fn gram_row1(k: usize) -> f64 {
 fn build_row1(n: usize) -> Vec<f64> {
     // Parallelize over k
     (1..n).into_par_iter()
-        .map(|k| gram_row1(k))
+        .map(gram_row1)
         .collect()
 }
 
@@ -214,8 +214,8 @@ fn compute_row(i: usize, gram: &[f64], v: &[f64], dim: usize,
         if i == j {
             diag = term;
         } else {
-            let omega_sum = big_omega[k] as u32 + big_omega[kj] as u32;
-            if omega_sum % 2 == 0 {
+            let omega_sum = big_omega[k] + big_omega[kj];
+            if omega_sum.is_multiple_of(2) {
                 bosonic_off += term;
             } else {
                 fermionic_off += term;

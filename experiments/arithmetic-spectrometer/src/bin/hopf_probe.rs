@@ -15,9 +15,9 @@ fn main() {
     // ===== CONSTANTS =====
     let zeta2: f64 = PI * PI / 6.0;
     let zeta4: f64 = PI.powi(4) / 90.0;
-    let zeta6: f64 = PI.powi(6) / 945.0;
+    let _zeta6: f64 = PI.powi(6) / 945.0;
     let zeta8: f64 = PI.powi(8) / 9450.0;
-    let zeta10: f64 = PI.powi(10) / 93555.0;
+    let _zeta10: f64 = PI.powi(10) / 93555.0;
     // B_16 = -3617/510
     let zeta16: f64 = (3617.0 / 510.0) * (2.0 * PI).powi(16)
         / (2.0 * (1..=16).map(|i| i as f64).product::<f64>());
@@ -290,7 +290,7 @@ fn main() {
         println!("  {:>25}  = {:.8}  Δ = {:.4}%  {}  {}",
             name, val, deviation, hopf,
             if significant { format!("✓ {} (significant)", gen) }
-            else { format!("✗ (below threshold)") });
+            else { "✗ (below threshold)".to_string() });
     }
 
     // Check glass4 would be

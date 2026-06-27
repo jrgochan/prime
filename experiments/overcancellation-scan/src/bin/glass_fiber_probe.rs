@@ -1,3 +1,4 @@
+#![allow(dead_code, unused_variables, unused_imports, unused_assignments, clippy::needless_range_loop, clippy::doc_lazy_continuation, non_snake_case, clippy::empty_line_after_doc_comments)]
 // overcancellation-scan/src/bin/glass_fiber_probe.rs
 //
 // ╔═══════════════════════════════════════════════════════════════════╗
@@ -197,7 +198,7 @@ fn main() {
     println!("{:>5} {:>12} {:>12} {:>12} {:>12} {:>12}", "p", "total", "dark", "Glass₁", "Glass₂", "Glass₃");
 
     let primes: Vec<usize> = {
-        let mut sieve = vec![true; 100];
+        let mut sieve = [true; 100];
         sieve[0] = false;
         sieve[1] = false;
         for i in 2..10 {

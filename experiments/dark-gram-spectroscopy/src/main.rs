@@ -1,3 +1,4 @@
+#![allow(dead_code, unused_variables, clippy::needless_range_loop, clippy::empty_line_after_doc_comments)]
 //! ═══════════════════════════════════════════════════════════════════════════
 //!  DARK GRAM SPECTROSCOPY v1
 //!  The Antimatter Engine — Bernoulli Basis Spectral Analysis

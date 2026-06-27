@@ -1,3 +1,4 @@
+#![allow(dead_code, unused_variables, clippy::needless_range_loop, clippy::empty_line_after_doc_comments, clippy::doc_lazy_continuation)]
 //! ═══════════════════════════════════════════════════════════════════════════
 //!  T-CONVERGENCE EXPLORER (Parallel)
 //!  Empirical analysis of the truncation horizon T for Gram matrix entries.

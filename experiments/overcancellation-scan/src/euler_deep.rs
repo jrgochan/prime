@@ -1,3 +1,4 @@
+#![allow(dead_code, clippy::needless_range_loop, clippy::empty_line_after_doc_comments)]
 //! # Euler Convergence Deep Probe
 //!
 //! Focused computation of (1 - vᵀGv)·lnN at high N

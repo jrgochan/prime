@@ -351,8 +351,8 @@ fn main() {
     ];
 
     println!(
-        "  {:>5} │ {:>14} {:>14} {:>14} │ {:>10} {:>7} {:>8} │ {}",
-        "α", "d² spectral", "d² Cholesky", "d² quadrature", "λ_min", "κ", "||c||", "Agree?"
+        "  {:>5} │ {:>14} {:>14} {:>14} │ {:>10} {:>7} {:>8} │ Agree?",
+        "α", "d² spectral", "d² Cholesky", "d² quadrature", "λ_min", "κ", "||c||"
     );
     println!(
         "  {}┼{}┼{}┼{}",

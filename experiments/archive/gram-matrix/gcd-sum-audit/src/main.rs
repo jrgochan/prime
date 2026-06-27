@@ -99,7 +99,7 @@ fn main() {
 
             // Progress reporting (every ~1000 rows)
             let p = progress_j.fetch_add(1, Ordering::Relaxed);
-            if p % 2000 == 0 {
+            if p.is_multiple_of(2000) {
                 let elapsed = start.elapsed().as_secs_f64();
                 let pct = p as f64 / max_n as f64 * 100.0;
                 let eta = if p > 0 {

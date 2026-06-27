@@ -1,3 +1,4 @@
+#![allow(clippy::needless_range_loop, clippy::doc_lazy_continuation)]
 //! ═══════════════════════════════════════════════════════════════════════════
 //!  PRIME FRACTAL SPECTRAL PROBE
 //!
@@ -82,10 +83,10 @@ fn eigenvalues(matrix: &[f64], dim: usize) -> Vec<f64> {
 fn is_prime(n: usize) -> bool {
     if n < 2 { return false; }
     if n < 4 { return true; }
-    if n % 2 == 0 || n % 3 == 0 { return false; }
+    if n.is_multiple_of(2) || n.is_multiple_of(3) { return false; }
     let mut i = 5;
     while i * i <= n {
-        if n % i == 0 || n % (i + 2) == 0 { return false; }
+        if n.is_multiple_of(i) || n.is_multiple_of(i + 2) { return false; }
         i += 6;
     }
     true

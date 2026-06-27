@@ -1,3 +1,4 @@
+#![allow(dead_code, clippy::needless_range_loop, clippy::empty_line_after_doc_comments)]
 //! # Error Matrix X-Ray: The G_V = R + E Decomposition
 //!
 //! ## Purpose

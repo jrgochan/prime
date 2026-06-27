@@ -19,10 +19,10 @@ pub fn run(bank: &PrimeOscillatorBank, num_zeros: usize) {
 
     // §1: Prime Choir
     display::section_header("§1. THE PRIME CHOIR");
-    println!("    {:>6}  {:>10}  {:>12}  {}",
-        "Prime", "1/√p", "log(p)/(2π)", "Energy");
-    println!("    {:>6}  {:>10}  {:>12}  {}",
-        "──────", "──────────", "────────────", "──────────────────────");
+    println!("    {:>6}  {:>10}  {:>12}  Energy",
+        "Prime", "1/√p", "log(p)/(2π)");
+    println!("    {:>6}  {:>10}  {:>12}  ──────────────────────",
+        "──────", "──────────", "────────────");
     let n_show = 20.min(bank.len());
     for i in 0..n_show {
         let bar = display::render_bar(bank.inv_sqrt_p[i], 0.75, 22);

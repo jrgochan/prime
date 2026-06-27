@@ -22,7 +22,7 @@ fn big_omega(mut n: usize) -> usize {
     let mut count = 0;
     let mut p = 2;
     while p * p <= n {
-        while n % p == 0 {
+        while n.is_multiple_of(p) {
             count += 1;
             n /= p;
         }

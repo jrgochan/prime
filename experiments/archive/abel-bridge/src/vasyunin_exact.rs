@@ -179,7 +179,7 @@ fn main() {
             .collect();
 
         // Mean vector: b_k for k=1..N
-        let b: Vec<f64> = (1..=n).map(|k| mean_entry(k)).collect();
+        let b: Vec<f64> = (1..=n).map(mean_entry).collect();
 
         // bᵀv
         let btv: f64 = (0..n).map(|i| b[i] * v[i]).sum();

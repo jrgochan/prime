@@ -545,12 +545,10 @@ fn main() {
 
             let rm: f64 = region_ratios.iter().sum::<f64>() / region_ratios.len() as f64;
 
-            let fits = vec![
-                ("GUE", (rm - 0.5996).abs()),
+            let fits = [("GUE", (rm - 0.5996).abs()),
                 ("GOE", (rm - 0.5307).abs()),
                 ("GSE", (rm - 0.6744).abs()),
-                ("Poisson", (rm - 0.3863).abs()),
-            ];
+                ("Poisson", (rm - 0.3863).abs())];
             let best = fits
                 .iter()
                 .min_by(|a, b| a.1.partial_cmp(&b.1).unwrap())

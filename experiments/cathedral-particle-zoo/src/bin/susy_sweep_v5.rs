@@ -336,11 +336,10 @@ fn main() {
             if name.starts_with("gram_N") && name.ends_with(".h5") && !name.contains("_p") {
                 let n_str = name.strip_prefix("gram_N")?.strip_suffix(".h5")?;
                 let n: usize = n_str.parse().ok()?;
-                if n <= cli.max_n && n >= 6 {
-                    if cli.n_values.is_empty() || cli.n_values.contains(&n) {
+                if n <= cli.max_n && n >= 6
+                    && (cli.n_values.is_empty() || cli.n_values.contains(&n)) {
                         return Some((n, e.path()));
                     }
-                }
                 None
             } else { None }
         })

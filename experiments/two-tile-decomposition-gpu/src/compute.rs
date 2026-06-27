@@ -7,7 +7,7 @@
 
 use std::f64::consts::PI;
 
-pub const EULER_GAMMA: f64 = 0.57721566490153286;
+pub const EULER_GAMMA: f64 = 0.577_215_664_901_532_9;
 pub const LOG_2PI: f64 = 1.8378770664093453; // ln(2π)
 
 // ────────────────────────────────────────────────

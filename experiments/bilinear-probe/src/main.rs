@@ -137,7 +137,7 @@ fn probe_at_n(
         for kj in 2..n {
             if ki == kj { continue; }
             let c = w(ki) * g(ki, kj) * w(kj);
-            let dist = if ki > kj { ki - kj } else { kj - ki };
+            let dist = ki.abs_diff(kj);
             if dist <= bw { near += c; } else { far += c; }
             if c > 0.0 { pos += c; } else { neg += c; }
         }
@@ -273,7 +273,7 @@ fn main() {
             let name = p.file_stem()?.to_str()?;
             if !name.starts_with("gram_N") { return None; }
             let n: usize = name.strip_prefix("gram_N")?.parse().ok()?;
-            if n > MAX_FULL_LOAD_N || n < 12 { return None; }
+            if !(12..=MAX_FULL_LOAD_N).contains(&n) { return None; }
             Some((n, p))
         })
         .collect();

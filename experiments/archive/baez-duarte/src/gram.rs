@@ -60,7 +60,7 @@ pub fn mean_entry(k: usize) -> Float {
 
 /// Build the mean vector b[0..n] = [b_1, b_2, ..., b_n].
 pub fn build_mean_vector(n: usize) -> Vec<Float> {
-    (1..=n).map(|k| mean_entry(k)).collect()
+    (1..=n).map(mean_entry).collect()
 }
 
 /// Precomputed cache of ln(1 + 1/n) values in 512-bit MPFR.
@@ -215,7 +215,7 @@ pub fn build_gram_matrix(n: usize, ln_cache: &[Float]) -> Vec<Vec<Float>> {
         .map(|&(i, j)| {
             let val = gram_entry_mpfr(i + 1, j + 1, ln_cache);
             let c = computed.fetch_add(1, Ordering::Relaxed) + 1;
-            if c % 200 == 0 || c == total {
+            if c.is_multiple_of(200) || c == total {
                 eprint!(
                     "\r    G: [{:5.1}%] {}/{}   ",
                     c as f64 / total as f64 * 100.0,

@@ -295,7 +295,7 @@ fn compute_on_fly(n: usize) -> HcResult {
     let d_sq = 1.0 - 2.0 * bt_v + vtgv;
     let margin = 1.0 - vtgv;
     let gap_times_ln = margin * ln_n;
-    let ndiv = (1..=n).filter(|&d| n % d == 0).count();
+    let ndiv = (1..=n).filter(|&d| n.is_multiple_of(d)).count();
 
     let elapsed = t0.elapsed().as_secs_f64();
 

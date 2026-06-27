@@ -37,7 +37,7 @@ pub fn sieve_moebius(max_n: usize) -> Vec<i32> {
         let p = smallest_prime[n];
         let m = n / p;
 
-        if m % p == 0 {
+        if m.is_multiple_of(p) {
             // p² divides n => μ(n) = 0
             mu[n] = 0;
         } else {

@@ -419,7 +419,7 @@ fn extract_hex_field(text: &str, field_name: &str) -> Option<String> {
     }
 
     // Clean: remove colons, leading "00", whitespace
-    let hex = hex.replace(':', "").replace(' ', "");
+    let hex = hex.replace([':', ' '], "");
     let hex = hex.trim_start_matches("00").to_string();
     if hex.is_empty() { return None; }
     Some(hex)
@@ -433,7 +433,6 @@ fn extract_public_exponent(text: &str) -> Option<u64> {
             // Format: "publicExponent: 65537 (0x10001)"
             let num_str = trimmed
                 .strip_prefix("publicExponent:")?
-                .trim()
                 .split_whitespace()
                 .next()?;
             return num_str.parse().ok();
@@ -444,7 +443,7 @@ fn extract_public_exponent(text: &str) -> Option<u64> {
 
 /// Convert a hex string to big-endian bytes.
 fn hex_to_bytes(hex: &str) -> Vec<u8> {
-    let hex = hex.replace(':', "").replace(' ', "");
+    let hex = hex.replace([':', ' '], "");
     let hex = if hex.len() % 2 == 1 { format!("0{}", hex) } else { hex };
     (0..hex.len())
         .step_by(2)

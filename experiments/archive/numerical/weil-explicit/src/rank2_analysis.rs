@@ -37,7 +37,7 @@ fn big_omega(n: usize) -> u32 {
     let mut m = n;
     let mut p = 2;
     while p * p <= m {
-        while m % p == 0 {
+        while m.is_multiple_of(p) {
             count += 1;
             m /= p;
         }
@@ -50,7 +50,7 @@ fn big_omega(n: usize) -> u32 {
 }
 
 fn liouville(n: usize) -> f64 {
-    if big_omega(n) % 2 == 0 {
+    if big_omega(n).is_multiple_of(2) {
         1.0
     } else {
         -1.0
@@ -65,10 +65,10 @@ fn mobius(n: usize) -> f64 {
     let mut p = 2;
     let mut factors = 0;
     while p * p <= m {
-        if m % p == 0 {
+        if m.is_multiple_of(p) {
             factors += 1;
             m /= p;
-            if m % p == 0 {
+            if m.is_multiple_of(p) {
                 return 0.0;
             } // p² | n
         }
@@ -91,12 +91,12 @@ fn is_prime(n: usize) -> bool {
     if n == 2 {
         return true;
     }
-    if n % 2 == 0 {
+    if n.is_multiple_of(2) {
         return false;
     }
     let mut p = 3;
     while p * p <= n {
-        if n % p == 0 {
+        if n.is_multiple_of(p) {
             return false;
         }
         p += 2;
@@ -111,9 +111,9 @@ fn von_mangoldt(n: usize) -> f64 {
     let mut m = n;
     let mut p = 2;
     while p * p <= m {
-        if m % p == 0 {
+        if m.is_multiple_of(p) {
             // check if n = p^k
-            while m % p == 0 {
+            while m.is_multiple_of(p) {
                 m /= p;
             }
             return if m == 1 { (p as f64).ln() } else { 0.0 };
@@ -132,8 +132,8 @@ fn euler_totient(n: usize) -> usize {
     let mut m = n;
     let mut p = 2;
     while p * p <= m {
-        if m % p == 0 {
-            while m % p == 0 {
+        if m.is_multiple_of(p) {
+            while m.is_multiple_of(p) {
                 m /= p;
             }
             result -= result / p;
@@ -155,7 +155,7 @@ fn num_divisors(n: usize) -> usize {
     let mut p = 2;
     while p * p <= m {
         let mut e = 0;
-        while m % p == 0 {
+        while m.is_multiple_of(p) {
             e += 1;
             m /= p;
         }

@@ -46,10 +46,10 @@ fn mobius(n: usize) -> i32 {
     let mut num_factors = 0;
     let mut d = 2;
     while d * d <= m {
-        if m % d == 0 {
+        if m.is_multiple_of(d) {
             num_factors += 1;
             m /= d;
-            if m % d == 0 {
+            if m.is_multiple_of(d) {
                 return 0;
             } // squared factor
         }
@@ -70,8 +70,8 @@ fn euler_phi(n: usize) -> usize {
     let mut m = n;
     let mut d = 2;
     while d * d <= m {
-        if m % d == 0 {
-            while m % d == 0 {
+        if m.is_multiple_of(d) {
+            while m.is_multiple_of(d) {
                 m /= d;
             }
             result -= result / d;
@@ -90,7 +90,7 @@ fn ramanujan_sum(q: usize, k: usize) -> f64 {
     let mut sum = 0.0f64;
     let mut d = 1;
     while d * d <= g {
-        if g % d == 0 {
+        if g.is_multiple_of(d) {
             sum += mobius(q / d) as f64 * d as f64;
             if d != g / d {
                 let d2 = g / d;
@@ -106,7 +106,7 @@ fn divisors(n: usize) -> Vec<usize> {
     let mut divs = Vec::new();
     let mut d = 1;
     while d * d <= n {
-        if n % d == 0 {
+        if n.is_multiple_of(d) {
             divs.push(d);
             if d != n / d {
                 divs.push(n / d);

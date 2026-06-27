@@ -106,7 +106,7 @@ fn prime_factors(mut n: usize) -> Vec<usize> {
     let mut f = Vec::new();
     let mut p = 2;
     while p * p <= n {
-        while n % p == 0 {
+        while n.is_multiple_of(p) {
             f.push(p);
             n /= p;
         }

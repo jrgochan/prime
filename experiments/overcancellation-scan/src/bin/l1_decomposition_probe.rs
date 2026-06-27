@@ -1,3 +1,4 @@
+#![allow(dead_code, unused_variables, unused_imports, unused_assignments, clippy::needless_range_loop, clippy::doc_lazy_continuation, non_snake_case, clippy::empty_line_after_doc_comments)]
 /// L₁ Decomposition Probe — Validates the graduation path for moebius_annihilation
 ///
 /// Decomposes vᵀL₁v = vᵀGv - vᵀA₁v into three components:
@@ -253,7 +254,7 @@ fn main() {
             .map(|k| 1.0 / k as f64).sum();
         
         // Σ μ²(k)·ln(k)/k (weighted Mertens)
-        let sum_mu2_log_over_k: f64 = (1..=n).filter(|&k| mu[k] != 0)
+        let _sum_mu2_log_over_k: f64 = (1..=n).filter(|&k| mu[k] != 0)
             .map(|k| (k as f64).ln() / k as f64).sum();
         
         println!("  N={:>4}: Σμ/k = {:>+.6}, Σμ·ln(k)/k = {:>+.6}, Σμ²/k = {:>.4} (expect {:.4}·lnN = {:.4})",

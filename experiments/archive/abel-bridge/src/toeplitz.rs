@@ -183,7 +183,7 @@ fn main() {
         max_k * (max_k + 1) / 2
     );
 
-    let kernel = compute_toeplitz_kernel(max_k, n_bins, |j, k| normalized_gram_bd(j, k));
+    let kernel = compute_toeplitz_kernel(max_k, n_bins, normalized_gram_bd);
 
     println!("  Done in {:.1}s\n", t0.elapsed().as_secs_f64());
 

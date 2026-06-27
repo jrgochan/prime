@@ -61,7 +61,7 @@ fn overshoot(a: usize, b: usize, m0: usize) -> usize {
     a * (m0 + 1) - b * (n0 + 1)
 }
 
-const EULER_GAMMA: f64 = 0.57721566490153286_f64;
+const EULER_GAMMA: f64 = 0.577_215_664_901_532_9_f64;
 
 // ────────────────────────────────────────────────
 // Full certification per pair

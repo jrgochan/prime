@@ -1,3 +1,4 @@
+#![allow(clippy::needless_range_loop, clippy::manual_range_contains, dead_code, unused_variables, clippy::empty_line_after_doc_comments)]
 //! # 🌀 Prime Harmonics Explorer
 //!
 //! **Computational implementation of Cathedral/Spectral/PrimeHarmonics.lean**

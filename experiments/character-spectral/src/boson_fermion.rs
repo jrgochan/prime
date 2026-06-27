@@ -97,12 +97,12 @@ fn is_prime(n: usize) -> bool {
     if n < 4 {
         return true;
     }
-    if n % 2 == 0 || n % 3 == 0 {
+    if n.is_multiple_of(2) || n.is_multiple_of(3) {
         return false;
     }
     let mut i = 5;
     while i * i <= n {
-        if n % i == 0 || n % (i + 2) == 0 {
+        if n.is_multiple_of(i) || n.is_multiple_of(i + 2) {
             return false;
         }
         i += 6;
@@ -117,7 +117,7 @@ fn num_divisors(n: usize) -> usize {
     let mut count = 0;
     let mut i = 1;
     while i * i <= n {
-        if n % i == 0 {
+        if n.is_multiple_of(i) {
             count += 1;
             if i != n / i {
                 count += 1;
@@ -135,7 +135,7 @@ fn divisor_sum(n: usize) -> usize {
     let mut total = 0;
     let mut i = 1;
     while i * i <= n {
-        if n % i == 0 {
+        if n.is_multiple_of(i) {
             total += i;
             if i != n / i {
                 total += n / i;
@@ -155,9 +155,9 @@ fn omega(n: usize) -> usize {
     let mut m = n;
     let mut p = 2;
     while p * p <= m {
-        if m % p == 0 {
+        if m.is_multiple_of(p) {
             count += 1;
-            while m % p == 0 {
+            while m.is_multiple_of(p) {
                 m /= p;
             }
         }
@@ -178,7 +178,7 @@ fn big_omega(n: usize) -> usize {
     let mut m = n;
     let mut p = 2;
     while p * p <= m {
-        while m % p == 0 {
+        while m.is_multiple_of(p) {
             count += 1;
             m /= p;
         }
@@ -665,7 +665,7 @@ fn factorize_display(mut n: usize) -> String {
     let mut p = 2;
     while p * p <= n {
         let mut exp = 0;
-        while n % p == 0 {
+        while n.is_multiple_of(p) {
             exp += 1;
             n /= p;
         }

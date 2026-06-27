@@ -92,9 +92,9 @@ fn moebius(n: usize) -> i32 {
     let mut d = 2usize;
     let mut count = 0;
     while d * d <= temp {
-        if temp % d == 0 {
+        if temp.is_multiple_of(d) {
             let mut exp = 0;
-            while temp % d == 0 { temp /= d; exp += 1; }
+            while temp.is_multiple_of(d) { temp /= d; exp += 1; }
             if exp > 1 { return 0; }
             count += 1;
         }
@@ -215,10 +215,10 @@ pub fn run(n_max: usize) {
         }).sum();
 
         // Compute v^T R v (sparse, parallel)
-        let v_r_v = sparse_quad_form(&v, &nonzero_idx, |j, k| sawtooth_gram(j, k));
+        let v_r_v = sparse_quad_form(&v, &nonzero_idx, sawtooth_gram);
 
         // Compute v^T G v (sparse, parallel — the expensive one)
-        let v_g_v = sparse_quad_form(&v, &nonzero_idx, |j, k| exact_gram(j, k));
+        let v_g_v = sparse_quad_form(&v, &nonzero_idx, exact_gram);
 
         let v_delta_v = v_g_v - v_r_v;
         let log_n = (n as f64).ln();

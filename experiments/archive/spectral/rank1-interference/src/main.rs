@@ -45,7 +45,7 @@ fn big_omega(mut n: usize) -> usize {
     let mut count = 0;
     let mut d = 2;
     while d * d <= n {
-        while n % d == 0 {
+        while n.is_multiple_of(d) {
             count += 1;
             n /= d;
         }
@@ -59,14 +59,14 @@ fn big_omega(mut n: usize) -> usize {
 
 /// Liouville function: λ(n) = (-1)^Ω(n)
 fn liouville(n: usize) -> i32 {
-    if big_omega(n) % 2 == 0 { 1 } else { -1 }
+    if big_omega(n).is_multiple_of(2) { 1 } else { -1 }
 }
 
 // ═══════════════════════════════════════════════════════════════════════
 // EXACT VASYUNIN COTANGENT FORMULA
 // ═══════════════════════════════════════════════════════════════════════
 
-const EULER_GAMMA: f64 = 0.5772156649015328606;
+const EULER_GAMMA: f64 = 0.577_215_664_901_532_9;
 
 fn vasyunin_sum(a: usize, b: usize) -> f64 {
     if a <= 1 {

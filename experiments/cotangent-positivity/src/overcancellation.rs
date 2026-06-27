@@ -213,7 +213,7 @@ fn main() {
     for &n in &ns {
         let r = analyze(n);
 
-        let vtgv_ok = if r.vtgv <= 1.0 { "✓" } else { "✗" };
+        let _vtgv_ok = if r.vtgv <= 1.0 { "✓" } else { "✗" };
         let ratio_ok = if r.ratio <= 1.0 { "✓" } else { "✗" };
 
         println!(

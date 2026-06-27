@@ -41,7 +41,7 @@ fn main() {
                 excess += g - 0.25;
             }
             let done = progress.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
-            if done % 10 == 0 {
+            if done.is_multiple_of(10) {
                 eprint!(
                     "\r  Progress: {}%",
                     (done + 1) * 100 / (total_pairs / chunk_size + 1)

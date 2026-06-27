@@ -137,9 +137,9 @@ fn moebius(n: usize) -> i32 {
     let mut k = 0; // number of distinct prime factors
     let mut p = 2;
     while p * p <= m {
-        if m % p == 0 {
+        if m.is_multiple_of(p) {
             m /= p;
-            if m % p == 0 {
+            if m.is_multiple_of(p) {
                 return 0; // squared prime factor
             }
             k += 1;

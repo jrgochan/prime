@@ -152,7 +152,7 @@ fn main() {
             let is_two_tile = series::is_two_tile(a, b, m);
 
             let done = progress.fetch_add(1, Ordering::Relaxed) + 1;
-            if report_interval > 0 && done % report_interval == 0 {
+            if report_interval > 0 && done.is_multiple_of(report_interval) {
                 let pct = (done as f64 / total_work as f64) * 100.0;
                 let elapsed = t0.elapsed().as_secs_f64();
                 let rate = done as f64 / elapsed;

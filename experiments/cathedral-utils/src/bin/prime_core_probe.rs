@@ -1,3 +1,4 @@
+#![allow(dead_code, unused_variables, clippy::needless_range_loop, clippy::empty_line_after_doc_comments, clippy::doc_lazy_continuation)]
 //! Prime Core Lanczos Probe — Matrix-Free N=1M Prime Core Test
 //!
 //! Tests the Prime Core Conjecture at arbitrary N without storing the
@@ -294,10 +295,10 @@ fn main() {
                 let t_mv = Instant::now();
                 gram_matvec(x, y, dim, t_max);
                 let elapsed = t_mv.elapsed().as_secs_f64();
-                unsafe {
-                    MATVEC_COUNT += 1;
-                    if MATVEC_COUNT <= 3 || MATVEC_COUNT % 10 == 0 {
-                        eprintln!("    matvec #{}: {:.2}s (CPU)", MATVEC_COUNT, elapsed);
+                {
+                    let count = MATVEC_COUNT.fetch_add(1, std::sync::atomic::Ordering::Relaxed) + 1;
+                    if count <= 3 || count % 10 == 0 {
+                        eprintln!("    matvec #{}: {:.2}s (CPU)", count, elapsed);
                     }
                 }
             };
@@ -316,10 +317,10 @@ fn main() {
                     );
                 }
                 let elapsed = t_mv.elapsed().as_secs_f64();
-                unsafe {
-                    MATVEC_COUNT += 1;
-                    if MATVEC_COUNT <= 3 || MATVEC_COUNT % 10 == 0 {
-                        eprintln!("    matvec #{}: {:.2}s (GPU 🚀)", MATVEC_COUNT, elapsed);
+                {
+                    let count = MATVEC_COUNT.fetch_add(1, std::sync::atomic::Ordering::Relaxed) + 1;
+                    if count <= 3 || count % 10 == 0 {
+                        eprintln!("    matvec #{}: {:.2}s (GPU 🚀)", count, elapsed);
                     }
                 }
             };
@@ -337,10 +338,10 @@ fn main() {
             let t_mv = Instant::now();
             gram_matvec(x, y, dim, t_max);
             let elapsed = t_mv.elapsed().as_secs_f64();
-            unsafe {
-                MATVEC_COUNT += 1;
-                if MATVEC_COUNT <= 3 || MATVEC_COUNT % 10 == 0 {
-                    eprintln!("    matvec #{}: {:.2}s (CPU)", MATVEC_COUNT, elapsed);
+            {
+                let count = MATVEC_COUNT.fetch_add(1, std::sync::atomic::Ordering::Relaxed) + 1;
+                if count <= 3 || count % 10 == 0 {
+                    eprintln!("    matvec #{}: {:.2}s (CPU)", count, elapsed);
                 }
             }
         };
@@ -354,10 +355,10 @@ fn main() {
             let t_mv = Instant::now();
             gram_matvec(x, y, dim, t_max);
             let elapsed = t_mv.elapsed().as_secs_f64();
-            unsafe {
-                MATVEC_COUNT += 1;
-                if MATVEC_COUNT <= 3 || MATVEC_COUNT % 10 == 0 {
-                    eprintln!("    matvec #{}: {:.2}s (CPU)", MATVEC_COUNT, elapsed);
+            {
+                let count = MATVEC_COUNT.fetch_add(1, std::sync::atomic::Ordering::Relaxed) + 1;
+                if count <= 3 || count % 10 == 0 {
+                    eprintln!("    matvec #{}: {:.2}s (CPU)", count, elapsed);
                 }
             }
         };
@@ -530,7 +531,7 @@ fn main() {
 }
 
 // Global matvec counter (used for progress reporting in the closure)
-static mut MATVEC_COUNT: usize = 0;
+static MATVEC_COUNT: std::sync::atomic::AtomicUsize = std::sync::atomic::AtomicUsize::new(0);
 
 fn format_time(secs: f64) -> String {
     if secs < 60.0 {

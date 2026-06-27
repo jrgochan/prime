@@ -117,7 +117,7 @@ fn int_to_octonion(k: usize) -> Oct {
     let mut n = k;
     let mut p = 2;
     while p * p <= n {
-        while n % p == 0 {
+        while n.is_multiple_of(p) {
             r = r.mul(&Oct::basis(prime_to_basis(p)));
             n /= p;
         }

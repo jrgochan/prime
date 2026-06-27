@@ -1,4 +1,5 @@
-/// Normalized Harmonic Projection — uses v/‖v‖ instead of raw v
+// Normalized Harmonic Projection — uses v/‖v‖ instead of raw v
+#![allow(clippy::needless_range_loop)]
 
 fn mobius_sieve(n: usize) -> Vec<i32> {
     let mut mu = vec![0i32; n + 1];

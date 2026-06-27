@@ -126,7 +126,7 @@ fn unfold_local(evals: &[f64], window: usize) -> Vec<f64> {
         let raw = sorted[i + 1] - sorted[i];
 
         // Local mean spacing from neighbors
-        let lo = if i >= window { i - window } else { 0 };
+        let lo = i.saturating_sub(window);
         let hi = (i + window + 1).min(n - 1);
         let local_mean = (sorted[hi] - sorted[lo]) / (hi - lo) as f64;
 

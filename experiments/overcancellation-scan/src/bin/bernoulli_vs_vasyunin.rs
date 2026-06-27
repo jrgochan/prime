@@ -1,3 +1,4 @@
+#![allow(dead_code, unused_variables, unused_imports, unused_assignments, clippy::needless_range_loop, clippy::doc_lazy_continuation, non_snake_case, clippy::empty_line_after_doc_comments)]
 // overcancellation-scan/src/bin/bernoulli_vs_vasyunin.rs
 //
 // ╔═══════════════════════════════════════════════════════════════════╗
@@ -91,7 +92,7 @@ fn main() {
 
     let gamma = 0.5772156649015329;
     let ln2pi = (2.0 * std::f64::consts::PI).ln();
-    let c_diag = ln2pi - gamma; // ≈ 1.2645
+    let _c_diag = ln2pi - gamma; // ≈ 1.2645
 
     println!("{:>5} {:>14} {:>14} {:>14} {:>14}",
         "k", "G_V(k,k)", "G^(1)(k,k)", "Delta", "Delta*k");
@@ -171,7 +172,7 @@ fn main() {
 
         // Verify glass decomposition: G^(1) = R + 1/4
         // vᵀG^(1)v should equal vᵀRv + 1/4*(Σv)²
-        let b1_check = vtrv + rank1;
+        let _b1_check = vtrv + rank1;
 
         let delta_form = vtgv_vasyunin - vtgv_b1;
 

@@ -1,3 +1,4 @@
+#![allow(dead_code, clippy::needless_range_loop, clippy::manual_clamp)]
 //! Cathedral Spectral Factorization Probe
 //!
 //! Tests whether Cathedral observables (Gram matrix spectra, GCD strata,

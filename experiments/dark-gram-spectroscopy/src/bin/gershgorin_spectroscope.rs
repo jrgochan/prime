@@ -325,7 +325,7 @@ fn count_divisors(n: usize) -> usize {
     let mut count = 0;
     for d in 1..=n {
         if d * d > n { break; }
-        if n % d == 0 {
+        if n.is_multiple_of(d) {
             count += 1;
             if d != n / d { count += 1; }
         }
@@ -338,7 +338,7 @@ fn get_divisors(n: usize) -> Vec<usize> {
     let mut divs = Vec::new();
     for d in 1..=n {
         if d * d > n { break; }
-        if n % d == 0 {
+        if n.is_multiple_of(d) {
             divs.push(d);
             if d != n / d { divs.push(n / d); }
         }

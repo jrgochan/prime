@@ -28,7 +28,7 @@ use std::time::Instant;
 use crate::arithmetic::gcd;
 
 /// Euler-Mascheroni constant γ to f64 precision.
-const EULER_GAMMA: f64 = 0.5772156649015328606;
+const EULER_GAMMA: f64 = 0.577_215_664_901_532_9;
 
 /// Mean vector entry: b_k = (ln(k) + 1 - γ) / k
 pub fn mean_entry_f64(k: usize) -> f64 {
@@ -127,7 +127,7 @@ pub fn build_gram_matrix_f64(n: usize, ln_cache: &[f64]) -> Vec<Vec<f64>> {
         .map(|&(i, j)| {
             let val = gram_entry_f64(i + 1, j + 1, ln_cache);
             let c = computed.fetch_add(1, Ordering::Relaxed) + 1;
-            if c % 1000 == 0 || c == total {
+            if c.is_multiple_of(1000) || c == total {
                 eprint!(
                     "\r    G: [{:5.1}%] {}/{}   ",
                     c as f64 / total as f64 * 100.0,

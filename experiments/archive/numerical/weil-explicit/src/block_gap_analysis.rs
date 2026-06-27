@@ -42,7 +42,7 @@ fn oct_class(k: usize) -> usize {
 
     for (idx, &p) in primes.iter().enumerate() {
         let mut exp = 0;
-        while remaining % p == 0 {
+        while remaining.is_multiple_of(p) {
             remaining /= p;
             exp += 1;
         }

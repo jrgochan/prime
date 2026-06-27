@@ -33,7 +33,7 @@ fn gcd(a: usize, b: usize) -> usize {
     a
 }
 
-const EULER_GAMMA: f64 = 0.5772156649015328606;
+const EULER_GAMMA: f64 = 0.577_215_664_901_532_9;
 type VCache = Mutex<HashMap<(usize, usize), f64>>;
 
 fn vasyunin_sum(a: usize, b: usize) -> f64 {

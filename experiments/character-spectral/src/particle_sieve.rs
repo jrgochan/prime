@@ -484,9 +484,9 @@ fn factorize(mut n: usize) -> String {
     let mut factors = Vec::new();
     let mut p = 2;
     while p * p <= n {
-        if n % p == 0 {
+        if n.is_multiple_of(p) {
             let mut exp = 0;
-            while n % p == 0 {
+            while n.is_multiple_of(p) {
                 n /= p;
                 exp += 1;
             }

@@ -1,3 +1,4 @@
+#![allow(clippy::needless_range_loop, dead_code, non_snake_case)]
 // overcancellation-scan/src/bin/dense_anatomy.rs
 //
 // ╔═══════════════════════════════════════════════════════════════════════╗
@@ -122,7 +123,7 @@ fn num_divisors(n: usize) -> usize {
     let mut count = 0;
     let mut d = 1;
     while d * d <= n {
-        if n % d == 0 {
+        if n.is_multiple_of(d) {
             count += 1;
             if d != n / d { count += 1; }
         }
@@ -145,7 +146,7 @@ fn is_prime_power(n: usize, primes: &[usize]) -> Option<usize> {
     for &p in primes {
         if p > n { break; }
         let mut x = n;
-        while x > 1 && x % p == 0 { x /= p; }
+        while x > 1 && x.is_multiple_of(p) { x /= p; }
         if x == 1 { return Some(p); }
     }
     None
@@ -156,8 +157,8 @@ fn euler_phi(n: usize) -> usize {
     let mut m = n;
     let mut p = 2;
     while p * p <= m {
-        if m % p == 0 {
-            while m % p == 0 { m /= p; }
+        if m.is_multiple_of(p) {
+            while m.is_multiple_of(p) { m /= p; }
             result -= result / p;
         }
         p += 1;
@@ -171,12 +172,12 @@ fn ramanujan_c(q: usize, n: usize, mu: &[i8]) -> f64 {
     let mut s = 0.0f64;
     let mut d = 1;
     while d * d <= g {
-        if g % d == 0 {
-            if q / d <= mu.len() - 1 {
+        if g.is_multiple_of(d) {
+            if q / d < mu.len() {
                 s += (mu[q / d] as f64) * (d as f64);
             }
             let d2 = g / d;
-            if d2 != d && q / d2 <= mu.len() - 1 {
+            if d2 != d && q / d2 < mu.len() {
                 s += (mu[q / d2] as f64) * (d2 as f64);
             }
         }
@@ -417,7 +418,7 @@ fn analyze_dense(n: usize, mu: &[i8], _primes: &[usize]) -> DenseResult {
         is_prime: mu[n] != 0 && {
             let mut ip = true;
             let mut d = 2;
-            while d * d <= n { if n % d == 0 { ip = false; break; } d += 1; }
+            while d * d <= n { if n.is_multiple_of(d) { ip = false; break; } d += 1; }
             ip && n > 1
         },
         prime_power_base: None,

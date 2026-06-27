@@ -1,20 +1,21 @@
-/// Three Towers Probe — Four-Fold Symmetry High-Precision Experiment
-///
-/// Probes the properties visible in the hyperzeta-explorer's "THREE TOWERS"
-/// visualization mode using arbitrary-precision arithmetic (MPFR via rug)
-/// and parallel computation (rayon).
-///
-/// Five probe sections:
-///   §1. Tower Opening Angles — how |ζ| grows away from Re(s)=1/2
-///   §2. Four-Fold Symmetry — verify ρ, 1-ρ, ρ̄, 1-ρ̄ at known zeros
-///   §3. Spectral Energy Profile — Σ_p p^{-2σ} divergence at σ=1/2
-///   §4. Wave Counting — Hardy Z sign changes vs Riemann-von Mangoldt
-///   §5. Tower Cross-Sections — |ζ(σ+iγ_n)| profile at each zero
-///
-/// Usage: cargo run --release --bin three-towers-probe [-- --height T]
-///   Default T = 100 (first ~29 zeros, runs in seconds)
-///
-/// Created: May 24, 2026 — Mountain Session
+#![allow(dead_code, unused_variables, unused_imports, unused_assignments, clippy::needless_range_loop, clippy::doc_lazy_continuation, non_snake_case, clippy::empty_line_after_doc_comments)]
+// Three Towers Probe — Four-Fold Symmetry High-Precision Experiment
+//
+// Probes the properties visible in the hyperzeta-explorer's "THREE TOWERS"
+// visualization mode using arbitrary-precision arithmetic (MPFR via rug)
+// and parallel computation (rayon).
+//
+// Five probe sections:
+//   §1. Tower Opening Angles — how |ζ| grows away from Re(s)=1/2
+//   §2. Four-Fold Symmetry — verify ρ, 1-ρ, ρ̄, 1-ρ̄ at known zeros
+//   §3. Spectral Energy Profile — Σ_p p^{-2σ} divergence at σ=1/2
+//   §4. Wave Counting — Hardy Z sign changes vs Riemann-von Mangoldt
+//   §5. Tower Cross-Sections — |ζ(σ+iγ_n)| profile at each zero
+//
+// Usage: cargo run --release --bin three-towers-probe [-- --height T]
+//   Default T = 100 (first ~29 zeros, runs in seconds)
+//
+// Created: May 24, 2026 — Mountain Session
 
 use rug::Float;
 use rug::ops::NegAssign;
@@ -46,16 +47,16 @@ fn sieve_primes(limit: usize) -> Vec<usize> {
 /// Known zeros of ζ on the critical line (imaginary parts γ_n)
 /// Source: LMFDB, first 30 zeros
 const KNOWN_ZEROS: [f64; 30] = [
-    14.134725141734693, 21.022039638771555, 25.010857580145688,
-    30.424876125859513, 32.935061587739189, 37.586178158825671,
-    40.918719012147495, 43.327073280914999, 48.005150881167159,
-    49.773832477672302, 52.970321477714460, 56.446247697063394,
-    59.347044002602353, 60.831778524609809, 65.112544048081606,
-    67.079810529494173, 69.546401711173979, 72.067157674481907,
-    75.704690699083933, 77.144840068874805, 79.337375020249367,
-    82.910380854086030, 84.735492980517050, 87.425274613125229,
-    88.809111207634465, 92.491899270558484, 94.651344040519838,
-    95.870634228245309, 98.831194218193692, 101.317851005731220,
+    14.134725141734693, 21.022039638771555, 25.010_857_580_145_69,
+    30.424876125859513, 32.935_061_587_739_19, 37.586_178_158_825_67,
+    40.918_719_012_147_5, 43.327_073_280_915, 48.005_150_881_167_16,
+    49.773_832_477_672_3, 52.970_321_477_714_46, 56.446_247_697_063_39,
+    59.347_044_002_602_35, 60.831_778_524_609_81, 65.112_544_048_081_6,
+    67.079_810_529_494_17, 69.546_401_711_173_98, 72.067_157_674_481_9,
+    75.704_690_699_083_93, 77.144_840_068_874_8, 79.337_375_020_249_37,
+    82.910_380_854_086_03, 84.735_492_980_517_05, 87.425_274_613_125_23,
+    88.809_111_207_634_46, 92.491_899_270_558_48, 94.651_344_040_519_83,
+    95.870_634_228_245_31, 98.831_194_218_193_69, 101.317_851_005_731_21,
 ];
 
 /// Compute ζ(σ + it) using partial Dirichlet sum with N terms (f64)
@@ -281,10 +282,10 @@ fn probe_spectral_energy(primes: &[usize]) {
         .map(|i| 0.1 + (i as f64) * 0.05)
         .collect();
     
-    println!("  {:>8}  {:>16}  {:>12}  {}",
-             "σ", "E(σ)", "log₁₀ E(σ)", "convergence");
-    println!("  {:>8}  {:>16}  {:>12}  {}",
-             "──────", "──────────────", "──────────", "───────────");
+    println!("  {:>8}  {:>16}  {:>12}  convergence",
+             "σ", "E(σ)", "log₁₀ E(σ)");
+    println!("  {:>8}  {:>16}  {:>12}  ───────────",
+             "──────", "──────────────", "──────────");
     
     for &sigma in &sigma_points {
         let energy: f64 = primes.iter()
@@ -347,7 +348,7 @@ fn probe_wave_counting(max_t: f64) {
     
     // Divide into chunks for parallel processing
     let n_chunks = rayon::current_num_threads() * 8;
-    let chunk_size = (n_steps + n_chunks - 1) / n_chunks;
+    let chunk_size = n_steps.div_ceil(n_chunks);
     
     let n_threads = rayon::current_num_threads();
     eprintln!("  Parallel sweep: {} chunks on {} threads, dt={}, {} total steps",

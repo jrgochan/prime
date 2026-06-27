@@ -62,7 +62,7 @@ fn run_fast_mode(args: &[String]) {
         .iter()
         .filter(|a| a.as_str() != "--fast" && !a.contains('/'))
         .filter_map(|a| a.parse().ok())
-        .last()
+        .next_back()
         .unwrap_or(5000);
 
     let threads = rayon::current_num_threads();
@@ -170,7 +170,7 @@ fn run_fast_mode(args: &[String]) {
             .join(" → ")
     );
 
-    let bd_target = 1.0 / (2.0 + 0.5772156649015328606 - (4.0 * std::f64::consts::PI).ln());
+    let bd_target = 1.0 / (2.0 + 0.577_215_664_901_532_9 - (4.0 * std::f64::consts::PI).ln());
     println!(
         "  Lean target: X/ln(N) → {:.4} (IntegralBasis/BaezDuarte.lean)",
         bd_target
@@ -376,7 +376,7 @@ fn run_mpfr_mode(args: &[String]) {
             .join(" → ")
     );
 
-    let bd_target = 1.0 / (2.0 + 0.5772156649015328606 - (4.0 * std::f64::consts::PI).ln());
+    let bd_target = 1.0 / (2.0 + 0.577_215_664_901_532_9 - (4.0 * std::f64::consts::PI).ln());
     println!(
         "  Lean target: X/ln(N) → {:.4} (IntegralBasis/BaezDuarte.lean)",
         bd_target

@@ -1,3 +1,4 @@
+#![allow(dead_code, unused_variables, unused_imports, unused_assignments, clippy::needless_range_loop, clippy::doc_lazy_continuation, non_snake_case, clippy::empty_line_after_doc_comments)]
 // overcancellation-scan/src/bin/overcancellation_anatomy.rs
 //
 // ╔═══════════════════════════════════════════════════════════════════╗
@@ -118,8 +119,8 @@ fn main() {
         }
 
         let norm_sq: f64 = v.iter().map(|x| x * x).sum();
-        let sigma: f64 = v.iter().sum();
-        let s: f64 = v.iter().enumerate().map(|(i, vi)| vi / (i as f64 + 1.0)).sum();
+        let _sigma: f64 = v.iter().sum();
+        let _s: f64 = v.iter().enumerate().map(|(i, vi)| vi / (i as f64 + 1.0)).sum();
 
         eprint!("  N = {:5} ({} rows)...", n, size);
 

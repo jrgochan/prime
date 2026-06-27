@@ -34,7 +34,7 @@ fn num_divisors(n: usize) -> usize {
     let mut count = 0;
     let mut d = 1;
     while d * d <= n {
-        if n % d == 0 {
+        if n.is_multiple_of(d) {
             count += 1;
             if d != n / d {
                 count += 1;
@@ -52,12 +52,12 @@ fn is_prime(n: usize) -> bool {
     if n < 4 {
         return true;
     }
-    if n % 2 == 0 || n % 3 == 0 {
+    if n.is_multiple_of(2) || n.is_multiple_of(3) {
         return false;
     }
     let mut i = 5;
     while i * i <= n {
-        if n % i == 0 || n % (i + 2) == 0 {
+        if n.is_multiple_of(i) || n.is_multiple_of(i + 2) {
             return false;
         }
         i += 6;

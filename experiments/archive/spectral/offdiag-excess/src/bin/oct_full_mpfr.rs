@@ -16,12 +16,12 @@ fn min_prime_factor(n: usize) -> usize {
     if n <= 1 {
         return 1;
     }
-    if n % 2 == 0 {
+    if n.is_multiple_of(2) {
         return 2;
     }
     let mut p = 3;
     while p * p <= n {
-        if n % p == 0 {
+        if n.is_multiple_of(p) {
             return p;
         }
         p += 2;
@@ -186,7 +186,7 @@ fn solve_mpfr(a: &[Vec<Float>], b: &[Float]) -> Vec<Float> {
     let n = b.len();
     let mut aug: Vec<Vec<Float>> = (0..n)
         .map(|i| {
-            let mut row: Vec<Float> = a[i].iter().map(|x| x.clone()).collect();
+            let mut row: Vec<Float> = a[i].iter().cloned().collect();
             row.push(b[i].clone());
             row
         })
@@ -280,7 +280,7 @@ fn main() {
 
         let classes: Vec<usize> = (0..dim).map(|i| octonion_class(i + 2)).collect();
         let mut active_classes: Vec<usize> = Vec::new();
-        let mut class_count = vec![0usize; 8];
+        let mut class_count = [0usize; 8];
         for &c in &classes {
             class_count[c] += 1;
         }
@@ -290,7 +290,7 @@ fn main() {
             }
         }
         let nc = active_classes.len();
-        let mut class_to_idx = vec![0usize; 8];
+        let mut class_to_idx = [0usize; 8];
         for (idx, &c) in active_classes.iter().enumerate() {
             class_to_idx[c] = idx;
         }

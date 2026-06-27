@@ -878,7 +878,7 @@ fn days_to_ymd(total_days: u64) -> (u64, u64, u64) {
 }
 
 fn is_leap(y: u64) -> bool {
-    (y % 4 == 0 && y % 100 != 0) || (y % 400 == 0)
+    (y.is_multiple_of(4) && !y.is_multiple_of(100)) || y.is_multiple_of(400)
 }
 
 fn percentile_f64(data: &[f64], pct: f64) -> f64 {

@@ -136,13 +136,13 @@ fn rs_theta_dd(t: f64) -> crate::dd::DD {
         let inv_t = DD::from_f64(1.0) / t_dd;
         let inv_t2 = inv_t * inv_t;
         let inv_t3 = inv_t2 * inv_t;
-        theta = theta + inv_t / DD::from_f64(48.0);
-        theta = theta + inv_t3 * DD::from_f64(7.0) / DD::from_f64(5760.0);
+        theta += inv_t / DD::from_f64(48.0);
+        theta += inv_t3 * DD::from_f64(7.0) / DD::from_f64(5760.0);
         if t > 10.0 {
             let inv_t5 = inv_t3 * inv_t2;
             let inv_t7 = inv_t5 * inv_t2;
-            theta = theta + inv_t5 * DD::from_f64(31.0) / DD::from_f64(80640.0);
-            theta = theta + inv_t7 * DD::from_f64(127.0) / DD::from_f64(430080.0);
+            theta += inv_t5 * DD::from_f64(31.0) / DD::from_f64(80640.0);
+            theta += inv_t7 * DD::from_f64(127.0) / DD::from_f64(430080.0);
         }
     }
 
@@ -177,9 +177,9 @@ pub fn hardy_z_hd(t: f64) -> f64 {
         let ln_n = DD::from_f64(n as f64).ln();
         let phase = theta - t_dd * ln_n;
         let cos_val = phase.cos();
-        sum = sum + cos_val / DD::from_f64((n as f64).sqrt());
+        sum += cos_val / DD::from_f64((n as f64).sqrt());
     }
-    sum = sum * DD::from_f64(2.0);
+    sum *= DD::from_f64(2.0);
 
     // Riemann-Siegel correction term (C₀)
     let p = ((t / (2.0 * PI)).sqrt()).fract();
@@ -225,6 +225,11 @@ impl DdLogTable {
     /// Number of terms in the table.
     pub fn len(&self) -> usize {
         self.logs.len() - 1
+    }
+
+    /// Returns true if the table has no entries.
+    pub fn is_empty(&self) -> bool {
+        self.logs.len() <= 1
     }
 }
 

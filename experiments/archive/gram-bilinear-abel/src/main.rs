@@ -80,7 +80,7 @@ fn mobius_sieve(n: usize) -> Vec<i8> {
         }
         if sq {
             mu[k] = 0;
-        } else if nf % 2 == 0 {
+        } else if nf.is_multiple_of(2) {
             mu[k] = 1;
         } else {
             mu[k] = -1;
@@ -453,7 +453,7 @@ fn experiment_c(n: usize, mu: &[i8], mertens: &[i64]) -> (f64, f64, f64, f64) {
 fn experiment_d(n: usize, mu: &[i8]) -> Vec<(usize, f64, f64, f64)> {
     let dim = n - 1;
     let weights: Vec<Float> = (1..n).map(|k| log_cutoff_weight(k, n, mu)).collect();
-    let means: Vec<Float> = (1..n).map(|k| mean_entry(k)).collect();
+    let means: Vec<Float> = (1..n).map(mean_entry).collect();
 
     let gv: Vec<Float> = (0..dim)
         .into_par_iter()

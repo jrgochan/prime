@@ -6,7 +6,7 @@
 //! - Spectral Lift Grid (the π^n/ζ(k) matrix)
 
 use crate::constants::PhysicalTarget;
-use crate::engine::{Correction, Match, Tier};
+use crate::engine::{Correction, Match};
 use crate::formulas::ZetaConstants;
 use serde::Serialize;
 use std::f64::consts::PI;

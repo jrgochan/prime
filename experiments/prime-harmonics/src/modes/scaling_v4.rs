@@ -202,7 +202,7 @@ fn blocked_forward_solve(l_data: &[f64], g: &[f64], n: usize) -> Vec<f64> {
             // Compute chunk size: aim for ~num_threads chunks (one per core).
             // Each chunk processes multiple consecutive L rows → great cache locality
             // since packed L rows are contiguous in memory.
-            let rows_per_chunk = (block_len + num_threads - 1) / num_threads;
+            let rows_per_chunk = block_len.div_ceil(num_threads);
 
             g_block
                 .par_chunks_mut(rows_per_chunk.max(1))

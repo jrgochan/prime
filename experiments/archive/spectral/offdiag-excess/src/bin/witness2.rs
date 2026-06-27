@@ -22,10 +22,10 @@ fn moebius(n: usize) -> i32 {
     let mut num_factors = 0;
     let mut p = 2;
     while p * p <= m {
-        if m % p == 0 {
+        if m.is_multiple_of(p) {
             num_factors += 1;
             m /= p;
-            if m % p == 0 {
+            if m.is_multiple_of(p) {
                 return 0;
             }
         }

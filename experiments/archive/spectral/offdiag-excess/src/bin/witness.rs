@@ -26,10 +26,10 @@ fn moebius(n: usize) -> i32 {
     // Trial division
     let mut p = 2;
     while p * p <= m {
-        if m % p == 0 {
+        if m.is_multiple_of(p) {
             num_factors += 1;
             m /= p;
-            if m % p == 0 {
+            if m.is_multiple_of(p) {
                 // p² divides n → μ(n) = 0
                 return 0;
             }

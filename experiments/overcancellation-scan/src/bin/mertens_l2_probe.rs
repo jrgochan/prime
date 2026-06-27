@@ -1,3 +1,4 @@
+#![allow(dead_code, unused_variables, unused_imports, unused_assignments, clippy::needless_range_loop, clippy::doc_lazy_continuation, non_snake_case, clippy::empty_line_after_doc_comments)]
 //! Mertens L² Probe — The Irreducible Core of RH
 //!
 //! Computes the discrete Mertens L² sum:

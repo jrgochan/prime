@@ -767,7 +767,7 @@ fn ooc_cg_solve(gram_path: &Path, b: &[f64], dim: usize, tol: f64, max_iter: usi
         // Stagnation detection with residual recomputation
         if r_norm >= prev_r_norm * 0.9999 {
             stagnation_count += 1;
-            if stagnation_count >= 50 && stagnation_count % 100 == 0 {
+            if stagnation_count >= 50 && stagnation_count.is_multiple_of(100) {
                 // Recompute residual from scratch: r = b - Gx
                 match &gpu_state {
                     Some(gs) => gpu_matvec(&gram, gs, &x, &mut y),

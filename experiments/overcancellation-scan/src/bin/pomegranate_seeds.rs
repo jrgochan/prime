@@ -1,3 +1,4 @@
+#![allow(clippy::needless_range_loop, dead_code)]
 // overcancellation-scan/src/bin/pomegranate_seeds.rs
 //
 // ╔═══════════════════════════════════════════════════════════════╗
@@ -82,7 +83,7 @@ fn compute_vtrv(n: usize, mu: &[i8]) -> f64 {
         .collect();
     
     // Parallel: compute vtRv with R(j,k) = gcd²/(12jk)
-    let diagonal: f64 = active.iter()
+    let _diagonal: f64 = active.iter()
         .map(|&(j, wj)| {
             let jf = j as f64;
             wj * wj * jf * jf / (12.0 * jf * jf)  // gcd(j,j)=j, so gcd²/(12j²) = 1/12

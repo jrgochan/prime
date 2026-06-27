@@ -421,8 +421,8 @@ fn vasyunin_sum(m: u64, n: u64) -> f64 {
 fn next_non_factor_prime(start: u64, n: u64) -> u64 {
     let mut p = start + 2;
     loop {
-        if is_prime_u64(p) && n % p != 0 { return p; }
-        p += if p % 2 == 0 { 1 } else { 2 };
+        if is_prime_u64(p) && !n.is_multiple_of(p) { return p; }
+        p += if p.is_multiple_of(2) { 1 } else { 2 };
         if p > start + 1000 { return start + 1; } // fallback
     }
 }
@@ -430,10 +430,10 @@ fn next_non_factor_prime(start: u64, n: u64) -> u64 {
 fn is_prime_u64(n: u64) -> bool {
     if n < 2 { return false; }
     if n < 4 { return true; }
-    if n % 2 == 0 || n % 3 == 0 { return false; }
+    if n.is_multiple_of(2) || n.is_multiple_of(3) { return false; }
     let mut i = 5u64;
     while i * i <= n {
-        if n % i == 0 || n % (i + 2) == 0 { return false; }
+        if n.is_multiple_of(i) || n.is_multiple_of(i + 2) { return false; }
         i += 6;
     }
     true

@@ -29,7 +29,7 @@ fn liouville(n: usize) -> i32 {
     let mut omega = 0;
     let mut p = 2;
     while p * p <= val {
-        while val % p == 0 {
+        while val.is_multiple_of(p) {
             omega += 1;
             val /= p;
         }

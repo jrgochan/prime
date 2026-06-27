@@ -201,7 +201,7 @@ fn main() {
     let flat_coeffs: Vec<f64> = (0..n).map(|i| -(mu[i + 1] as f64) * k_half[i]).collect();
     let sharp_coeffs: Vec<f64> = (0..n)
         .map(|i| {
-            if i + 1 <= n / 2 {
+            if i < n / 2 {
                 -(mu[i + 1] as f64) * k_half[i]
             } else {
                 0.0

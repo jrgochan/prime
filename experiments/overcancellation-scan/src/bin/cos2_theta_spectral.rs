@@ -1,3 +1,4 @@
+#![allow(dead_code, unused_variables, unused_imports, unused_assignments, clippy::needless_range_loop, clippy::doc_lazy_continuation, non_snake_case, clippy::empty_line_after_doc_comments)]
 // overcancellation-scan/src/bin/cos2_theta_spectral.rs
 //
 // ╔═══════════════════════════════════════════════════════════════════╗
@@ -29,10 +30,10 @@ use std::time::Instant;
 fn is_prime(n: usize) -> bool {
     if n < 2 { return false; }
     if n < 4 { return true; }
-    if n % 2 == 0 || n % 3 == 0 { return false; }
+    if n.is_multiple_of(2) || n.is_multiple_of(3) { return false; }
     let mut i = 5;
     while i * i <= n {
-        if n % i == 0 || n % (i + 2) == 0 { return false; }
+        if n.is_multiple_of(i) || n.is_multiple_of(i + 2) { return false; }
         i += 6;
     }
     true
@@ -42,7 +43,7 @@ fn num_divisors(n: usize) -> usize {
     let mut count = 0;
     let mut d = 1;
     while d * d <= n {
-        if n % d == 0 {
+        if n.is_multiple_of(d) {
             count += 1;
             if d != n / d { count += 1; }
         }
@@ -197,7 +198,7 @@ fn main() {
         // Actually, g is the last column of G_N that connects G_{N-1} to the new vector.
         // In the bordered matrix [[G_{N-1}, g], [gᵀ, γ]], g[i] = gramEntry(i+1, N-1)
         // which is sub[i * dim + (dim-1)] for i = 0..dim-2
-        let prev_dim = if dim > 1 { dim - 1 } else { 0 };
+        let prev_dim = dim.saturating_sub(1);
         let g_vec: Vec<f64> = (0..prev_dim).map(|i| sub[i * dim + prev_dim]).collect();
         let g_nsq = norm_sq(&g_vec);
 

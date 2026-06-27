@@ -1,3 +1,4 @@
+#![allow(dead_code, unused_variables, unused_imports, unused_assignments, clippy::needless_range_loop, clippy::doc_lazy_continuation, non_snake_case, clippy::empty_line_after_doc_comments)]
 // overcancellation-scan/src/bin/smith_probe.rs
 //
 // ╔═══════════════════════════════════════════════════════════════════╗
@@ -51,9 +52,9 @@ fn jordan_totient2(d: usize) -> f64 {
     let mut n = d;
     let mut p = 2;
     while p * p <= n {
-        if n % p == 0 {
+        if n.is_multiple_of(p) {
             result *= 1.0 - 1.0 / (p as f64 * p as f64);
-            while n % p == 0 {
+            while n.is_multiple_of(p) {
                 n /= p;
             }
         }
@@ -157,7 +158,7 @@ fn main() {
     println!();
 
     for &n in &test_ns {
-        let log_n = (n as f64).ln();
+        let _log_n = (n as f64).ln();
 
         // Compute y_1
         let y1 = divisor_coeff(&mu, 1, n);
@@ -252,7 +253,7 @@ fn main() {
 
     // Check the N = 100000 case
     let n_check = 100000;
-    let y1_check = divisor_coeff(&mu, 1, n_check);
+    let _y1_check = divisor_coeff(&mu, 1, n_check);
     let log_n_check = (n_check as f64).ln();
 
     // Compute scaled coefficients for d = 2..20

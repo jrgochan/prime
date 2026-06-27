@@ -43,7 +43,7 @@ fn big_omega(n: usize) -> u32 {
     let mut m = n;
     let mut p = 2;
     while p * p <= m {
-        while m % p == 0 {
+        while m.is_multiple_of(p) {
             count += 1;
             m /= p;
         }
@@ -57,7 +57,7 @@ fn big_omega(n: usize) -> u32 {
 
 /// Liouville function: λ(n) = (-1)^{Ω(n)}
 fn liouville(n: usize) -> f64 {
-    if big_omega(n) % 2 == 0 {
+    if big_omega(n).is_multiple_of(2) {
         1.0
     } else {
         -1.0

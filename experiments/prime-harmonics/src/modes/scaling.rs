@@ -150,7 +150,7 @@ pub fn run(h5_dir: &str, max_n: usize) {
             };
 
             // Build leading dim×dim submatrix
-            let g_sub = DMatrix::from_fn(dim, dim, |i, j| gram_entry(i, j));
+            let g_sub = DMatrix::from_fn(dim, dim, gram_entry);
             let b_sub = DVector::from_fn(dim, |i, _| b_full[i]);
 
             // Cholesky solve

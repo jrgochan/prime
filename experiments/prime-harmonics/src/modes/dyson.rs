@@ -32,9 +32,9 @@ fn moebius_fn(n: usize) -> i32 {
     let mut d = 2usize;
     let mut count = 0;
     while d * d <= temp {
-        if temp % d == 0 {
+        if temp.is_multiple_of(d) {
             let mut exp = 0;
-            while temp % d == 0 { temp /= d; exp += 1; }
+            while temp.is_multiple_of(d) { temp /= d; exp += 1; }
             if exp > 1 { return 0; }
             count += 1;
         }
@@ -143,7 +143,7 @@ pub fn run(n_max: usize) {
 
     for &n in &test_ns {
         let t0 = Instant::now();
-        let dim = n - 1;
+        let _dim = n - 1;
 
         // Build matrices
         let g_mat = build_gram_matrix(n);
