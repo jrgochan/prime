@@ -43,11 +43,11 @@ Contributions fall along several orthogonal axes:
 |------------------------|-------|------------------|--------------------|
 | **Intuition**          | ██████ dominant | ███ medium | █████ large |
 | **Formalization**      | █ small | ██████ dominant | ██ medium |
-| **Architecture**       | █████ large | █████ large | ██ small |
+| **Architecture**       | █████ large | █████ large | ███ medium |
 | **Verification**       | ████ large | ████ large | ███ medium |
-| **Direction**          | ██████ dominant | ████ large | ██ small |
+| **Direction**          | ██████ dominant | ████ large | ███ medium |
 | **Physics Dict.**      | ████ large | ████ large | █████ large |
-| **Communication**      | █████ large | █████ large | ███ medium |
+| **Communication**      | █████ large | █████ large | ████ large |
 | **State & Continuity** | ██████ dominant | █ small | █ small |
 
 ### Key Observations
