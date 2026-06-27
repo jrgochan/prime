@@ -1,0 +1,64 @@
+# The Cathedral — EditorConfig
+# https://editorconfig.org
+
+root = true
+
+# Default: UTF-8, LF, trailing whitespace trimmed
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# Lean 4: 2-space indent (Mathlib convention)
+[*.lean]
+indent_style = space
+indent_size = 2
+
+# Rust: 4-space indent (rustfmt default)
+[*.rs]
+indent_style = space
+indent_size = 4
+
+# TOML (Cargo.toml, etc.): 2-space indent
+[*.toml]
+indent_style = space
+indent_size = 2
+
+# YAML (CI workflows): 2-space indent
+[*.{yml,yaml}]
+indent_style = space
+indent_size = 2
+
+# Makefiles: tabs required
+[Makefile]
+indent_style = tab
+
+# Shell scripts: 4-space indent
+[*.sh]
+indent_style = space
+indent_size = 4
+
+# Markdown: preserve trailing whitespace (line breaks)
+[*.md]
+trim_trailing_whitespace = false
+
+# LaTeX: 2-space indent
+[*.tex]
+indent_style = space
+indent_size = 2
+
+# JavaScript/TypeScript (visualizers): 2-space indent
+[*.{js,jsx,ts,tsx}]
+indent_style = space
+indent_size = 2
+
+# JSON
+[*.json]
+indent_style = space
+indent_size = 2
+
+# Dockerfile
+[Dockerfile]
+indent_style = space
+indent_size = 4

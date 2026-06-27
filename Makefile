@@ -9,7 +9,7 @@
 #   make doctor  — verify everything works
 # ============================================
 
-.PHONY: help build papers papers-all verify axioms rh cascade crown-audit clock jukebox
+.PHONY: help build tour papers papers-all verify axioms rh cascade crown-audit clock jukebox
 .PHONY: hyperzeta hyperzeta-origin hyperzeta-explorer particle-zoo visualizer
 .PHONY: check setup setup-lean setup-rust setup-node setup-python setup-latex setup-gmp
 .PHONY: experiment-vasyunin experiment-covariance experiment-bd
@@ -34,6 +34,71 @@ ENV := scripts/env.sh
 build: ## Build the Lean 4 proofs (THE main event)
 	@$(ENV) require lean
 	cd proofs && lake build
+
+tour: ## 🗺️  Guided tour — what is the Cathedral? (no build required)
+	@echo ""
+	@echo "  ═══════════════════════════════════════════════════════════"
+	@echo "  🏛️  THE CATHEDRAL — A Guided Tour"
+	@echo "  ═══════════════════════════════════════════════════════════"
+	@echo ""
+	@echo "  What is this?"
+	@echo "  ─────────────"
+	@echo "  A machine-checked proof architecture in Lean 4 + Mathlib that"
+	@echo "  reduces the Riemann Hypothesis to the decay of the"
+	@echo "  Nyman–Beurling distance d²(N)."
+	@echo ""
+	@echo "  The Core Claim"
+	@echo "  ──────────────"
+	@echo "  If vᵀGv ≤ 1 + K/ln(N) for all N (the Gram form bound),"
+	@echo "  then the Riemann Hypothesis is true."
+	@echo ""
+	@echo "  The compiler verifies this implication with ZERO sorry on"
+	@echo "  the crown path. Run 'make verify' to see the axiom foundation."
+	@echo ""
+	@echo "  Project Scale"
+	@echo "  ─────────────"
+	@printf "  Lean files:      " && find proofs/Cathedral -name '*.lean' -not -path '*/Archive/*' -not -path '*/.lake/*' | wc -l | tr -d ' '
+	@printf "  Lines of proof:  ~" && find proofs/Cathedral -name '*.lean' -not -path '*/Archive/*' -not -path '*/.lake/*' -exec cat {} + 2>/dev/null | wc -l | tr -d ' '
+	@printf "  Build jobs:      8,854+\n"
+	@printf "  Experiments:     " && find experiments -maxdepth 1 -type d | tail -n +2 | wc -l | tr -d ' '
+	@echo "  Papers:          18 (4 core + 14 working drafts)"
+	@echo ""
+	@echo "  The 4 Proof Paths to RH"
+	@echo "  ───────────────────────"
+	@echo "  1. Overcancellation Chain    — Möbius cancellation → Gram bound → RH"
+	@echo "  2. Unified Fermionic Path    — SUSY decomposition → RH"
+	@echo "  3. Vacuum Stability Path     — Physics interpretation → RH"
+	@echo "  4. Nyman–Beurling Equivalence — BD distance → L² convergence → RH"
+	@echo ""
+	@echo "  Key Commands"
+	@echo "  ────────────"
+	@echo "  make check     See what dependencies you have / need"
+	@echo "  make setup     Install missing dependencies (interactive)"
+	@echo "  make doctor    Full health check"
+	@echo "  make build     Build all Lean proofs (~20 min first time)"
+	@echo "  make verify    Show the crown theorem's axiom foundation"
+	@echo "  make rh        Show ALL 4 proof paths to the Riemann Hypothesis"
+	@echo "  make stats     Project statistics"
+	@echo "  make axioms    List every axiom in the Cathedral"
+	@echo ""
+	@echo "  Visualizers (interactive)"
+	@echo "  ────────────────────────"
+	@echo "  make clock              The Cathedral Clock — cosmological N dashboard"
+	@echo "  make hyperzeta          150K-particle sedenion lattice explorer"
+	@echo "  make particle-zoo       Every integer has a soul"
+	@echo "  make visualizer         Proof architecture explorer"
+	@echo ""
+	@echo "  Learn More"
+	@echo "  ──────────"
+	@echo "  docs/GETTING-STARTED.md   Step-by-step setup guide"
+	@echo "  CONTRIBUTING.md           How to contribute"
+	@echo "  ORIGIN-STORY.md           How this project began"
+	@echo "  papers/core/              The 4 companion papers"
+	@echo ""
+	@echo "  ═══════════════════════════════════════════════════════════"
+	@echo "  Ready? Start with:  make check  →  make setup  →  make doctor"
+	@echo "  ═══════════════════════════════════════════════════════════"
+	@echo ""
 
 # ── Port conflict detection ─────────────────────────
 define check_port
@@ -500,12 +565,12 @@ help: ## Show this help message
 	@echo ""
 	@echo "  🏛️  The Cathedral — A Formal Reduction of the Riemann Hypothesis"
 	@echo ""
-	@echo "  First time? Run:  make check  →  make setup  →  make doctor"
+	@echo "  First time? Run:  make tour    (or:  make check → make setup → make doctor)"
 	@echo ""
 	@echo "  Usage: make <target>"
 	@echo ""
 	@echo "  ─── THE CATHEDRAL ────────────────────────────────────────"
-	@grep -E '^(build|verify|axioms|rh|cascade|crown-audit|papers|papers-all|clock|jukebox|hyperzeta[a-z-]*|particle-zoo|visualizer):.*##' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  %-24s %s\n", $$1, $$2}'
+	@grep -E '^(tour|build|verify|axioms|rh|cascade|crown-audit|papers|papers-all|clock|jukebox|hyperzeta[a-z-]*|particle-zoo|visualizer):.*##' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  %-24s %s\n", $$1, $$2}'
 	@echo ""
 	@echo "  ─── EXPERIMENTS & AUDITING ───────────────────────────────"
 	@grep -E '^(audit|experiment-[a-z]+|stats):.*##' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  %-24s %s\n", $$1, $$2}'
