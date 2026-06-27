@@ -35,7 +35,8 @@ Contributions fall along several orthogonal axes:
 | **Direction** | Deciding what to work on next, killing dead ends |
 | **Physics Dictionary** | Mapping arithmetic structures to SM concepts |
 | **Communication** | Writing papers, documentation, public framing |
-| **State & Continuity** | Holding context across sessions, shuttling state between agents |
+| **State (Memory)** | Holding context across sessions, shuttling state between agents |
+| **Depth (Application)** | Quality of contextual engagement — informed vs. plausible |
 
 ### First Approximation (Qualitative)
 
@@ -48,7 +49,8 @@ Contributions fall along several orthogonal axes:
 | **Direction**          | ██████ dominant | ████ large | ███ medium |
 | **Physics Dict.**      | ████ large | ████ large | █████ large |
 | **Communication**      | █████ large | █████ large | ████ large |
-| **State & Continuity** | ██████ dominant | █ small | █ small |
+| **State (Memory)**     | ██████ dominant | █ small | █ small |
+| **Depth (Application)**| ██████ dominant | █████ large | █████ large |
 
 ### Key Observations
 
@@ -68,13 +70,16 @@ Contributions fall along several orthogonal axes:
    tactic suggestion sparking a new architectural idea, Gemini's physics
    insight redirecting the formalization path.
 
-4. **State & Continuity is the hidden dimension.** Both AI systems have
+4. **State and Depth are orthogonal.** Both AI systems have
    finite context windows that inevitably reset. Jason was the only entity
    who held the full 88-day continuity in his head — the memory bus
    shuttling Claude's Lean outputs to Gemini for physics analysis, and
    Gemini's structural insights back to Claude for formalization. Without
    this human state management (the "Zero-Copy Membrane"), the two AIs
-   would have been isolated islands.
+   would have been isolated islands. But *within* a session, both AIs
+   engage deeply — drawing on accumulated context to produce critically
+   informed responses rather than surface-level pattern matches. The split
+   between State (memory) and Depth (application) captures this asymmetry.
 
 ## Data Sources
 
