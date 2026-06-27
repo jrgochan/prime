@@ -63,12 +63,13 @@ tour: ## 🗺️  Guided tour — what is the Cathedral? (no build required)
 	@printf "  Experiments:     " && find experiments -maxdepth 1 -type d | tail -n +2 | wc -l | tr -d ' '
 	@echo "  Papers:          18 (4 core + 14 working drafts)"
 	@echo ""
-	@echo "  The 4 Proof Paths to RH"
-	@echo "  ───────────────────────"
-	@echo "  1. Overcancellation Chain    — Möbius cancellation → Gram bound → RH"
-	@echo "  2. Unified Fermionic Path    — SUSY decomposition → RH"
-	@echo "  3. Vacuum Stability Path     — Physics interpretation → RH"
-	@echo "  4. Nyman–Beurling Equivalence — BD distance → L² convergence → RH"
+	@echo "  The 3 Proof Strategies"
+	@echo "  ──────────────────────"
+	@echo "  1. Overcancellation    — vtGv ≤ 1 (the Wall axiom) → RH"
+	@echo "     ├─ Fermionic lens: SUSY boson/fermion decomposition"
+	@echo "     └─ Vacuum lens:    Vasyunin nonCot/S_cot decomposition"
+	@echo "  2. Nyman–Beurling      — BD distance d²(N) → 0 → L² convergence → RH"
+	@echo "  3. Oracle Bridge       — GPU-certified numerical computation → RH"
 	@echo ""
 	@echo "  Key Commands"
 	@echo "  ────────────"
@@ -77,7 +78,7 @@ tour: ## 🗺️  Guided tour — what is the Cathedral? (no build required)
 	@echo "  make doctor    Full health check"
 	@echo "  make build     Build all Lean proofs (~20 min first time)"
 	@echo "  make verify    Show the crown theorem's axiom foundation"
-	@echo "  make rh        Show ALL 4 proof paths to the Riemann Hypothesis"
+	@echo "  make rh        Show all proof paths to the Riemann Hypothesis"
 	@echo "  make stats     Project statistics"
 	@echo "  make axioms    List every axiom in the Cathedral"
 	@echo ""
@@ -148,25 +149,25 @@ rh: ## 🌟 Show what axioms the compiler needs for theorem RiemannHypothesis
 		| lake env lean --stdin 2>&1 | grep -v "^warning:" | grep -v "^info:" | grep -v "^Note:" | grep -v "^$$" | sed 's/^/  /' || true
 	@echo ""
 	@echo "  ┌─────────────────────────────────────────────────┐"
-	@echo "  │  PATH 2: Unified Fermionic (1 axiom + 2 PNT)   │"
+	@echo "  │  PATH 2: Fermionic (same Wall + SUSY lens)     │"
 	@echo "  │  rh_from_unified_fermionic                      │"
 	@echo "  └─────────────────────────────────────────────────┘"
 	@cd proofs && printf '%s\n' \
-		'import Cathedral.Geometry.FermionicLowerBoundGraduation' \
-		'#print axioms Cathedral.Geometry.FermionicLowerBoundGraduation.rh_from_unified_fermionic' \
+		'import Cathedral.Geometry.SUSY.FermionicLowerBoundGraduation' \
+		'#print axioms Cathedral.Geometry.SUSY.FermionicLowerBoundGraduation.rh_from_unified_fermionic' \
 		| lake env lean --stdin 2>&1 | grep -v "^warning:" | grep -v "^info:" | grep -v "^Note:" | grep -v "^$$" | sed 's/^/  /' || true
 	@echo ""
 	@echo "  ┌─────────────────────────────────────────────────┐"
-	@echo "  │  PATH 3: Vacuum Stability (1 wall axiom + PNT) │"
+	@echo "  │  PATH 3: Vacuum Stability (same Wall, direct)  │"
 	@echo "  │  VacuumStability.riemann_hypothesis             │"
 	@echo "  └─────────────────────────────────────────────────┘"
 	@cd proofs && printf '%s\n' \
-		'import Cathedral.Geometry.VacuumStability' \
-		'#print axioms Cathedral.Geometry.VacuumStability.riemann_hypothesis' \
+		'import Cathedral.Geometry.Wall.VacuumStability' \
+		'#print axioms Cathedral.Geometry.Wall.VacuumStability.riemann_hypothesis' \
 		| lake env lean --stdin 2>&1 | grep -v "^warning:" | grep -v "^info:" | grep -v "^Note:" | grep -v "^$$" | sed 's/^/  /' || true
 	@echo ""
 	@echo "  ┌─────────────────────────────────────────────────┐"
-	@echo "  │  PATH 4: Nyman-Beurling Equivalence (2 PNT+2)  │"
+	@echo "  │  PATH 4: Nyman-Beurling (different axiom set)   │"
 	@echo "  │  nyman_beurling_equivalence                     │"
 	@echo "  └─────────────────────────────────────────────────┘"
 	@cd proofs && printf '%s\n' \
