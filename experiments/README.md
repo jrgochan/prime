@@ -88,3 +88,53 @@ All 30 active experiments depend on `cathedral-utils` — zero local math duplic
 
 - `cache/` — Active OOC certificates and cached coefficient files
 - Each experiment stores results in its own `results/` subdirectory
+
+---
+
+## 🏗️ Code Quality Bounty — Production-Grade Hardening
+
+**Status**: `make lint` → ✅ zero clippy warnings (as of June 2026)
+**Goal**: Zero warnings *without* crate-level `#![allow(...)]` suppression
+
+### Current State
+
+The experiment crates currently compile warning-free via blanket `#![allow(...)]`
+directives at the crate root (e.g. `dead_code`, `unused_variables`, `unused_imports`,
+`unused_assignments`, `clippy::needless_range_loop`). This was a necessary first step
+to get the full workspace to green, but it **masks real issues** that should be
+fixed properly.
+
+### The Bounty
+
+We're looking for contributions that incrementally harden individual experiment
+crates toward production-grade Rust:
+
+| Task | Difficulty | Impact |
+|------|-----------|--------|
+| **Remove a `#![allow(...)]` and fix the underlying warnings** | ⭐–⭐⭐ | High — each removal makes real bugs visible |
+| **Replace `dead_code` allows with proper `pub` visibility or deletion** | ⭐ | Medium — clarifies public API surface |
+| **Replace `unused_variables` allows with `_` prefixes or removal** | ⭐ | Medium — documents intentional vs accidental unused code |
+| **Fix `needless_range_loop` with idiomatic iterators** | ⭐⭐ | Medium — cleaner, faster Rust |
+| **Add unit tests to experiment binaries** | ⭐⭐–⭐⭐⭐ | Very high — currently untested |
+| **Extract shared patterns into `cathedral-utils`** | ⭐⭐⭐ | Very high — reduces duplication |
+
+### How to Contribute
+
+1. Pick an experiment crate (start small — `bilinear-probe/` or `hc-gram-oracle/`)
+2. Remove one `#![allow(...)]` item from the crate root
+3. Fix every warning that surfaces — properly, not with more suppression
+4. Run `make lint` to verify the full workspace stays green
+5. Submit a PR with the crate name in the title (e.g. `chore(bilinear-probe): remove dead_code allow`)
+
+### Priority Crates
+
+These crates are most likely to benefit from hardening (high reuse, complex logic):
+
+- `cathedral-utils/` — the shared math library, used by all 30+ experiments
+- `nb-distance-gpu/` — primary GPU solver, production-critical
+- `overcancellation-scan/` — largest crate, 25+ binaries, most lint suppression
+- `spectral-factorization-probe-gpu/` — GPU eigendecomposition pipeline
+
+> **Rule**: every PR that removes a `#![allow(...)]` and fixes the underlying
+> issues is a good PR. The end state is a workspace where `make lint` passes
+> with **zero warnings and zero suppression directives**.
