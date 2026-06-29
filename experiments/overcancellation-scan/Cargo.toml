@@ -208,7 +208,3 @@ path = "src/bin/fermi_tower.rs"
 name = "pomegranate-seeds"
 path = "src/bin/pomegranate_seeds.rs"
 
-[profile.release]
-opt-level = 3
-lto = true
-codegen-units = 1
