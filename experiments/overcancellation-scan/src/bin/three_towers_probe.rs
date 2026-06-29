@@ -32,8 +32,6 @@ use rug::ops::NegAssign;
 use rug::Float;
 use std::f64::consts::PI;
 
-
-
 /// Known zeros of ζ on the critical line (imaginary parts γ_n)
 /// Source: LMFDB, first 30 zeros
 const KNOWN_ZEROS: [f64; 30] = [

@@ -75,8 +75,6 @@ fn pi_exact(x: f64) -> usize {
     is_prime.iter().filter(|&&b| b).count()
 }
 
-
-
 /// Chebyshev ψ(x) via the explicit formula with `num_zeros` zeros.
 ///
 /// ψ(x) = x - Σ_{n=1}^{N} 2·Re(x^ρ_n / ρ_n) - ln(2π) - ½·ln(1 - x⁻²)

@@ -91,8 +91,6 @@ fn sieve_moebius(limit: usize) -> Vec<i8> {
     mu
 }
 
-
-
 /// Number of distinct prime factors.
 fn omega(mut n: usize, _is_prime: &[bool]) -> u32 {
     let mut count = 0;

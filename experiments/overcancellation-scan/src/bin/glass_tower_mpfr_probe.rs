@@ -21,8 +21,6 @@
 use cathedral_utils::arith::primes_up_to;
 use rug::Float;
 
-
-
 // ═══════════════════════════════════════════════════════
 // §2. MPFR COMPLEX ARITHMETIC
 // ═══════════════════════════════════════════════════════
