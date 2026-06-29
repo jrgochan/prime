@@ -7,7 +7,9 @@
 //!
 //! Let P = {p₁, p₂, ..., pₖ} be the first k primes. Define the prime subblock:
 //!
-//!     G_P(i,j) = G_N(pᵢ-1, pⱼ-1)   (0-indexed into the dim×dim matrix)
+//! ```text
+//! G_P(i,j) = G_N(pᵢ-1, pⱼ-1)   (0-indexed into the dim×dim matrix)
+//! ```
 //!
 //! **Conjecture**: As N → ∞, there exist O(1) eigenvectors of G_N whose
 //! restriction to prime indices converges to the eigenvectors of G_P, with
