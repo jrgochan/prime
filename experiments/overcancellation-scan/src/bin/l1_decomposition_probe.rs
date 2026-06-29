@@ -16,38 +16,8 @@
 /// 3. Cotangent remainder: everything else
 ///
 /// Purpose: confirm each component decays as O(1/logN) relative to vᵀA₁v
-use cathedral_utils::arith::gcd;
+use cathedral_utils::arith::{gcd, mobius_table};
 use std::collections::HashMap;
-
-/// Compute μ(n) via sieve
-fn mobius_sieve(n: usize) -> Vec<i32> {
-    let mut mu = vec![0i32; n + 1];
-    mu[1] = 1;
-    let mut is_prime = vec![true; n + 1];
-    let mut primes = Vec::new();
-
-    for i in 2..=n {
-        if is_prime[i] {
-            primes.push(i);
-            mu[i] = -1;
-        }
-        for &p in &primes {
-            if i * p > n {
-                break;
-            }
-            is_prime[i * p] = false;
-            if i % p == 0 {
-                mu[i * p] = 0;
-                break;
-            } else {
-                mu[i * p] = -mu[i];
-            }
-        }
-    }
-    mu
-}
-
-
 
 /// Compute ∫₀¹ {1/(jx)}{1/(kx)} dx via high-precision numerical integration
 /// Uses the explicit formula from Vasyunin's decomposition
@@ -140,7 +110,7 @@ fn main() {
     println!();
 
     let n_max = 500;
-    let mu = mobius_sieve(n_max);
+    let mu = mobius_table(n_max);
 
     // ── §1: Check a few L₁ entries ──
     println!("═══ §1: Sample L₁(j,k) Decomposition ═══");

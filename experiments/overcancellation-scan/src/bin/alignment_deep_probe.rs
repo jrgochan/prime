@@ -67,8 +67,6 @@ fn num_divisors(n: usize) -> usize {
     count
 }
 
-
-
 fn build_gram(n: usize) -> Vec<f64> {
     let dim = n - 1;
     let upper_indices: Vec<(usize, usize)> = (0..dim)

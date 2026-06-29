@@ -8,7 +8,7 @@
     non_snake_case,
     clippy::empty_line_after_doc_comments
 )]
-use cathedral_utils::arith::gcd;
+use cathedral_utils::arith::{gcd, mobius_table};
 /// Ramanujan Spectral Probe — Does Parseval capture Möbius cancellation?
 ///
 /// The B₁ skeleton decomposes via J₂(d) (Jordan totient):
@@ -24,32 +24,6 @@ use cathedral_utils::arith::gcd;
 ///
 /// Each T_d is a MERTENS-TYPE SUM! PNT controls these individually.
 /// The question: does Σ J₂(d)·T_d² converge, and how fast?
-
-fn mobius_sieve(n: usize) -> Vec<i32> {
-    let mut mu = vec![0i32; n + 1];
-    mu[1] = 1;
-    let mut is_prime = vec![true; n + 1];
-    let mut primes = Vec::new();
-    for i in 2..=n {
-        if is_prime[i] {
-            primes.push(i);
-            mu[i] = -1;
-        }
-        for &p in &primes {
-            if i * p > n {
-                break;
-            }
-            is_prime[i * p] = false;
-            if i % p == 0 {
-                mu[i * p] = 0;
-                break;
-            } else {
-                mu[i * p] = -mu[i];
-            }
-        }
-    }
-    mu
-}
 
 /// Jordan's totient J₂(n) = n² · Π_{p|n} (1 - 1/p²)
 fn jordan_j2(n: usize) -> f64 {
@@ -76,7 +50,7 @@ fn jordan_j2(n: usize) -> f64 {
 
 fn main() {
     let n_max = 50_000;
-    let mu = mobius_sieve(n_max);
+    let mu = mobius_table(n_max);
 
     println!("═══════════════════════════════════════════════════════════════");
     println!("RAMANUJAN SPECTRAL PROBE — Parseval + Möbius Cancellation");
@@ -276,5 +250,3 @@ fn main() {
     println!();
     println!("═══════════════════════════════════════════════════════════════");
 }
-
-

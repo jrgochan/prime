@@ -374,8 +374,6 @@ fn main() {
     eprintln!("═══════════════════════════════════════════════════════════════");
 }
 
-
-
 /// Count divisors of n
 fn count_divisors(n: usize) -> usize {
     if n == 0 {

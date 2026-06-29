@@ -36,8 +36,6 @@ fn sieve_mobius(n: usize) -> Vec<i8> {
     mu
 }
 
-
-
 /// Vasyunin sum V(a,b) = Σ_{m=1}^{a-1} {m·b/a} · cot(π·m/a)
 fn vasyunin_sum(a: usize, b: usize) -> f64 {
     if a <= 1 {

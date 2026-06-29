@@ -57,8 +57,6 @@ fn sieve_mobius(n: usize) -> (Vec<i8>, Vec<usize>) {
     (mu, primes)
 }
 
-
-
 fn vasyunin_sum(a: usize, b: usize) -> f64 {
     if a <= 1 {
         return 0.0;

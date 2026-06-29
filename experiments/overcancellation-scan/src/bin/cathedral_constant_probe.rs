@@ -34,8 +34,6 @@ use std::time::Instant;
 // ARITHMETIC FUNCTIONS
 // ════════════════════════════════════════════════════
 
-
-
 /// J₂(d) = d² · Π_{p|d} (1 - 1/p²)
 fn jordan_totient2(d: usize) -> f64 {
     if d == 0 {

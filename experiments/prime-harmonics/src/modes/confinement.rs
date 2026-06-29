@@ -17,7 +17,6 @@ use std::time::Instant;
 
 const EULER_GAMMA: f64 = 0.5772156649015329;
 
-
 /// R_true(j,k) = gcd(j,k)²/(12jk) + 1/4
 fn r_true(j: usize, k: usize) -> f64 {
     let g = gcd(j, k);

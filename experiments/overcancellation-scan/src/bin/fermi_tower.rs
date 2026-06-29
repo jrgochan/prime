@@ -72,8 +72,6 @@ fn sieve_omega(n: usize) -> Vec<u8> {
     om
 }
 
-
-
 fn vasyunin_sum(a: usize, b: usize) -> f64 {
     if a <= 1 {
         return 0.0;

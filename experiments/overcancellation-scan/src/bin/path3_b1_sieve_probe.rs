@@ -8,6 +8,7 @@
     non_snake_case,
     clippy::empty_line_after_doc_comments
 )]
+use cathedral_utils::arith::mobius_table;
 /// Path 3 Probe: B₁ Bilinear Decomposition + Large Sieve
 ///
 /// From BilinearSieve.lean's PROVED theorem `bilinear_b1_decomposition`:
@@ -27,32 +28,6 @@
 ///
 /// For Möbius weights: Σ μ(k)²·(1-lnk/lnN)²·(k+1) is a weighted Mertens sum.
 
-fn mobius_sieve(n: usize) -> Vec<i32> {
-    let mut mu = vec![0i32; n + 1];
-    mu[1] = 1;
-    let mut is_prime = vec![true; n + 1];
-    let mut primes = Vec::new();
-    for i in 2..=n {
-        if is_prime[i] {
-            primes.push(i);
-            mu[i] = -1;
-        }
-        for &p in &primes {
-            if i * p > n {
-                break;
-            }
-            is_prime[i * p] = false;
-            if i % p == 0 {
-                mu[i * p] = 0;
-                break;
-            } else {
-                mu[i * p] = -mu[i];
-            }
-        }
-    }
-    mu
-}
-
 /// Compute B₁(x) = {x} - 1/2
 fn sawtooth(x: f64) -> f64 {
     x - x.floor() - 0.5
@@ -60,7 +35,7 @@ fn sawtooth(x: f64) -> f64 {
 
 fn main() {
     let n_max = 5000; // Keep small for O(N²) numerical integration
-    let mu = mobius_sieve(n_max);
+    let mu = mobius_table(n_max);
 
     println!("═══════════════════════════════════════════════════════════════");
     println!("PATH 3 PROBE: B₁ Bilinear Decomposition + Large Sieve");

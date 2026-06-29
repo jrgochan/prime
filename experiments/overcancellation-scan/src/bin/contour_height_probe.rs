@@ -1,30 +1,6 @@
 #![allow(clippy::needless_range_loop, clippy::let_and_return)]
 
-fn mobius_sieve(n: usize) -> Vec<i32> {
-    let mut mu = vec![0i32; n + 1];
-    mu[1] = 1;
-    let mut is_prime = vec![true; n + 1];
-    let mut primes = Vec::new();
-    for i in 2..=n {
-        if is_prime[i] {
-            primes.push(i);
-            mu[i] = -1;
-        }
-        for &p in &primes {
-            if i * p > n {
-                break;
-            }
-            is_prime[i * p] = false;
-            if i % p == 0 {
-                mu[i * p] = 0;
-                break;
-            } else {
-                mu[i * p] = -mu[i];
-            }
-        }
-    }
-    mu
-}
+use cathedral_utils::arith::mobius_table;
 
 /// ζ(σ+it) via partial sums + Euler-Maclaurin
 fn zeta_at(sigma: f64, t: f64, n_terms: usize) -> (f64, f64) {
@@ -66,7 +42,7 @@ fn cabs2(a: f64, b: f64) -> f64 {
 
 fn main() {
     let n_max = 20_000;
-    let mu = mobius_sieve(n_max);
+    let mu = mobius_table(n_max);
 
     println!("═══════════════════════════════════════════════════════════════");
     println!("CONTOUR HEIGHT PROBE — Spectral Error vs Re(s)");

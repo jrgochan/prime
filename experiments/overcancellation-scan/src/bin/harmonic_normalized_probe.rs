@@ -1,38 +1,14 @@
 // Normalized Harmonic Projection — uses v/‖v‖ instead of raw v
 #![allow(clippy::needless_range_loop)]
 
-fn mobius_sieve(n: usize) -> Vec<i32> {
-    let mut mu = vec![0i32; n + 1];
-    mu[1] = 1;
-    let mut is_prime = vec![true; n + 1];
-    let mut primes = Vec::new();
-    for i in 2..=n {
-        if is_prime[i] {
-            primes.push(i);
-            mu[i] = -1;
-        }
-        for &p in &primes {
-            if i * p > n {
-                break;
-            }
-            is_prime[i * p] = false;
-            if i % p == 0 {
-                mu[i * p] = 0;
-                break;
-            } else {
-                mu[i * p] = -mu[i];
-            }
-        }
-    }
-    mu
-}
+use cathedral_utils::arith::mobius_table;
 
 fn main() {
     let euler_gamma = 0.5772156649015329;
     let c = (2.0 * std::f64::consts::PI).ln() - euler_gamma;
     let threshold = c - 2.0 / 3.0;
     let n_max = 100_000;
-    let mu = mobius_sieve(n_max);
+    let mu = mobius_table(n_max);
 
     println!("═══════════════════════════════════════════════════════════");
     println!("NORMALIZED Harmonic Projection Probe");

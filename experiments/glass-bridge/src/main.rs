@@ -22,8 +22,6 @@ use cathedral_utils::arith::gcd;
 use std::f64::consts::PI;
 use std::fmt::Write;
 
-
-
 fn mobius(n: usize) -> i64 {
     if n == 1 {
         return 1;

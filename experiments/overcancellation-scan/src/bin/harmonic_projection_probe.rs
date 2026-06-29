@@ -8,6 +8,7 @@
     non_snake_case,
     clippy::empty_line_after_doc_comments
 )]
+use cathedral_utils::arith::mobius_table;
 /// Harmonic Projection Probe — Path 4 Closure Validator
 ///
 /// Computes the quantities from OvercancellationAssembly.lean:
@@ -21,32 +22,6 @@
 /// TARGET: Verify S(N)² > C - 2/3 ≈ 0.594 where C = ln(2π) - γ ≈ 1.261
 ///
 /// If confirmed, Path 4 (gram_eventually_lt_one) closes unconditionally!
-
-fn mobius_sieve(n: usize) -> Vec<i32> {
-    let mut mu = vec![0i32; n + 1];
-    mu[1] = 1;
-    let mut is_prime = vec![true; n + 1];
-    let mut primes = Vec::new();
-    for i in 2..=n {
-        if is_prime[i] {
-            primes.push(i);
-            mu[i] = -1;
-        }
-        for &p in &primes {
-            if i * p > n {
-                break;
-            }
-            is_prime[i * p] = false;
-            if i % p == 0 {
-                mu[i * p] = 0;
-                break;
-            } else {
-                mu[i * p] = -mu[i];
-            }
-        }
-    }
-    mu
-}
 
 fn main() {
     let euler_gamma = 0.5772156649015329;
@@ -68,7 +43,7 @@ fn main() {
     println!();
 
     let n_max = 100_000;
-    let mu = mobius_sieve(n_max);
+    let mu = mobius_table(n_max);
 
     // ═══ §1: Core quantities for increasing N ═══
     println!("═══ §1: Log-Cutoff Witness Quantities ═══");

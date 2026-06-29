@@ -73,7 +73,6 @@ fn vasyunin_sum(a: usize, b: usize) -> f64 {
 
 /// GCD
 
-
 /// Pre-compute all V(a,b)+V(b,a) pair sums needed for a given N.
 /// Returns a HashMap keyed by (min(a,b), max(a,b)) for canonicalization.
 fn precompute_pair_sums(n: usize, mu: &[i8]) -> HashMap<(usize, usize), f64> {
