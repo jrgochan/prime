@@ -69,6 +69,14 @@ pub fn sieve_primes(n: usize) -> Vec<bool> {
     is_prime
 }
 
+/// Collect all primes up to `n` as a `Vec<usize>`.
+///
+/// Convenience wrapper around [`sieve_primes`].
+pub fn primes_up_to(n: usize) -> Vec<usize> {
+    let sieve = sieve_primes(n);
+    (2..=n).filter(|&i| sieve[i]).collect()
+}
+
 /// Möbius function table: μ(n) for n = 0..=max_n.
 ///
 /// μ(1) = 1, μ(n) = 0 if n has a squared factor,

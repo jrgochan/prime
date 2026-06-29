@@ -16,6 +16,7 @@
 //! Also tracks inter-prime cancellation: how composites between
 //! consecutive primes restore balance.
 
+use cathedral_utils::arith::sieve_primes;
 use std::time::Instant;
 
 /// First 30 nontrivial zeta zeros (imaginary parts).
@@ -90,26 +91,7 @@ fn sieve_moebius(limit: usize) -> Vec<i8> {
     mu
 }
 
-/// Sieve primes up to limit.
-fn sieve_primes(limit: usize) -> Vec<bool> {
-    let mut is_prime = vec![true; limit + 1];
-    is_prime[0] = false;
-    if limit >= 1 {
-        is_prime[1] = false;
-    }
-    let mut i = 2;
-    while i * i <= limit {
-        if is_prime[i] {
-            let mut j = i * i;
-            while j <= limit {
-                is_prime[j] = false;
-                j += i;
-            }
-        }
-        i += 1;
-    }
-    is_prime
-}
+
 
 /// Number of distinct prime factors.
 fn omega(mut n: usize, _is_prime: &[bool]) -> u32 {

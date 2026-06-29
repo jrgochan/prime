@@ -26,34 +26,13 @@
 //
 // Created: May 24, 2026 — Mountain Session
 
+use cathedral_utils::arith::primes_up_to;
 use rayon::prelude::*;
 use rug::ops::NegAssign;
 use rug::Float;
 use std::f64::consts::PI;
 
-// ═══════════════════════════════════════════════════════
-// §0. INFRASTRUCTURE
-// ═══════════════════════════════════════════════════════
 
-fn sieve_primes(limit: usize) -> Vec<usize> {
-    let mut is_prime = vec![true; limit + 1];
-    is_prime[0] = false;
-    if limit >= 1 {
-        is_prime[1] = false;
-    }
-    let mut i = 2;
-    while i * i <= limit {
-        if is_prime[i] {
-            let mut j = i * i;
-            while j <= limit {
-                is_prime[j] = false;
-                j += i;
-            }
-        }
-        i += 1;
-    }
-    (2..=limit).filter(|&n| is_prime[n]).collect()
-}
 
 /// Known zeros of ζ on the critical line (imaginary parts γ_n)
 /// Source: LMFDB, first 30 zeros
@@ -668,7 +647,7 @@ fn main() {
 
     // Sieve primes
     eprintln!("Sieving primes...");
-    let primes = sieve_primes(100_000);
+    let primes = primes_up_to(100_000);
     eprintln!("  {} primes ready", primes.len());
 
     // Run all five probes

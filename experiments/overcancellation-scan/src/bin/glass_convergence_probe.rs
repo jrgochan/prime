@@ -8,30 +8,9 @@
     non_snake_case,
     clippy::empty_line_after_doc_comments
 )]
+use cathedral_utils::arith::primes_up_to;
 
-// ═══════════════════════════════════════════════════════
-// §1. PRIME SIEVE
-// ═══════════════════════════════════════════════════════
 
-fn sieve_primes(limit: usize) -> Vec<usize> {
-    let mut is_prime = vec![true; limit + 1];
-    is_prime[0] = false;
-    if limit >= 1 {
-        is_prime[1] = false;
-    }
-    let mut i = 2;
-    while i * i <= limit {
-        if is_prime[i] {
-            let mut j = i * i;
-            while j <= limit {
-                is_prime[j] = false;
-                j += i;
-            }
-        }
-        i += 1;
-    }
-    (2..=limit).filter(|&n| is_prime[n]).collect()
-}
 
 // ═══════════════════════════════════════════════════════
 // §2. COMPLEX ARITHMETIC
@@ -118,7 +97,7 @@ fn main() {
     // Sieve primes up to 10^7
     let prime_limit = 10_000_000;
     eprintln!("Sieving primes up to {}...", prime_limit);
-    let primes = sieve_primes(prime_limit);
+    let primes = primes_up_to(prime_limit);
     eprintln!(
         "Found {} primes (largest: {})",
         primes.len(),

@@ -18,31 +18,10 @@
 /// The predicted pattern: |L_k - 1| ≈ (|L_{k-1} - 1|)²
 /// because log(1+x) ≈ x for small x, and the Euler product
 /// at level k involves p^{-2^k·σ} which squares at each step.
+use cathedral_utils::arith::primes_up_to;
 use rug::Float;
 
-// ═══════════════════════════════════════════════════════
-// §1. PRIME SIEVE
-// ═══════════════════════════════════════════════════════
 
-fn sieve_primes(limit: usize) -> Vec<usize> {
-    let mut is_prime = vec![true; limit + 1];
-    is_prime[0] = false;
-    if limit >= 1 {
-        is_prime[1] = false;
-    }
-    let mut i = 2;
-    while i * i <= limit {
-        if is_prime[i] {
-            let mut j = i * i;
-            while j <= limit {
-                is_prime[j] = false;
-                j += i;
-            }
-        }
-        i += 1;
-    }
-    (2..=limit).filter(|&n| is_prime[n]).collect()
-}
 
 // ═══════════════════════════════════════════════════════
 // §2. MPFR COMPLEX ARITHMETIC
@@ -162,7 +141,7 @@ fn main() {
     // Sieve primes (use fewer for MPFR since each op is expensive)
     let prime_limit = 100_000;
     eprintln!("Sieving primes up to {}...", prime_limit);
-    let primes = sieve_primes(prime_limit);
+    let primes = primes_up_to(prime_limit);
     eprintln!("Found {} primes", primes.len());
 
     let sigma = 0.55;

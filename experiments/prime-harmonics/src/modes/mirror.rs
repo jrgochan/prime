@@ -10,6 +10,7 @@
 //!  makes the smooth approximation converge to the exact prime staircase.
 //! ═══════════════════════════════════════════════════════════════════════════
 
+use cathedral_utils::arith::primes_up_to;
 use cathedral_utils::zeta_zeros;
 use std::f64::consts::PI;
 
@@ -74,28 +75,7 @@ fn pi_exact(x: f64) -> usize {
     is_prime.iter().filter(|&&b| b).count()
 }
 
-/// List of primes up to x via sieve.
-fn primes_up_to(x: f64) -> Vec<usize> {
-    if x < 2.0 {
-        return vec![];
-    }
-    let limit = x as usize;
-    let mut is_prime = vec![true; limit + 1];
-    is_prime[0] = false;
-    if limit >= 1 {
-        is_prime[1] = false;
-    }
-    for i in 2..=(limit as f64).sqrt() as usize {
-        if is_prime[i] {
-            let mut j = i * i;
-            while j <= limit {
-                is_prime[j] = false;
-                j += i;
-            }
-        }
-    }
-    (2..=limit).filter(|&i| is_prime[i]).collect()
-}
+
 
 /// Chebyshev ψ(x) via the explicit formula with `num_zeros` zeros.
 ///
@@ -267,7 +247,7 @@ pub fn run(x_max: f64) {
     println!("   \"The zeros ARE the primes, seen through a mirror.\"");
     println!();
 
-    let actual_primes = primes_up_to(x_max);
+    let actual_primes = primes_up_to(x_max as usize);
     let pi_true = actual_primes.len();
 
     println!("   Range: [2, {}]", x_max as usize);
@@ -391,7 +371,7 @@ pub fn run(x_max: f64) {
     }
 
     // Match detected peaks against actual primes
-    let actual_small = primes_up_to(scan_limit);
+    let actual_small = primes_up_to(scan_limit as usize);
     let mut hits = 0;
     let mut false_pos = 0;
 

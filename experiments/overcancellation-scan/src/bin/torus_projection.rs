@@ -26,7 +26,7 @@
 // ║  Cathedral Experiment — June 1, 2026                          ║
 // ╚═══════════════════════════════════════════════════════════════╝
 
-use cathedral_utils::arith::gcd;
+use cathedral_utils::arith::{gcd, primes_up_to};
 use rayon::prelude::*;
 use std::f64::consts::PI;
 
@@ -125,31 +125,7 @@ fn mean_entry(k: usize) -> f64 {
     (kf.ln() + 1.0 - EULER_GAMMA) / kf
 }
 
-/// Primes up to n via sieve of Eratosthenes
-fn primes_up_to(n: usize) -> Vec<usize> {
-    let mut sieve = vec![true; n + 1];
-    sieve[0] = false;
-    if n >= 1 {
-        sieve[1] = false;
-    }
-    let mut i = 2;
-    while i * i <= n {
-        if sieve[i] {
-            let mut j = i * i;
-            while j <= n {
-                sieve[j] = false;
-                j += i;
-            }
-        }
-        i += 1;
-    }
-    sieve
-        .iter()
-        .enumerate()
-        .filter(|(_, &is_prime)| is_prime)
-        .map(|(i, _)| i)
-        .collect()
-}
+
 
 // ════════════════════════════════════════════════════════════════
 // §2. PER-PRIME ENERGY DECOMPOSITION ON THE TORUS
