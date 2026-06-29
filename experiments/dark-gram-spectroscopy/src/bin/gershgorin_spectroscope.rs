@@ -26,6 +26,7 @@
 //!    cargo run --release --bin gershgorin-spectroscope -- --dims 50,500,5000
 //! ═══════════════════════════════════════════════════════════════════════════
 
+use cathedral_utils::arith::gcd;
 use clap::Parser;
 use dark_gram_spectroscopy::dark_gram;
 use std::collections::BTreeMap;
@@ -373,17 +374,7 @@ fn main() {
     eprintln!("═══════════════════════════════════════════════════════════════");
 }
 
-/// GCD helper
-#[inline]
-fn gcd(a: usize, b: usize) -> usize {
-    let (mut a, mut b) = (a, b);
-    while b != 0 {
-        let t = b;
-        b = a % b;
-        a = t;
-    }
-    a
-}
+
 
 /// Count divisors of n
 fn count_divisors(n: usize) -> usize {

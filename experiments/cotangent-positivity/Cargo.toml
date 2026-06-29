@@ -25,6 +25,7 @@ name = "path-1e-analytics"
 path = "src/path_1e_analytics.rs"
 
 [dependencies]
+cathedral-utils = { path = "../cathedral-utils" }
 rayon = "1.10"
 
 [lints]

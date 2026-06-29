@@ -419,6 +419,7 @@ checksum = "773648b94d0e5d620f64f280777445740e61fe701025087ec8b57f45c791888b"
 name = "cotangent-positivity"
 version = "0.1.0"
 dependencies = [
+ "cathedral-utils",
  "rayon",
 ]
 
@@ -944,6 +945,9 @@ dependencies = [
 [[package]]
 name = "glass-bridge"
 version = "0.1.0"
+dependencies = [
+ "cathedral-utils",
+]
 
 [[package]]
 name = "gmp-mpfr-sys"

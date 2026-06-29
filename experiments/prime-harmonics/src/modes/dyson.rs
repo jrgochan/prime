@@ -19,6 +19,7 @@
 //! Created: May 29, 2026 — The Dyson Protocol (Gemini directive)
 
 use crate::modes::anomaly::exact_gram;
+use cathedral_utils::arith::gcd;
 use nalgebra::{DMatrix, DVector};
 use rayon::prelude::*;
 use std::time::Instant;
@@ -60,14 +61,6 @@ fn moebius_fn(n: usize) -> i32 {
 /// BD mean: b_k = (ln(k) + 1 - γ) / k
 fn bd_mean(k: usize) -> f64 {
     ((k as f64).ln() + 1.0 - EULER_GAMMA) / k as f64
-}
-
-fn gcd(a: usize, b: usize) -> usize {
-    if b == 0 {
-        a
-    } else {
-        gcd(b, a % b)
-    }
 }
 
 /// Full sawtooth Gram: R_true(j,k) = gcd(j,k)²/(12jk) + 1/4

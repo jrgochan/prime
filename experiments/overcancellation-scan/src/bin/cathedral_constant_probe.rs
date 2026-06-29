@@ -25,6 +25,7 @@
 // ║  3. What are λ_min(A₁_N), λ_min(A₂_N), λ_min(G_N)?             ║
 // ╚════════════════════════════════════════════════════════════════════╝
 
+use cathedral_utils::arith::gcd;
 use cathedral_utils::arith::mobius_table;
 use nalgebra::{DMatrix, DVector, SymmetricEigen};
 use std::time::Instant;
@@ -33,13 +34,7 @@ use std::time::Instant;
 // ARITHMETIC FUNCTIONS
 // ════════════════════════════════════════════════════
 
-fn gcd(a: usize, b: usize) -> usize {
-    if b == 0 {
-        a
-    } else {
-        gcd(b, a % b)
-    }
-}
+
 
 /// J₂(d) = d² · Π_{p|d} (1 - 1/p²)
 fn jordan_totient2(d: usize) -> f64 {

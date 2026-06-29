@@ -10,19 +10,13 @@
 //!
 //! Created: May 30, 2026 — Confinement (Mirror RH Closure)
 
+use cathedral_utils::arith::gcd;
 use nalgebra::{DMatrix, DVector};
 use std::path::Path;
 use std::time::Instant;
 
 const EULER_GAMMA: f64 = 0.5772156649015329;
 
-fn gcd(a: usize, b: usize) -> usize {
-    if b == 0 {
-        a
-    } else {
-        gcd(b, a % b)
-    }
-}
 
 /// R_true(j,k) = gcd(j,k)²/(12jk) + 1/4
 fn r_true(j: usize, k: usize) -> f64 {

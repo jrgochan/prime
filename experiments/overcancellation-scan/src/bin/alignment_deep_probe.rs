@@ -27,6 +27,7 @@
 // ║     → Does the E/M ratio predict alignment?                      ║
 // ╚═══════════════════════════════════════════════════════════════════╝
 
+use cathedral_utils::arith::gcd;
 use cathedral_utils::gram;
 use rayon::prelude::*;
 use std::time::Instant;
@@ -66,14 +67,7 @@ fn num_divisors(n: usize) -> usize {
     count
 }
 
-fn gcd(mut a: usize, mut b: usize) -> usize {
-    while b != 0 {
-        let t = b;
-        b = a % b;
-        a = t;
-    }
-    a
-}
+
 
 fn build_gram(n: usize) -> Vec<f64> {
     let dim = n - 1;

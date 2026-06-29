@@ -18,12 +18,11 @@
 //!
 //! This module computes c exactly and explores what it takes for vᵀRv → 0.
 
+use cathedral_utils::arith::gcd;
 use std::f64::consts::PI;
 use std::fmt::Write;
 
-fn gcd(a: usize, b: usize) -> usize {
-    if b == 0 { a } else { gcd(b, a % b) }
-}
+
 
 fn mobius(n: usize) -> i64 {
     if n == 1 {

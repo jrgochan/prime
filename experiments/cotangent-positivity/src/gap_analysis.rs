@@ -10,6 +10,7 @@
 //!
 //! Cathedral — Climbing the Wall 🧗 — June 1, 2026
 
+use cathedral_utils::arith::gcd;
 use rayon::prelude::*;
 use std::collections::HashMap;
 use std::f64::consts::PI;
@@ -44,14 +45,7 @@ fn sieve_mobius(n: usize) -> Vec<i8> {
     mu
 }
 
-fn gcd(mut a: usize, mut b: usize) -> usize {
-    while b != 0 {
-        let t = b;
-        b = a % b;
-        a = t;
-    }
-    a
-}
+
 
 fn vasyunin_sum(a: usize, b: usize) -> f64 {
     if a <= 1 {

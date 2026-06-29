@@ -17,6 +17,7 @@
 //!
 //! This gives EXACT values (no quadrature) in O(max(j,k)) per entry.
 
+use cathedral_utils::arith::gcd;
 use rayon::prelude::*;
 use std::time::Instant;
 
@@ -85,14 +86,6 @@ pub fn exact_gram(j: usize, k: usize) -> f64 {
 fn sawtooth_gram(j: usize, k: usize) -> f64 {
     let g = gcd(j, k);
     (g * g) as f64 / (12.0 * j as f64 * k as f64)
-}
-
-fn gcd(a: usize, b: usize) -> usize {
-    if b == 0 {
-        a
-    } else {
-        gcd(b, a % b)
-    }
 }
 
 /// Compute μ(n) (Möbius function)

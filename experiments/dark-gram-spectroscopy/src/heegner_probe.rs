@@ -30,6 +30,7 @@
 //!    cargo run --release --bin heegner-probe
 //! ═══════════════════════════════════════════════════════════════════════════
 
+use cathedral_utils::arith::gcd;
 use std::time::Instant;
 
 use dark_gram_spectroscopy::dark_gram;
@@ -61,17 +62,6 @@ fn is_prime(n: u64) -> bool {
         i += 6;
     }
     true
-}
-
-/// GCD
-fn gcd(a: usize, b: usize) -> usize {
-    let (mut a, mut b) = (a, b);
-    while b != 0 {
-        let t = b;
-        b = a % b;
-        a = t;
-    }
-    a
 }
 
 /// Compute the fraction of coprime pairs in the index set {2, 3, ..., N+1}.

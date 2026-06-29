@@ -8,6 +8,7 @@
     non_snake_case,
     clippy::empty_line_after_doc_comments
 )]
+use cathedral_utils::arith::gcd;
 /// Ramanujan Spectral Probe — Does Parseval capture Möbius cancellation?
 ///
 /// The B₁ skeleton decomposes via J₂(d) (Jordan totient):
@@ -276,12 +277,4 @@ fn main() {
     println!("═══════════════════════════════════════════════════════════════");
 }
 
-fn gcd(a: usize, b: usize) -> usize {
-    let (mut a, mut b) = (a, b);
-    while b > 0 {
-        let t = b;
-        b = a % b;
-        a = t;
-    }
-    a
-}
+

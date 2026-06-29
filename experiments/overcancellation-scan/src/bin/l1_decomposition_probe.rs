@@ -16,6 +16,7 @@
 /// 3. Cotangent remainder: everything else
 ///
 /// Purpose: confirm each component decays as O(1/logN) relative to vᵀA₁v
+use cathedral_utils::arith::gcd;
 use std::collections::HashMap;
 
 /// Compute μ(n) via sieve
@@ -46,13 +47,7 @@ fn mobius_sieve(n: usize) -> Vec<i32> {
     mu
 }
 
-fn gcd(a: usize, b: usize) -> usize {
-    if b == 0 {
-        a
-    } else {
-        gcd(b, a % b)
-    }
-}
+
 
 /// Compute ∫₀¹ {1/(jx)}{1/(kx)} dx via high-precision numerical integration
 /// Uses the explicit formula from Vasyunin's decomposition

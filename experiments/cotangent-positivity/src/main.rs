@@ -12,6 +12,7 @@
 //! Cathedral — Climbing the Wall 🧗
 //! June 1, 2026
 
+use cathedral_utils::arith::gcd;
 use rayon::prelude::*;
 use std::collections::HashMap;
 use std::f64::consts::PI;
@@ -71,14 +72,7 @@ fn vasyunin_sum(a: usize, b: usize) -> f64 {
 }
 
 /// GCD
-fn gcd(mut a: usize, mut b: usize) -> usize {
-    while b != 0 {
-        let t = b;
-        b = a % b;
-        a = t;
-    }
-    a
-}
+
 
 /// Pre-compute all V(a,b)+V(b,a) pair sums needed for a given N.
 /// Returns a HashMap keyed by (min(a,b), max(a,b)) for canonicalization.

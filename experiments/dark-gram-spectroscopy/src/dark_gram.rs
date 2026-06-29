@@ -14,21 +14,10 @@
 //!  convergence with just ~100 terms.
 //! ═══════════════════════════════════════════════════════════════════════════
 
+use cathedral_utils::arith::gcd;
 use rayon::prelude::*;
 
 use crate::bernoulli;
-
-/// GCD via Euclidean algorithm.
-#[inline]
-fn gcd(a: usize, b: usize) -> usize {
-    let (mut a, mut b) = (a, b);
-    while b != 0 {
-        let t = b;
-        b = a % b;
-        a = t;
-    }
-    a
-}
 
 // ═══════════════════════════════════════════════════════════════
 // CLOSED-FORM ENGINE (n=2)
