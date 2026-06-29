@@ -194,8 +194,8 @@ fn main() {
     println!("────────────────────────────────────────────────────────────────────────────────");
 
     let ns: Vec<usize> = vec![
-        100, 200, 500, 1000, 2000, 2520, 3000, 5000, 5040,
-        7000, 10000, 15000, 20000, 25000, 30000, 40000, 50000,
+        100, 200, 500, 1000, 2000, 2520, 3000, 5000, 5040, 7000, 10000, 15000, 20000, 25000, 30000,
+        40000, 50000,
     ];
 
     let mut results: Vec<(usize, f64, f64, f64, usize)> = Vec::new();
@@ -226,7 +226,15 @@ fn main() {
         let log_n = (n as f64).ln();
         println!(
             "{:6} │ {:+12.6} │  {}  │ {:10.4} │ {:7} │ {:+11.4} │ {:+11.4} │ {:7.1}% │ {:5.1}s",
-            n, total, sign, total.abs() * log_n, n_active, d1, d_ge2, margin_pct, dt
+            n,
+            total,
+            sign,
+            total.abs() * log_n,
+            n_active,
+            d1,
+            d_ge2,
+            margin_pct,
+            dt
         );
 
         results.push((n, total, d1, d_ge2, n_active));
@@ -241,7 +249,10 @@ fn main() {
         results.iter().filter(|(n, _, _, _, _)| *n >= 500).collect();
     if big.len() >= 3 {
         let n_pts = big.len() as f64;
-        let sum_x: f64 = big.iter().map(|(n, _, _, _, _)| 1.0 / (*n as f64).ln()).sum();
+        let sum_x: f64 = big
+            .iter()
+            .map(|(n, _, _, _, _)| 1.0 / (*n as f64).ln())
+            .sum();
         let sum_y: f64 = big.iter().map(|(_, s, _, _, _)| *s).sum();
         let sum_xx: f64 = big
             .iter()
@@ -271,7 +282,10 @@ fn main() {
     println!();
     println!("═══════════════════════════════════════════════════════════════");
     if !ever_negative.load(Ordering::Relaxed) {
-        println!("  ✅ S_cot > 0 for ALL N up to {} — POSITIVITY HOLDS!", ns.last().unwrap());
+        println!(
+            "  ✅ S_cot > 0 for ALL N up to {} — POSITIVITY HOLDS!",
+            ns.last().unwrap()
+        );
         println!("  The cotangent is an ALLY. The wall is a DOOR. 🚪");
     } else {
         println!("  ⚠️  S_cot became negative! The wall stands. 🧱");

@@ -1,4 +1,13 @@
-#![allow(dead_code, unused_variables, unused_imports, unused_assignments, clippy::needless_range_loop, clippy::doc_lazy_continuation, non_snake_case, clippy::empty_line_after_doc_comments)]
+#![allow(
+    dead_code,
+    unused_variables,
+    unused_imports,
+    unused_assignments,
+    clippy::needless_range_loop,
+    clippy::doc_lazy_continuation,
+    non_snake_case,
+    clippy::empty_line_after_doc_comments
+)]
 // overcancellation-scan/src/bin/cos2_theta_spectral.rs
 //
 // ╔═══════════════════════════════════════════════════════════════════╗
@@ -28,12 +37,20 @@ use std::time::Instant;
 // ─── Arithmetic helpers ───
 
 fn is_prime(n: usize) -> bool {
-    if n < 2 { return false; }
-    if n < 4 { return true; }
-    if n.is_multiple_of(2) || n.is_multiple_of(3) { return false; }
+    if n < 2 {
+        return false;
+    }
+    if n < 4 {
+        return true;
+    }
+    if n.is_multiple_of(2) || n.is_multiple_of(3) {
+        return false;
+    }
     let mut i = 5;
     while i * i <= n {
-        if n.is_multiple_of(i) || n.is_multiple_of(i + 2) { return false; }
+        if n.is_multiple_of(i) || n.is_multiple_of(i + 2) {
+            return false;
+        }
         i += 6;
     }
     true
@@ -45,7 +62,9 @@ fn num_divisors(n: usize) -> usize {
     while d * d <= n {
         if n.is_multiple_of(d) {
             count += 1;
-            if d != n / d { count += 1; }
+            if d != n / d {
+                count += 1;
+            }
         }
         d += 1;
     }
@@ -134,8 +153,10 @@ fn power_law_fit(data: &[(f64, f64)]) -> (f64, f64, f64) {
     let c = log_c.exp();
     let mean_y = sy / n;
     let ss_tot: f64 = data.iter().map(|(_, y)| (y.ln() - mean_y).powi(2)).sum();
-    let ss_res: f64 = data.iter()
-        .map(|(x, y)| (y.ln() - (alpha * x.ln() + log_c)).powi(2)).sum();
+    let ss_res: f64 = data
+        .iter()
+        .map(|(x, y)| (y.ln() - (alpha * x.ln() + log_c)).powi(2))
+        .sum();
     let r2 = 1.0 - ss_res / ss_tot;
     (c, alpha, r2)
 }
@@ -179,11 +200,18 @@ fn main() {
     let t0 = Instant::now();
     let full_gram = build_gram(max_n);
     let full_dim = max_n - 1;
-    println!("  [Built {}×{} Gram matrix in {:.1}s]", full_dim, full_dim, t0.elapsed().as_secs_f64());
+    println!(
+        "  [Built {}×{} Gram matrix in {:.1}s]",
+        full_dim,
+        full_dim,
+        t0.elapsed().as_secs_f64()
+    );
 
     println!();
-    println!("  {:>5} {:>12} {:>12} {:>12} {:>12} {:>10} {:>5} {:>4}",
-        "N", "λ_min", "cos²θ", "‖g‖²", "Schur", "δ_N", "d(N)", "P?");
+    println!(
+        "  {:>5} {:>12} {:>12} {:>12} {:>12} {:>10} {:>5} {:>4}",
+        "N", "λ_min", "cos²θ", "‖g‖²", "Schur", "δ_N", "d(N)", "P?"
+    );
     println!("  {}", "─".repeat(85));
 
     let mut results: Vec<AlignmentData> = Vec::new();
@@ -228,36 +256,61 @@ fn main() {
                     let inv_g = &inv * &g_col;
                     gamma - g_col.dot(&inv_g)
                 }
-                None => gamma // fallback
+                None => gamma, // fallback
             }
         } else {
             gamma
         };
 
-        let drop = if n > start_n { (prev_lmin - lmin).max(0.0) } else { 0.0 };
-        let drop_formula = if schur.abs() > 1e-20 { cos2 * g_nsq / schur } else { 0.0 };
+        let drop = if n > start_n {
+            (prev_lmin - lmin).max(0.0)
+        } else {
+            0.0
+        };
+        let drop_formula = if schur.abs() > 1e-20 {
+            cos2 * g_nsq / schur
+        } else {
+            0.0
+        };
         let dn = num_divisors(n);
 
         let datum = AlignmentData {
-            n, lambda_min: lmin, cos2_theta: cos2,
-            g_norm_sq: g_nsq, schur, eigen_drop: drop,
-            drop_formula, d_n: dn, is_prime: is_prime(n),
+            n,
+            lambda_min: lmin,
+            cos2_theta: cos2,
+            g_norm_sq: g_nsq,
+            schur,
+            eigen_drop: drop,
+            drop_formula,
+            d_n: dn,
+            is_prime: is_prime(n),
         };
 
         // Print selected rows
-        let show = n <= 20 || n % 50 == 0 || n == max_n
-            || (is_prime(n) && n <= 100) || dn >= 12;
+        let show = n <= 20 || n % 50 == 0 || n == max_n || (is_prime(n) && n <= 100) || dn >= 12;
         if show {
-            println!("  {:5} {:12.4e} {:12.4e} {:12.4e} {:12.4e} {:10.2e} {:5} {:>4}",
-                n, lmin, cos2, g_nsq, schur, drop, dn,
-                if datum.is_prime { "P" } else { "" });
+            println!(
+                "  {:5} {:12.4e} {:12.4e} {:12.4e} {:12.4e} {:10.2e} {:5} {:>4}",
+                n,
+                lmin,
+                cos2,
+                g_nsq,
+                schur,
+                drop,
+                dn,
+                if datum.is_prime { "P" } else { "" }
+            );
         }
 
         results.push(datum);
         prev_lmin = lmin;
 
         if n % 100 == 0 && n > 30 {
-            eprintln!("  ... N={} done ({:.0}s total)", n, t_start.elapsed().as_secs_f64());
+            eprintln!(
+                "  ... N={} done ({:.0}s total)",
+                n,
+                t_start.elapsed().as_secs_f64()
+            );
         }
     }
 
@@ -270,7 +323,8 @@ fn main() {
     println!("  PHASE 2: cos²θ Power Law Scaling");
     println!("══════════════════════════════════════════════════════════════");
 
-    let fit_data: Vec<(f64, f64)> = results.iter()
+    let fit_data: Vec<(f64, f64)> = results
+        .iter()
         .filter(|d| d.n >= 20 && d.cos2_theta > 1e-20)
         .map(|d| (d.n as f64, d.cos2_theta))
         .collect();
@@ -278,26 +332,37 @@ fn main() {
     if fit_data.len() >= 10 {
         let (c, alpha, r2) = power_law_fit(&fit_data);
         println!();
-        println!("  ALL N:  cos²θ ≈ {:.4} · N^({:.4})    R² = {:.6}", c, alpha, r2);
+        println!(
+            "  ALL N:  cos²θ ≈ {:.4} · N^({:.4})    R² = {:.6}",
+            c, alpha, r2
+        );
 
         // Prime-only fit
-        let prime_data: Vec<(f64, f64)> = results.iter()
+        let prime_data: Vec<(f64, f64)> = results
+            .iter()
             .filter(|d| d.n >= 20 && d.is_prime && d.cos2_theta > 1e-20)
             .map(|d| (d.n as f64, d.cos2_theta))
             .collect();
         if prime_data.len() >= 5 {
             let (cp, ap, rp) = power_law_fit(&prime_data);
-            println!("  PRIMES: cos²θ ≈ {:.4} · N^({:.4})    R² = {:.6}", cp, ap, rp);
+            println!(
+                "  PRIMES: cos²θ ≈ {:.4} · N^({:.4})    R² = {:.6}",
+                cp, ap, rp
+            );
         }
 
         // Composite-only fit
-        let comp_data: Vec<(f64, f64)> = results.iter()
+        let comp_data: Vec<(f64, f64)> = results
+            .iter()
             .filter(|d| d.n >= 20 && !d.is_prime && d.cos2_theta > 1e-20)
             .map(|d| (d.n as f64, d.cos2_theta))
             .collect();
         if comp_data.len() >= 5 {
             let (cc, ac, rc) = power_law_fit(&comp_data);
-            println!("  COMPS:  cos²θ ≈ {:.4} · N^({:.4})    R² = {:.6}", cc, ac, rc);
+            println!(
+                "  COMPS:  cos²θ ≈ {:.4} · N^({:.4})    R² = {:.6}",
+                cc, ac, rc
+            );
         }
     }
 
@@ -310,16 +375,24 @@ fn main() {
     println!("  PHASE 3: Drop Formula — δ vs cos²θ·‖g‖²/S");
     println!("══════════════════════════════════════════════════════════════");
     println!();
-    println!("  {:>5} {:>12} {:>12} {:>10}",
-        "N", "δ_actual", "δ_formula", "ratio");
+    println!(
+        "  {:>5} {:>12} {:>12} {:>10}",
+        "N", "δ_actual", "δ_formula", "ratio"
+    );
     println!("  {}", "─".repeat(45));
 
     for d in results.iter().filter(|d| d.n >= 5 && d.eigen_drop > 1e-15) {
         let show = d.n <= 20 || d.n % 100 == 0 || d.n == max_n || d.is_prime && d.n <= 100;
         if show {
-            let ratio = if d.drop_formula > 1e-20 { d.eigen_drop / d.drop_formula } else { 0.0 };
-            println!("  {:5} {:12.4e} {:12.4e} {:10.4}",
-                d.n, d.eigen_drop, d.drop_formula, ratio);
+            let ratio = if d.drop_formula > 1e-20 {
+                d.eigen_drop / d.drop_formula
+            } else {
+                0.0
+            };
+            println!(
+                "  {:5} {:12.4e} {:12.4e} {:10.4}",
+                d.n, d.eigen_drop, d.drop_formula, ratio
+            );
         }
     }
 
@@ -332,11 +405,13 @@ fn main() {
     println!("  PHASE 4: Prime vs Composite cos²θ Distributions");
     println!("══════════════════════════════════════════════════════════════");
 
-    let prime_cos2: Vec<f64> = results.iter()
+    let prime_cos2: Vec<f64> = results
+        .iter()
         .filter(|d| d.is_prime && d.n >= 20 && d.cos2_theta > 1e-20)
         .map(|d| d.cos2_theta)
         .collect();
-    let comp_cos2: Vec<f64> = results.iter()
+    let comp_cos2: Vec<f64> = results
+        .iter()
         .filter(|d| !d.is_prime && d.n >= 20 && d.cos2_theta > 1e-20)
         .map(|d| d.cos2_theta)
         .collect();
@@ -344,23 +419,55 @@ fn main() {
     if !prime_cos2.is_empty() && !comp_cos2.is_empty() {
         let prime_mean: f64 = prime_cos2.iter().sum::<f64>() / prime_cos2.len() as f64;
         let comp_mean: f64 = comp_cos2.iter().sum::<f64>() / comp_cos2.len() as f64;
-        let prime_std: f64 = (prime_cos2.iter().map(|x| (x - prime_mean).powi(2)).sum::<f64>()
-            / prime_cos2.len() as f64).sqrt();
-        let comp_std: f64 = (comp_cos2.iter().map(|x| (x - comp_mean).powi(2)).sum::<f64>()
-            / comp_cos2.len() as f64).sqrt();
+        let prime_std: f64 = (prime_cos2
+            .iter()
+            .map(|x| (x - prime_mean).powi(2))
+            .sum::<f64>()
+            / prime_cos2.len() as f64)
+            .sqrt();
+        let comp_std: f64 = (comp_cos2
+            .iter()
+            .map(|x| (x - comp_mean).powi(2))
+            .sum::<f64>()
+            / comp_cos2.len() as f64)
+            .sqrt();
 
         println!();
-        println!("  {:>12} {:>10} {:>12} {:>12} {:>12}",
-            "Category", "Count", "Mean cos²θ", "Std Dev", "CV");
+        println!(
+            "  {:>12} {:>10} {:>12} {:>12} {:>12}",
+            "Category", "Count", "Mean cos²θ", "Std Dev", "CV"
+        );
         println!("  {}", "─".repeat(60));
-        println!("  {:>12} {:>10} {:12.4e} {:12.4e} {:12.4}",
-            "Primes", prime_cos2.len(), prime_mean, prime_std,
-            if prime_mean > 0.0 { prime_std / prime_mean } else { 0.0 });
-        println!("  {:>12} {:>10} {:12.4e} {:12.4e} {:12.4}",
-            "Composites", comp_cos2.len(), comp_mean, comp_std,
-            if comp_mean > 0.0 { comp_std / comp_mean } else { 0.0 });
-        println!("  {:>12} {:>10} {:12.4}",
-            "Ratio P/C", "", prime_mean / comp_mean);
+        println!(
+            "  {:>12} {:>10} {:12.4e} {:12.4e} {:12.4}",
+            "Primes",
+            prime_cos2.len(),
+            prime_mean,
+            prime_std,
+            if prime_mean > 0.0 {
+                prime_std / prime_mean
+            } else {
+                0.0
+            }
+        );
+        println!(
+            "  {:>12} {:>10} {:12.4e} {:12.4e} {:12.4}",
+            "Composites",
+            comp_cos2.len(),
+            comp_mean,
+            comp_std,
+            if comp_mean > 0.0 {
+                comp_std / comp_mean
+            } else {
+                0.0
+            }
+        );
+        println!(
+            "  {:>12} {:>10} {:12.4}",
+            "Ratio P/C",
+            "",
+            prime_mean / comp_mean
+        );
     }
 
     // ══════════════════════════════════════════════════
@@ -376,7 +483,8 @@ fn main() {
     // If cos²θ ~ C/N^α, then cos²θ · N^α → C
     // Try several normalizations
     for &beta in &[0.5, 1.0, 1.5, 2.0] {
-        let normalized: Vec<(usize, f64)> = results.iter()
+        let normalized: Vec<(usize, f64)> = results
+            .iter()
             .filter(|d| d.n >= 50 && d.cos2_theta > 1e-20)
             .map(|d| (d.n, d.cos2_theta * (d.n as f64).powf(beta)))
             .collect();
@@ -384,13 +492,18 @@ fn main() {
         if normalized.len() >= 10 {
             let vals: Vec<f64> = normalized.iter().map(|(_, v)| *v).collect();
             let mean: f64 = vals.iter().sum::<f64>() / vals.len() as f64;
-            let std: f64 = (vals.iter().map(|x| (x - mean).powi(2)).sum::<f64>()
-                / vals.len() as f64).sqrt();
-            let cv = if mean > 0.0 { std / mean } else { f64::INFINITY };
+            let std: f64 =
+                (vals.iter().map(|x| (x - mean).powi(2)).sum::<f64>() / vals.len() as f64).sqrt();
+            let cv = if mean > 0.0 {
+                std / mean
+            } else {
+                f64::INFINITY
+            };
 
             // Check trend: compare first half vs second half
             let half = normalized.len() / 2;
-            let first_half: f64 = normalized[..half].iter().map(|(_, v)| v).sum::<f64>() / half as f64;
+            let first_half: f64 =
+                normalized[..half].iter().map(|(_, v)| v).sum::<f64>() / half as f64;
             let second_half: f64 = normalized[half..].iter().map(|(_, v)| v).sum::<f64>()
                 / (normalized.len() - half) as f64;
 
@@ -409,14 +522,16 @@ fn main() {
     println!("══════════════════════════════════════════════════════════════");
 
     // Sort cos²θ values and compute nearest-neighbor spacings
-    let mut sorted_cos2: Vec<f64> = results.iter()
+    let mut sorted_cos2: Vec<f64> = results
+        .iter()
         .filter(|d| d.n >= 20 && d.cos2_theta > 1e-20)
-        .map(|d| d.cos2_theta.ln())  // Work in log scale
+        .map(|d| d.cos2_theta.ln()) // Work in log scale
         .collect();
     sorted_cos2.sort_by(|a, b| a.partial_cmp(b).unwrap());
 
     if sorted_cos2.len() >= 20 {
-        let spacings: Vec<f64> = sorted_cos2.windows(2)
+        let spacings: Vec<f64> = sorted_cos2
+            .windows(2)
             .map(|w| (w[1] - w[0]).abs())
             .collect();
         let mean_s: f64 = spacings.iter().sum::<f64>() / spacings.len() as f64;
@@ -426,7 +541,8 @@ fn main() {
         // For GOE: <r> ≈ 0.5307
         // For GUE: <r> ≈ 0.6027
         // For Poisson: <r> ≈ 0.3863
-        let r_ratios: Vec<f64> = normalized_spacings.windows(2)
+        let r_ratios: Vec<f64> = normalized_spacings
+            .windows(2)
             .map(|w| {
                 let s_n = w[0];
                 let s_n1 = w[1];
@@ -437,15 +553,22 @@ fn main() {
 
         // P(s=0) test: fraction of very small spacings
         // GOE has level repulsion (P(s→0) → 0), Poisson doesn't
-        let small_frac = normalized_spacings.iter()
-            .filter(|&&s| s < 0.1).count() as f64 / normalized_spacings.len() as f64;
+        let small_frac = normalized_spacings.iter().filter(|&&s| s < 0.1).count() as f64
+            / normalized_spacings.len() as f64;
 
         // Variance of spacings
-        let var_s: f64 = normalized_spacings.iter()
-            .map(|s| (s - 1.0).powi(2)).sum::<f64>() / normalized_spacings.len() as f64;
+        let var_s: f64 = normalized_spacings
+            .iter()
+            .map(|s| (s - 1.0).powi(2))
+            .sum::<f64>()
+            / normalized_spacings.len() as f64;
 
         println!();
-        println!("  Spacing analysis ({} spacings from {} cos²θ values):", spacings.len(), sorted_cos2.len());
+        println!(
+            "  Spacing analysis ({} spacings from {} cos²θ values):",
+            spacings.len(),
+            sorted_cos2.len()
+        );
         println!();
         println!("  ⟨r⟩ ratio = {:.4}", mean_r);
         println!("    GOE  prediction: 0.5307");
@@ -487,12 +610,14 @@ fn main() {
     println!();
 
     // Group by divisor count and compute mean cos²θ
-    let mut by_divisor: std::collections::HashMap<usize, Vec<f64>> = std::collections::HashMap::new();
+    let mut by_divisor: std::collections::HashMap<usize, Vec<f64>> =
+        std::collections::HashMap::new();
     for d in results.iter().filter(|d| d.n >= 20 && d.cos2_theta > 1e-20) {
         by_divisor.entry(d.d_n).or_default().push(d.cos2_theta);
     }
 
-    let mut divisor_groups: Vec<(usize, usize, f64)> = by_divisor.iter()
+    let mut divisor_groups: Vec<(usize, usize, f64)> = by_divisor
+        .iter()
         .map(|(&d, vals)| {
             let mean: f64 = vals.iter().sum::<f64>() / vals.len() as f64;
             (d, vals.len(), mean)
@@ -500,19 +625,27 @@ fn main() {
         .collect();
     divisor_groups.sort_by_key(|&(d, _, _)| d);
 
-    println!("  {:>6} {:>8} {:>14} {:>12}",
-        "d(N)", "count", "mean cos²θ", "ratio/d=2");
+    println!(
+        "  {:>6} {:>8} {:>14} {:>12}",
+        "d(N)", "count", "mean cos²θ", "ratio/d=2"
+    );
     println!("  {}", "─".repeat(45));
 
-    let base_mean = divisor_groups.iter()
+    let base_mean = divisor_groups
+        .iter()
         .find(|&&(d, _, _)| d == 2)
         .map(|&(_, _, m)| m)
         .unwrap_or(1.0);
 
     for &(d, count, mean) in &divisor_groups {
         if count >= 3 {
-            println!("  {:6} {:8} {:14.4e} {:12.4}",
-                d, count, mean, mean / base_mean);
+            println!(
+                "  {:6} {:8} {:14.4e} {:12.4}",
+                d,
+                count,
+                mean,
+                mean / base_mean
+            );
         }
     }
 

@@ -37,20 +37,34 @@ fn main() {
 
     // 4. Print top results
     println!("  ══ TOP 25 MATCHES ══\n");
-    println!("  {:>4} {:>20} {:>30} {:>10} ", "Rank", "Target", "Formula", "Error");
+    println!(
+        "  {:>4} {:>20} {:>30} {:>10} ",
+        "Rank", "Target", "Formula", "Error"
+    );
     println!("  {}", "─".repeat(72));
     for (i, m) in matches.iter().take(25).enumerate() {
-        println!("  {:>4} {:>20} {:>30} {:>9.5}% {}",
-            i + 1, m.target_symbol, m.formula_name, m.error_pct, m.tier);
+        println!(
+            "  {:>4} {:>20} {:>30} {:>9.5}% {}",
+            i + 1,
+            m.target_symbol,
+            m.formula_name,
+            m.error_pct,
+            m.tier
+        );
     }
 
     if !corrections.is_empty() {
         println!("\n  ══ AUTO-CORRECTIONS (α-improved) ══\n");
-        println!("  {:>20} {:>35} {:>9} {:>8}", "Target", "Corrected Formula", "New Err", "Was");
+        println!(
+            "  {:>20} {:>35} {:>9} {:>8}",
+            "Target", "Corrected Formula", "New Err", "Was"
+        );
         println!("  {}", "─".repeat(76));
         for c in corrections.iter().take(15) {
-            println!("  {:>20} {:>35} {:>8.5}% {:>7.3}%",
-                c.target_symbol, c.corrected_formula, c.new_error_pct, c.old_error_pct);
+            println!(
+                "  {:>20} {:>35} {:>8.5}% {:>7.3}%",
+                c.target_symbol, c.corrected_formula, c.new_error_pct, c.old_error_pct
+            );
         }
     }
 

@@ -15,9 +15,9 @@
 //!   cargo run --release --bin susy-sweep-v5 -- --cache-dir experiments/cache/hpdf
 //!   cargo run --release --bin susy-sweep-v5 -- --cache-dir experiments/cache/hpdf --max-n 10000
 
+use clap::Parser;
 use std::path::{Path, PathBuf};
 use std::time::Instant;
-use clap::Parser;
 
 use cathedral_utils::arith;
 use cathedral_utils::hpdf::reader::HpdfReader;
@@ -59,22 +59,46 @@ use std::f64::consts::PI;
 
 /// Complex number (simple inline to avoid extra dependency)
 #[derive(Clone, Copy, Debug)]
-struct C64 { re: f64, im: f64 }
+struct C64 {
+    re: f64,
+    im: f64,
+}
 
 impl C64 {
-    fn new(re: f64, im: f64) -> Self { Self { re, im } }
-    fn norm_sq(self) -> f64 { self.re * self.re + self.im * self.im }
-    fn norm(self) -> f64 { self.norm_sq().sqrt() }
-    fn conj(self) -> Self { Self { re: self.re, im: -self.im } }
+    fn new(re: f64, im: f64) -> Self {
+        Self { re, im }
+    }
+    fn norm_sq(self) -> f64 {
+        self.re * self.re + self.im * self.im
+    }
+    fn norm(self) -> f64 {
+        self.norm_sq().sqrt()
+    }
+    fn conj(self) -> Self {
+        Self {
+            re: self.re,
+            im: -self.im,
+        }
+    }
 }
 
 impl std::ops::Add for C64 {
     type Output = Self;
-    fn add(self, rhs: Self) -> Self { Self { re: self.re + rhs.re, im: self.im + rhs.im } }
+    fn add(self, rhs: Self) -> Self {
+        Self {
+            re: self.re + rhs.re,
+            im: self.im + rhs.im,
+        }
+    }
 }
 impl std::ops::Sub for C64 {
     type Output = Self;
-    fn sub(self, rhs: Self) -> Self { Self { re: self.re - rhs.re, im: self.im - rhs.im } }
+    fn sub(self, rhs: Self) -> Self {
+        Self {
+            re: self.re - rhs.re,
+            im: self.im - rhs.im,
+        }
+    }
 }
 impl std::ops::Mul for C64 {
     type Output = Self;
@@ -87,13 +111,20 @@ impl std::ops::Mul for C64 {
 }
 impl std::ops::Mul<f64> for C64 {
     type Output = Self;
-    fn mul(self, rhs: f64) -> Self { Self { re: self.re * rhs, im: self.im * rhs } }
+    fn mul(self, rhs: f64) -> Self {
+        Self {
+            re: self.re * rhs,
+            im: self.im * rhs,
+        }
+    }
 }
 impl std::ops::Div for C64 {
     type Output = Self;
     fn div(self, rhs: Self) -> Self {
         let d = rhs.norm_sq();
-        if d < 1e-300 { return Self::new(0.0, 0.0); }
+        if d < 1e-300 {
+            return Self::new(0.0, 0.0);
+        }
         Self {
             re: (self.re * rhs.re + self.im * rhs.im) / d,
             im: (self.im * rhs.re - self.re * rhs.im) / d,
@@ -105,7 +136,7 @@ impl std::ops::Div for C64 {
 fn k_pow_neg_s(k: usize, sigma: f64, t: f64) -> C64 {
     let ln_k = (k as f64).ln();
     let mag = (-sigma * ln_k).exp(); // k^{-σ}
-    let phase = -t * ln_k;           // -t·ln(k)
+    let phase = -t * ln_k; // -t·ln(k)
     C64::new(mag * phase.cos(), mag * phase.sin())
 }
 
@@ -133,7 +164,9 @@ fn zeta_on_critical_line(t: f64) -> C64 {
 fn dirichlet_poly(v: &[f64], sigma: f64, t: f64) -> C64 {
     let mut sum = C64::new(0.0, 0.0);
     for (i, &vi) in v.iter().enumerate() {
-        if vi.abs() < 1e-20 { continue; }
+        if vi.abs() < 1e-20 {
+            continue;
+        }
         let k = i + 2; // HPDF convention: index 0 → k=2
         let ks = k_pow_neg_s(k, sigma, t);
         sum = sum + ks * vi;
@@ -148,7 +181,9 @@ fn rational_part(v: &[f64], t: f64) -> C64 {
     let one_over_s = C64::new(1.0, 0.0) / s;
     let mut sum = C64::new(0.0, 0.0);
     for (i, &vi) in v.iter().enumerate() {
-        if vi.abs() < 1e-20 { continue; }
+        if vi.abs() < 1e-20 {
+            continue;
+        }
         let k = i + 2;
         let term = C64::new(vi / k as f64, 0.0) / s_minus_1;
         sum = sum + term;
@@ -158,7 +193,9 @@ fn rational_part(v: &[f64], t: f64) -> C64 {
 
 /// sinc²(x) — Fejér kernel
 fn fejer_kernel(x: f64) -> f64 {
-    if x.abs() < 1e-12 { return 1.0; }
+    if x.abs() < 1e-12 {
+        return 1.0;
+    }
     let pix = PI * x;
     let s = pix.sin() / pix;
     s * s
@@ -170,17 +207,17 @@ struct MellinResult {
     dim: usize,
     vtgv: f64,
     // v5 channels
-    mellin_l2_log_n: f64,       // (1/2π)∫|M|²·logN
-    zeta_d_product_l2: f64,     // ∫|ζ·D|²
-    zeta_l2: f64,               // ∫|ζ/s|²
-    d_flat_l2: f64,             // ∫|D|² (flat)
-    d_fejer_l2: f64,            // Σ|v_k|² (= Fejér-weighted, exact)
-    flat_fejer_ratio: f64,      // I_flat / I_fejer
-    zeta_d_cancel: f64,         // η_ζD cancellation efficiency
-    dirichlet_collapse: f64,    // mean |ζ·D - 1| on critical line
-    subconv_alpha: f64,         // empirical sup |ζ·D|/t^{1/4}
-    r_l2: f64,                  // ∫|R|²
-    cross_term_real: f64,       // Re ∫ R·conj(ζD/s)
+    mellin_l2_log_n: f64,    // (1/2π)∫|M|²·logN
+    zeta_d_product_l2: f64,  // ∫|ζ·D|²
+    zeta_l2: f64,            // ∫|ζ/s|²
+    d_flat_l2: f64,          // ∫|D|² (flat)
+    d_fejer_l2: f64,         // Σ|v_k|² (= Fejér-weighted, exact)
+    flat_fejer_ratio: f64,   // I_flat / I_fejer
+    zeta_d_cancel: f64,      // η_ζD cancellation efficiency
+    dirichlet_collapse: f64, // mean |ζ·D - 1| on critical line
+    subconv_alpha: f64,      // empirical sup |ζ·D|/t^{1/4}
+    r_l2: f64,               // ∫|R|²
+    cross_term_real: f64,    // Re ∫ R·conj(ζD/s)
     t_max_used: f64,
     n_grid: usize,
     elapsed_secs: f64,
@@ -195,18 +232,22 @@ fn analyze_critical_line(path: &Path, t_grid: usize, t_max: f64) -> Option<Melli
 
     // Read Gram matrix for vᵀGv computation
     let gram = reader.read_gram_full().ok()?;
-    if gram.len() != dim * dim { return None; }
+    if gram.len() != dim * dim {
+        return None;
+    }
 
     let mu = arith::mobius_table(n);
     let ln_n = (n as f64).ln();
 
     // Build witness vector v (HPDF convention: k=2..=N)
-    let v: Vec<f64> = (0..dim).map(|i| {
-        let k = i + 2;
-        let mu_k = mu[k] as f64;
-        let w = 1.0 - (k as f64).ln() / ln_n;
-        -mu_k * w
-    }).collect();
+    let v: Vec<f64> = (0..dim)
+        .map(|i| {
+            let k = i + 2;
+            let mu_k = mu[k] as f64;
+            let w = 1.0 - (k as f64).ln() / ln_n;
+            -mu_k * w
+        })
+        .collect();
 
     // Compute vᵀGv
     let mut vtgv = 0.0f64;
@@ -237,7 +278,9 @@ fn analyze_critical_line(path: &Path, t_grid: usize, t_max: f64) -> Option<Melli
     // (skip t=0 where ζ has a pole-like behavior in 1/s)
     for ig in 1..=t_grid {
         let t = ig as f64 * dt;
-        if t < 0.5 { continue; } // skip near-origin
+        if t < 0.5 {
+            continue;
+        } // skip near-origin
 
         // Evaluate components at s = 1/2 + it
         let zeta = zeta_on_critical_line(t);
@@ -273,7 +316,9 @@ fn analyze_critical_line(path: &Path, t_grid: usize, t_max: f64) -> Option<Melli
         // Subconvexity: |ζ·D| / t^{1/4}
         if t > 10.0 {
             let alpha = zeta_times_d.norm() / t.powf(0.25);
-            if alpha > subconv_max { subconv_max = alpha; }
+            if alpha > subconv_max {
+                subconv_max = alpha;
+            }
         }
 
         n_points += 1;
@@ -286,15 +331,27 @@ fn analyze_critical_line(path: &Path, t_grid: usize, t_max: f64) -> Option<Melli
     // Cancellation efficiency: η_ζD = ∫|ζ·D|² / sqrt(∫|ζ/s|² · ∫|D|²)
     let zeta_d_cancel = if zeta_over_s_l2 > 0.0 && d_flat_l2 > 0.0 {
         zeta_d_l2 / (zeta_over_s_l2 * d_flat_l2).sqrt()
-    } else { 0.0 };
+    } else {
+        0.0
+    };
 
-    let flat_fejer_ratio = if d_fejer_l2 > 1e-15 { d_flat_l2 / d_fejer_l2 } else { 0.0 };
-    let dirichlet_collapse = if n_points > 0 { collapse_sum / n_points as f64 } else { 0.0 };
+    let flat_fejer_ratio = if d_fejer_l2 > 1e-15 {
+        d_flat_l2 / d_fejer_l2
+    } else {
+        0.0
+    };
+    let dirichlet_collapse = if n_points > 0 {
+        collapse_sum / n_points as f64
+    } else {
+        0.0
+    };
 
     let elapsed = t0.elapsed().as_secs_f64();
 
     Some(MellinResult {
-        n, dim, vtgv,
+        n,
+        dim,
+        vtgv,
         mellin_l2_log_n: mellin_l2 * ln_n,
         zeta_d_product_l2: zeta_d_l2,
         zeta_l2: zeta_over_s_l2,
@@ -318,8 +375,10 @@ fn main() {
     println!("╔══════════════════════════════════════════════════════════════════════╗");
     println!("║  SUSY SWEEP v5 — Mellin-Fejér Bridge: Subconvexity Probe          ║");
     println!("║  Testing Dirichlet Collapse: ζ(s)·D_N(s) ≈ 1 on critical line    ║");
-    println!("║  T_max={:.0}  grid={}  channels: Mellin L², η_ζD, collapse     ║",
-             cli.t_max, cli.t_grid);
+    println!(
+        "║  T_max={:.0}  grid={}  channels: Mellin L², η_ζD, collapse     ║",
+        cli.t_max, cli.t_grid
+    );
     println!("╚══════════════════════════════════════════════════════════════════════╝");
 
     let cache_dir = Path::new(&cli.cache_dir);
@@ -336,19 +395,30 @@ fn main() {
             if name.starts_with("gram_N") && name.ends_with(".h5") && !name.contains("_p") {
                 let n_str = name.strip_prefix("gram_N")?.strip_suffix(".h5")?;
                 let n: usize = n_str.parse().ok()?;
-                if n <= cli.max_n && n >= 6
-                    && (cli.n_values.is_empty() || cli.n_values.contains(&n)) {
-                        return Some((n, e.path()));
-                    }
+                if n <= cli.max_n
+                    && n >= 6
+                    && (cli.n_values.is_empty() || cli.n_values.contains(&n))
+                {
+                    return Some((n, e.path()));
+                }
                 None
-            } else { None }
+            } else {
+                None
+            }
         })
         .collect();
 
     h5_files.sort_by_key(|(n, _)| *n);
 
-    println!("\n  Found {} HPDF files (N ≤ {})", h5_files.len(), cli.max_n);
-    println!("  Processing with T_max={}, {} grid points...\n", cli.t_max, cli.t_grid);
+    println!(
+        "\n  Found {} HPDF files (N ≤ {})",
+        h5_files.len(),
+        cli.max_n
+    );
+    println!(
+        "  Processing with T_max={}, {} grid points...\n",
+        cli.t_max, cli.t_grid
+    );
 
     let t_total = Instant::now();
     let mut results: Vec<MellinResult> = Vec::new();
@@ -357,12 +427,20 @@ fn main() {
         eprint!("  N={:>6} ...", n);
         match analyze_critical_line(path, cli.t_grid, cli.t_max) {
             Some(r) => {
-                eprintln!(" |M|²·lnN={:>10.4}  η_ζD={:.6}  collapse={:.6}  ρ={:.2}  α={:.4}  ({:.1}s)",
-                         r.mellin_l2_log_n, r.zeta_d_cancel, r.dirichlet_collapse,
-                         r.flat_fejer_ratio, r.subconv_alpha, r.elapsed_secs);
+                eprintln!(
+                    " |M|²·lnN={:>10.4}  η_ζD={:.6}  collapse={:.6}  ρ={:.2}  α={:.4}  ({:.1}s)",
+                    r.mellin_l2_log_n,
+                    r.zeta_d_cancel,
+                    r.dirichlet_collapse,
+                    r.flat_fejer_ratio,
+                    r.subconv_alpha,
+                    r.elapsed_secs
+                );
                 results.push(r);
             }
-            None => { eprintln!(" FAILED"); }
+            None => {
+                eprintln!(" FAILED");
+            }
         }
     }
 
@@ -378,9 +456,16 @@ fn main() {
     println!("  ║   N    ║  |M|²·lnN  ║   η_ζD     ║  collapse  ║  flat/fej  ║  α_subconv ║   vᵀGv     ║");
     println!("  ╠════════╬════════════╬════════════╬════════════╬════════════╬════════════╬════════════╣");
     for r in &results {
-        println!("  ║{:>7} ║ {:>10.4} ║ {:>10.6} ║ {:>10.6} ║ {:>10.2} ║ {:>10.4} ║ {:>10.6} ║",
-                 r.n, r.mellin_l2_log_n, r.zeta_d_cancel, r.dirichlet_collapse,
-                 r.flat_fejer_ratio, r.subconv_alpha, r.vtgv);
+        println!(
+            "  ║{:>7} ║ {:>10.4} ║ {:>10.6} ║ {:>10.6} ║ {:>10.2} ║ {:>10.4} ║ {:>10.6} ║",
+            r.n,
+            r.mellin_l2_log_n,
+            r.zeta_d_cancel,
+            r.dirichlet_collapse,
+            r.flat_fejer_ratio,
+            r.subconv_alpha,
+            r.vtgv
+        );
     }
     println!("  ╚════════╩════════════╩════════════╩════════════╩════════════╩════════════╩════════════╝");
 
@@ -389,8 +474,10 @@ fn main() {
     println!("  ║   N    ║  ∫|R|²     ║  ∫|ζ/s|²  ║  ∫|D|²flat ║  Σ|v|²fej  ║  Re∫R·ζD*  ║");
     println!("  ╠════════╬════════════╬════════════╬════════════╬════════════╬════════════╣");
     for r in &results {
-        println!("  ║{:>7} ║ {:>10.4} ║ {:>10.4} ║ {:>10.4} ║ {:>10.6} ║ {:>+10.4} ║",
-                 r.n, r.r_l2, r.zeta_l2, r.d_flat_l2, r.d_fejer_l2, r.cross_term_real);
+        println!(
+            "  ║{:>7} ║ {:>10.4} ║ {:>10.4} ║ {:>10.4} ║ {:>10.6} ║ {:>+10.4} ║",
+            r.n, r.r_l2, r.zeta_l2, r.d_flat_l2, r.d_fejer_l2, r.cross_term_real
+        );
     }
     println!("  ╚════════╩════════════╩════════════╩════════════╩════════════╩════════════╝");
 
@@ -403,21 +490,39 @@ fn main() {
         let first = results.iter().find(|r| r.n >= 60).unwrap_or(&results[0]);
         let last = results.last().unwrap();
 
-        let eta_trend = if last.zeta_d_cancel < first.zeta_d_cancel { "✅ DECAYS" } else { "⚠  GROWS " };
-        let col_trend = if last.dirichlet_collapse < first.dirichlet_collapse { "✅ DECAYS" } else { "⚠  GROWS " };
-        let ml2_bounded = if last.mellin_l2_log_n < first.mellin_l2_log_n * 2.0 { "✅ BOUNDED" } else { "⚠  GROWS  " };
+        let eta_trend = if last.zeta_d_cancel < first.zeta_d_cancel {
+            "✅ DECAYS"
+        } else {
+            "⚠  GROWS "
+        };
+        let col_trend = if last.dirichlet_collapse < first.dirichlet_collapse {
+            "✅ DECAYS"
+        } else {
+            "⚠  GROWS "
+        };
+        let ml2_bounded = if last.mellin_l2_log_n < first.mellin_l2_log_n * 2.0 {
+            "✅ BOUNDED"
+        } else {
+            "⚠  GROWS  "
+        };
 
-        println!("  ║  η_ζD (cancellation):  {:.6} → {:.6}  {}         ║",
-                 first.zeta_d_cancel, last.zeta_d_cancel, eta_trend);
-        println!("  ║  collapse |ζD-1|:      {:.6} → {:.6}  {}         ║",
-                 first.dirichlet_collapse, last.dirichlet_collapse, col_trend);
-        println!("  ║  |M|²·logN:            {:.4} → {:.4}      {}         ║",
-                 first.mellin_l2_log_n, last.mellin_l2_log_n, ml2_bounded);
+        println!(
+            "  ║  η_ζD (cancellation):  {:.6} → {:.6}  {}         ║",
+            first.zeta_d_cancel, last.zeta_d_cancel, eta_trend
+        );
+        println!(
+            "  ║  collapse |ζD-1|:      {:.6} → {:.6}  {}         ║",
+            first.dirichlet_collapse, last.dirichlet_collapse, col_trend
+        );
+        println!(
+            "  ║  |M|²·logN:            {:.4} → {:.4}      {}         ║",
+            first.mellin_l2_log_n, last.mellin_l2_log_n, ml2_bounded
+        );
         println!("  ║                                                                    ║");
 
         // Dirichlet collapse verdict
-        let collapse_happens = last.dirichlet_collapse < first.dirichlet_collapse
-            && last.dirichlet_collapse < 1.0;
+        let collapse_happens =
+            last.dirichlet_collapse < first.dirichlet_collapse && last.dirichlet_collapse < 1.0;
         if collapse_happens {
             println!("  ║  🎯 DIRICHLET COLLAPSE DETECTED: ζ·D → 1 on critical line!       ║");
             println!("  ║     This suggests an unconditional bound may exist.               ║");

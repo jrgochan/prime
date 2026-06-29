@@ -1,4 +1,13 @@
-#![allow(dead_code, unused_variables, unused_imports, unused_assignments, clippy::needless_range_loop, clippy::doc_lazy_continuation, non_snake_case, clippy::empty_line_after_doc_comments)]
+#![allow(
+    dead_code,
+    unused_variables,
+    unused_imports,
+    unused_assignments,
+    clippy::needless_range_loop,
+    clippy::doc_lazy_continuation,
+    non_snake_case,
+    clippy::empty_line_after_doc_comments
+)]
 // overcancellation-scan/src/bin/cotangent_bound_probe.rs
 //
 // ╔═══════════════════════════════════════════════════════════════════╗
@@ -111,7 +120,9 @@ fn decompose(j: usize, k: usize) -> (f64, f64, f64, f64) {
 
 /// BD witness weight: v(k) = -μ(k) · w(k,N) where w = 1 - ln(k)/ln(N)
 fn log_weight(k: usize, n: usize) -> f64 {
-    if k >= n { return 0.0; }
+    if k >= n {
+        return 0.0;
+    }
     1.0 - (k as f64).ln() / (n as f64).ln()
 }
 
@@ -123,22 +134,30 @@ fn main() {
 
     let c = vasyunin_const();
     println!("C = ln(2π) − γ = {:.6}", c);
-    println!("1/3 + C = {:.6}", 1.0/3.0 + c);
-    println!("C − 2/3 = {:.6}", c - 2.0/3.0);
+    println!("1/3 + C = {:.6}", 1.0 / 3.0 + c);
+    println!("C − 2/3 = {:.6}", c - 2.0 / 3.0);
     println!();
 
     // ═══════════════════════════════════════════════════
     // SECTION 1: Verify Dedekind dissolution formula
     // ═══════════════════════════════════════════════════
     println!("═══ SECTION 1: Dedekind Dissolution Verification ═══");
-    println!("{:>5} {:>5} {:>12} {:>12} {:>12}", "j'", "k'", "V+V (direct)", "dissolved", "error");
+    println!(
+        "{:>5} {:>5} {:>12} {:>12} {:>12}",
+        "j'", "k'", "V+V (direct)", "dissolved", "error"
+    );
     for jp in 1..=8 {
-        for kp in (jp+1)..=8 {
-            if gcd(jp, kp) != 1 { continue; }
+        for kp in (jp + 1)..=8 {
+            if gcd(jp, kp) != 1 {
+                continue;
+            }
             let v_direct = vasyunin_sum(jp, kp) + vasyunin_sum(kp, jp);
             let v_dissolved = dissolved_vasyunin(jp, kp);
             let err = (v_direct - v_dissolved).abs();
-            println!("{:5} {:5} {:12.6} {:12.6} {:12.2e}", jp, kp, v_direct, v_dissolved, err);
+            println!(
+                "{:5} {:5} {:12.6} {:12.6} {:12.2e}",
+                jp, kp, v_direct, v_dissolved, err
+            );
         }
     }
     println!();
@@ -153,7 +172,10 @@ fn main() {
 
     let n_max = 200;
     println!("  Column sums up to N = {}:", n_max);
-    println!("{:>5} {:>12} {:>12} {:>12} {:>12}", "j", "Σ|term2-t3|", "Σ|term2|", "Σ|term3|", "diag G(j,j)");
+    println!(
+        "{:>5} {:>12} {:>12} {:>12} {:>12}",
+        "j", "Σ|term2-t3|", "Σ|term2|", "Σ|term3|", "diag G(j,j)"
+    );
 
     let mut max_col_sum = 0.0f64;
     let mut max_col_j = 0;
@@ -162,14 +184,19 @@ fn main() {
         let mut sum_term2 = 0.0;
         let mut sum_term3 = 0.0;
         for k in 1..=n_max {
-            if k == j { continue; }
+            if k == j {
+                continue;
+            }
             let (_, t2, t3, _) = decompose(j, k);
             sum_residual += (t2 - t3).abs();
             sum_term2 += t2.abs();
             sum_term3 += t3.abs();
         }
         let diag = gram_diag(j);
-        println!("{:5} {:12.6} {:12.6} {:12.6} {:12.6}", j, sum_residual, sum_term2, sum_term3, diag);
+        println!(
+            "{:5} {:12.6} {:12.6} {:12.6} {:12.6}",
+            j, sum_residual, sum_term2, sum_term3, diag
+        );
         if sum_residual > max_col_sum {
             max_col_sum = sum_residual;
             max_col_j = j;
@@ -177,8 +204,15 @@ fn main() {
     }
     println!();
     println!("  Max column sum: {:.6} at j = {}", max_col_sum, max_col_j);
-    println!("  Target: < 2/3 = {:.6}", 2.0/3.0);
-    println!("  Status: {}", if max_col_sum < 2.0/3.0 { "✅ WITHIN BOUND" } else { "❌ EXCEEDS BOUND" });
+    println!("  Target: < 2/3 = {:.6}", 2.0 / 3.0);
+    println!(
+        "  Status: {}",
+        if max_col_sum < 2.0 / 3.0 {
+            "✅ WITHIN BOUND"
+        } else {
+            "❌ EXCEEDS BOUND"
+        }
+    );
     println!();
 
     // ═══════════════════════════════════════════════════
@@ -193,7 +227,7 @@ fn main() {
         let size = n - 1;
         let mut v = vec![0.0f64; size];
         for k in 1..n {
-            v[k-1] = -(mu[k] as f64) * log_weight(k, n);
+            v[k - 1] = -(mu[k] as f64) * log_weight(k, n);
         }
 
         // Compute vᵀGv decomposition
@@ -212,7 +246,9 @@ fn main() {
             // Off-diagonal
             for k_idx in 0..size {
                 let k = k_idx + 1;
-                if k == j { continue; }
+                if k == j {
+                    continue;
+                }
                 let (t1, t2, t3, t4) = decompose(j, k);
                 let vv = v[j_idx] * v[k_idx];
                 term1_sum += vv * t1;
@@ -226,12 +262,22 @@ fn main() {
 
         let norm_sq: f64 = v.iter().map(|x| x * x).sum();
         let sigma: f64 = v.iter().sum();
-        let s: f64 = v.iter().enumerate().map(|(i, vi)| vi / (i as f64 + 1.0)).sum();
+        let s: f64 = v
+            .iter()
+            .enumerate()
+            .map(|(i, vi)| vi / (i as f64 + 1.0))
+            .sum();
 
         println!("  N = {:5}: vᵀGv = {:.6} | diag = {:.4} | term1(CσS) = {:.4} | term2(log) = {:.4} | -term3(cot) = {:.4} | -term4(-S²) = {:.4}",
             n, full_gram, diag_sum, term1_sum, term2_sum, term3_sum, term4_sum);
-        println!("           ‖v‖² = {:.4} | σ = {:.6} | S = {:.6} | CσS = {:.6} | S² = {:.6}",
-            norm_sq, sigma, s, c * sigma * s, s * s);
+        println!(
+            "           ‖v‖² = {:.4} | σ = {:.6} | S = {:.6} | CσS = {:.6} | S² = {:.6}",
+            norm_sq,
+            sigma,
+            s,
+            c * sigma * s,
+            s * s
+        );
     }
 
     println!();
@@ -248,21 +294,23 @@ fn main() {
         let size = n - 1;
         let mut v = vec![0.0f64; size];
         for k in 1..n {
-            v[k-1] = -(mu[k] as f64) * log_weight(k, n);
+            v[k - 1] = -(mu[k] as f64) * log_weight(k, n);
         }
 
         let mut diag_total = 0.0;
         let mut t1_total = 0.0;
         let mut t2_total = 0.0;
-        let mut t3_total = 0.0;  // this is −term3 (cotangent contribution)
-        let mut t4_total = 0.0;  // this is −term4 (= +S²)
+        let mut t3_total = 0.0; // this is −term3 (cotangent contribution)
+        let mut t4_total = 0.0; // this is −term4 (= +S²)
 
         for j_idx in 0..size {
             let j = j_idx + 1;
             diag_total += v[j_idx] * v[j_idx] * gram_diag(j);
             for k_idx in 0..size {
                 let k = k_idx + 1;
-                if k == j { continue; }
+                if k == j {
+                    continue;
+                }
                 let (t1, t2, t3, t4) = decompose(j, k);
                 let vv = v[j_idx] * v[k_idx];
                 t1_total += vv * t1;
@@ -275,13 +323,20 @@ fn main() {
         let norm_sq: f64 = v.iter().map(|x| x * x).sum();
 
         println!("  N = {:5}:  vᵀGv = {:.6}", n, full);
-        println!("    diagonal:   {:+.6} ({:.1}% of ‖v‖²={:.4})",
-            diag_total, 100.0 * diag_total / norm_sq, norm_sq);
+        println!(
+            "    diagonal:   {:+.6} ({:.1}% of ‖v‖²={:.4})",
+            diag_total,
+            100.0 * diag_total / norm_sq,
+            norm_sq
+        );
         println!("    term1(CσS): {:+.6}", t1_total);
         println!("    term2(log): {:+.6}", t2_total);
         println!("    −term3(cot):{:+.6}  ← THE GAP", t3_total);
         println!("    −term4(S²): {:+.6}", t4_total);
-        println!("    residual = term2 + (−term3) = {:+.6}", t2_total + t3_total);
+        println!(
+            "    residual = term2 + (−term3) = {:+.6}",
+            t2_total + t3_total
+        );
         println!();
     }
 }

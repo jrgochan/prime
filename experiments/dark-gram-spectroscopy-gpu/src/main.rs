@@ -16,12 +16,15 @@
 
 mod gpu;
 
-use std::time::Instant;
 use clap::Parser;
 use rayon::prelude::*;
+use std::time::Instant;
 
 #[derive(Parser)]
-#[command(name = "dark-gram-spectroscopy-gpu", about = "Dark Gram Matrix — GPU spectral analysis")]
+#[command(
+    name = "dark-gram-spectroscopy-gpu",
+    about = "Dark Gram Matrix — GPU spectral analysis"
+)]
 struct Cli {
     /// Bernoulli orders to test (comma-separated)
     #[arg(long, value_delimiter = ',', default_value = "2")]
@@ -70,8 +73,8 @@ fn main() {
 
     let dims = if let Some(max_dim) = cli.max_dim {
         let hc = vec![
-            12, 24, 60, 120, 240, 360, 720, 1000, 2520, 5040,
-            10080, 15120, 20000, 25200, 30000, 40000, 50000,
+            12, 24, 60, 120, 240, 360, 720, 1000, 2520, 5040, 10080, 15120, 20000, 25200, 30000,
+            40000, 50000,
         ];
         hc.into_iter().filter(|&d| d <= max_dim).collect()
     } else {
@@ -106,16 +109,12 @@ fn main() {
     }
 
     eprintln!();
-    eprintln!(
-        "═══════════════════════════════════════════════════════════════"
-    );
+    eprintln!("═══════════════════════════════════════════════════════════════");
     eprintln!(
         "  🪞 Dark Gram GPU Spectroscopy complete ({:.1}s)",
         t_total.elapsed().as_secs_f64()
     );
-    eprintln!(
-        "═══════════════════════════════════════════════════════════════"
-    );
+    eprintln!("═══════════════════════════════════════════════════════════════");
 }
 
 struct SpectralResult {
@@ -188,7 +187,9 @@ fn lanczos_tridiag(
     let val = 1.0 / (dim as f64).sqrt();
     let mut v = vec![val; dim];
     let norm: f64 = v.iter().map(|x| x * x).sum::<f64>().sqrt();
-    for x in &mut v { *x /= norm; }
+    for x in &mut v {
+        *x /= norm;
+    }
     basis.push(v);
 
     let mut w = vec![0.0f64; dim];
@@ -212,7 +213,9 @@ fn lanczos_tridiag(
         for _pass in 0..2 {
             for k in 0..=j {
                 let coeff: f64 = w.iter().zip(basis[k].iter()).map(|(a, b)| a * b).sum();
-                for i in 0..dim { w[i] -= coeff * basis[k][i]; }
+                for i in 0..dim {
+                    w[i] -= coeff * basis[k][i];
+                }
             }
         }
 
@@ -237,7 +240,9 @@ fn lanczos_tridiag(
 /// Extract eigenvalues from tridiagonal matrix using faer.
 fn tridiag_eigenvalues(alpha: &[f64], beta: &[f64]) -> Vec<f64> {
     let m = alpha.len();
-    if m == 0 { return vec![]; }
+    if m == 0 {
+        return vec![];
+    }
 
     let mat = faer::Mat::from_fn(m, m, |i, j| {
         if i == j {
@@ -268,7 +273,8 @@ fn analyze_dark_gram_lanczos(n: usize, dim: usize, k: usize, m: usize) -> Spectr
 
     eprintln!("    Trace (exact) = {trace:.6e}");
     eprintln!("    Diag (exact)  = {diag_val:.6e}");
-    eprintln!("    Memory: ~{:.0} MB (vs {:.0} MB for full matrix)",
+    eprintln!(
+        "    Memory: ~{:.0} MB (vs {:.0} MB for full matrix)",
         (m as f64) * (dim as f64) * 8.0 / 1e6,
         (dim as f64) * (dim as f64) * 8.0 / 1e6,
     );
@@ -279,11 +285,19 @@ fn analyze_dark_gram_lanczos(n: usize, dim: usize, k: usize, m: usize) -> Spectr
         _ => {
             eprintln!("    ⚠ Lanczos OOC only supports n=2 (closed form)");
             return SpectralResult {
-                lambda_min: diag_val, lambda_max: diag_val,
-                kappa: 1.0, r_mean: 0.0, ensemble: "N/A".to_string(),
-                decay_type: "N/A".to_string(), eff_rank: dim as f64,
-                trace, frobenius: 0.0, diag_min: diag_val, diag_max: diag_val,
-                build_secs: 0.0, eigen_secs: 0.0,
+                lambda_min: diag_val,
+                lambda_max: diag_val,
+                kappa: 1.0,
+                r_mean: 0.0,
+                ensemble: "N/A".to_string(),
+                decay_type: "N/A".to_string(),
+                eff_rank: dim as f64,
+                trace,
+                frobenius: 0.0,
+                diag_min: diag_val,
+                diag_max: diag_val,
+                build_secs: 0.0,
+                eigen_secs: 0.0,
             };
         }
     };
@@ -294,7 +308,10 @@ fn analyze_dark_gram_lanczos(n: usize, dim: usize, k: usize, m: usize) -> Spectr
     let (alpha, beta, _basis) = lanczos_tridiag(matvec.as_ref(), dim, m);
     let ritz = tridiag_eigenvalues(&alpha, &beta);
     let pass1_secs = t_eigen.elapsed().as_secs_f64();
-    eprintln!("    ✓ Pass 1 done in {pass1_secs:.1}s ({} Ritz values)", ritz.len());
+    eprintln!(
+        "    ✓ Pass 1 done in {pass1_secs:.1}s ({} Ritz values)",
+        ritz.len()
+    );
 
     let lambda_min = ritz.first().copied().unwrap_or(0.0).abs().max(1e-300);
 
@@ -308,7 +325,9 @@ fn analyze_dark_gram_lanczos(n: usize, dim: usize, k: usize, m: usize) -> Spectr
     eprintln!("    ▸ Lanczos pass 2: top-{k} eigenvalues (m={m})...");
     let neg_matvec = |x: &[f64], y: &mut [f64]| {
         matvec(x, y);
-        for val in y.iter_mut() { *val = -*val; }
+        for val in y.iter_mut() {
+            *val = -*val;
+        }
     };
     let t_pass2 = Instant::now();
     let (alpha2, beta2, _basis2) = lanczos_tridiag(&neg_matvec, dim, m);
@@ -336,10 +355,10 @@ fn analyze_dark_gram_lanczos(n: usize, dim: usize, k: usize, m: usize) -> Spectr
         lambda_min,
         lambda_max,
         kappa,
-        r_mean: 0.0,                    // Lanczos doesn't give full spectrum for ⟨r⟩
+        r_mean: 0.0, // Lanczos doesn't give full spectrum for ⟨r⟩
         ensemble: "Lanczos".to_string(),
         decay_type: "Lanczos".to_string(),
-        eff_rank: 0.0,                  // Would need full spectrum
+        eff_rank: 0.0, // Would need full spectrum
         trace,
         frobenius: 0.0,
         diag_min: diag_val,
@@ -362,18 +381,16 @@ fn build_dark_gram(n: usize, dim: usize) -> Vec<f64> {
     let mut mat = vec![0.0f64; dim * dim];
 
     // Parallel row construction
-    mat.par_chunks_mut(dim)
-        .enumerate()
-        .for_each(|(i, row)| {
-            let j = i + 2; // j starts at 2
-            for k_idx in 0..dim {
-                let k = k_idx + 2;
-                row[k_idx] = match n {
-                    2 => dark_gram_entry_n2(j, k),
-                    _ => dark_gram_entry_quadrature(n, j, k, 50_000),
-                };
-            }
-        });
+    mat.par_chunks_mut(dim).enumerate().for_each(|(i, row)| {
+        let j = i + 2; // j starts at 2
+        for k_idx in 0..dim {
+            let k = k_idx + 2;
+            row[k_idx] = match n {
+                2 => dark_gram_entry_n2(j, k),
+                _ => dark_gram_entry_quadrature(n, j, k, 50_000),
+            };
+        }
+    });
 
     eprintln!(
         "  ✓ Dark Gram G^({n}) built: {dim}×{dim} ({:.2}s)",
@@ -463,7 +480,8 @@ fn analyze_dark_gram_gpu(n: usize, dim: usize) -> SpectralResult {
             eprintln!("    → Falling back to faer CPU parallel eigensolver...");
             let t_cpu = Instant::now();
             let faer_mat = faer::Mat::from_fn(dim, dim, |i, j| mat[i * dim + j]);
-            let eig_vec = faer_mat.self_adjoint_eigenvalues(faer::Side::Lower)
+            let eig_vec = faer_mat
+                .self_adjoint_eigenvalues(faer::Side::Lower)
                 .expect("faer eigenvalue computation failed");
             eprintln!(
                 "    [CPU/faer] eigenvalues computed in {:.2}s",
@@ -478,10 +496,7 @@ fn analyze_dark_gram_gpu(n: usize, dim: usize) -> SpectralResult {
     let lambda_min_raw = eigenvalues[0];
     let lambda_max_raw = eigenvalues[dim - 1];
 
-    eprintln!(
-        "    Eigen     = {dim}×{dim} ({:.2}s)",
-        eigen_secs
-    );
+    eprintln!("    Eigen     = {dim}×{dim} ({:.2}s)", eigen_secs);
     eprintln!("    λ_max     = {lambda_max_raw:.6e}");
     eprintln!("    λ_min     = {lambda_min_raw:.6e}");
 
@@ -506,11 +521,16 @@ fn analyze_dark_gram_gpu(n: usize, dim: usize) -> SpectralResult {
     // Effective rank
     let total: f64 = eigenvalues.iter().filter(|&&x| x > 0.0).sum();
     let eff_rank = if total > 0.0 {
-        let entropy: f64 = eigenvalues.iter()
+        let entropy: f64 = eigenvalues
+            .iter()
             .filter(|&&x| x > 0.0)
             .map(|&x| {
                 let p = x / total;
-                if p > 1e-30 { -p * p.ln() } else { 0.0 }
+                if p > 1e-30 {
+                    -p * p.ln()
+                } else {
+                    0.0
+                }
             })
             .sum();
         entropy.exp()
@@ -585,7 +605,10 @@ fn classify_ensemble(r_mean: f64) -> String {
     let (name, _) = candidates
         .iter()
         .min_by(|a, b| {
-            (a.1 - r_mean).abs().partial_cmp(&(b.1 - r_mean).abs()).unwrap()
+            (a.1 - r_mean)
+                .abs()
+                .partial_cmp(&(b.1 - r_mean).abs())
+                .unwrap()
         })
         .unwrap();
     name.to_string()
@@ -598,7 +621,8 @@ fn classify_decay(eigenvalues: &[f64]) -> String {
         return "unknown".to_string();
     }
 
-    let positive: Vec<(usize, f64)> = eigenvalues.iter()
+    let positive: Vec<(usize, f64)> = eigenvalues
+        .iter()
         .enumerate()
         .take(n)
         .filter(|(_, &v)| v > 1e-300)
@@ -615,7 +639,10 @@ fn classify_decay(eigenvalues: &[f64]) -> String {
     );
 
     let pow_r2 = r_squared(
-        &positive.iter().map(|(i, _)| ((*i + 1) as f64).ln()).collect::<Vec<_>>(),
+        &positive
+            .iter()
+            .map(|(i, _)| ((*i + 1) as f64).ln())
+            .collect::<Vec<_>>(),
         &positive.iter().map(|(_, v)| v.ln()).collect::<Vec<_>>(),
     );
 
@@ -632,7 +659,11 @@ fn r_squared(x: &[f64], y: &[f64]) -> f64 {
     let n = x.len() as f64;
     let x_mean = x.iter().sum::<f64>() / n;
     let y_mean = y.iter().sum::<f64>() / n;
-    let ss_xy: f64 = x.iter().zip(y).map(|(xi, yi)| (xi - x_mean) * (yi - y_mean)).sum();
+    let ss_xy: f64 = x
+        .iter()
+        .zip(y)
+        .map(|(xi, yi)| (xi - x_mean) * (yi - y_mean))
+        .sum();
     let ss_xx: f64 = x.iter().map(|xi| (xi - x_mean).powi(2)).sum();
     let ss_yy: f64 = y.iter().map(|yi| (yi - y_mean).powi(2)).sum();
     if ss_xx.abs() < 1e-30 || ss_yy.abs() < 1e-30 {

@@ -1,4 +1,13 @@
-#![allow(dead_code, unused_variables, unused_imports, unused_assignments, clippy::needless_range_loop, clippy::doc_lazy_continuation, non_snake_case, clippy::empty_line_after_doc_comments)]
+#![allow(
+    dead_code,
+    unused_variables,
+    unused_imports,
+    unused_assignments,
+    clippy::needless_range_loop,
+    clippy::doc_lazy_continuation,
+    non_snake_case,
+    clippy::empty_line_after_doc_comments
+)]
 // overcancellation-scan/src/bin/torus_projection.rs
 //
 // ╔═══════════════════════════════════════════════════════════════╗
@@ -29,32 +38,46 @@ const EULER_GAMMA: f64 = 0.5772156649015329;
 
 /// Möbius function μ(n)
 fn moebius(n: usize) -> i64 {
-    if n == 1 { return 1; }
+    if n == 1 {
+        return 1;
+    }
     let mut m = n;
     let mut num_factors = 0i64;
     let mut d = 2usize;
     while d * d <= m {
         if m.is_multiple_of(d) {
             m /= d;
-            if m.is_multiple_of(d) { return 0; } // p² | n
+            if m.is_multiple_of(d) {
+                return 0;
+            } // p² | n
             num_factors += 1;
         }
         d += 1;
     }
-    if m > 1 { num_factors += 1; }
-    if num_factors % 2 == 0 { 1 } else { -1 }
+    if m > 1 {
+        num_factors += 1;
+    }
+    if num_factors % 2 == 0 {
+        1
+    } else {
+        -1
+    }
 }
 
 /// Fejér-Möbius witness weight: v_k = -μ(k) · (1 - ln(k)/ln(N))
 fn fejer_weight(k: usize, ln_n: f64) -> f64 {
-    if k == 0 { return 0.0; }
+    if k == 0 {
+        return 0.0;
+    }
     let mu = moebius(k) as f64;
     -mu * (1.0 - (k as f64).ln() / ln_n)
 }
 
 /// Vasyunin cotangent sum V(a,b) = Σ_{m=1}^{a-1} cot(πm/a) · {mb/a}
 fn vasyunin_sum(a: usize, b: usize) -> f64 {
-    if a <= 1 { return 0.0; }
+    if a <= 1 {
+        return 0.0;
+    }
     let mut s = 0.0;
     for m in 1..a {
         let cot_val = 1.0 / (PI * m as f64 / a as f64).tan();
@@ -70,7 +93,9 @@ fn vasyunin_const() -> f64 {
 
 /// Full Gram entry G(j,k) for j ≠ k — Vasyunin cotangent formula
 fn gram_entry(j: usize, k: usize) -> f64 {
-    if j == k { return gram_diag(j); }
+    if j == k {
+        return gram_diag(j);
+    }
     let c = vasyunin_const();
     let jf = j as f64;
     let kf = k as f64;
@@ -81,8 +106,7 @@ fn gram_entry(j: usize, k: usize) -> f64 {
 
     let term1 = c / 2.0 * (1.0 / jf + 1.0 / kf);
     let term2 = (jf - kf) / (2.0 * jf * kf) * (kf / jf).ln();
-    let term3 = PI * df / (2.0 * jf * kf)
-        * (vasyunin_sum(jp, kp) + vasyunin_sum(kp, jp));
+    let term3 = PI * df / (2.0 * jf * kf) * (vasyunin_sum(jp, kp) + vasyunin_sum(kp, jp));
     let term4 = 1.0 / (jf * kf);
 
     term1 + term2 - term3 - term4
@@ -105,7 +129,9 @@ fn mean_entry(k: usize) -> f64 {
 fn primes_up_to(n: usize) -> Vec<usize> {
     let mut sieve = vec![true; n + 1];
     sieve[0] = false;
-    if n >= 1 { sieve[1] = false; }
+    if n >= 1 {
+        sieve[1] = false;
+    }
     let mut i = 2;
     while i * i <= n {
         if sieve[i] {
@@ -117,7 +143,9 @@ fn primes_up_to(n: usize) -> Vec<usize> {
         }
         i += 1;
     }
-    sieve.iter().enumerate()
+    sieve
+        .iter()
+        .enumerate()
         .filter(|(_, &is_prime)| is_prime)
         .map(|(i, _)| i)
         .collect()
@@ -137,15 +165,18 @@ fn per_prime_energy(n: usize) -> Vec<(usize, f64, f64)> {
     let weights: Vec<f64> = (1..=dim).map(|k| fejer_weight(k, ln_n)).collect();
 
     // Total vᵀGv
-    let total_vtgv: f64 = (0..dim).into_par_iter().map(|i| {
-        let j = i + 1;
-        let mut row_sum = 0.0;
-        for ki in 0..dim {
-            let k = ki + 1;
-            row_sum += weights[i] * gram_entry(j, k) * weights[ki];
-        }
-        row_sum
-    }).sum();
+    let total_vtgv: f64 = (0..dim)
+        .into_par_iter()
+        .map(|i| {
+            let j = i + 1;
+            let mut row_sum = 0.0;
+            for ki in 0..dim {
+                let k = ki + 1;
+                row_sum += weights[i] * gram_entry(j, k) * weights[ki];
+            }
+            row_sum
+        })
+        .sum();
 
     // Per-GCD-stratum energy
     let mut stratum_energy: Vec<f64> = vec![0.0; n];
@@ -203,7 +234,9 @@ fn phase_coherence(n: usize) -> Vec<(usize, f64, f64)> {
         let mut total_weight_sq = 0.0;
 
         for k in 1..=dim {
-            if k % p != 0 { continue; }
+            if k % p != 0 {
+                continue;
+            }
             let v = weights[k - 1];
             // p-adic valuation of k
             let mut val = 0usize;
@@ -262,8 +295,9 @@ fn equatorial_concentration(n: usize) -> (f64, f64, f64) {
     let weights: Vec<f64> = (1..=dim).map(|k| fejer_weight(k, ln_n)).collect();
 
     // First few zeta zero imaginary parts (Gram points approximate)
-    let test_heights = [14.134725, 21.022040, 25.010858, 30.424876,
-                        32.935062, 37.586178, 40.918719, 43.327073];
+    let test_heights = [
+        14.134725, 21.022040, 25.010858, 30.424876, 32.935062, 37.586178, 40.918719, 43.327073,
+    ];
 
     // Energy on equator: |Σ v_k / (k · (½+it-1))|² = |Σ v_k / (k·(-½+it))|²
     let mut equator_energy = 0.0;
@@ -330,8 +364,9 @@ fn equatorial_concentration(n: usize) -> (f64, f64, f64) {
 /// as we scan through primes up to N.
 fn winding_at_zeros(n: usize) -> Vec<(f64, Vec<(usize, f64)>)> {
     let primes = primes_up_to(n);
-    let zeros = [14.134725, 21.022040, 25.010858, 30.424876,
-                 32.935062, 37.586178, 40.918719, 43.327073];
+    let zeros = [
+        14.134725, 21.022040, 25.010858, 30.424876, 32.935062, 37.586178, 40.918719, 43.327073,
+    ];
 
     let mut results = Vec::new();
 
@@ -376,17 +411,19 @@ fn main() {
         let weights: Vec<f64> = (1..=dim).map(|k| fejer_weight(k, ln_n)).collect();
 
         // ── §A. Core quadratic form ──
-        let vtgv: f64 = (0..dim).map(|i| {
-            let j = i + 1;
-            (0..dim).map(|ki| {
-                let k = ki + 1;
-                weights[i] * gram_entry(j, k) * weights[ki]
-            }).sum::<f64>()
-        }).sum();
+        let vtgv: f64 = (0..dim)
+            .map(|i| {
+                let j = i + 1;
+                (0..dim)
+                    .map(|ki| {
+                        let k = ki + 1;
+                        weights[i] * gram_entry(j, k) * weights[ki]
+                    })
+                    .sum::<f64>()
+            })
+            .sum();
 
-        let btv: f64 = (0..dim).map(|i| {
-            mean_entry(i + 1) * weights[i]
-        }).sum();
+        let btv: f64 = (0..dim).map(|i| mean_entry(i + 1) * weights[i]).sum();
 
         let vtcv = vtgv - btv * btv;
         let d2_lambda = 1.0 - btv * btv / vtgv;
@@ -407,7 +444,10 @@ fn main() {
         println!("  Target (1/logN)       = {:.8}", target_cov);
         println!("  Anomaly Δ             = {:.8}", anomaly);
         println!("  Δ·logN                = {:.6}", anomaly * ln_n);
-        println!("  vᵀCv/(vᵀGv)           = {:.6}  (cov/gram ratio)", vtcv / vtgv);
+        println!(
+            "  vᵀCv/(vᵀGv)           = {:.6}  (cov/gram ratio)",
+            vtcv / vtgv
+        );
         println!();
 
         // ── §C. Per-prime energy (compact) ──
@@ -433,7 +473,11 @@ fn main() {
         // ── §E. Equatorial concentration ──
         println!("  ── Equatorial Concentration ──");
         let (eq_e, off_e, _) = equatorial_concentration(n);
-        let ratio_display = if off_e > 1e-20 { eq_e / off_e } else { f64::INFINITY };
+        let ratio_display = if off_e > 1e-20 {
+            eq_e / off_e
+        } else {
+            f64::INFINITY
+        };
         println!("  Equator (Re=½):   {:.6e}", eq_e);
         println!("  Off-equator:      {:.6e}", off_e);
         println!("  Ratio:            {:.6}", ratio_display);
@@ -454,7 +498,15 @@ fn main() {
         }
         println!();
 
-        scaling_data.push((n, vtgv, btv, vtcv, d2_lambda, d2_lambda * ln_n, anomaly * ln_n));
+        scaling_data.push((
+            n,
+            vtgv,
+            btv,
+            vtcv,
+            d2_lambda,
+            d2_lambda * ln_n,
+            anomaly * ln_n,
+        ));
     }
 
     // ═══════════════════════════════════════════════════════════════
@@ -464,13 +516,19 @@ fn main() {
     println!("║              N-SCALING SUMMARY                               ║");
     println!("╚═══════════════════════════════════════════════════════════════╝");
     println!();
-    println!("  {:>6} {:>10} {:>10} {:>10} {:>10} {:>10} {:>10}",
-        "N", "vᵀGv", "bᵀv", "vᵀCv", "d²", "d²·lnN", "Δ·lnN");
-    println!("  {:->6} {:->10} {:->10} {:->10} {:->10} {:->10} {:->10}",
-        "", "", "", "", "", "", "");
+    println!(
+        "  {:>6} {:>10} {:>10} {:>10} {:>10} {:>10} {:>10}",
+        "N", "vᵀGv", "bᵀv", "vᵀCv", "d²", "d²·lnN", "Δ·lnN"
+    );
+    println!(
+        "  {:->6} {:->10} {:->10} {:->10} {:->10} {:->10} {:->10}",
+        "", "", "", "", "", "", ""
+    );
     for &(n, vtgv, btv, vtcv, d2, d2_ln, delta_ln) in &scaling_data {
-        println!("  {:>6} {:>10.6} {:>10.6} {:>10.6} {:>10.6} {:>10.4} {:>10.4}",
-            n, vtgv, btv, vtcv, d2, d2_ln, delta_ln);
+        println!(
+            "  {:>6} {:>10.6} {:>10.6} {:>10.6} {:>10.6} {:>10.4} {:>10.4}",
+            n, vtgv, btv, vtcv, d2, d2_ln, delta_ln
+        );
     }
     println!();
 

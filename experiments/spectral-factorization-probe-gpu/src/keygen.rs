@@ -14,7 +14,11 @@ pub struct SemiprimeKey {
 
 impl std::fmt::Display for SemiprimeKey {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "N={} = {} × {} ({}-bit)", self.n, self.p, self.q, self.bits)
+        write!(
+            f,
+            "N={} = {} × {} ({}-bit)",
+            self.n, self.p, self.q, self.bits
+        )
     }
 }
 
@@ -26,12 +30,20 @@ pub struct KeyClass {
 
 /// Simple trial-division primality test (sufficient for small test keys).
 fn is_prime(n: u64) -> bool {
-    if n < 2 { return false; }
-    if n < 4 { return true; }
-    if n.is_multiple_of(2) || n.is_multiple_of(3) { return false; }
+    if n < 2 {
+        return false;
+    }
+    if n < 4 {
+        return true;
+    }
+    if n.is_multiple_of(2) || n.is_multiple_of(3) {
+        return false;
+    }
     let mut i = 5u64;
     while i * i <= n {
-        if n.is_multiple_of(i) || n.is_multiple_of(i + 2) { return false; }
+        if n.is_multiple_of(i) || n.is_multiple_of(i + 2) {
+            return false;
+        }
         i += 6;
     }
     true
@@ -42,7 +54,9 @@ fn random_prime(lo: u64, hi: u64) -> u64 {
     let mut rng = rand::thread_rng();
     loop {
         let candidate = rng.gen_range(lo..hi) | 1; // force odd
-        if is_prime(candidate) { return candidate; }
+        if is_prime(candidate) {
+            return candidate;
+        }
     }
 }
 
@@ -68,7 +82,12 @@ pub fn generate_test_suite() -> Vec<KeyClass> {
             let (p, q) = if p < q { (p, q) } else { (q, p) };
             let n = p * q;
             let actual_bits = 64 - n.leading_zeros();
-            keys.push(SemiprimeKey { n, p, q, bits: actual_bits });
+            keys.push(SemiprimeKey {
+                n,
+                p,
+                q,
+                bits: actual_bits,
+            });
         }
         classes.push(KeyClass { bits, keys });
     }

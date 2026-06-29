@@ -1,4 +1,13 @@
-#![allow(dead_code, unused_variables, unused_imports, unused_assignments, clippy::needless_range_loop, clippy::doc_lazy_continuation, non_snake_case, clippy::empty_line_after_doc_comments)]
+#![allow(
+    dead_code,
+    unused_variables,
+    unused_imports,
+    unused_assignments,
+    clippy::needless_range_loop,
+    clippy::doc_lazy_continuation,
+    non_snake_case,
+    clippy::empty_line_after_doc_comments
+)]
 // overcancellation-scan/src/bin/smith_head_tail.rs
 //
 // ╔═══════════════════════════════════════════════════════════════════╗
@@ -17,7 +26,9 @@ use cathedral_utils::arith::mobius_table;
 
 /// J₂(d) = d² · Π_{p|d} (1 - 1/p²)
 fn jordan_totient2(d: usize) -> f64 {
-    if d == 0 { return 0.0; }
+    if d == 0 {
+        return 0.0;
+    }
     let d_f = d as f64;
     let mut result = d_f * d_f;
     let mut n = d;
@@ -25,7 +36,9 @@ fn jordan_totient2(d: usize) -> f64 {
     while p * p <= n {
         if n.is_multiple_of(p) {
             result *= 1.0 - 1.0 / (p as f64 * p as f64);
-            while n.is_multiple_of(p) { n /= p; }
+            while n.is_multiple_of(p) {
+                n /= p;
+            }
         }
         p += 1;
     }
@@ -101,9 +114,19 @@ fn main() {
 
             // Compute full Smith sum and head/tail for various D
             let d_cutoffs: Vec<usize> = vec![
-                1, 2, 5, 10, 20, 50, 100, 200, 500,
+                1,
+                2,
+                5,
+                10,
+                20,
+                50,
+                100,
+                200,
+                500,
                 (n as f64).sqrt() as usize,
-                n / 10, n / 2, n,
+                n / 10,
+                n / 2,
+                n,
             ];
 
             // First compute full sum
@@ -125,48 +148,78 @@ fn main() {
             let rank1 = 0.25 * sum_v * sum_v;
             let v_g_v = v_r_v + rank1;
 
-            println!("  Full Smith sum = {:.8}  (vᵀRv = {:.8})", full_smith, v_r_v);
+            println!(
+                "  Full Smith sum = {:.8}  (vᵀRv = {:.8})",
+                full_smith, v_r_v
+            );
             println!("  (Σv)² = {:.8}  rank1 = {:.8}", sum_v * sum_v, rank1);
-            println!("  vᵀGv = {:.8}  {}", v_g_v,
-                if v_g_v < 1.0 { "< 1 ✅" } else { "> 1" });
+            println!(
+                "  vᵀGv = {:.8}  {}",
+                v_g_v,
+                if v_g_v < 1.0 { "< 1 ✅" } else { "> 1" }
+            );
             println!();
 
             // Head/tail split
-            println!("  {:>8} {:>14} {:>14} {:>14} {:>14}",
-                "D", "Head(D)", "Tail(D)", "Head/D", "Tail·D");
-            println!("  {:>8} {:>14} {:>14} {:>14} {:>14}",
-                "--------", "--------------", "--------------",
-                "--------------", "--------------");
+            println!(
+                "  {:>8} {:>14} {:>14} {:>14} {:>14}",
+                "D", "Head(D)", "Tail(D)", "Head/D", "Tail·D"
+            );
+            println!(
+                "  {:>8} {:>14} {:>14} {:>14} {:>14}",
+                "--------", "--------------", "--------------", "--------------", "--------------"
+            );
 
             for &d_cut in &d_cutoffs {
-                if d_cut == 0 || d_cut > n { continue; }
+                if d_cut == 0 || d_cut > n {
+                    continue;
+                }
 
                 let head: f64 = (1..=d_cut).map(|d| terms[d]).sum();
                 let tail: f64 = ((d_cut + 1)..=n).map(|d| terms[d]).sum();
-                let head_per_d = if d_cut > 0 { head / (d_cut as f64) } else { 0.0 };
+                let head_per_d = if d_cut > 0 {
+                    head / (d_cut as f64)
+                } else {
+                    0.0
+                };
                 let tail_times_d = tail * (d_cut as f64);
 
-                println!("  {:>8} {:>14.8} {:>14.8} {:>14.8} {:>14.8}",
-                    d_cut, head, tail, head_per_d, tail_times_d);
+                println!(
+                    "  {:>8} {:>14.8} {:>14.8} {:>14.8} {:>14.8}",
+                    d_cut, head, tail, head_per_d, tail_times_d
+                );
             }
 
             // Divisor projection decay profile
             println!();
             println!("  Divisor projection decay: |y_d| for small d");
-            println!("  {:>5} {:>14} {:>14} {:>14} {:>14}",
-                "d", "y_d", "|y_d|·d", "J₂(d)·y_d²", "cumul_pct");
-            println!("  {:>5} {:>14} {:>14} {:>14} {:>14}",
-                "-----", "--------------", "--------------",
-                "--------------", "--------------");
+            println!(
+                "  {:>5} {:>14} {:>14} {:>14} {:>14}",
+                "d", "y_d", "|y_d|·d", "J₂(d)·y_d²", "cumul_pct"
+            );
+            println!(
+                "  {:>5} {:>14} {:>14} {:>14} {:>14}",
+                "-----", "--------------", "--------------", "--------------", "--------------"
+            );
 
             let mut cumul = 0.0f64;
             for d in 1..=30.min(n) {
                 let yd = divisor_projection(&mu, d, n, weights);
                 let j2d = jordan_totient2(d);
                 cumul += j2d * yd * yd;
-                let pct = if full_smith > 0.0 { 100.0 * cumul / full_smith } else { 0.0 };
-                println!("  {:>5} {:>14.8} {:>14.8} {:>14.8} {:>13.4}%",
-                    d, yd, yd.abs() * d as f64, j2d * yd * yd, pct);
+                let pct = if full_smith > 0.0 {
+                    100.0 * cumul / full_smith
+                } else {
+                    0.0
+                };
+                println!(
+                    "  {:>5} {:>14.8} {:>14.8} {:>14.8} {:>13.4}%",
+                    d,
+                    yd,
+                    yd.abs() * d as f64,
+                    j2d * yd * yd,
+                    pct
+                );
             }
 
             println!();
@@ -183,12 +236,20 @@ fn main() {
     println!("═══════════════════════════════════════════════════════════");
     println!();
 
-    println!("{:>10} {:>12} {:>12} {:>12} {:>12} {:>12} {:>12}",
-        "N", "Smith_A", "Smith_B", "Smith_C",
-        "A/N", "A/logN", "A/log²N");
-    println!("{:>10} {:>12} {:>12} {:>12} {:>12} {:>12} {:>12}",
-        "----------", "------------", "------------", "------------",
-        "------------", "------------", "------------");
+    println!(
+        "{:>10} {:>12} {:>12} {:>12} {:>12} {:>12} {:>12}",
+        "N", "Smith_A", "Smith_B", "Smith_C", "A/N", "A/logN", "A/log²N"
+    );
+    println!(
+        "{:>10} {:>12} {:>12} {:>12} {:>12} {:>12} {:>12}",
+        "----------",
+        "------------",
+        "------------",
+        "------------",
+        "------------",
+        "------------",
+        "------------"
+    );
 
     for &n in &test_ns {
         let log_n = (n as f64).ln();
@@ -219,9 +280,16 @@ fn main() {
         let sb = smith(&weights_b);
         let sc = smith(&weights_c);
 
-        println!("{:>10} {:>12.4} {:>12.6} {:>12.4} {:>12.6} {:>12.4} {:>12.4}",
-            n, sa, sb, sc,
-            sa / n as f64, sa / log_n, sa / (log_n * log_n));
+        println!(
+            "{:>10} {:>12.4} {:>12.6} {:>12.4} {:>12.6} {:>12.4} {:>12.4}",
+            n,
+            sa,
+            sb,
+            sc,
+            sa / n as f64,
+            sa / log_n,
+            sa / (log_n * log_n)
+        );
     }
 
     println!();

@@ -67,9 +67,15 @@ fn exact_gram(j: usize, k: usize) -> f64 {
         }
 
         u_prev = u_next;
-        if next_j <= next_k { mj += 1; }
-        if next_k <= next_j { mk += 1; }
-        if next_bp >= m_max { break; }
+        if next_j <= next_k {
+            mj += 1;
+        }
+        if next_k <= next_j {
+            mk += 1;
+        }
+        if next_bp >= m_max {
+            break;
+        }
     }
 
     total += 0.25 / (m_max as f64);
@@ -87,9 +93,11 @@ pub fn run(max_n: usize) {
     let max_dim = effective_max - 1;
 
     eprintln!("Incremental sweep: N = 2 to {effective_max}");
-    eprintln!("L triangle: {} entries ({:.1} GB)",
+    eprintln!(
+        "L triangle: {} entries ({:.1} GB)",
         max_dim * (max_dim + 1) / 2,
-        max_dim as f64 * (max_dim + 1) as f64 / 2.0 * 8.0 / 1e9);
+        max_dim as f64 * (max_dim + 1) as f64 / 2.0 * 8.0 / 1e9
+    );
     eprintln!("No H5 file needed — computing Gram entries analytically");
     eprintln!("Rayon threads: {}", rayon::current_num_threads());
     eprintln!();
@@ -99,7 +107,9 @@ pub fn run(max_n: usize) {
 
     let mut is_prime = vec![true; effective_max + 1];
     is_prime[0] = false;
-    if effective_max >= 1 { is_prime[1] = false; }
+    if effective_max >= 1 {
+        is_prime[1] = false;
+    }
     for i in 2..=effective_max {
         if is_prime[i] {
             let mut j = i * i;
@@ -134,8 +144,10 @@ pub fn run(max_n: usize) {
 
     // ═══ Allocate L triangle ═══
     let tri_size = max_dim * (max_dim + 1) / 2;
-    eprintln!("Allocating L triangle: {tri_size} entries ({:.1} GB)...",
-        tri_size as f64 * 8.0 / 1e9);
+    eprintln!(
+        "Allocating L triangle: {tri_size} entries ({:.1} GB)...",
+        tri_size as f64 * 8.0 / 1e9
+    );
     let mut l_data: Vec<f64> = vec![0.0; tri_size];
     let mut z: Vec<f64> = Vec::with_capacity(max_dim);
     let mut norm_z_sq: f64 = 0.0;
@@ -175,7 +187,8 @@ pub fn run(max_n: usize) {
             // This is EMBARRASSINGLY PARALLEL — each entry is independent
             let k_gram = new_row + 2; // the new index being added
             let g_col: Vec<f64> = if new_row >= PAR_THRESHOLD {
-                (0..new_row).into_par_iter()
+                (0..new_row)
+                    .into_par_iter()
                     .map(|i| exact_gram(i + 2, k_gram))
                     .collect()
             } else {
@@ -195,9 +208,7 @@ pub fn run(max_n: usize) {
                     // For large rows, use chunked reduction to help auto-vectorization
                     let l_slice = &l_data[l_row_start..l_row_start + i];
                     let w_slice = &w[..i];
-                    l_slice.iter().zip(w_slice.iter())
-                        .map(|(a, b)| a * b)
-                        .sum()
+                    l_slice.iter().zip(w_slice.iter()).map(|(a, b)| a * b).sum()
                 } else {
                     let mut s = 0.0f64;
                     for j in 0..i {
@@ -241,13 +252,21 @@ pub fn run(max_n: usize) {
         let ln_n = (n as f64).ln();
         let d2_ln = d2 * ln_n;
         let d2_ln2 = d2 * ln_n * ln_n;
-        let y2_new = if z.is_empty() { 0.0 } else { z.last().unwrap().powi(2) };
+        let y2_new = if z.is_empty() {
+            0.0
+        } else {
+            z.last().unwrap().powi(2)
+        };
         let p = if is_prime[n] { 1 } else { 0 };
         let h = if is_hcn[n] { 1 } else { 0 };
         let t = tau[n];
-        let class = if is_hcn[n] { "HCN" }
-            else if is_prime[n] { "prime" }
-            else { "comp" };
+        let class = if is_hcn[n] {
+            "HCN"
+        } else if is_prime[n] {
+            "prime"
+        } else {
+            "comp"
+        };
 
         println!("{n}\t{d2:.12e}\t{ln_n:.6}\t{d2_ln:.10}\t{d2_ln2:.10}\t{y2_new:.12e}\t{p}\t{h}\t{t}\t{class}");
 
@@ -263,7 +282,15 @@ pub fn run(max_n: usize) {
     let total = t_sweep.elapsed().as_secs_f64();
     let rate = max_dim as f64 / total;
     eprintln!();
-    eprintln!("Done: {} values in {:.1}s = {:.2}h ({rate:.0} N/s)", max_dim, total, total/3600.0);
-    eprintln!("Memory: L triangle = {} entries ({:.1} GB)",
-        tri_size, tri_size as f64 * 8.0 / 1e9);
+    eprintln!(
+        "Done: {} values in {:.1}s = {:.2}h ({rate:.0} N/s)",
+        max_dim,
+        total,
+        total / 3600.0
+    );
+    eprintln!(
+        "Memory: L triangle = {} entries ({:.1} GB)",
+        tri_size,
+        tri_size as f64 * 8.0 / 1e9
+    );
 }

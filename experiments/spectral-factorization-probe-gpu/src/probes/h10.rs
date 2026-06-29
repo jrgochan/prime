@@ -14,13 +14,19 @@ use crate::results::*;
 /// Compute nearest-neighbor spacing ratio r = min(s_i, s_{i+1}) / max(s_i, s_{i+1}).
 /// For GOE: mean r ≈ 0.5307; for Poisson: mean r ≈ 0.3863.
 fn mean_spacing_ratio(eigenvalues: &[f64]) -> f64 {
-    if eigenvalues.len() < 3 { return 0.0; }
+    if eigenvalues.len() < 3 {
+        return 0.0;
+    }
     let mut spacings: Vec<f64> = Vec::new();
     for i in 1..eigenvalues.len() {
         let s = eigenvalues[i] - eigenvalues[i - 1];
-        if s > 0.0 { spacings.push(s); }
+        if s > 0.0 {
+            spacings.push(s);
+        }
     }
-    if spacings.len() < 2 { return 0.0; }
+    if spacings.len() < 2 {
+        return 0.0;
+    }
 
     let mut ratios = Vec::new();
     for i in 0..spacings.len() - 1 {
@@ -29,7 +35,9 @@ fn mean_spacing_ratio(eigenvalues: &[f64]) -> f64 {
             ratios.push(a.min(b) / a.max(b));
         }
     }
-    if ratios.is_empty() { return 0.0; }
+    if ratios.is_empty() {
+        return 0.0;
+    }
     ratios.iter().sum::<f64>() / ratios.len() as f64
 }
 
@@ -48,7 +56,10 @@ pub fn h10_dark_sector_crossover(keys: &[SemiprimeKey], cache: &GramCache) -> Ve
     for key in keys.iter().take(3) {
         let p = key.p as usize;
         if p > 500 {
-            println!("    N={}: p={} too large for crossover scan, skipping", key.n, p);
+            println!(
+                "    N={}: p={} too large for crossover scan, skipping",
+                key.n, p
+            );
             continue;
         }
 
@@ -83,9 +94,7 @@ pub fn h10_dark_sector_crossover(keys: &[SemiprimeKey], cache: &GramCache) -> Ve
             // For the restricted test: extract eigenvalues of the p-sublattice submatrix
             // We use the full eigenvalues filtered by index pattern as a proxy
             // (True sublattice eigen requires submatrix extraction, done below)
-            let p_indices: Vec<usize> = (0..dim)
-                .filter(|i| (i + 2) % p == 0)
-                .collect();
+            let p_indices: Vec<usize> = (0..dim).filter(|i| (i + 2) % p == 0).collect();
             if p_indices.len() >= 5 {
                 // Extract p-sublattice submatrix
                 let sub_dim = p_indices.len();
@@ -111,10 +120,12 @@ pub fn h10_dark_sector_crossover(keys: &[SemiprimeKey], cache: &GramCache) -> Ve
         }
 
         // Find crossover point (GOE fraction crosses 0.5)
-        let full_crossover = full_entries.iter()
+        let full_crossover = full_entries
+            .iter()
             .position(|e| e.goe_fraction >= 0.5)
             .map(|i| full_entries[i].dim);
-        let restricted_crossover = restricted_entries.iter()
+        let restricted_crossover = restricted_entries
+            .iter()
             .position(|e| e.goe_fraction >= 0.5)
             .map(|i| restricted_entries[i].dim);
 
@@ -126,24 +137,47 @@ pub fn h10_dark_sector_crossover(keys: &[SemiprimeKey], cache: &GramCache) -> Ve
         println!("    N={} = {}×{}", key.n, key.p, key.q);
         println!("      Full spectrum crossover:");
         for e in &full_entries {
-            println!("        M={:5}: <r>={:.4}, GOE%={:.1}%{}",
-                e.dim, e.mean_spacing_ratio, e.goe_fraction * 100.0,
-                if (e.goe_fraction - 0.5).abs() < 0.1 { " ← CROSSOVER" } else { "" });
+            println!(
+                "        M={:5}: <r>={:.4}, GOE%={:.1}%{}",
+                e.dim,
+                e.mean_spacing_ratio,
+                e.goe_fraction * 100.0,
+                if (e.goe_fraction - 0.5).abs() < 0.1 {
+                    " ← CROSSOVER"
+                } else {
+                    ""
+                }
+            );
         }
         println!("      Factor-p sublattice crossover:");
         for e in &restricted_entries {
-            println!("        M={:5}: <r>={:.4}, GOE%={:.1}%{}",
-                e.dim, e.mean_spacing_ratio, e.goe_fraction * 100.0,
-                if (e.goe_fraction - 0.5).abs() < 0.1 { " ← CROSSOVER" } else { "" });
+            println!(
+                "        M={:5}: <r>={:.4}, GOE%={:.1}%{}",
+                e.dim,
+                e.mean_spacing_ratio,
+                e.goe_fraction * 100.0,
+                if (e.goe_fraction - 0.5).abs() < 0.1 {
+                    " ← CROSSOVER"
+                } else {
+                    ""
+                }
+            );
         }
         if let Some(shift) = crossover_shift {
             println!("      Crossover shift ratio: {:.3}", shift);
         } else {
             println!("      Crossover shift: indeterminate (insufficient data)");
         }
-        println!("      Signal: {}\n",
-            crossover_shift.map(|s| if (s - 1.0).abs() > 0.3 { "weak 〜" } else { "null ∅" })
-                .unwrap_or("null ∅"));
+        println!(
+            "      Signal: {}\n",
+            crossover_shift
+                .map(|s| if (s - 1.0).abs() > 0.3 {
+                    "weak 〜"
+                } else {
+                    "null ∅"
+                })
+                .unwrap_or("null ∅")
+        );
 
         results.push(H10Result {
             n: key.n,

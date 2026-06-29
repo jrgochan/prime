@@ -17,11 +17,15 @@ use std::f64::consts::PI;
 ///
 /// Exact computation by trial division (for ground truth).
 fn chebyshev_psi_exact(x: f64) -> f64 {
-    if x < 2.0 { return 0.0; }
+    if x < 2.0 {
+        return 0.0;
+    }
     let limit = x as usize;
     let mut is_prime = vec![true; limit + 1];
     is_prime[0] = false;
-    if limit >= 1 { is_prime[1] = false; }
+    if limit >= 1 {
+        is_prime[1] = false;
+    }
     for i in 2..=(limit as f64).sqrt() as usize {
         if is_prime[i] {
             let mut j = i * i;
@@ -49,11 +53,15 @@ fn chebyshev_psi_exact(x: f64) -> f64 {
 
 /// π(x) — exact prime counting function via sieve.
 fn pi_exact(x: f64) -> usize {
-    if x < 2.0 { return 0; }
+    if x < 2.0 {
+        return 0;
+    }
     let limit = x as usize;
     let mut is_prime = vec![true; limit + 1];
     is_prime[0] = false;
-    if limit >= 1 { is_prime[1] = false; }
+    if limit >= 1 {
+        is_prime[1] = false;
+    }
     for i in 2..=(limit as f64).sqrt() as usize {
         if is_prime[i] {
             let mut j = i * i;
@@ -68,11 +76,15 @@ fn pi_exact(x: f64) -> usize {
 
 /// List of primes up to x via sieve.
 fn primes_up_to(x: f64) -> Vec<usize> {
-    if x < 2.0 { return vec![]; }
+    if x < 2.0 {
+        return vec![];
+    }
     let limit = x as usize;
     let mut is_prime = vec![true; limit + 1];
     is_prime[0] = false;
-    if limit >= 1 { is_prime[1] = false; }
+    if limit >= 1 {
+        is_prime[1] = false;
+    }
     for i in 2..=(limit as f64).sqrt() as usize {
         if is_prime[i] {
             let mut j = i * i;
@@ -93,7 +105,9 @@ fn primes_up_to(x: f64) -> Vec<usize> {
 ///   2·Re(x^(½+iγ) / (½+iγ))
 ///   = 2·√x · (½·cos(γ·ln(x)) + γ·sin(γ·ln(x))) / (¼ + γ²)
 fn chebyshev_psi_from_zeros(x: f64, num_zeros: usize) -> f64 {
-    if x < 2.0 { return 0.0; }
+    if x < 2.0 {
+        return 0.0;
+    }
 
     let zeros = zeta_zeros::known_zeros(num_zeros);
     let ln_x = x.ln();
@@ -132,7 +146,9 @@ fn chebyshev_psi_from_zeros(x: f64, num_zeros: usize) -> f64 {
 /// μ(n) = (-1)^k if n = p₁·p₂·...·pₖ (product of k distinct primes)
 /// μ(n) = 0 if n has a squared prime factor
 fn moebius(n: usize) -> i32 {
-    if n == 1 { return 1; }
+    if n == 1 {
+        return 1;
+    }
     let mut m = n;
     let mut k = 0; // number of distinct prime factors
     let mut p = 2;
@@ -146,8 +162,14 @@ fn moebius(n: usize) -> i32 {
         }
         p += 1;
     }
-    if m > 1 { k += 1; }
-    if k % 2 == 0 { 1 } else { -1 }
+    if m > 1 {
+        k += 1;
+    }
+    if k % 2 == 0 {
+        1
+    } else {
+        -1
+    }
 }
 
 /// Chebyshev θ(x) from zeros via full Möbius inversion:
@@ -156,17 +178,23 @@ fn moebius(n: usize) -> i32 {
 /// This removes prime power contributions from ψ, giving
 /// θ(x) = Σ_{p ≤ x} ln(p) — pure prime counting weight.
 fn chebyshev_theta_from_zeros(x: f64, num_zeros: usize) -> f64 {
-    if x < 2.0 { return 0.0; }
+    if x < 2.0 {
+        return 0.0;
+    }
 
     let k_max = (x.ln() / 2.0_f64.ln()) as usize; // ⌊log₂ x⌋
     let mut theta = 0.0;
 
     for k in 1..=k_max {
         let mu = moebius(k);
-        if mu == 0 { continue; }
+        if mu == 0 {
+            continue;
+        }
 
         let x_k = x.powf(1.0 / k as f64);
-        if x_k < 2.0 { break; }
+        if x_k < 2.0 {
+            break;
+        }
 
         let psi_k = chebyshev_psi_from_zeros(x_k, num_zeros);
         theta += mu as f64 * psi_k;
@@ -183,7 +211,9 @@ fn chebyshev_theta_from_zeros(x: f64, num_zeros: usize) -> f64 {
 /// The integral correction accounts for the fact that θ(x)/ln(x)
 /// underestimates π(x) because ln(p) varies across primes.
 fn pi_from_zeros(x: f64, num_zeros: usize) -> f64 {
-    if x < 2.0 { return 0.0; }
+    if x < 2.0 {
+        return 0.0;
+    }
 
     let theta_x = chebyshev_theta_from_zeros(x, num_zeros);
     let ln_x = x.ln();
@@ -217,7 +247,9 @@ fn pi_from_zeros(x: f64, num_zeros: usize) -> f64 {
 
 /// Logarithmic integral li(x) = ∫₂ˣ dt/ln(t)
 fn li(x: f64) -> f64 {
-    if x <= 2.0 { return 0.0; }
+    if x <= 2.0 {
+        return 0.0;
+    }
     // Numerical integration via trapezoidal rule
     let n = 10000;
     let dx = (x - 2.0) / n as f64;
@@ -244,32 +276,52 @@ pub fn run(x_max: f64) {
 
     // ═══ §1: Convergence of π(x) as we add zeros ═══
     println!("═══ §1. THE STAIRCASE EMERGES ══════════════════════════════════");
-    println!("    π({}) from the explicit formula with increasing zeros:", x_max as usize);
+    println!(
+        "    π({}) from the explicit formula with increasing zeros:",
+        x_max as usize
+    );
     println!();
-    println!("    {:>10}  {:>12}  {:>12}  {:>10}  {:>10}",
-        "# Zeros", "π(x) approx", "π(x) exact", "Error", "Error %");
-    println!("    {:>10}  {:>12}  {:>12}  {:>10}  {:>10}",
-        "──────────", "────────────", "────────────", "──────────", "──────────");
+    println!(
+        "    {:>10}  {:>12}  {:>12}  {:>10}  {:>10}",
+        "# Zeros", "π(x) approx", "π(x) exact", "Error", "Error %"
+    );
+    println!(
+        "    {:>10}  {:>12}  {:>12}  {:>10}  {:>10}",
+        "──────────", "────────────", "────────────", "──────────", "──────────"
+    );
 
     let zero_counts = [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000];
 
     for &nz in &zero_counts {
         let available = zeta_zeros::known_zeros(nz).len();
-        if available == 0 { continue; }
+        if available == 0 {
+            continue;
+        }
 
         let pi_approx = pi_from_zeros(x_max, nz);
         let error = pi_approx - pi_true as f64;
         let error_pct = error / pi_true as f64 * 100.0;
-        let bar = if error_pct.abs() < 1.0 { "⭐⭐⭐" }
-                  else if error_pct.abs() < 5.0 { "⭐⭐" }
-                  else if error_pct.abs() < 20.0 { "⭐" }
-                  else { "" };
-        println!("    {:>10}  {:>12.2}  {:>12}  {:>+10.2}  {:>+8.2}%  {}",
-            nz, pi_approx, pi_true, error, error_pct, bar);
+        let bar = if error_pct.abs() < 1.0 {
+            "⭐⭐⭐"
+        } else if error_pct.abs() < 5.0 {
+            "⭐⭐"
+        } else if error_pct.abs() < 20.0 {
+            "⭐"
+        } else {
+            ""
+        };
+        println!(
+            "    {:>10}  {:>12.2}  {:>12}  {:>+10.2}  {:>+8.2}%  {}",
+            nz, pi_approx, pi_true, error, error_pct, bar
+        );
     }
 
     println!();
-    println!("    li({}) = {:.2} (classical estimate)", x_max as usize, li(x_max));
+    println!(
+        "    li({}) = {:.2} (classical estimate)",
+        x_max as usize,
+        li(x_max)
+    );
     println!();
 
     // ═══ §2: The mirror at specific x values ═══
@@ -280,17 +332,28 @@ pub fn run(x_max: f64) {
         println!("═══ §2. THE MIRROR AT EACH x ═══════════════════════════════════");
         println!("    π(x) from 10,000 zeros vs reality:");
         println!();
-        println!("    {:>8}  {:>10}  {:>10}  {:>10}  {:>10}  {:>10}",
-            "x", "π exact", "π (zeros)", "li(x)", "Δ zeros", "Δ li(x)");
-        println!("    {:>8}  {:>10}  {:>10}  {:>10}  {:>10}  {:>10}",
-            "────────", "──────────", "──────────", "──────────", "──────────", "──────────");
+        println!(
+            "    {:>8}  {:>10}  {:>10}  {:>10}  {:>10}  {:>10}",
+            "x", "π exact", "π (zeros)", "li(x)", "Δ zeros", "Δ li(x)"
+        );
+        println!(
+            "    {:>8}  {:>10}  {:>10}  {:>10}  {:>10}  {:>10}",
+            "────────", "──────────", "──────────", "──────────", "──────────", "──────────"
+        );
 
         for &x in &test_values {
             let exact = pi_exact(x);
             let from_z = pi_from_zeros(x, 10_000);
             let li_x = li(x);
-            println!("    {:>8}  {:>10}  {:>10.1}  {:>10.1}  {:>+10.1}  {:>+10.1}",
-                x as usize, exact, from_z, li_x, from_z - exact as f64, li_x - exact as f64);
+            println!(
+                "    {:>8}  {:>10}  {:>10.1}  {:>10.1}  {:>+10.1}  {:>+10.1}",
+                x as usize,
+                exact,
+                from_z,
+                li_x,
+                from_z - exact as f64,
+                li_x - exact as f64
+            );
         }
         println!();
     }
@@ -332,45 +395,79 @@ pub fn run(x_max: f64) {
     let mut hits = 0;
     let mut false_pos = 0;
 
-    println!("    {:>6}  {:>10}  {:>10}  {:>10}  {:>8}",
-        "#", "Detected", "Nearest p", "Jump Δψ", "Match?");
-    println!("    {:>6}  {:>10}  {:>10}  {:>10}  {:>8}",
-        "──────", "──────────", "──────────", "──────────", "────────");
+    println!(
+        "    {:>6}  {:>10}  {:>10}  {:>10}  {:>8}",
+        "#", "Detected", "Nearest p", "Jump Δψ", "Match?"
+    );
+    println!(
+        "    {:>6}  {:>10}  {:>10}  {:>10}  {:>8}",
+        "──────", "──────────", "──────────", "──────────", "────────"
+    );
 
     let display_limit = 30.min(detected_primes.len());
     for (i, &(x_det, jump)) in detected_primes.iter().take(display_limit).enumerate() {
-        let nearest = actual_small.iter()
+        let nearest = actual_small
+            .iter()
             .min_by_key(|&&p| ((p as f64 - x_det) * 10.0).abs() as usize)
             .copied()
             .unwrap_or(0);
 
         let dist = (x_det - nearest as f64).abs();
         let matched = dist < 1.0;
-        if matched { hits += 1; } else { false_pos += 1; }
+        if matched {
+            hits += 1;
+        } else {
+            false_pos += 1;
+        }
 
         let marker = if matched { "✅" } else { "❌" };
-        println!("    {:>6}  {:>10.1}  {:>10}  {:>10.3}  {:>8}",
-            i + 1, x_det, nearest, jump, marker);
+        println!(
+            "    {:>6}  {:>10.1}  {:>10}  {:>10.3}  {:>8}",
+            i + 1,
+            x_det,
+            nearest,
+            jump,
+            marker
+        );
     }
 
     if detected_primes.len() > display_limit {
         // Count remaining matches
         for &(x_det, _) in detected_primes.iter().skip(display_limit) {
-            let nearest = actual_small.iter()
+            let nearest = actual_small
+                .iter()
                 .min_by_key(|&&p| ((p as f64 - x_det) * 10.0).abs() as usize)
                 .copied()
                 .unwrap_or(0);
             let dist = (x_det - nearest as f64).abs();
-            if dist < 1.0 { hits += 1; } else { false_pos += 1; }
+            if dist < 1.0 {
+                hits += 1;
+            } else {
+                false_pos += 1;
+            }
         }
-        println!("    ... ({} more peaks detected)", detected_primes.len() - display_limit);
+        println!(
+            "    ... ({} more peaks detected)",
+            detected_primes.len() - display_limit
+        );
     }
 
     println!();
-    println!("    Detected: {} peaks | Matched to primes: {} | False positives: {}",
-        detected_primes.len(), hits, false_pos);
-    println!("    Actual primes ≤ {}: {}", scan_limit as usize, actual_small.len());
-    println!("    Detection rate: {:.1}%", hits as f64 / actual_small.len() as f64 * 100.0);
+    println!(
+        "    Detected: {} peaks | Matched to primes: {} | False positives: {}",
+        detected_primes.len(),
+        hits,
+        false_pos
+    );
+    println!(
+        "    Actual primes ≤ {}: {}",
+        scan_limit as usize,
+        actual_small.len()
+    );
+    println!(
+        "    Detection rate: {:.1}%",
+        hits as f64 / actual_small.len() as f64 * 100.0
+    );
     println!();
 
     // ═══ §4: The choir / mirror duality ═══
@@ -384,8 +481,12 @@ pub fn run(x_max: f64) {
     println!("    ZEROS → PRIMES (the mirror):");
     println!("      Each zero γ contributes a correction wave cos(γ·ln(x))/√x.");
     println!("      The superposition of all waves → the prime staircase.");
-    println!("      10,000 zeros → π({}) ≈ {:.1} (true: {}).", x_max as usize,
-        pi_from_zeros(x_max, 10_000), pi_true);
+    println!(
+        "      10,000 zeros → π({}) ≈ {:.1} (true: {}).",
+        x_max as usize,
+        pi_from_zeros(x_max, 10_000),
+        pi_true
+    );
     println!();
     println!("    🌀 The Riemann Hypothesis says: both mirrors are perfect.");
     println!("       All zeros have Re(ρ) = ½ ⟺ the primes are as regular as possible.");

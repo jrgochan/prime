@@ -102,7 +102,13 @@ fn liouville_table(max_n: usize) -> Vec<i8> {
     }
 
     (0..=max_n)
-        .map(|n| if omega[n].is_multiple_of(2) { 1i8 } else { -1i8 })
+        .map(|n| {
+            if omega[n].is_multiple_of(2) {
+                1i8
+            } else {
+                -1i8
+            }
+        })
         .collect()
 }
 

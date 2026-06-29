@@ -44,12 +44,20 @@ fn euler_poly(n: i64) -> i64 {
 
 /// Check if a positive integer is prime (trial division, fine for small numbers).
 fn is_prime(n: u64) -> bool {
-    if n < 2 { return false; }
-    if n < 4 { return true; }
-    if n.is_multiple_of(2) || n.is_multiple_of(3) { return false; }
+    if n < 2 {
+        return false;
+    }
+    if n < 4 {
+        return true;
+    }
+    if n.is_multiple_of(2) || n.is_multiple_of(3) {
+        return false;
+    }
     let mut i = 5u64;
     while i * i <= n {
-        if n.is_multiple_of(i) || n.is_multiple_of(i + 2) { return false; }
+        if n.is_multiple_of(i) || n.is_multiple_of(i + 2) {
+            return false;
+        }
         i += 6;
     }
     true
@@ -58,7 +66,11 @@ fn is_prime(n: u64) -> bool {
 /// GCD
 fn gcd(a: usize, b: usize) -> usize {
     let (mut a, mut b) = (a, b);
-    while b != 0 { let t = b; b = a % b; a = t; }
+    while b != 0 {
+        let t = b;
+        b = a % b;
+        a = t;
+    }
     a
 }
 
@@ -74,7 +86,9 @@ fn coprimality_fraction(dim: usize) -> f64 {
             }
         }
     }
-    if total == 0 { return 1.0; }
+    if total == 0 {
+        return 1.0;
+    }
     coprime_count as f64 / total as f64
 }
 
@@ -85,8 +99,8 @@ struct HeegnerResult {
     lambda_min: f64,
     lambda_max: f64,
     kappa: f64,
-    log_det: f64,        // log of absolute determinant
-    det_sign: i32,       // sign of determinant
+    log_det: f64,  // log of absolute determinant
+    det_sign: i32, // sign of determinant
     trace: f64,
     frobenius: f64,
     spectral_entropy: f64,
@@ -94,7 +108,7 @@ struct HeegnerResult {
     r_mean: f64,
     ensemble: String,
     coprime_frac: f64,
-    euler_primes: usize,   // how many of E(1)..E(dim) are prime
+    euler_primes: usize, // how many of E(1)..E(dim) are prime
     build_time: f64,
     eigen_time: f64,
 }
@@ -116,7 +130,8 @@ fn analyze_heegner_dim(dim: usize) -> HeegnerResult {
     // Full eigendecomposition
     let t_eigen = Instant::now();
     let faer_mat = faer::Mat::from_fn(dim, dim, |i, j| mat[i * dim + j]);
-    let eig_vec = faer_mat.self_adjoint_eigenvalues(faer::Side::Lower)
+    let eig_vec = faer_mat
+        .self_adjoint_eigenvalues(faer::Side::Lower)
         .expect("eigenvalue computation failed");
     let mut eigenvalues: Vec<f64> = eig_vec;
     eigenvalues.sort_by(|a, b| a.partial_cmp(b).unwrap()); // ascending
@@ -135,17 +150,24 @@ fn analyze_heegner_dim(dim: usize) -> HeegnerResult {
             break;
         }
         log_det += lam.abs().ln();
-        if lam < 0.0 { det_sign *= -1; }
+        if lam < 0.0 {
+            det_sign *= -1;
+        }
     }
 
     // Spectral entropy and effective rank
     let total: f64 = eigenvalues.iter().filter(|&&x| x > 0.0).sum();
     let (spectral_entropy, eff_rank) = if total > 0.0 {
-        let entropy: f64 = eigenvalues.iter()
+        let entropy: f64 = eigenvalues
+            .iter()
             .filter(|&&x| x > 0.0)
             .map(|&x| {
                 let p = x / total;
-                if p > 1e-30 { -p * p.ln() } else { 0.0 }
+                if p > 1e-30 {
+                    -p * p.ln()
+                } else {
+                    0.0
+                }
             })
             .sum();
         (entropy, entropy.exp())
@@ -177,14 +199,23 @@ fn analyze_heegner_dim(dim: usize) -> HeegnerResult {
     eprintln!("    λ_min     = {:.6e}", eigenvalues[0]);
     eprintln!("    λ_max     = {:.6e}", lambda_max);
     eprintln!("    κ         = {:.6e}", kappa);
-    eprintln!("    log|det|  = {:.6e} (sign={})", log_det, if det_sign > 0 { "+" } else { "-" });
+    eprintln!(
+        "    log|det|  = {:.6e} (sign={})",
+        log_det,
+        if det_sign > 0 { "+" } else { "-" }
+    );
     eprintln!("    Tr        = {:.6e}", trace);
     eprintln!("    ‖G‖_F     = {:.6e}", frobenius);
-    eprintln!("    S_spec    = {:.4} (eff_rank = {:.1})", spectral_entropy, eff_rank);
+    eprintln!(
+        "    S_spec    = {:.4} (eff_rank = {:.1})",
+        spectral_entropy, eff_rank
+    );
     eprintln!("    ⟨r⟩       = {:.4} → {}", r_mean, ensemble);
     eprintln!("    Coprime%  = {:.2}%", coprime_frac * 100.0);
-    eprintln!("    Euler E(1..{dim}) primes: {euler_primes}/{dim} ({:.1}%)",
-              euler_primes as f64 / dim as f64 * 100.0);
+    eprintln!(
+        "    Euler E(1..{dim}) primes: {euler_primes}/{dim} ({:.1}%)",
+        euler_primes as f64 / dim as f64 * 100.0
+    );
 
     // Print eigenvalue spectrum (up to 20 values)
     let show = dim.min(20);
@@ -196,14 +227,23 @@ fn analyze_heegner_dim(dim: usize) -> HeegnerResult {
     eprintln!();
 
     HeegnerResult {
-        dim, is_heegner,
-        lambda_min, lambda_max, kappa,
-        log_det, det_sign,
-        trace, frobenius,
-        spectral_entropy, eff_rank,
-        r_mean, ensemble: ensemble.to_string(),
-        coprime_frac, euler_primes,
-        build_time, eigen_time,
+        dim,
+        is_heegner,
+        lambda_min,
+        lambda_max,
+        kappa,
+        log_det,
+        det_sign,
+        trace,
+        frobenius,
+        spectral_entropy,
+        eff_rank,
+        r_mean,
+        ensemble: ensemble.to_string(),
+        coprime_frac,
+        euler_primes,
+        build_time,
+        eigen_time,
     }
 }
 
@@ -231,7 +271,11 @@ fn main() {
         let p = is_prime(e as u64);
         if n <= 45 || HEEGNER.contains(&(n as usize)) {
             let marker = if p { "✓ PRIME" } else { "✗ composite" };
-            let heeg = if HEEGNER.contains(&(n as usize)) { " ★" } else { "" };
+            let heeg = if HEEGNER.contains(&(n as usize)) {
+                " ★"
+            } else {
+                ""
+            };
             eprintln!("    E({n:>3}) = {e:>6}  {marker}{heeg}");
         }
         if p && prime_streak == (n as usize - 1) {
@@ -257,7 +301,9 @@ fn main() {
     for &h in &HEEGNER {
         // Skip N=1 (degenerate 1×1 matrix)
         if h < 3 {
-            if h >= 2 { dims_to_probe.push(h); }
+            if h >= 2 {
+                dims_to_probe.push(h);
+            }
             continue;
         }
         for offset in [-2i64, -1, 0, 1, 2] {
@@ -270,7 +316,11 @@ fn main() {
     dims_to_probe.sort();
     dims_to_probe.dedup();
 
-    eprintln!("  Probing {} dimensions: {:?}", dims_to_probe.len(), dims_to_probe);
+    eprintln!(
+        "  Probing {} dimensions: {:?}",
+        dims_to_probe.len(),
+        dims_to_probe
+    );
     eprintln!();
 
     // Output TSV header
@@ -310,27 +360,34 @@ fn main() {
     eprintln!("═══════════════════════════════════════════════════════════════");
     eprintln!();
 
-    let heegner_results: Vec<&HeegnerResult> = all_results.iter()
-        .filter(|r| r.is_heegner)
-        .collect();
-    let non_heegner_results: Vec<&HeegnerResult> = all_results.iter()
-        .filter(|r| !r.is_heegner)
-        .collect();
+    let heegner_results: Vec<&HeegnerResult> =
+        all_results.iter().filter(|r| r.is_heegner).collect();
+    let non_heegner_results: Vec<&HeegnerResult> =
+        all_results.iter().filter(|r| !r.is_heegner).collect();
 
     if !heegner_results.is_empty() && !non_heegner_results.is_empty() {
-        let h_kappa_avg: f64 = heegner_results.iter().map(|r| r.kappa).sum::<f64>()
-            / heegner_results.len() as f64;
+        let h_kappa_avg: f64 =
+            heegner_results.iter().map(|r| r.kappa).sum::<f64>() / heegner_results.len() as f64;
         let nh_kappa_avg: f64 = non_heegner_results.iter().map(|r| r.kappa).sum::<f64>()
             / non_heegner_results.len() as f64;
 
-        let h_entropy_avg: f64 = heegner_results.iter().map(|r| r.spectral_entropy).sum::<f64>()
+        let h_entropy_avg: f64 = heegner_results
+            .iter()
+            .map(|r| r.spectral_entropy)
+            .sum::<f64>()
             / heegner_results.len() as f64;
-        let nh_entropy_avg: f64 = non_heegner_results.iter().map(|r| r.spectral_entropy).sum::<f64>()
+        let nh_entropy_avg: f64 = non_heegner_results
+            .iter()
+            .map(|r| r.spectral_entropy)
+            .sum::<f64>()
             / non_heegner_results.len() as f64;
 
         let h_coprime_avg: f64 = heegner_results.iter().map(|r| r.coprime_frac).sum::<f64>()
             / heegner_results.len() as f64;
-        let nh_coprime_avg: f64 = non_heegner_results.iter().map(|r| r.coprime_frac).sum::<f64>()
+        let nh_coprime_avg: f64 = non_heegner_results
+            .iter()
+            .map(|r| r.coprime_frac)
+            .sum::<f64>()
             / non_heegner_results.len() as f64;
 
         eprintln!("  ┌─────────────────────────┬──────────────┬──────────────┐");
@@ -338,7 +395,9 @@ fn main() {
         eprintln!("  ├─────────────────────────┼──────────────┼──────────────┤");
         eprintln!("  │ Avg κ (condition #)     │ {h_kappa_avg:>12.4e} │ {nh_kappa_avg:>12.4e} │");
         eprintln!("  │ Avg S (spectral entropy)│ {h_entropy_avg:>12.4} │ {nh_entropy_avg:>12.4} │");
-        eprintln!("  │ Avg coprime fraction    │ {h_coprime_avg:>11.4}% │ {nh_coprime_avg:>11.4}% │");
+        eprintln!(
+            "  │ Avg coprime fraction    │ {h_coprime_avg:>11.4}% │ {nh_coprime_avg:>11.4}% │"
+        );
         eprintln!("  └─────────────────────────┴──────────────┴──────────────┘");
     }
 
@@ -364,9 +423,12 @@ fn main() {
 
     eprintln!("  At N=41 (Euler's breaking point):");
     eprintln!("    κ  = {:.6e}", dim41.kappa);
-    eprintln!("    Euler primes: {}/{} ({:.1}%)",
-        dim41.euler_primes, dim41.dim,
-        dim41.euler_primes as f64 / dim41.dim as f64 * 100.0);
+    eprintln!(
+        "    Euler primes: {}/{} ({:.1}%)",
+        dim41.euler_primes,
+        dim41.dim,
+        dim41.euler_primes as f64 / dim41.dim as f64 * 100.0
+    );
     if let Some(ref r40) = dim40 {
         eprintln!("  At N=40 (last Euler prime):");
         eprintln!("    κ  = {:.6e}", r40.kappa);
@@ -388,7 +450,10 @@ fn main() {
     let ram_error = (ramanujan - ram_nearest_int).abs();
     eprintln!("  e^(π√163) = {:.15e}", ramanujan);
     eprintln!("  Nearest integer: {:.0}", ram_nearest_int);
-    eprintln!("  |error|   = {:.2e}  (the famous 'almost integer')", ram_error);
+    eprintln!(
+        "  |error|   = {:.2e}  (the famous 'almost integer')",
+        ram_error
+    );
     eprintln!();
 
     // Check if any eigenvalue ratio relates to 163
@@ -396,12 +461,18 @@ fn main() {
         eprintln!("  At N=163 (the largest Heegner number):");
         eprintln!("    λ_max/λ_min = {:.6e}", h163.kappa);
         eprintln!("    log|det|    = {:.6e}", h163.log_det);
-        eprintln!("    Tr/dim      = {:.10e} (should be 1/180)", h163.trace / 163.0);
+        eprintln!(
+            "    Tr/dim      = {:.10e} (should be 1/180)",
+            h163.trace / 163.0
+        );
         eprintln!("    Coprime%    = {:.2}%", h163.coprime_frac * 100.0);
     }
 
     eprintln!();
     eprintln!("═══════════════════════════════════════════════════════════════");
-    eprintln!("  🔮 HEEGNER PROBE complete ({:.1}s)", t_total.elapsed().as_secs_f64());
+    eprintln!(
+        "  🔮 HEEGNER PROBE complete ({:.1}s)",
+        t_total.elapsed().as_secs_f64()
+    );
     eprintln!("═══════════════════════════════════════════════════════════════");
 }

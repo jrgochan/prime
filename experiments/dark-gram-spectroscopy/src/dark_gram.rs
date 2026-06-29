@@ -139,9 +139,7 @@ fn factorial(n: usize) -> u64 {
 /// For n=2, uses the exact closed form (essentially free).
 /// For other n, uses the Fourier series (fast convergence).
 pub fn build_dark_gram(n: usize, dim: usize) -> Vec<f64> {
-    eprintln!(
-        "  \x1b[2m▸ Building Dark Gram matrix: order n={n}, dim={dim}×{dim}...\x1b[0m"
-    );
+    eprintln!("  \x1b[2m▸ Building Dark Gram matrix: order n={n}, dim={dim}×{dim}...\x1b[0m");
     let t0 = std::time::Instant::now();
 
     let mat: Vec<f64> = (0..dim)
@@ -215,7 +213,10 @@ mod tests {
         // For coprime j,k: gcd=1, so G = 1/(180·j²k²)
         let g = dark_gram_entry_n2(3, 5);
         let expected = 1.0 / (180.0 * 9.0 * 25.0);
-        assert!((g - expected).abs() < 1e-15, "G(3,5) = {g}, expected {expected}");
+        assert!(
+            (g - expected).abs() < 1e-15,
+            "G(3,5) = {g}, expected {expected}"
+        );
     }
 
     #[test]
@@ -223,7 +224,10 @@ mod tests {
         // G(4,6): gcd=2, so G = 2⁴/(180·16·36) = 16/103680
         let g = dark_gram_entry_n2(4, 6);
         let expected = 16.0 / (180.0 * 16.0 * 36.0);
-        assert!((g - expected).abs() < 1e-15, "G(4,6) = {g}, expected {expected}");
+        assert!(
+            (g - expected).abs() < 1e-15,
+            "G(4,6) = {g}, expected {expected}"
+        );
     }
 
     #[test]

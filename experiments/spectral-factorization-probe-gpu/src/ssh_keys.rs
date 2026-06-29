@@ -86,15 +86,21 @@ pub fn generate_ssh_test_suite(output_dir: &Path) -> SshKeySet {
     // we generate synthetic semiprimes using our keygen module to ensure
     // the H1–H6 pipeline always has tractable material.
     for bits in [64u32, 128, 256, 512] {
-        println!("  Generating RSA-{} key (small, for full probe analysis)...", bits);
+        println!(
+            "  Generating RSA-{} key (small, for full probe analysis)...",
+            bits
+        );
         match generate_small_rsa(&key_dir, bits) {
             Ok(info) => {
                 if let Some(ref sp) = info.semiprime {
                     println!("    ✓ N = {} = {} × {} ({}-bit)", sp.n, sp.p, sp.q, sp.bits);
                     tractable_semiprimes.push(sp.clone());
                 } else {
-                    println!("    ✓ N = {} ({} hex digits, too large for u64)", 
-                        &info.modulus_hex[..20.min(info.modulus_hex.len())], info.modulus_hex.len());
+                    println!(
+                        "    ✓ N = {} ({} hex digits, too large for u64)",
+                        &info.modulus_hex[..20.min(info.modulus_hex.len())],
+                        info.modulus_hex.len()
+                    );
                 }
                 rsa_keys.push(info);
             }
@@ -111,8 +117,10 @@ pub fn generate_ssh_test_suite(output_dir: &Path) -> SshKeySet {
                             tractable_semiprimes.push(key.clone());
                         }
                     }
-                    println!("    ✓ Added {} synthetic semiprimes for H1–H6 probe analysis",
-                        tractable_semiprimes.len());
+                    println!(
+                        "    ✓ Added {} synthetic semiprimes for H1–H6 probe analysis",
+                        tractable_semiprimes.len()
+                    );
                 }
             }
         }
@@ -120,11 +128,18 @@ pub fn generate_ssh_test_suite(output_dir: &Path) -> SshKeySet {
 
     // ── Standard SSH RSA keys ──
     for bits in [2048u32, 4096] {
-        println!("  Generating SSH RSA-{} key (standard, password=\"password\")...", bits);
+        println!(
+            "  Generating SSH RSA-{} key (standard, password=\"password\")...",
+            bits
+        );
         match generate_ssh_rsa(&key_dir, bits, "password") {
             Ok(info) => {
                 let n_preview = if info.modulus_hex.len() > 32 {
-                    format!("{}...{}", &info.modulus_hex[..16], &info.modulus_hex[info.modulus_hex.len()-16..])
+                    format!(
+                        "{}...{}",
+                        &info.modulus_hex[..16],
+                        &info.modulus_hex[info.modulus_hex.len() - 16..]
+                    )
                 } else {
                     info.modulus_hex.clone()
                 };
@@ -138,7 +153,10 @@ pub fn generate_ssh_test_suite(output_dir: &Path) -> SshKeySet {
     // ── ECDSA keys ──
     for (curve, bits) in [("prime256v1", 256u32), ("secp384r1", 384)] {
         let name = if bits == 256 { "P-256" } else { "P-384" };
-        println!("  Generating SSH ECDSA {} key (password=\"password\")...", name);
+        println!(
+            "  Generating SSH ECDSA {} key (password=\"password\")...",
+            name
+        );
         match generate_ssh_ecdsa(&key_dir, curve, bits, "password") {
             Ok(info) => {
                 let preview = if info.private_key_hex.len() > 32 {
@@ -153,8 +171,12 @@ pub fn generate_ssh_test_suite(output_dir: &Path) -> SshKeySet {
         }
     }
 
-    println!("\n  Summary: {} RSA keys ({} tractable), {} ECDSA keys\n",
-        rsa_keys.len(), tractable_semiprimes.len(), ecdsa_keys.len());
+    println!(
+        "\n  Summary: {} RSA keys ({} tractable), {} ECDSA keys\n",
+        rsa_keys.len(),
+        tractable_semiprimes.len(),
+        ecdsa_keys.len()
+    );
 
     SshKeySet {
         output_dir: key_dir.to_string_lossy().to_string(),
@@ -174,13 +196,21 @@ fn generate_small_rsa(key_dir: &Path, bits: u32) -> Result<RsaKeyInfo, String> {
 
     // Generate key
     let output = Command::new("openssl")
-        .args(["genrsa", "-out", &key_path.to_string_lossy(), &bits.to_string()])
+        .args([
+            "genrsa",
+            "-out",
+            &key_path.to_string_lossy(),
+            &bits.to_string(),
+        ])
         .output()
         .map_err(|e| format!("openssl genrsa failed: {}", e))?;
 
     if !output.status.success() {
-        return Err(format!("openssl genrsa exit {}: {}",
-            output.status, String::from_utf8_lossy(&output.stderr)));
+        return Err(format!(
+            "openssl genrsa exit {}: {}",
+            output.status,
+            String::from_utf8_lossy(&output.stderr)
+        ));
     }
 
     // Extract parameters
@@ -198,26 +228,38 @@ fn generate_ssh_rsa(key_dir: &Path, bits: u32, passphrase: &str) -> Result<RsaKe
     // Generate SSH key in PEM format (so openssl can read it)
     let output = Command::new("ssh-keygen")
         .args([
-            "-t", "rsa",
-            "-b", &bits.to_string(),
-            "-N", passphrase,
-            "-m", "PEM",
-            "-f", &key_path.to_string_lossy(),
-            "-q",  // quiet
+            "-t",
+            "rsa",
+            "-b",
+            &bits.to_string(),
+            "-N",
+            passphrase,
+            "-m",
+            "PEM",
+            "-f",
+            &key_path.to_string_lossy(),
+            "-q", // quiet
         ])
         .output()
         .map_err(|e| format!("ssh-keygen failed: {}", e))?;
 
     if !output.status.success() {
-        return Err(format!("ssh-keygen exit {}: {}",
-            output.status, String::from_utf8_lossy(&output.stderr)));
+        return Err(format!(
+            "ssh-keygen exit {}: {}",
+            output.status,
+            String::from_utf8_lossy(&output.stderr)
+        ));
     }
 
     extract_rsa_params(&key_path, bits, Some(passphrase))
 }
 
 /// Extract RSA modulus and prime factors from a PEM key file.
-fn extract_rsa_params(key_path: &Path, bits: u32, passphrase: Option<&str>) -> Result<RsaKeyInfo, String> {
+fn extract_rsa_params(
+    key_path: &Path,
+    bits: u32,
+    passphrase: Option<&str>,
+) -> Result<RsaKeyInfo, String> {
     let key_path_str = key_path.to_string_lossy().to_string();
     let mut args = vec!["rsa", "-in", key_path_str.as_str(), "-text", "-noout"];
     let pass_arg;
@@ -232,8 +274,11 @@ fn extract_rsa_params(key_path: &Path, bits: u32, passphrase: Option<&str>) -> R
         .map_err(|e| format!("openssl rsa -text failed: {}", e))?;
 
     if !output.status.success() {
-        return Err(format!("openssl rsa -text exit {}: {}",
-            output.status, String::from_utf8_lossy(&output.stderr)));
+        return Err(format!(
+            "openssl rsa -text exit {}: {}",
+            output.status,
+            String::from_utf8_lossy(&output.stderr)
+        ));
     }
 
     let text = String::from_utf8_lossy(&output.stdout);
@@ -255,7 +300,12 @@ fn extract_rsa_params(key_path: &Path, bits: u32, passphrase: Option<&str>) -> R
         let q = bytes_to_u64(&hex_to_bytes(&prime2_hex));
         if n > 0 && p > 0 && q > 0 {
             let (p, q) = if p < q { (p, q) } else { (q, p) };
-            Some(SemiprimeKey { n, p, q, bits: 64 - n.leading_zeros() })
+            Some(SemiprimeKey {
+                n,
+                p,
+                q,
+                bits: 64 - n.leading_zeros(),
+            })
         } else {
             None
         }
@@ -297,40 +347,54 @@ fn generate_ssh_ecdsa(
 
     let output = Command::new("ssh-keygen")
         .args([
-            "-t", "ecdsa",
-            "-b", ecdsa_bits,
-            "-N", passphrase,
-            "-m", "PEM",
-            "-f", &key_path.to_string_lossy(),
+            "-t",
+            "ecdsa",
+            "-b",
+            ecdsa_bits,
+            "-N",
+            passphrase,
+            "-m",
+            "PEM",
+            "-f",
+            &key_path.to_string_lossy(),
             "-q",
         ])
         .output()
         .map_err(|e| format!("ssh-keygen ecdsa failed: {}", e))?;
 
     if !output.status.success() {
-        return Err(format!("ssh-keygen ecdsa exit {}: {}",
-            output.status, String::from_utf8_lossy(&output.stderr)));
+        return Err(format!(
+            "ssh-keygen ecdsa exit {}: {}",
+            output.status,
+            String::from_utf8_lossy(&output.stderr)
+        ));
     }
 
     // Extract ECDSA private key
     let ec_output = Command::new("openssl")
         .args([
-            "ec", "-in", &key_path.to_string_lossy(),
-            "-text", "-noout",
-            "-passin", &format!("pass:{}", passphrase),
+            "ec",
+            "-in",
+            &key_path.to_string_lossy(),
+            "-text",
+            "-noout",
+            "-passin",
+            &format!("pass:{}", passphrase),
         ])
         .output()
         .map_err(|e| format!("openssl ec -text failed: {}", e))?;
 
     if !ec_output.status.success() {
-        return Err(format!("openssl ec -text exit {}: {}",
-            ec_output.status, String::from_utf8_lossy(&ec_output.stderr)));
+        return Err(format!(
+            "openssl ec -text exit {}: {}",
+            ec_output.status,
+            String::from_utf8_lossy(&ec_output.stderr)
+        ));
     }
 
     let text = String::from_utf8_lossy(&ec_output.stdout);
 
-    let private_key_hex = extract_hex_field(&text, "priv:")
-        .unwrap_or_default();
+    let private_key_hex = extract_hex_field(&text, "priv:").unwrap_or_default();
 
     // Well-known curve orders
     let curve_order_hex = match curve {
@@ -341,7 +405,7 @@ fn generate_ssh_ecdsa(
 
     let curve_name = match curve {
         "prime256v1" => "P-256",
-        "secp384r1"  => "P-384",
+        "secp384r1" => "P-384",
         _ => curve,
     };
 
@@ -378,12 +442,20 @@ fn extract_hex_field(text: &str, field_name: &str) -> Option<String> {
     // Known RSA field names from openssl rsa -text output.
     // These MUST terminate hex continuation scanning.
     const RSA_FIELDS: &[&str] = &[
-        "modulus:", "publicExponent:", "privateExponent:",
-        "prime1:", "prime2:", "exponent1:", "exponent2:", "coefficient:",
+        "modulus:",
+        "publicExponent:",
+        "privateExponent:",
+        "prime1:",
+        "prime2:",
+        "exponent1:",
+        "exponent2:",
+        "coefficient:",
     ];
 
     let lines: Vec<&str> = text.lines().collect();
-    let start = lines.iter().position(|l| l.trim().starts_with(field_name))?;
+    let start = lines
+        .iter()
+        .position(|l| l.trim().starts_with(field_name))?;
 
     let mut hex = String::new();
 
@@ -421,7 +493,9 @@ fn extract_hex_field(text: &str, field_name: &str) -> Option<String> {
     // Clean: remove colons, leading "00", whitespace
     let hex = hex.replace([':', ' '], "");
     let hex = hex.trim_start_matches("00").to_string();
-    if hex.is_empty() { return None; }
+    if hex.is_empty() {
+        return None;
+    }
     Some(hex)
 }
 
@@ -444,10 +518,14 @@ fn extract_public_exponent(text: &str) -> Option<u64> {
 /// Convert a hex string to big-endian bytes.
 fn hex_to_bytes(hex: &str) -> Vec<u8> {
     let hex = hex.replace([':', ' '], "");
-    let hex = if hex.len() % 2 == 1 { format!("0{}", hex) } else { hex };
+    let hex = if hex.len() % 2 == 1 {
+        format!("0{}", hex)
+    } else {
+        hex
+    };
     (0..hex.len())
         .step_by(2)
-        .filter_map(|i| u8::from_str_radix(&hex[i..i+2], 16).ok())
+        .filter_map(|i| u8::from_str_radix(&hex[i..i + 2], 16).ok())
         .collect()
 }
 
@@ -470,13 +548,16 @@ fn bytes_to_u64(bytes: &[u8]) -> u64 {
 /// Returns N mod m for small m values, which is sufficient for
 /// the Vasyunin cotangent sum V(m, N mod m).
 pub fn modular_residues(modulus_bytes: &[u8], moduli: &[u64]) -> Vec<(u64, u64)> {
-    moduli.iter().map(|&m| {
-        let mut residue = 0u64;
-        for &byte in modulus_bytes {
-            residue = (residue * 256 + byte as u64) % m;
-        }
-        (m, residue)
-    }).collect()
+    moduli
+        .iter()
+        .map(|&m| {
+            let mut residue = 0u64;
+            for &byte in modulus_bytes {
+                residue = (residue * 256 + byte as u64) % m;
+            }
+            (m, residue)
+        })
+        .collect()
 }
 
 /// Compute number-theoretic properties of the private key scalar.
@@ -486,12 +567,14 @@ pub fn modular_residues(modulus_bytes: &[u8], moduli: &[u64]) -> Vec<(u64, u64)>
 /// compared to generic random numbers.
 pub fn scalar_properties(d_hex: &str) -> ScalarProperties {
     let bytes = hex_to_bytes(d_hex);
-    let d_u64 = if bytes.len() <= 8 { Some(bytes_to_u64(&bytes)) } else { None };
+    let d_u64 = if bytes.len() <= 8 {
+        Some(bytes_to_u64(&bytes))
+    } else {
+        None
+    };
 
     // Bit entropy estimate: how many trailing zeros?
-    let trailing_zeros = bytes.iter().rev()
-        .take_while(|&&b| b == 0)
-        .count() * 8;
+    let trailing_zeros = bytes.iter().rev().take_while(|&&b| b == 0).count() * 8;
 
     // Hamming weight of the scalar
     let hamming_weight: u32 = bytes.iter().map(|b| b.count_ones()).sum();

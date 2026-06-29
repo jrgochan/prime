@@ -24,14 +24,20 @@ fn main() {
 
     // Phase 1: Generate test semiprimes at various bit widths
     let test_keys = keygen::generate_test_suite();
-    println!("Generated {} test semiprimes across {} bit-width classes\n",
+    println!(
+        "Generated {} test semiprimes across {} bit-width classes\n",
         test_keys.iter().map(|c| c.keys.len()).sum::<usize>(),
-        test_keys.len());
+        test_keys.len()
+    );
 
     // Phase 2: Run all probes
     for class in &test_keys {
         println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-        println!("  BIT WIDTH: {} bits ({} semiprimes)", class.bits, class.keys.len());
+        println!(
+            "  BIT WIDTH: {} bits ({} semiprimes)",
+            class.bits,
+            class.keys.len()
+        );
         println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
 
         // H1: GCD-stratum eigenvector correlation

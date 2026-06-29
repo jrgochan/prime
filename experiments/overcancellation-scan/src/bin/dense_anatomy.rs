@@ -28,7 +28,7 @@ use std::time::Instant;
 
 const EULER_GAMMA: f64 = 0.5772156649015329;
 const LN_2PI: f64 = 1.8378770664093453;
-const COEFF: f64 = LN_2PI - EULER_GAMMA;  // ln(2π) - γ ≈ 1.2606
+const COEFF: f64 = LN_2PI - EULER_GAMMA; // ln(2π) - γ ≈ 1.2606
 
 fn sieve_mobius(n: usize) -> (Vec<i8>, Vec<usize>) {
     let mut mu = vec![0i8; n + 1];
@@ -41,31 +41,48 @@ fn sieve_mobius(n: usize) -> (Vec<i8>, Vec<usize>) {
             mu[i] = -1;
         }
         for &p in &primes {
-            if i * p > n { break; }
+            if i * p > n {
+                break;
+            }
             is_prime[i * p] = false;
-            if i % p == 0 { mu[i * p] = 0; break; }
-            else { mu[i * p] = -mu[i]; }
+            if i % p == 0 {
+                mu[i * p] = 0;
+                break;
+            } else {
+                mu[i * p] = -mu[i];
+            }
         }
     }
     (mu, primes)
 }
 
 fn gcd(mut a: usize, mut b: usize) -> usize {
-    while b != 0 { let t = b; b = a % b; a = t; } a
+    while b != 0 {
+        let t = b;
+        b = a % b;
+        a = t;
+    }
+    a
 }
 
 fn vasyunin_sum(a: usize, b: usize) -> f64 {
-    if a <= 1 { return 0.0; }
+    if a <= 1 {
+        return 0.0;
+    }
     let af = a as f64;
     let bf = b as f64;
     let mut total = 0.0;
     for m in 1..a {
         let mf = m as f64;
         let mut frac_part = (mf * bf / af).fract();
-        if frac_part < 0.0 { frac_part += 1.0; }
+        if frac_part < 0.0 {
+            frac_part += 1.0;
+        }
         let angle = PI * mf / af;
         let sin_val = angle.sin();
-        if sin_val.abs() < 1e-15 { continue; }
+        if sin_val.abs() < 1e-15 {
+            continue;
+        }
         total += frac_part * angle.cos() / sin_val;
     }
     total
@@ -105,16 +122,24 @@ fn precompute_pair_sums(n: usize, mu: &[i8]) -> HashMap<(usize, usize), f64> {
     let mut needed = Vec::new();
     let mut seen = std::collections::HashSet::new();
     for j in 1..n {
-        if mu[j] == 0 { continue; }
+        if mu[j] == 0 {
+            continue;
+        }
         for k in 1..n {
-            if j == k || mu[k] == 0 { continue; }
+            if j == k || mu[k] == 0 {
+                continue;
+            }
             let d = gcd(j, k);
-            let a = j / d; let b = k / d;
+            let a = j / d;
+            let b = k / d;
             let key = if a <= b { (a, b) } else { (b, a) };
-            if seen.insert(key) { needed.push(key); }
+            if seen.insert(key) {
+                needed.push(key);
+            }
         }
     }
-    needed.par_iter()
+    needed
+        .par_iter()
         .map(|&(a, b)| ((a, b), vasyunin_sum(a, b) + vasyunin_sum(b, a)))
         .collect()
 }
@@ -125,7 +150,9 @@ fn num_divisors(n: usize) -> usize {
     while d * d <= n {
         if n.is_multiple_of(d) {
             count += 1;
-            if d != n / d { count += 1; }
+            if d != n / d {
+                count += 1;
+            }
         }
         d += 1;
     }
@@ -144,10 +171,16 @@ fn is_hcn(n: usize, max_divisors_below: &mut usize) -> bool {
 
 fn is_prime_power(n: usize, primes: &[usize]) -> Option<usize> {
     for &p in primes {
-        if p > n { break; }
+        if p > n {
+            break;
+        }
         let mut x = n;
-        while x > 1 && x.is_multiple_of(p) { x /= p; }
-        if x == 1 { return Some(p); }
+        while x > 1 && x.is_multiple_of(p) {
+            x /= p;
+        }
+        if x == 1 {
+            return Some(p);
+        }
     }
     None
 }
@@ -158,12 +191,16 @@ fn euler_phi(n: usize) -> usize {
     let mut p = 2;
     while p * p <= m {
         if m.is_multiple_of(p) {
-            while m.is_multiple_of(p) { m /= p; }
+            while m.is_multiple_of(p) {
+                m /= p;
+            }
             result -= result / p;
         }
         p += 1;
     }
-    if m > 1 { result -= result / m; }
+    if m > 1 {
+        result -= result / m;
+    }
     result
 }
 
@@ -193,21 +230,21 @@ struct DenseResult {
     vt_l1_v: f64,
     bt_v: f64,
     d2: f64,
-    ratio: f64,  // d²/(2(1-bᵀv))
+    ratio: f64, // d²/(2(1-bᵀv))
     // ═══ L₁ DECOMPOSITION (the four pieces from L1Bridge) ═══
-    ratio_term: f64,    // Σᵢⱼ vᵢvⱼ · (j-k)/(2jk)·ln(k/j)
-    neg_ecot: f64,      // -Σᵢⱼ vᵢvⱼ · π·gcd/(2jk)·(V(a,b)+V(b,a))
-    log_harm: f64,      // Σᵢⱼ vᵢvⱼ · COEFF/2·(1/j+1/k)
-    rank1: f64,         // Σᵢⱼ vᵢvⱼ · (-1/(jk))
+    ratio_term: f64, // Σᵢⱼ vᵢvⱼ · (j-k)/(2jk)·ln(k/j)
+    neg_ecot: f64,   // -Σᵢⱼ vᵢvⱼ · π·gcd/(2jk)·(V(a,b)+V(b,a))
+    log_harm: f64,   // Σᵢⱼ vᵢvⱼ · COEFF/2·(1/j+1/k)
+    rank1: f64,      // Σᵢⱼ vᵢvⱼ · (-1/(jk))
     // ═══ GROWTH DIAGNOSTICS ═══
     vtgv_over_lnN: f64,
     vtgv_over_lnlnN: f64,
-    norm_v_sq: f64,     // ||v||²
-    n_active: usize,    // # nonzero weights
+    norm_v_sq: f64,  // ||v||²
+    n_active: usize, // # nonzero weights
     // ═══ PNT SUMS (Mertens convergence) ═══
-    mertens_sum: f64,       // Σ_{k≤N} μ(k)/k  (→ 0 by PNT)
-    mertens_env_sum: f64,   // Σ_{k≤N} μ(k)·env(k)/k  (rank-1 amplitude)
-    mertens_log_sum: f64,   // Σ_{k≤N} μ(k)·ln(k)/k  (→ -1 by PNT)
+    mertens_sum: f64,     // Σ_{k≤N} μ(k)/k  (→ 0 by PNT)
+    mertens_env_sum: f64, // Σ_{k≤N} μ(k)·env(k)/k  (rank-1 amplitude)
+    mertens_log_sum: f64, // Σ_{k≤N} μ(k)·ln(k)/k  (→ -1 by PNT)
     // ═══ DOUBLE ABEL ═══
     max_partial: f64,
     c_inner: f64,
@@ -216,15 +253,15 @@ struct DenseResult {
     coprime_contrib: f64,
     p2_contrib: f64,
     p3_contrib: f64,
-    gcd_strata: [f64; 7],  // [diag, gcd=1, gcd=2, gcd=3, gcd=4, gcd=5, gcd≥6]
+    gcd_strata: [f64; 7], // [diag, gcd=1, gcd=2, gcd=3, gcd=4, gcd=5, gcd≥6]
     ramanujan_sum: f64,
     divisor_weighted: f64,
     euler_phi_sum: f64,
     cancel_efficiency: f64,
     noncop_l1: f64,
     // ═══ RATIO DIAGNOSTICS ═══
-    ratio_over_neg: f64,    // ratio_term / |neg_ecot + log_harm + rank1|
-    ecot_over_ratio: f64,   // |neg_ecot| / ratio_term
+    ratio_over_neg: f64,  // ratio_term / |neg_ecot + log_harm + rank1|
+    ecot_over_ratio: f64, // |neg_ecot| / ratio_term
     // Flags
     is_hcn: bool,
     is_prime: bool,
@@ -238,11 +275,16 @@ fn analyze_dense(n: usize, mu: &[i8], _primes: &[usize]) -> DenseResult {
     let log_n = (n as f64).ln();
 
     // Build weights v_j = -μ(j)·(1-lnj/lnN) for j=1..N-1
-    let v: Vec<f64> = (0..dim).map(|i| {
-        let j = i + 1;
-        if mu[j] == 0 { 0.0 }
-        else { -(mu[j] as f64) * (1.0 - (j as f64).ln() / log_n) }
-    }).collect();
+    let v: Vec<f64> = (0..dim)
+        .map(|i| {
+            let j = i + 1;
+            if mu[j] == 0 {
+                0.0
+            } else {
+                -(mu[j] as f64) * (1.0 - (j as f64).ln() / log_n)
+            }
+        })
+        .collect();
 
     // Count active weights and compute ||v||²
     let mut norm_v_sq = 0.0f64;
@@ -304,7 +346,9 @@ fn analyze_dense(n: usize, mu: &[i8], _primes: &[usize]) -> DenseResult {
         for j_idx in 0..dim {
             let j = j_idx + 1;
             let jf = j as f64;
-            if v[j_idx] == 0.0 { continue; }
+            if v[j_idx] == 0.0 {
+                continue;
+            }
             let g_jk = if j == k {
                 gram_diagonal(j)
             } else {
@@ -350,22 +394,43 @@ fn analyze_dense(n: usize, mu: &[i8], _primes: &[usize]) -> DenseResult {
                 gcd_strata[0] += contrib;
             } else {
                 match d {
-                    1 => { gcd_strata[1] += contrib; coprime_contrib += contrib; }
-                    2 => { gcd_strata[2] += contrib; }
-                    3 => { gcd_strata[3] += contrib; }
-                    4 => { gcd_strata[4] += contrib; }
-                    5 => { gcd_strata[5] += contrib; }
-                    _ => { gcd_strata[6] += contrib; }
+                    1 => {
+                        gcd_strata[1] += contrib;
+                        coprime_contrib += contrib;
+                    }
+                    2 => {
+                        gcd_strata[2] += contrib;
+                    }
+                    3 => {
+                        gcd_strata[3] += contrib;
+                    }
+                    4 => {
+                        gcd_strata[4] += contrib;
+                    }
+                    5 => {
+                        gcd_strata[5] += contrib;
+                    }
+                    _ => {
+                        gcd_strata[6] += contrib;
+                    }
                 }
-                if j % 2 == 0 && k % 2 == 0 { p2_contrib += contrib; }
-                if j % 3 == 0 && k % 3 == 0 { p3_contrib += contrib; }
+                if j % 2 == 0 && k % 2 == 0 {
+                    p2_contrib += contrib;
+                }
+                if j % 3 == 0 && k % 3 == 0 {
+                    p3_contrib += contrib;
+                }
             }
 
             let c_val = ramanujan_c(d, 1, mu);
             ramanujan_sum += prod * c_val;
             let nd = num_divisors(d) as f64;
             divisor_weighted += contrib * nd;
-            let phi_ratio = if d > 0 { euler_phi(d) as f64 / d as f64 } else { 0.0 };
+            let phi_ratio = if d > 0 {
+                euler_phi(d) as f64 / d as f64
+            } else {
+                0.0
+            };
             euler_phi_sum += contrib * phi_ratio;
         }
         inner[k_idx] = inner_k;
@@ -374,27 +439,49 @@ fn analyze_dense(n: usize, mu: &[i8], _primes: &[usize]) -> DenseResult {
     let vt_l1_v = vtgv - vt_b1_v;
     let d2 = 1.0 - 2.0 * bt_v + vtgv;
     let margin = 2.0 * (1.0 - bt_v);
-    let ratio = if margin.abs() > 1e-15 { d2 / margin } else { f64::NAN };
-    let cancel_efficiency = if vt_b1_v.abs() > 1e-15 { vt_l1_v.abs() / vt_b1_v } else { 0.0 };
+    let ratio = if margin.abs() > 1e-15 {
+        d2 / margin
+    } else {
+        f64::NAN
+    };
+    let cancel_efficiency = if vt_b1_v.abs() > 1e-15 {
+        vt_l1_v.abs() / vt_b1_v
+    } else {
+        0.0
+    };
     let noncop_l1 = vt_l1_v - coprime_contrib;
 
     // Growth diagnostics
     let log_n_val = (n as f64).ln();
-    let log_log_n = if log_n_val > 1.0 { log_n_val.ln() } else { 0.01 };
+    let log_log_n = if log_n_val > 1.0 {
+        log_n_val.ln()
+    } else {
+        0.01
+    };
     let vtgv_over_lnN = vtgv / log_n_val;
     let vtgv_over_lnlnN = vtgv / log_log_n;
 
     // Ratio diagnostics
     let neg_total = neg_ecot.abs() + log_harm.abs() + rank1.abs();
-    let ratio_over_neg = if neg_total > 1e-15 { ratio_term / neg_total } else { f64::NAN };
-    let ecot_over_ratio = if ratio_term.abs() > 1e-15 { neg_ecot.abs() / ratio_term } else { f64::NAN };
+    let ratio_over_neg = if neg_total > 1e-15 {
+        ratio_term / neg_total
+    } else {
+        f64::NAN
+    };
+    let ecot_over_ratio = if ratio_term.abs() > 1e-15 {
+        neg_ecot.abs() / ratio_term
+    } else {
+        f64::NAN
+    };
 
     // Double Abel
     let mut max_partial = 0.0f64;
     let mut partial_sum = 0.0f64;
     for i in 0..dim {
         partial_sum += v[i];
-        if partial_sum.abs() > max_partial { max_partial = partial_sum.abs(); }
+        if partial_sum.abs() > max_partial {
+            max_partial = partial_sum.abs();
+        }
     }
     let c_inner = inner.iter().map(|x| x.abs()).fold(0.0f64, f64::max);
     let mut tv_outer = 0.0f64;
@@ -405,20 +492,49 @@ fn analyze_dense(n: usize, mu: &[i8], _primes: &[usize]) -> DenseResult {
     let elapsed = start.elapsed().as_secs_f64();
 
     DenseResult {
-        n, vtgv, vt_b1_v, vt_l1_v, bt_v, d2, ratio,
-        ratio_term, neg_ecot, log_harm, rank1,
-        vtgv_over_lnN, vtgv_over_lnlnN, norm_v_sq, n_active,
-        mertens_sum, mertens_env_sum, mertens_log_sum,
-        max_partial, c_inner, tv_outer,
-        coprime_contrib, p2_contrib, p3_contrib,
-        gcd_strata, ramanujan_sum, divisor_weighted, euler_phi_sum,
-        cancel_efficiency, noncop_l1,
-        ratio_over_neg, ecot_over_ratio,
+        n,
+        vtgv,
+        vt_b1_v,
+        vt_l1_v,
+        bt_v,
+        d2,
+        ratio,
+        ratio_term,
+        neg_ecot,
+        log_harm,
+        rank1,
+        vtgv_over_lnN,
+        vtgv_over_lnlnN,
+        norm_v_sq,
+        n_active,
+        mertens_sum,
+        mertens_env_sum,
+        mertens_log_sum,
+        max_partial,
+        c_inner,
+        tv_outer,
+        coprime_contrib,
+        p2_contrib,
+        p3_contrib,
+        gcd_strata,
+        ramanujan_sum,
+        divisor_weighted,
+        euler_phi_sum,
+        cancel_efficiency,
+        noncop_l1,
+        ratio_over_neg,
+        ecot_over_ratio,
         is_hcn: false,
         is_prime: mu[n] != 0 && {
             let mut ip = true;
             let mut d = 2;
-            while d * d <= n { if n.is_multiple_of(d) { ip = false; break; } d += 1; }
+            while d * d <= n {
+                if n.is_multiple_of(d) {
+                    ip = false;
+                    break;
+                }
+                d += 1;
+            }
             ip && n > 1
         },
         prime_power_base: None,
@@ -436,7 +552,10 @@ fn main() {
     };
 
     eprintln!("╔═══════════════════════════════════════════════════════════════════════════╗");
-    eprintln!("║  DENSE ANATOMY v2 — Every N from 3 to {:<10}               🔬🏰     ║", n_max);
+    eprintln!(
+        "║  DENSE ANATOMY v2 — Every N from 3 to {:<10}               🔬🏰     ║",
+        n_max
+    );
     eprintln!("║  L₁ decomposition: ratio | -eCot | logHarm | rank1                      ║");
     eprintln!("║  Growth: vtGv/lnN, vtGv/lnlnN, Δslope                                  ║");
     eprintln!("║  PNT: Σμ/k, Σμ·env/k, Σμ·lnk/k                                        ║");
@@ -446,7 +565,11 @@ fn main() {
     eprintln!("  Sieving Möbius function up to {}...", n_max);
     let sieve_start = Instant::now();
     let (mu, primes) = sieve_mobius(n_max);
-    eprintln!("  Sieve complete in {:.2}s. {} primes found.", sieve_start.elapsed().as_secs_f64(), primes.len());
+    eprintln!(
+        "  Sieve complete in {:.2}s. {} primes found.",
+        sieve_start.elapsed().as_secs_f64(),
+        primes.len()
+    );
 
     let results_dir = "experiments/overcancellation-scan/results";
     fs::create_dir_all(results_dir).unwrap();
@@ -455,7 +578,9 @@ fn main() {
     let mut f = fs::File::create(&tsv_path).unwrap();
 
     // TSV header — every column we track
-    writeln!(f, "N\tvtGv\tvtB1v\tvtL1v\tbtv\td2\tratio\t\
+    writeln!(
+        f,
+        "N\tvtGv\tvtB1v\tvtL1v\tbtv\td2\tratio\t\
         ratio_term\tneg_ecot\tlog_harm\trank1\t\
         vtGv_lnN\tvtGv_lnlnN\tnorm_v_sq\tn_active\t\
         mertens_sum\tmertens_env\tmertens_log\t\
@@ -465,7 +590,9 @@ fn main() {
         ramanujan\tdivisor_wt\teuler_phi\t\
         cancel_eff\tnoncop_l1\t\
         ratio_over_neg\tecot_over_ratio\t\
-        is_hcn\tis_prime\tprime_power\ttime").unwrap();
+        is_hcn\tis_prime\tprime_power\ttime"
+    )
+    .unwrap();
 
     let total_start = Instant::now();
     let mut max_divisors = 0usize;
@@ -473,9 +600,22 @@ fn main() {
     let mut prev_ln_n = 1.0f64;
 
     // Console header (to stderr so TSV on stdout stays clean)
-    eprintln!("  {:>6} {:>1} {:>8} {:>8} {:>8} {:>7} {:>7} {:>7} {:>7} {:>7} {:>8} {:>8} {:>6}",
-        "N", "F", "vtGv", "ratio", "d²", "vtG/lN", "Δslope",
-        "ratioT", "-eCot", "logH", "Σμ/k", "Σμe/k", "time");
+    eprintln!(
+        "  {:>6} {:>1} {:>8} {:>8} {:>8} {:>7} {:>7} {:>7} {:>7} {:>7} {:>8} {:>8} {:>6}",
+        "N",
+        "F",
+        "vtGv",
+        "ratio",
+        "d²",
+        "vtG/lN",
+        "Δslope",
+        "ratioT",
+        "-eCot",
+        "logH",
+        "Σμ/k",
+        "Σμe/k",
+        "time"
+    );
     eprintln!("  {}", "-".repeat(120));
 
     for n in 3..=n_max {
@@ -486,24 +626,31 @@ fn main() {
         r.prime_power_base = is_prime_power(n, &primes);
 
         let abel_product = r.max_partial * (r.c_inner + r.tv_outer);
-        let flag = if r.is_hcn { "H" }
-            else if r.is_prime { "P" }
-            else if r.prime_power_base.is_some() { "Q" }
-            else { " " };
+        let flag = if r.is_hcn {
+            "H"
+        } else if r.is_prime {
+            "P"
+        } else if r.prime_power_base.is_some() {
+            "Q"
+        } else {
+            " "
+        };
 
         // Incremental slope
         let ln_n = (n as f64).ln();
         let delta_vtgv = r.vtgv - prev_vtgv;
         let delta_ln_n = ln_n - prev_ln_n;
-        let slope = if delta_ln_n > 1e-10 { delta_vtgv / delta_ln_n } else { 0.0 };
+        let slope = if delta_ln_n > 1e-10 {
+            delta_vtgv / delta_ln_n
+        } else {
+            0.0
+        };
         prev_vtgv = r.vtgv;
         prev_ln_n = ln_n;
 
         // Print select rows to console
-        let should_print = r.is_hcn || r.is_prime
-            || n <= 30 || n % 100 == 0
-            || n % 500 == 0
-            || n == n_max;
+        let should_print =
+            r.is_hcn || r.is_prime || n <= 30 || n % 100 == 0 || n % 500 == 0 || n == n_max;
 
         if should_print {
             eprintln!("  {:>6} {} {:>+8.4} {:>8.4} {:>8.5} {:>7.4} {:>+7.4} {:>+7.3} {:>+7.3} {:>+7.3} {:>+8.5} {:>+8.5} {:>5.1}s",
@@ -514,7 +661,9 @@ fn main() {
         }
 
         // Write ALL rows to TSV
-        writeln!(f, "{}\t{:.12}\t{:.12}\t{:.12}\t{:.12}\t{:.12}\t{:.12}\t\
+        writeln!(
+            f,
+            "{}\t{:.12}\t{:.12}\t{:.12}\t{:.12}\t{:.12}\t{:.12}\t\
             {:.12}\t{:.12}\t{:.12}\t{:.12}\t\
             {:.12}\t{:.12}\t{:.6}\t{}\t\
             {:.12}\t{:.12}\t{:.12}\t\
@@ -525,21 +674,51 @@ fn main() {
             {:.12}\t{:.12}\t\
             {:.8}\t{:.8}\t\
             {}\t{}\t{}\t{:.3}",
-            n, r.vtgv, r.vt_b1_v, r.vt_l1_v, r.bt_v, r.d2, r.ratio,
-            r.ratio_term, r.neg_ecot, r.log_harm, r.rank1,
-            r.vtgv_over_lnN, r.vtgv_over_lnlnN, r.norm_v_sq, r.n_active,
-            r.mertens_sum, r.mertens_env_sum, r.mertens_log_sum,
-            r.max_partial, r.c_inner, r.tv_outer, abel_product,
-            r.coprime_contrib, r.p2_contrib, r.p3_contrib,
-            r.gcd_strata[0], r.gcd_strata[1], r.gcd_strata[2],
-            r.gcd_strata[3], r.gcd_strata[4], r.gcd_strata[5], r.gcd_strata[6],
-            r.ramanujan_sum, r.divisor_weighted, r.euler_phi_sum,
-            r.cancel_efficiency, r.noncop_l1,
-            r.ratio_over_neg, r.ecot_over_ratio,
-            r.is_hcn, r.is_prime,
+            n,
+            r.vtgv,
+            r.vt_b1_v,
+            r.vt_l1_v,
+            r.bt_v,
+            r.d2,
+            r.ratio,
+            r.ratio_term,
+            r.neg_ecot,
+            r.log_harm,
+            r.rank1,
+            r.vtgv_over_lnN,
+            r.vtgv_over_lnlnN,
+            r.norm_v_sq,
+            r.n_active,
+            r.mertens_sum,
+            r.mertens_env_sum,
+            r.mertens_log_sum,
+            r.max_partial,
+            r.c_inner,
+            r.tv_outer,
+            abel_product,
+            r.coprime_contrib,
+            r.p2_contrib,
+            r.p3_contrib,
+            r.gcd_strata[0],
+            r.gcd_strata[1],
+            r.gcd_strata[2],
+            r.gcd_strata[3],
+            r.gcd_strata[4],
+            r.gcd_strata[5],
+            r.gcd_strata[6],
+            r.ramanujan_sum,
+            r.divisor_weighted,
+            r.euler_phi_sum,
+            r.cancel_efficiency,
+            r.noncop_l1,
+            r.ratio_over_neg,
+            r.ecot_over_ratio,
+            r.is_hcn,
+            r.is_prime,
             r.prime_power_base.map_or("".to_string(), |p| p.to_string()),
             r.elapsed
-        ).unwrap();
+        )
+        .unwrap();
 
         // Flush every 100 rows for remote monitoring
         if n % 100 == 0 {

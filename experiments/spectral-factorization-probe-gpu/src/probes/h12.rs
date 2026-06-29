@@ -31,7 +31,9 @@ fn mellin_on_critical_line(weights: &[f64], t: f64, n_quadrature: usize) -> f64 
         // f_N(x) = Σ_k v_k * {k/x}
         let mut f_val = 0.0f64;
         for (idx, &w) in weights.iter().enumerate() {
-            if w == 0.0 { continue; }
+            if w == 0.0 {
+                continue;
+            }
             let k = (idx + 2) as f64;
             let frac = (k / x).fract();
             f_val += w * frac;
@@ -64,9 +66,9 @@ pub fn h12_mellin_critical_line(keys: &[SemiprimeKey]) -> Vec<H12Result> {
 
         // Expected resonance frequencies: t = 2πk / ln(p)
         let ln_p = (key.p as f64).ln();
-        let expected_freqs: Vec<f64> = (1..=5).map(|k| {
-            2.0 * std::f64::consts::PI * k as f64 / ln_p
-        }).collect();
+        let expected_freqs: Vec<f64> = (1..=5)
+            .map(|k| 2.0 * std::f64::consts::PI * k as f64 / ln_p)
+            .collect();
 
         // Scan the critical line
         let dt = T_MAX / NUM_FREQ_SAMPLES as f64;
@@ -104,7 +106,9 @@ pub fn h12_mellin_critical_line(keys: &[SemiprimeKey]) -> Vec<H12Result> {
         let total_peaks = peaks.len();
         let resonance_fraction = if total_peaks > 0 {
             near_count as f64 / total_peaks as f64
-        } else { 0.0 };
+        } else {
+            0.0
+        };
 
         // Under null hypothesis (random peaks), expected fraction ≈ 5 * 6dt / T_MAX
         let expected_fraction = 5.0 * 6.0 * dt / T_MAX;
@@ -114,21 +118,41 @@ pub fn h12_mellin_critical_line(keys: &[SemiprimeKey]) -> Vec<H12Result> {
         for (k, ef) in expected_freqs.iter().enumerate() {
             println!("        k={}: t={:.4}", k + 1, ef);
         }
-        println!("      Scanned {} frequencies, found {} peaks above 1.5× median", NUM_FREQ_SAMPLES, total_peaks);
-        println!("      Peaks near expected resonances: {}/{}", near_count, total_peaks);
-        println!("      Resonance fraction: {:.4} (null expected: {:.4})", resonance_fraction, expected_fraction);
+        println!(
+            "      Scanned {} frequencies, found {} peaks above 1.5× median",
+            NUM_FREQ_SAMPLES, total_peaks
+        );
+        println!(
+            "      Peaks near expected resonances: {}/{}",
+            near_count, total_peaks
+        );
+        println!(
+            "      Resonance fraction: {:.4} (null expected: {:.4})",
+            resonance_fraction, expected_fraction
+        );
 
         // Sort and show top peaks
         peaks.sort_by(|a, b| b.amplitude.partial_cmp(&a.amplitude).unwrap());
         println!("      Top-5 peaks:");
         for (i, p) in peaks.iter().take(5).enumerate() {
-            println!("        #{}: t={:.4} amp={:.6e} {}",
-                i + 1, p.frequency, p.amplitude,
-                if p.near_expected_resonance { "← NEAR EXPECTED" } else { "" });
+            println!(
+                "        #{}: t={:.4} amp={:.6e} {}",
+                i + 1,
+                p.frequency,
+                p.amplitude,
+                if p.near_expected_resonance {
+                    "← NEAR EXPECTED"
+                } else {
+                    ""
+                }
+            );
         }
 
-        let signal = if resonance_fraction > expected_fraction * 3.0 && near_count >= 2 { "weak 〜" }
-            else { "null ∅" };
+        let signal = if resonance_fraction > expected_fraction * 3.0 && near_count >= 2 {
+            "weak 〜"
+        } else {
+            "null ∅"
+        };
         println!("      Signal: {}\n", signal);
 
         results.push(H12Result {

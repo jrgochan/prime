@@ -81,12 +81,20 @@ fn eigenvalues(matrix: &[f64], dim: usize) -> Vec<f64> {
 
 /// Check if n is prime (simple trial division).
 fn is_prime(n: usize) -> bool {
-    if n < 2 { return false; }
-    if n < 4 { return true; }
-    if n.is_multiple_of(2) || n.is_multiple_of(3) { return false; }
+    if n < 2 {
+        return false;
+    }
+    if n < 4 {
+        return true;
+    }
+    if n.is_multiple_of(2) || n.is_multiple_of(3) {
+        return false;
+    }
     let mut i = 5;
     while i * i <= n {
-        if n.is_multiple_of(i) || n.is_multiple_of(i + 2) { return false; }
+        if n.is_multiple_of(i) || n.is_multiple_of(i + 2) {
+            return false;
+        }
         i += 6;
     }
     true
@@ -139,20 +147,28 @@ fn main() {
 
     for &p in &primes_to_test {
         println!("\n  Prime p = {}:", p);
-        println!("  {:>6} {:>14} {:>14} {:>10} {:>10}",
-                 "N", "λ_sub", "λ_ref", "ratio", "1/p");
+        println!(
+            "  {:>6} {:>14} {:>14} {:>10} {:>10}",
+            "N", "λ_sub", "λ_ref", "ratio", "1/p"
+        );
 
         // Dynamic test schedule based on N_max
         let multipliers = [6, 8, 10, 12, 15, 20, 25, 30, 40, 50];
         for &m in &multipliers {
             let n = m * p;
-            if n > n_max { continue; }
+            if n > n_max {
+                continue;
+            }
             let n_ref = n / p;
-            if n_ref < 3 { continue; }
+            if n_ref < 3 {
+                continue;
+            }
 
             let g_n = build_gram_f64(n);
             let (sub, sub_dim) = extract_prime_submatrix(&g_n, n, p);
-            if sub_dim < 2 { continue; }
+            if sub_dim < 2 {
+                continue;
+            }
 
             let eigs_sub = eigenvalues(&sub, sub_dim);
             let lmin_sub = eigs_sub[0];
@@ -163,7 +179,11 @@ fn main() {
             let eigs_ref = eigenvalues(&g_ref, dim_ref);
             let lmin_ref = eigs_ref[0];
 
-            let ratio = if lmin_ref.abs() > 1e-20 { lmin_sub / lmin_ref } else { f64::NAN };
+            let ratio = if lmin_ref.abs() > 1e-20 {
+                lmin_sub / lmin_ref
+            } else {
+                f64::NAN
+            };
             let predicted = 1.0 / p as f64;
 
             println!(
@@ -199,7 +219,10 @@ fn main() {
         if n <= 40 || (n <= n_max && (is_prime(n) || n % 10 == 0)) {
             println!(
                 "  {:6} {:14.8e} {:10.6} {:>8}",
-                n, delta, delta * n as f64, kind
+                n,
+                delta,
+                delta * n as f64,
+                kind
             );
         }
     }
@@ -221,11 +244,15 @@ fn main() {
     let p = 2;
     for n in (10..=n_max).step_by(5) {
         let n_ref = n / p;
-        if n_ref < 3 { continue; }
+        if n_ref < 3 {
+            continue;
+        }
 
         let g_n = build_gram_f64(n);
         let (sub, sub_dim) = extract_prime_submatrix(&g_n, n, p);
-        if sub_dim < 2 { continue; }
+        if sub_dim < 2 {
+            continue;
+        }
         let eigs_sub = eigenvalues(&sub, sub_dim);
         let lmin_sub = eigs_sub[0];
 
@@ -235,11 +262,17 @@ fn main() {
         let lmin_ref = eigs_ref[0];
 
         let correction = (lmin_sub - lmin_ref / p as f64).abs();
-        let relative = if lmin_ref.abs() > 1e-20 { correction / (lmin_ref / p as f64) } else { f64::NAN };
+        let relative = if lmin_ref.abs() > 1e-20 {
+            correction / (lmin_ref / p as f64)
+        } else {
+            f64::NAN
+        };
 
         println!(
             "  N={:4}: |correction| = {:.8e}  relative = {:.4}%",
-            n, correction, relative * 100.0
+            n,
+            correction,
+            relative * 100.0
         );
     }
     println!();
@@ -273,8 +306,14 @@ fn main() {
 
     println!("  D ≈ {:.10}", d_fractal);
     println!("  Σ p^{{-D}} = {:.10} (should be ≈ 1.0)", sum_check);
-    println!("  Compare: log(3)/log(2) = {:.6} (Sierpinski gasket)", (3.0f64).ln() / (2.0f64).ln());
-    println!("  Compare: log(4)/log(2) = {:.6} (Sierpinski tetrahedron)", 2.0);
+    println!(
+        "  Compare: log(3)/log(2) = {:.6} (Sierpinski gasket)",
+        (3.0f64).ln() / (2.0f64).ln()
+    );
+    println!(
+        "  Compare: log(4)/log(2) = {:.6} (Sierpinski tetrahedron)",
+        2.0
+    );
     println!();
 
     println!("═══════════════════════════════════════════════════════════════");

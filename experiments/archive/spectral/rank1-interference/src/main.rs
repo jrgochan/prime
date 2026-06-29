@@ -59,7 +59,11 @@ fn big_omega(mut n: usize) -> usize {
 
 /// Liouville function: λ(n) = (-1)^Ω(n)
 fn liouville(n: usize) -> i32 {
-    if big_omega(n).is_multiple_of(2) { 1 } else { -1 }
+    if big_omega(n).is_multiple_of(2) {
+        1
+    } else {
+        -1
+    }
 }
 
 // ═══════════════════════════════════════════════════════════════════════

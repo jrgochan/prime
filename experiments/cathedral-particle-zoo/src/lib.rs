@@ -13,13 +13,13 @@
 //! - [`proof_tree`] — Cathedral theorem ↔ physics observable bridge
 //! - [`report`] — Rich terminal output formatting
 
-pub mod particle_map;
-pub mod rmt_analysis;
-pub mod generation_scan;
 pub mod coupling;
-pub mod seesaw;
-pub mod spectral_bands;
+pub mod generation_scan;
+pub mod output;
+pub mod particle_map;
 pub mod prime_core;
 pub mod proof_tree;
 pub mod report;
-pub mod output;
+pub mod rmt_analysis;
+pub mod seesaw;
+pub mod spectral_bands;

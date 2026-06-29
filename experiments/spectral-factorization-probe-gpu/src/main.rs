@@ -55,7 +55,10 @@ fn run_standard_mode() {
     // Detect GPU
     let gpu_info = match gpu::detect_gpu() {
         Some(info) => {
-            println!("  \x1b[32m✓ GPU detected: {} ({} MB VRAM)\x1b[0m\n", info.name, info.vram_mb);
+            println!(
+                "  \x1b[32m✓ GPU detected: {} ({} MB VRAM)\x1b[0m\n",
+                info.name, info.vram_mb
+            );
             info
         }
         None => {
@@ -79,18 +82,30 @@ fn run_standard_mode() {
     let total_semiprimes: usize = test_keys.iter().map(|c| c.keys.len()).sum();
     let bit_classes: Vec<u32> = test_keys.iter().map(|c| c.bits).collect();
 
-    println!("Generated {} test semiprimes across {} bit-width classes\n",
-        total_semiprimes, test_keys.len());
+    println!(
+        "Generated {} test semiprimes across {} bit-width classes\n",
+        total_semiprimes,
+        test_keys.len()
+    );
 
     // Write manifest
-    writer.write_manifest(&gpu_info.name, gpu_info.vram_mb, &bit_classes, total_semiprimes);
+    writer.write_manifest(
+        &gpu_info.name,
+        gpu_info.vram_mb,
+        &bit_classes,
+        total_semiprimes,
+    );
 
     // Phase 2: Run all probes per bit-width class, collecting results
     let mut all_class_results = Vec::new();
 
     for class in &test_keys {
         println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-        println!("  BIT WIDTH: {} bits ({} semiprimes)", class.bits, class.keys.len());
+        println!(
+            "  BIT WIDTH: {} bits ({} semiprimes)",
+            class.bits,
+            class.keys.len()
+        );
         println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
 
         let t_class = Instant::now();
@@ -172,7 +187,10 @@ fn run_standard_mode() {
             "weak" => "〜",
             _ => "∅",
         };
-        println!("  [{}] {} — {} {}", v.hypothesis, v.description, v.signal_strength, icon);
+        println!(
+            "  [{}] {} — {} {}",
+            v.hypothesis, v.description, v.signal_strength, icon
+        );
         println!("       {}\n", v.verdict);
     }
     println!("  ╔═══════════════════════════════════════════════════════════╗");
@@ -202,7 +220,10 @@ fn run_ssh_mode() {
     // Detect GPU
     let gpu_info = match gpu::detect_gpu() {
         Some(info) => {
-            println!("  \x1b[32m✓ GPU detected: {} ({} MB VRAM)\x1b[0m\n", info.name, info.vram_mb);
+            println!(
+                "  \x1b[32m✓ GPU detected: {} ({} MB VRAM)\x1b[0m\n",
+                info.name, info.vram_mb
+            );
             info
         }
         None => {
@@ -240,8 +261,10 @@ fn run_ssh_mode() {
 
     // Write individual results per key type
     for result in &probe_results {
-        let filename = format!("ssh_probe_{}.json",
-            result.key_type.to_lowercase().replace('-', "_"));
+        let filename = format!(
+            "ssh_probe_{}.json",
+            result.key_type.to_lowercase().replace('-', "_")
+        );
         writer.write_json_pub(&filename, result);
     }
 

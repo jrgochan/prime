@@ -26,31 +26,47 @@ fn gcd(a: usize, b: usize) -> usize {
 }
 
 fn mobius(n: usize) -> i64 {
-    if n == 1 { return 1; }
+    if n == 1 {
+        return 1;
+    }
     let mut m = n;
     let mut nf = 0;
     let mut d = 2;
     while d * d <= m {
-        if m.is_multiple_of(d) { m /= d; if m.is_multiple_of(d) { return 0; } nf += 1; }
+        if m.is_multiple_of(d) {
+            m /= d;
+            if m.is_multiple_of(d) {
+                return 0;
+            }
+            nf += 1;
+        }
         d += 1;
     }
-    if m > 1 { nf += 1; }
+    if m > 1 {
+        nf += 1;
+    }
     if nf % 2 == 0 { 1 } else { -1 }
 }
 
 fn jordan2(d: usize) -> f64 {
-    if d == 0 { return 0.0; }
+    if d == 0 {
+        return 0.0;
+    }
     let mut result = (d * d) as f64;
     let mut m = d;
     let mut p = 2;
     while p * p <= m {
         if m.is_multiple_of(p) {
             result *= 1.0 - 1.0 / (p * p) as f64;
-            while m.is_multiple_of(p) { m /= p; }
+            while m.is_multiple_of(p) {
+                m /= p;
+            }
         }
         p += 1;
     }
-    if m > 1 { result *= 1.0 - 1.0 / (m * m) as f64; }
+    if m > 1 {
+        result *= 1.0 - 1.0 / (m * m) as f64;
+    }
     result
 }
 
@@ -60,10 +76,17 @@ fn prime_factors(n: usize) -> Vec<usize> {
     let mut m = n;
     let mut d = 2;
     while d * d <= m {
-        if m.is_multiple_of(d) { factors.push(d); while m.is_multiple_of(d) { m /= d; } }
+        if m.is_multiple_of(d) {
+            factors.push(d);
+            while m.is_multiple_of(d) {
+                m /= d;
+            }
+        }
         d += 1;
     }
-    if m > 1 { factors.push(m); }
+    if m > 1 {
+        factors.push(m);
+    }
     factors
 }
 
@@ -71,7 +94,9 @@ fn prime_factors(n: usize) -> Vec<usize> {
 /// y_d(∞) = μ(d)/d² · (6/π²) · ∏_{p|d} p²/(p²-1)
 fn y_d_limit(d: usize) -> f64 {
     let mu = mobius(d);
-    if mu == 0 { return 0.0; }
+    if mu == 0 {
+        return 0.0;
+    }
     let mut product = 1.0;
     for p in prime_factors(d) {
         let p2 = (p * p) as f64;
@@ -107,8 +132,10 @@ fn main() {
     // §1. y_d CONVERGENCE: numerical vs theoretical
     // ═══════════════════════════════════════════════
     println!("§1. y_d CONVERGENCE\n");
-    println!("  {:>5} {:>4} {:>14} {:>14} {:>12}",
-             "d", "μ(d)", "y_d(10000)", "y_d(∞)", "error");
+    println!(
+        "  {:>5} {:>4} {:>14} {:>14} {:>12}",
+        "d", "μ(d)", "y_d(10000)", "y_d(∞)", "error"
+    );
     println!("  {}", "─".repeat(56));
 
     let n_large = 10000;
@@ -118,9 +145,17 @@ fn main() {
         let y_theory = y_d_limit(d);
         let err = (y_num - y_theory).abs();
         if mu != 0 {
-            let star = if err < 1e-6 { "⭐" } else if err < 1e-4 { "✓" } else { "" };
-            println!("  {:>5} {:>4} {:>14.8} {:>14.8} {:>12.2e} {}",
-                     d, mu, y_num, y_theory, err, star);
+            let star = if err < 1e-6 {
+                "⭐"
+            } else if err < 1e-4 {
+                "✓"
+            } else {
+                ""
+            };
+            println!(
+                "  {:>5} {:>4} {:>14.8} {:>14.8} {:>12.2e} {}",
+                d, mu, y_num, y_theory, err, star
+            );
         }
     }
 
@@ -132,8 +167,10 @@ fn main() {
 
     let mut vtRv_theory = 0.0;
     let mut vtRv_partial = 0.0;
-    println!("  {:>5} {:>10} {:>14} {:>14} {:>14}",
-             "d", "J₂(d)", "y_d(∞)", "J₂·y²/12", "cumulative");
+    println!(
+        "  {:>5} {:>10} {:>14} {:>14} {:>14}",
+        "d", "J₂(d)", "y_d(∞)", "J₂·y²/12", "cumulative"
+    );
     println!("  {}", "─".repeat(62));
 
     let mut terms: Vec<(usize, f64)> = Vec::new();
@@ -149,18 +186,26 @@ fn main() {
     terms.sort_by(|a, b| b.1.abs().partial_cmp(&a.1.abs()).unwrap());
     for (d, term) in terms.iter().take(20) {
         vtRv_partial += term;
-        println!("  {:>5} {:>10.2} {:>14.8} {:>14.10} {:>14.10}",
-                 d, jordan2(*d), y_d_limit(*d), term, vtRv_partial);
+        println!(
+            "  {:>5} {:>10.2} {:>14.8} {:>14.10} {:>14.10}",
+            d,
+            jordan2(*d),
+            y_d_limit(*d),
+            term,
+            vtRv_partial
+        );
     }
 
     // Compare with direct numerical computation
     let n_check = 10000;
     let v: Vec<f64> = (1..=n_check).map(|k| mobius(k) as f64 / k as f64).collect();
     let mut vtRv_direct = 0.0;
-    for i in 0..n_check { for j in 0..n_check {
-        let d = gcd(i+1, j+1) as f64;
-        vtRv_direct += d * d / (12.0 * (i+1) as f64 * (j+1) as f64) * v[i] * v[j];
-    }}
+    for i in 0..n_check {
+        for j in 0..n_check {
+            let d = gcd(i + 1, j + 1) as f64;
+            vtRv_direct += d * d / (12.0 * (i + 1) as f64 * (j + 1) as f64) * v[i] * v[j];
+        }
+    }
 
     println!("\n  Theoretical limit (1000 terms): {vtRv_theory:.10}");
     println!("  Direct computation (N=10000):   {vtRv_direct:.10}");
@@ -197,8 +242,14 @@ fn main() {
     println!("  1/(2π²)           = {:.10}", euler_prediction);
     println!("  Theoretical sum    = {vtRv_theory:.10}");
     println!("  Direct (N=10000)   = {vtRv_direct:.10}");
-    println!("  Match theory:  {:.2e}", (euler_prediction - vtRv_theory).abs());
-    println!("  Match direct:  {:.2e}", (euler_prediction - vtRv_direct).abs());
+    println!(
+        "  Match theory:  {:.2e}",
+        (euler_prediction - vtRv_theory).abs()
+    );
+    println!(
+        "  Match direct:  {:.2e}",
+        (euler_prediction - vtRv_direct).abs()
+    );
 
     // ═══════════════════════════════════════════════
     // §4. THE BD DISTANCE FOR MÖBIUS WITNESS
@@ -225,18 +276,24 @@ fn main() {
     // §5. CONVERGENCE RATES OF y_d
     // ═══════════════════════════════════════════════
     println!("\n§5. CONVERGENCE RATE: y_d(N) → y_d(∞)\n");
-    println!("  {:>5} {:>12} {:>12} {:>12} {:>12}",
-             "d", "N=100", "N=1000", "N=10000", "y_d(∞)");
+    println!(
+        "  {:>5} {:>12} {:>12} {:>12} {:>12}",
+        "d", "N=100", "N=1000", "N=10000", "y_d(∞)"
+    );
     println!("  {}", "─".repeat(56));
 
     for d in [1, 2, 3, 5, 6, 7, 10, 11, 13, 30] {
-        if mobius(d) == 0 { continue; }
-        println!("  {:>5} {:>12.8} {:>12.8} {:>12.8} {:>12.8}",
-                 d,
-                 y_d_numerical(d, 100),
-                 y_d_numerical(d, 1000),
-                 y_d_numerical(d, 10000),
-                 y_d_limit(d));
+        if mobius(d) == 0 {
+            continue;
+        }
+        println!(
+            "  {:>5} {:>12.8} {:>12.8} {:>12.8} {:>12.8}",
+            d,
+            y_d_numerical(d, 100),
+            y_d_numerical(d, 1000),
+            y_d_numerical(d, 10000),
+            y_d_limit(d)
+        );
     }
 
     // ═══════════════════════════════════════════════
@@ -254,9 +311,7 @@ fn main() {
     let gamma: f64 = 0.5772156649015329;
 
     // Vasyunin mean entry: b(k) = (ln(k) + 1 - γ) / k
-    let b_entry = |k: usize| -> f64 {
-        ((k as f64).ln() + 1.0 - gamma) / k as f64
-    };
+    let b_entry = |k: usize| -> f64 { ((k as f64).ln() + 1.0 - gamma) / k as f64 };
 
     // Ramanujan matrix entry: R(j,k) = gcd(j,k)² / (12·j·k)
     let r_entry = |j: usize, k: usize| -> f64 {
@@ -266,14 +321,14 @@ fn main() {
 
     // Vasyunin Gram diagonal: G(k,k) = (ln(2π) - γ)/k - 1/k²
     let vasyunin_const = (2.0 * PI).ln() - gamma;
-    let g_diag = |k: usize| -> f64 {
-        vasyunin_const / k as f64 - 1.0 / (k * k) as f64
-    };
+    let g_diag = |k: usize| -> f64 { vasyunin_const / k as f64 - 1.0 / (k * k) as f64 };
 
     // Check diagonal: G(k,k) vs R(k,k) + b(k)²
     println!("  §6a. DIAGONAL CHECK: G(k,k) vs R(k,k) + b(k)²\n");
-    println!("  {:>5} {:>14} {:>14} {:>14} {:>12}",
-             "k", "G(k,k)", "R(k,k)+b²", "R(k,k)", "error");
+    println!(
+        "  {:>5} {:>14} {:>14} {:>14} {:>12}",
+        "k", "G(k,k)", "R(k,k)+b²", "R(k,k)", "error"
+    );
     println!("  {}", "─".repeat(64));
 
     let mut max_diag_err = 0.0f64;
@@ -284,9 +339,17 @@ fn main() {
         let rbb_val = r_val + b_val * b_val;
         let err = (g_val - rbb_val).abs();
         max_diag_err = max_diag_err.max(err);
-        let star = if err < 1e-14 { "⭐" } else if err < 1e-10 { "✓" } else { "✗" };
-        println!("  {:>5} {:>14.10} {:>14.10} {:>14.10} {:>12.2e} {}",
-                 k, g_val, rbb_val, r_val, err, star);
+        let star = if err < 1e-14 {
+            "⭐"
+        } else if err < 1e-10 {
+            "✓"
+        } else {
+            "✗"
+        };
+        println!(
+            "  {:>5} {:>14.10} {:>14.10} {:>14.10} {:>12.2e} {}",
+            k, g_val, rbb_val, r_val, err, star
+        );
     }
 
     println!("\n  Max diagonal error: {:.2e}", max_diag_err);
@@ -305,12 +368,18 @@ fn main() {
 
     // Vasyunin cotangent sum: V(a,b) = Σ_{m=1}^{a-1} {mb/a}·cot(πm/a)
     let vasyunin_sum = |a: usize, b: usize| -> f64 {
-        if a <= 1 { return 0.0; }
+        if a <= 1 {
+            return 0.0;
+        }
         let mut sum = 0.0;
         for m in 1..a {
             let frac_part = ((m * b) as f64 / a as f64).fract();
             // Handle negative fract
-            let frac = if frac_part < 0.0 { frac_part + 1.0 } else { frac_part };
+            let frac = if frac_part < 0.0 {
+                frac_part + 1.0
+            } else {
+                frac_part
+            };
             let cot = (PI * m as f64 / a as f64).cos() / (PI * m as f64 / a as f64).sin();
             sum += frac * cot;
         }
@@ -319,7 +388,9 @@ fn main() {
 
     // Full Vasyunin Gram entry
     let g_entry = |j: usize, k: usize| -> f64 {
-        if j == k { return g_diag(j); }
+        if j == k {
+            return g_diag(j);
+        }
         let d = gcd(j, k);
         let jp = j / d;
         let kp = k / d;
@@ -333,27 +404,40 @@ fn main() {
         term1 + term2 - term3 - term4
     };
 
-    println!("  {:>5} {:>5} {:>14} {:>14} {:>12}",
-             "j", "k", "G(j,k)", "R+bb^T", "error");
+    println!(
+        "  {:>5} {:>5} {:>14} {:>14} {:>12}",
+        "j", "k", "G(j,k)", "R+bb^T", "error"
+    );
     println!("  {}", "─".repeat(56));
 
     let mut max_offdiag_err = 0.0f64;
     let n_test = 12;
     for j in 1..=n_test {
-        for k in (j+1)..=n_test {
+        for k in (j + 1)..=n_test {
             let g_val = g_entry(j, k);
             let rbb_val = r_entry(j, k) + b_entry(j) * b_entry(k);
             let err = (g_val - rbb_val).abs();
             max_offdiag_err = max_offdiag_err.max(err);
             if j <= 6 && k <= 6 {
-                let star = if err < 1e-12 { "⭐" } else if err < 1e-8 { "✓" } else { "✗" };
-                println!("  {:>5} {:>5} {:>14.10} {:>14.10} {:>12.2e} {}",
-                         j, k, g_val, rbb_val, err, star);
+                let star = if err < 1e-12 {
+                    "⭐"
+                } else if err < 1e-8 {
+                    "✓"
+                } else {
+                    "✗"
+                };
+                println!(
+                    "  {:>5} {:>5} {:>14.10} {:>14.10} {:>12.2e} {}",
+                    j, k, g_val, rbb_val, err, star
+                );
             }
         }
     }
 
-    println!("\n  Max off-diagonal error (N={}): {:.2e}", n_test, max_offdiag_err);
+    println!(
+        "\n  Max off-diagonal error (N={}): {:.2e}",
+        n_test, max_offdiag_err
+    );
     if max_offdiag_err < 1e-8 {
         println!("  ⭐ IDENTITY CONFIRMED: G(j,k) = R(j,k) + b(j)·b(k)");
         println!("\n  ════════════════════════════════════════════════════════");
@@ -388,19 +472,23 @@ fn main() {
 
         // Build Φ⁻¹·D: (Φ⁻¹D)_{d,k} = μ(d/k)·[k|d]·k
         let phi_inv_d = |d: usize, k: usize| -> f64 {
-            if !d.is_multiple_of(k) { return 0.0; }
+            if !d.is_multiple_of(k) {
+                return 0.0;
+            }
             mobius(d / k) as f64 * k as f64
         };
 
         // Compute S = (Φ⁻¹D) · G · (Φ⁻¹D)ᵀ
         // S_{a,b} = Σ_j Σ_k (Φ⁻¹D)_{a,j} · G(j,k) · (Φ⁻¹D)_{b,k}
         println!("  Smith-rotated G (should be (1/12)·J₂ on diagonal if G = R):\n");
-        println!("  {:>5} {:>5} {:>12} {:>12} {:>12}",
-                 "a", "b", "S(a,b)", "(1/12)J₂", "residual");
+        println!(
+            "  {:>5} {:>5} {:>12} {:>12} {:>12}",
+            "a", "b", "S(a,b)", "(1/12)J₂", "residual"
+        );
         println!("  {}", "─".repeat(52));
 
         for a in 1..=n_smith {
-            for b in a..=n_smith.min(a+3) {
+            for b in a..=n_smith.min(a + 3) {
                 let mut s_ab = 0.0;
                 for j in 1..=n_smith {
                     for k in 1..=n_smith {
@@ -409,18 +497,24 @@ fn main() {
                 }
                 let j2_diag = if a == b { jordan2(a) / 12.0 } else { 0.0 };
                 let residual = s_ab - j2_diag;
-                let star = if residual.abs() < 1e-10 { "⭐" }
-                          else if a == b { "DIAG" } else { "" };
-                println!("  {:>5} {:>5} {:>12.6} {:>12.6} {:>12.6} {}",
-                         a, b, s_ab, j2_diag, residual, star);
+                let star = if residual.abs() < 1e-10 {
+                    "⭐"
+                } else if a == b {
+                    "DIAG"
+                } else {
+                    ""
+                };
+                println!(
+                    "  {:>5} {:>5} {:>12.6} {:>12.6} {:>12.6} {}",
+                    a, b, s_ab, j2_diag, residual, star
+                );
             }
         }
 
         // Also show: what is bb^T in Smith basis?
         // (Φ⁻¹D)·b in Smith basis: c_d = Σ_k (Φ⁻¹D)_{d,k}·b(k)
         println!("\n  Mean vector b in Smith basis: c_d = Σ_k (Φ⁻¹D)_{{d,k}}·b(k)\n");
-        println!("  {:>5} {:>14} {:>14}",
-                 "d", "c_d", "c_d²");
+        println!("  {:>5} {:>14} {:>14}", "d", "c_d", "c_d²");
         println!("  {}", "─".repeat(36));
         for d in 1..=n_smith {
             let mut c_d = 0.0;
@@ -434,7 +528,9 @@ fn main() {
         // This is S - (1/12)J₂ on diagonal
         println!("\n  Smith-rotated (G - R) matrix:\n");
         print!("  {:>5} |", "");
-        for b in 1..=n_smith { print!("{:>10} ", b); }
+        for b in 1..=n_smith {
+            print!("{:>10} ", b);
+        }
         println!();
         println!("  {}", "─".repeat(6 + 11 * n_smith));
         for a in 1..=n_smith {
@@ -479,35 +575,47 @@ fn main() {
             // Find pivot
             let mut max_row = col;
             let mut max_val = aug[col][col].abs();
-            for row in (col+1)..n {
+            for row in (col + 1)..n {
                 if aug[row][col].abs() > max_val {
                     max_val = aug[row][col].abs();
                     max_row = row;
                 }
             }
-            if max_val < 1e-15 { return None; }
+            if max_val < 1e-15 {
+                return None;
+            }
             aug.swap(col, max_row);
             let pivot = aug[col][col];
-            for j in 0..2*n { aug[col][j] /= pivot; }
+            for j in 0..2 * n {
+                aug[col][j] /= pivot;
+            }
             for row in 0..n {
-                if row == col { continue; }
+                if row == col {
+                    continue;
+                }
                 let factor = aug[row][col];
-                for j in 0..2*n { aug[row][j] -= factor * aug[col][j]; }
+                for j in 0..2 * n {
+                    aug[row][j] -= factor * aug[col][j];
+                }
             }
         }
         Some(aug.iter().map(|row| row[n..].to_vec()).collect())
     }
 
     fn mat_vec_mul(a: &[Vec<f64>], v: &[f64]) -> Vec<f64> {
-        a.iter().map(|row| row.iter().zip(v).map(|(a,b)| a*b).sum()).collect()
+        a.iter()
+            .map(|row| row.iter().zip(v).map(|(a, b)| a * b).sum())
+            .collect()
     }
 
     fn dot(a: &[f64], b: &[f64]) -> f64 {
-        a.iter().zip(b).map(|(x,y)| x*y).sum()
+        a.iter().zip(b).map(|(x, y)| x * y).sum()
     }
 
-    println!("  {:>5} {:>12} {:>12} {:>12} {:>12} {:>12}",
-             "N", "σ=𝟏ᵀR⁻¹𝟏", "bᵀw", "wᵀGw", "d²_smith", "d²_opt");
+    println!(
+        "  {:>5} {:>12} {:>12} {:>12} {:>12} {:>12}",
+        "N", "σ=𝟏ᵀR⁻¹𝟏", "bᵀw", "wᵀGw", "d²_smith", "d²_opt"
+    );
     println!("  {}", "─".repeat(72));
 
     for n_size in [3, 4, 5, 6, 8, 10, 12, 15, 18, 20] {
@@ -541,7 +649,10 @@ fn main() {
         // Compute R⁻¹
         let r_inv = match mat_inverse(&r_mat) {
             Some(inv) => inv,
-            None => { println!("  {:>5} SINGULAR", n_size); continue; }
+            None => {
+                println!("  {:>5} SINGULAR", n_size);
+                continue;
+            }
         };
 
         // Smith witness: w = R⁻¹·𝟏
@@ -563,46 +674,79 @@ fn main() {
         // Optimal d² = 1 - bᵀG⁻¹b (for comparison)
         let g_inv = match mat_inverse(&g_mat) {
             Some(inv) => inv,
-            None => { println!("  {:>5} G SINGULAR", n_size); continue; }
+            None => {
+                println!("  {:>5} G SINGULAR", n_size);
+                continue;
+            }
         };
         let g_inv_b = mat_vec_mul(&g_inv, &b_vec);
         let d_sq_opt = 1.0 - dot(&b_vec, &g_inv_b);
 
-        let star = if d_sq_smith < 0.01 { "⭐" }
-                  else if d_sq_smith < 0.1 { "✓" } else { "" };
+        let star = if d_sq_smith < 0.01 {
+            "⭐"
+        } else if d_sq_smith < 0.1 {
+            "✓"
+        } else {
+            ""
+        };
 
-        println!("  {:>5} {:>12.4} {:>12.6} {:>12.4} {:>12.8} {:>12.8} {}",
-                 n_size, sigma, bt_w, wt_gw, d_sq_smith, d_sq_opt, star);
+        println!(
+            "  {:>5} {:>12.4} {:>12.6} {:>12.4} {:>12.8} {:>12.8} {}",
+            n_size, sigma, bt_w, wt_gw, d_sq_smith, d_sq_opt, star
+        );
     }
 
     // Also check: does d²_smith / d²_opt have a pattern?
     println!("\n  RATIO ANALYSIS: d²_smith / d²_opt\n");
-    println!("  {:>5} {:>12} {:>12} {:>12}",
-             "N", "d²_smith", "d²_opt", "ratio");
+    println!(
+        "  {:>5} {:>12} {:>12} {:>12}",
+        "N", "d²_smith", "d²_opt", "ratio"
+    );
     println!("  {}", "─".repeat(44));
 
     for n_size in [3, 4, 5, 6, 8, 10, 12, 15, 18, 20] {
         let mut r_mat: Vec<Vec<f64>> = Vec::new();
-        for j in 1..=n_size { let mut row = Vec::new();
-            for k in 1..=n_size { let d = gcd(j, k) as f64;
-                row.push(d * d / (12.0 * j as f64 * k as f64)); } r_mat.push(row); }
+        for j in 1..=n_size {
+            let mut row = Vec::new();
+            for k in 1..=n_size {
+                let d = gcd(j, k) as f64;
+                row.push(d * d / (12.0 * j as f64 * k as f64));
+            }
+            r_mat.push(row);
+        }
         let mut g_mat: Vec<Vec<f64>> = Vec::new();
-        for j in 1..=n_size { let mut row = Vec::new();
-            for k in 1..=n_size { row.push(g_entry(j, k)); } g_mat.push(row); }
+        for j in 1..=n_size {
+            let mut row = Vec::new();
+            for k in 1..=n_size {
+                row.push(g_entry(j, k));
+            }
+            g_mat.push(row);
+        }
         let b_vec: Vec<f64> = (1..=n_size).map(&b_entry).collect();
         let ones: Vec<f64> = vec![1.0; n_size];
-        let r_inv = match mat_inverse(&r_mat) { Some(inv) => inv, None => continue };
+        let r_inv = match mat_inverse(&r_mat) {
+            Some(inv) => inv,
+            None => continue,
+        };
         let w = mat_vec_mul(&r_inv, &ones);
         let bt_w = dot(&b_vec, &w);
         let gw = mat_vec_mul(&g_mat, &w);
         let wt_gw = dot(&w, &gw);
         let d_sq_smith = 1.0 - 2.0 * bt_w + wt_gw;
-        let g_inv = match mat_inverse(&g_mat) { Some(inv) => inv, None => continue };
+        let g_inv = match mat_inverse(&g_mat) {
+            Some(inv) => inv,
+            None => continue,
+        };
         let g_inv_b = mat_vec_mul(&g_inv, &b_vec);
         let d_sq_opt = 1.0 - dot(&b_vec, &g_inv_b);
         if d_sq_opt.abs() > 1e-15 {
-            println!("  {:>5} {:>12.8} {:>12.8} {:>12.4}",
-                     n_size, d_sq_smith, d_sq_opt, d_sq_smith / d_sq_opt);
+            println!(
+                "  {:>5} {:>12.8} {:>12.8} {:>12.4}",
+                n_size,
+                d_sq_smith,
+                d_sq_opt,
+                d_sq_smith / d_sq_opt
+            );
         }
     }
 
@@ -640,58 +784,90 @@ fn main() {
         for i in 0..n_size {
             let diff = g_mat[i][i] - r_mat[i][i];
             trace_diff += diff;
-            if diff < -1e-15 { all_pos = false; }
-            if diff > 1e-15 { all_neg = false; }
+            if diff < -1e-15 {
+                all_pos = false;
+            }
+            if diff > 1e-15 {
+                all_neg = false;
+            }
         }
 
         // Compute full quadratic form for random-ish vector (1/k normalized)
         let test_v: Vec<f64> = (1..=n_size).map(|k| 1.0 / k as f64).collect();
-        let _norm_sq: f64 = test_v.iter().map(|x| x*x).sum();
+        let _norm_sq: f64 = test_v.iter().map(|x| x * x).sum();
         let mut qf_g = 0.0;
         let mut qf_r = 0.0;
-        for i in 0..n_size { for j in 0..n_size {
-            qf_g += test_v[i] * g_mat[i][j] * test_v[j];
-            qf_r += test_v[i] * r_mat[i][j] * test_v[j];
-        }}
+        for i in 0..n_size {
+            for j in 0..n_size {
+                qf_g += test_v[i] * g_mat[i][j] * test_v[j];
+                qf_r += test_v[i] * r_mat[i][j] * test_v[j];
+            }
+        }
 
-        let verdict = if all_pos { "G > R (diag)" }
-                     else if all_neg { "R > G (diag)" }
-                     else { "MIXED" };
-        println!("  N={:>3}: tr(G-R)={:>10.6}, vᵀ(G-R)v={:>10.6}, vᵀGv/vᵀRv={:>8.4}  {}",
-                 n_size, trace_diff, qf_g - qf_r, qf_g / qf_r, verdict);
+        let verdict = if all_pos {
+            "G > R (diag)"
+        } else if all_neg {
+            "R > G (diag)"
+        } else {
+            "MIXED"
+        };
+        println!(
+            "  N={:>3}: tr(G-R)={:>10.6}, vᵀ(G-R)v={:>10.6}, vᵀGv/vᵀRv={:>8.4}  {}",
+            n_size,
+            trace_diff,
+            qf_g - qf_r,
+            qf_g / qf_r,
+            verdict
+        );
     }
 
     // §8b. THE MAGIC RATIO: bᵀG⁻¹b / σ
     println!("\n  §8b. THE MAGIC RATIO: bᵀG⁻¹b / 𝟏ᵀR⁻¹𝟏\n");
     println!("  If this → c, then d²_NB ≈ 1 - c·σ\n");
-    println!("  {:>5} {:>14} {:>14} {:>14} {:>14}",
-             "N", "bᵀG⁻¹b", "σ=𝟏ᵀR⁻¹𝟏", "ratio", "1-bᵀG⁻¹b");
+    println!(
+        "  {:>5} {:>14} {:>14} {:>14} {:>14}",
+        "N", "bᵀG⁻¹b", "σ=𝟏ᵀR⁻¹𝟏", "ratio", "1-bᵀG⁻¹b"
+    );
     println!("  {}", "─".repeat(64));
 
     for n_size in [3, 4, 5, 6, 8, 10, 12, 15, 18, 20] {
         let mut r_mat: Vec<Vec<f64>> = Vec::new();
         let mut g_mat: Vec<Vec<f64>> = Vec::new();
         for j in 1..=n_size {
-            let mut g_row = Vec::new(); let mut r_row = Vec::new();
+            let mut g_row = Vec::new();
+            let mut r_row = Vec::new();
             for k in 1..=n_size {
                 g_row.push(g_entry(j, k));
                 let d = gcd(j, k) as f64;
                 r_row.push(d * d / (12.0 * j as f64 * k as f64));
             }
-            g_mat.push(g_row); r_mat.push(r_row);
+            g_mat.push(g_row);
+            r_mat.push(r_row);
         }
         let b_vec: Vec<f64> = (1..=n_size).map(&b_entry).collect();
         let ones: Vec<f64> = vec![1.0; n_size];
 
-        let r_inv = match mat_inverse(&r_mat) { Some(inv) => inv, None => continue };
+        let r_inv = match mat_inverse(&r_mat) {
+            Some(inv) => inv,
+            None => continue,
+        };
         let sigma: f64 = mat_vec_mul(&r_inv, &ones).iter().sum();
 
-        let g_inv = match mat_inverse(&g_mat) { Some(inv) => inv, None => continue };
+        let g_inv = match mat_inverse(&g_mat) {
+            Some(inv) => inv,
+            None => continue,
+        };
         let g_inv_b = mat_vec_mul(&g_inv, &b_vec);
         let bt_ginv_b = dot(&b_vec, &g_inv_b);
 
-        println!("  {:>5} {:>14.8} {:>14.4} {:>14.10} {:>14.10}",
-                 n_size, bt_ginv_b, sigma, bt_ginv_b / sigma, 1.0 - bt_ginv_b);
+        println!(
+            "  {:>5} {:>14.8} {:>14.4} {:>14.10} {:>14.10}",
+            n_size,
+            bt_ginv_b,
+            sigma,
+            bt_ginv_b / sigma,
+            1.0 - bt_ginv_b
+        );
     }
 
     // §8c. OPTIMAL WITNESS IN SMITH BASIS
@@ -703,7 +879,9 @@ fn main() {
         let mut g_mat: Vec<Vec<f64>> = Vec::new();
         for j in 1..=n_smith_c {
             let mut row = Vec::new();
-            for k in 1..=n_smith_c { row.push(g_entry(j, k)); }
+            for k in 1..=n_smith_c {
+                row.push(g_entry(j, k));
+            }
             g_mat.push(row);
         }
         let b_vec: Vec<f64> = (1..=n_smith_c).map(b_entry).collect();
@@ -727,12 +905,16 @@ fn main() {
         // Rotate both to Smith basis via Φ⁻¹·D
         // (Φ⁻¹D)_{d,k} = μ(d/k)·[k|d]·k
         let phi_inv_d_mat = |d: usize, k: usize| -> f64 {
-            if !d.is_multiple_of(k) { return 0.0; }
+            if !d.is_multiple_of(k) {
+                return 0.0;
+            }
             mobius(d / k) as f64 * k as f64
         };
 
-        println!("  {:>5} {:>14} {:>14} {:>14} {:>14}",
-                 "d", "v*_smith", "w_smith", "Λ(d)", "v*/Λ(d)");
+        println!(
+            "  {:>5} {:>14} {:>14} {:>14} {:>14}",
+            "d", "v*_smith", "w_smith", "Λ(d)", "v*/Λ(d)"
+        );
         println!("  {}", "─".repeat(64));
 
         for d in 1..=n_smith_c {
@@ -740,46 +922,65 @@ fn main() {
             let mut w_smith_d = 0.0;
             for k in 1..=n_smith_c {
                 let coeff = phi_inv_d_mat(d, k);
-                v_smith_d += coeff * v_star[k-1];
-                w_smith_d += coeff * w_smith[k-1];
+                v_smith_d += coeff * v_star[k - 1];
+                w_smith_d += coeff * w_smith[k - 1];
             }
 
             // von Mangoldt for comparison
-            let lambda_d = if d == 1 { 0.0 }
-                else {
-                    let mut n = d;
-                    let mut p = 0usize;
-                    let mut count = 0;
-                    let mut dd = 2;
-                    while dd * dd <= n {
-                        if n % dd == 0 {
-                            p = dd;
-                            count += 1;
-                            while n % dd == 0 { n /= dd; }
+            let lambda_d = if d == 1 {
+                0.0
+            } else {
+                let mut n = d;
+                let mut p = 0usize;
+                let mut count = 0;
+                let mut dd = 2;
+                while dd * dd <= n {
+                    if n % dd == 0 {
+                        p = dd;
+                        count += 1;
+                        while n % dd == 0 {
+                            n /= dd;
                         }
-                        dd += 1;
                     }
-                    if n > 1 { p = n; count += 1; }
-                    if count == 1 { (p as f64).ln() } else { 0.0 }
-                };
+                    dd += 1;
+                }
+                if n > 1 {
+                    p = n;
+                    count += 1;
+                }
+                if count == 1 { (p as f64).ln() } else { 0.0 }
+            };
 
-            let ratio = if lambda_d.abs() > 1e-10 { v_smith_d / lambda_d } else { f64::NAN };
-            println!("  {:>5} {:>14.6} {:>14.6} {:>14.6} {:>14.6}",
-                     d, v_smith_d, w_smith_d, lambda_d, ratio);
+            let ratio = if lambda_d.abs() > 1e-10 {
+                v_smith_d / lambda_d
+            } else {
+                f64::NAN
+            };
+            println!(
+                "  {:>5} {:>14.6} {:>14.6} {:>14.6} {:>14.6}",
+                d, v_smith_d, w_smith_d, lambda_d, ratio
+            );
         }
     }
 
     // §8d. EIGENVALUE COMPARISON
     println!("\n  §8d. EIGENVALUE PROXY: Diagonal dominance ratios\n");
     println!("  G(k,k)/R(k,k) shows how the continuous metric scales vs discrete\n");
-    println!("  {:>5} {:>14} {:>14} {:>14}",
-             "k", "G(k,k)", "R(k,k)", "G/R");
+    println!(
+        "  {:>5} {:>14} {:>14} {:>14}",
+        "k", "G(k,k)", "R(k,k)", "G/R"
+    );
     println!("  {}", "─".repeat(48));
     for k in 1..=20 {
         let g_kk = g_diag(k);
         let r_kk = r_entry(k, k);
-        println!("  {:>5} {:>14.8} {:>14.8} {:>14.4}",
-                 k, g_kk, r_kk, g_kk / r_kk);
+        println!(
+            "  {:>5} {:>14.8} {:>14.8} {:>14.4}",
+            k,
+            g_kk,
+            r_kk,
+            g_kk / r_kk
+        );
     }
 
     // ═══════════════════════════════════════════════════════════
@@ -798,13 +999,17 @@ fn main() {
 
     // Von Mangoldt function
     let von_mangoldt = |n: usize| -> f64 {
-        if n <= 1 { return 0.0; }
+        if n <= 1 {
+            return 0.0;
+        }
         let mut m = n;
         let mut p = 2;
         while p * p <= m {
             if m.is_multiple_of(p) {
                 // Check if n = p^k
-                while m.is_multiple_of(p) { m /= p; }
+                while m.is_multiple_of(p) {
+                    m /= p;
+                }
                 return if m == 1 { (p as f64).ln() } else { 0.0 };
             }
             p += 1;
@@ -815,13 +1020,18 @@ fn main() {
 
     // Is n a prime power? Returns (p, k) if n = p^k, None otherwise
     let prime_power_decomp = |n: usize| -> Option<(usize, usize)> {
-        if n <= 1 { return None; }
+        if n <= 1 {
+            return None;
+        }
         let mut m = n;
         let mut p = 2;
         while p * p <= m {
             if m.is_multiple_of(p) {
                 let mut k = 0;
-                while m.is_multiple_of(p) { m /= p; k += 1; }
+                while m.is_multiple_of(p) {
+                    m /= p;
+                    k += 1;
+                }
                 return if m == 1 { Some((p, k)) } else { None };
             }
             p += 1;
@@ -836,7 +1046,9 @@ fn main() {
         while i * i <= d {
             if d.is_multiple_of(i) {
                 divs.push(i);
-                if i != d / i { divs.push(d / i); }
+                if i != d / i {
+                    divs.push(d / i);
+                }
             }
             i += 1;
         }
@@ -846,8 +1058,10 @@ fn main() {
 
     // §9a. VERIFY THE BRIDGE IDENTITY AT SCALE
     println!("  §9a. BRIDGE IDENTITY VERIFICATION: c_d vs Λ(d) + (1-γ)·[d=1]\n");
-    println!("  {:<5} {:>12} {:>14} {:>14} {:>10} {:>12}",
-             "d", "c_d", "Λ(d)+(1-γ)δ", "error", "Λ(d)", "type");
+    println!(
+        "  {:<5} {:>12} {:>14} {:>14} {:>10} {:>12}",
+        "d", "c_d", "Λ(d)+(1-γ)δ", "error", "Λ(d)", "type"
+    );
     println!("  {}", "─".repeat(72));
 
     let n_verify = 30;
@@ -877,25 +1091,42 @@ fn main() {
         let dtype = match prime_power_decomp(d) {
             Some((p, 1)) => format!("prime={}", p),
             Some((p, k)) => format!("{}^{}", p, k),
-            None => if d == 1 { "unit".to_string() } else { "composite".to_string() }
+            None => {
+                if d == 1 {
+                    "unit".to_string()
+                } else {
+                    "composite".to_string()
+                }
+            }
         };
 
         let star = if err < 1e-12 { "✓" } else { "✗" };
-        println!("  {:<5} {:>12.8} {:>14.8} {:>14.2e} {:>10.6} {:>12} {}",
-                 d, c_d, theoretical, err, lambda_d, dtype, star);
+        println!(
+            "  {:<5} {:>12.8} {:>14.8} {:>14.2e} {:>10.6} {:>12} {}",
+            d, c_d, theoretical, err, lambda_d, dtype, star
+        );
 
         lambda_sum += lambda_d;
-        if d >= 2 { pnt_sum += lambda_d / d as f64; }
+        if d >= 2 {
+            pnt_sum += lambda_d / d as f64;
+        }
     }
 
     println!("\n  Max bridge error: {:.2e}", max_bridge_err);
     if max_bridge_err < 1e-10 {
         println!("  ⭐ BRIDGE IDENTITY CONFIRMED: c_d = Λ(d) + (1-γ)·δ_{{d,1}}");
     }
-    println!("  Σ Λ(d) for d≤{}: {:.6} (cf. Chebyshev ψ({}) ~ {})",
-             n_verify, lambda_sum, n_verify, n_verify);
-    println!("  Σ Λ(d)/d for d≤{}: {:.6} (cf. PNT: ~ ln({}) = {:.4})",
-             n_verify, pnt_sum, n_verify, (n_verify as f64).ln());
+    println!(
+        "  Σ Λ(d) for d≤{}: {:.6} (cf. Chebyshev ψ({}) ~ {})",
+        n_verify, lambda_sum, n_verify, n_verify
+    );
+    println!(
+        "  Σ Λ(d)/d for d≤{}: {:.6} (cf. PNT: ~ ln({}) = {:.4})",
+        n_verify,
+        pnt_sum,
+        n_verify,
+        (n_verify as f64).ln()
+    );
 
     // §9b. PRIME-POWER ANATOMY
     println!("\n  §9b. PRIME-POWER ANATOMY: Where Λ(d) lives\n");
@@ -920,18 +1151,28 @@ fn main() {
         }
     }
 
-    println!("  Among d = 2..{}: {} prime powers, {} non-prime-powers",
-             n_anatomy, prime_power_count, non_prime_power_count);
+    println!(
+        "  Among d = 2..{}: {} prime powers, {} non-prime-powers",
+        n_anatomy, prime_power_count, non_prime_power_count
+    );
     println!("\n  Prime power hierarchy:\n");
-    println!("  {:<8} {:<30} {:>10}", "prime p", "powers p^k ≤ 60", "ln(p)");
+    println!(
+        "  {:<8} {:<30} {:>10}",
+        "prime p", "powers p^k ≤ 60", "ln(p)"
+    );
     println!("  {}", "─".repeat(52));
 
     for (p, powers) in &lambda_by_prime {
-        let powers_str: Vec<String> = powers.iter()
+        let powers_str: Vec<String> = powers
+            .iter()
             .map(|(k, _)| format!("{}^{}={}", p, k, p.pow(*k as u32)))
             .collect();
-        println!("  {:<8} {:<30} {:>10.6}",
-                 p, powers_str.join(", "), (*p as f64).ln());
+        println!(
+            "  {:<8} {:<30} {:>10.6}",
+            p,
+            powers_str.join(", "),
+            (*p as f64).ln()
+        );
     }
 
     // §9c. THE SPECTRAL DRIVE: Why σ → ∞
@@ -941,8 +1182,10 @@ fn main() {
     println!("  The sum diverges because there are infinitely many primes.\n");
 
     // Compute cumulative σ drive
-    println!("  {:<5} {:>10} {:>12} {:>12} {:>14} {:>12}",
-             "N", "c_N²", "Σ c_d²", "12·Σ c_d²", "prime sum", "ratio");
+    println!(
+        "  {:<5} {:>10} {:>12} {:>12} {:>14} {:>12}",
+        "N", "c_N²", "Σ c_d²", "12·Σ c_d²", "prime sum", "ratio"
+    );
     println!("  {}", "─".repeat(68));
 
     let n_drive = 100;
@@ -963,16 +1206,28 @@ fn main() {
 
         // Track prime contribution
         if let Some((p, _)) = prime_power_decomp(d)
-            && d >= 2 {
-                let lnp = (p as f64).ln();
-                cum_prime_lnp2 += lnp * lnp;
-            }
+            && d >= 2
+        {
+            let lnp = (p as f64).ln();
+            cum_prime_lnp2 += lnp * lnp;
+        }
 
         // Print at select values
         if d <= 10 || d % 10 == 0 {
-            let ratio = if cum_prime_lnp2 > 0.0 { cum_c2 / cum_prime_lnp2 } else { 0.0 };
-            println!("  {:<5} {:>10.6} {:>12.6} {:>12.4} {:>14.6} {:>12.4}",
-                     d, c_d * c_d, cum_c2, 12.0 * cum_c2, cum_prime_lnp2, ratio);
+            let ratio = if cum_prime_lnp2 > 0.0 {
+                cum_c2 / cum_prime_lnp2
+            } else {
+                0.0
+            };
+            println!(
+                "  {:<5} {:>10.6} {:>12.6} {:>12.4} {:>14.6} {:>12.4}",
+                d,
+                c_d * c_d,
+                cum_c2,
+                12.0 * cum_c2,
+                cum_prime_lnp2,
+                ratio
+            );
         }
     }
 
@@ -981,8 +1236,10 @@ fn main() {
     println!("  The PNT gives Σ_{{p≤N}} ln²(p)/p ~ ½ ln²(N),");
     println!("  so σ(N) ~ 6·ln²(N) (since prime powers p^k with k≥2 contribute O(1)).\n");
 
-    println!("  {:<8} {:>12} {:>12} {:>12} {:>12}",
-             "N", "12·Σ c_d²", "6·ln²(N)", "ratio", "π(N)");
+    println!(
+        "  {:<8} {:>12} {:>12} {:>12} {:>12}",
+        "N", "12·Σ c_d²", "6·ln²(N)", "ratio", "π(N)"
+    );
     println!("  {}", "─".repeat(60));
 
     let mut cum_c2_full = 0.0f64;
@@ -1008,8 +1265,10 @@ fn main() {
             let mertens_est = 6.0 * ln_n * ln_n;
             let sigma_val = 12.0 * cum_c2_full;
             let ratio = sigma_val / mertens_est;
-            println!("  {:<8} {:>12.4} {:>12.4} {:>12.4} {:>12}",
-                     d, sigma_val, mertens_est, ratio, prime_count);
+            println!(
+                "  {:<8} {:>12.4} {:>12.4} {:>12.4} {:>12}",
+                d, sigma_val, mertens_est, ratio, prime_count
+            );
         }
     }
 
@@ -1045,7 +1304,7 @@ fn main() {
         // Partial pivoting
         let mut max_row = col;
         let mut max_val = aug[col][col].abs();
-        for row in (col+1)..n {
+        for row in (col + 1)..n {
             if aug[row][col].abs() > max_val {
                 max_val = aug[row][col].abs();
                 max_row = row;
@@ -1054,9 +1313,11 @@ fn main() {
         aug.swap(col, max_row);
 
         let pivot = aug[col][col];
-        if pivot.abs() < 1e-15 { continue; }
+        if pivot.abs() < 1e-15 {
+            continue;
+        }
 
-        for row in (col+1)..n {
+        for row in (col + 1)..n {
             let factor = aug[row][col] / pivot;
             for c in col..=n {
                 aug[row][c] -= factor * aug[col][c];
@@ -1068,15 +1329,17 @@ fn main() {
     let mut v_opt = vec![0.0f64; n];
     for i in (0..n).rev() {
         let mut sum = aug[i][n];
-        for j in (i+1)..n {
+        for j in (i + 1)..n {
             sum -= aug[i][j] * v_opt[j];
         }
         v_opt[i] = sum / aug[i][i];
     }
 
     // Rotate both the Λ-witness and the optimal witness into Smith basis
-    println!("  {:<5} {:>12} {:>12} {:>12} {:>12}",
-             "d", "Λ(d)", "c_d(mean)", "v*_d(opt)", "v*/c ratio");
+    println!(
+        "  {:<5} {:>12} {:>12} {:>12} {:>12}",
+        "d", "Λ(d)", "c_d(mean)", "v*_d(opt)", "v*/c ratio"
+    );
     println!("  {}", "─".repeat(56));
 
     for d in 1..=n_filter {
@@ -1100,9 +1363,15 @@ fn main() {
             }
         }
 
-        let ratio = if c_d.abs() > 1e-15 { v_smith / c_d } else { f64::NAN };
-        println!("  {:<5} {:>12.6} {:>12.6} {:>12.6} {:>12.4}",
-                 d, lambda_d, c_d, v_smith, ratio);
+        let ratio = if c_d.abs() > 1e-15 {
+            v_smith / c_d
+        } else {
+            f64::NAN
+        };
+        println!(
+            "  {:<5} {:>12.6} {:>12.6} {:>12.6} {:>12.4}",
+            d, lambda_d, c_d, v_smith, ratio
+        );
     }
 
     // Final summary
@@ -1120,12 +1389,26 @@ fn main() {
     let d2_smith = 4.0 / (4.0 + 12.0 * sigma_est);
     // Optimal BD distance: d² = 1 / (1ᵀ G⁻¹ 1) where v_opt = G⁻¹·1
     let one_t_ginv_one: f64 = v_opt.iter().sum();
-    let d2_opt = if one_t_ginv_one > 0.0 { 1.0 / one_t_ginv_one } else { f64::INFINITY };
+    let d2_opt = if one_t_ginv_one > 0.0 {
+        1.0 / one_t_ginv_one
+    } else {
+        f64::INFINITY
+    };
 
     println!("\n  ─── Summary ───");
-    println!("  σ(N={}) ≈ {:.4} (from 12·Σ c_d²)", n_filter, 12.0 * sigma_est);
-    println!("  d²_smith(N={}) ≈ {:.6} (Smith witness → d²=4/(4+σ))", n_filter, d2_smith);
-    println!("  d²_opt(N={})   ≈ {:.6} (optimal NB: d²=1/1ᵀG⁻¹1)", n_filter, d2_opt);
+    println!(
+        "  σ(N={}) ≈ {:.4} (from 12·Σ c_d²)",
+        n_filter,
+        12.0 * sigma_est
+    );
+    println!(
+        "  d²_smith(N={}) ≈ {:.6} (Smith witness → d²=4/(4+σ))",
+        n_filter, d2_smith
+    );
+    println!(
+        "  d²_opt(N={})   ≈ {:.6} (optimal NB: d²=1/1ᵀG⁻¹1)",
+        n_filter, d2_opt
+    );
     println!("  1ᵀG⁻¹1         = {:.6}", one_t_ginv_one);
     println!("\n  Key: d²_opt < d²_smith because the optimal witness uses Möbius");
     println!("  cancellation to suppress L² error far better than the raw");
@@ -1186,23 +1469,27 @@ fn main() {
 
     // Mean vector entry: b_k = ∫₀¹ {1/(kx)} dx
     // Closed form: (ln(k) + 1 - γ) / k
-    let mean_entry = |k: usize| -> f64 {
-        ((k as f64).ln() + 1.0 - euler_gamma) / k as f64
-    };
+    let mean_entry = |k: usize| -> f64 { ((k as f64).ln() + 1.0 - euler_gamma) / k as f64 };
 
-    println!("  {:>5} {:>12} {:>12} {:>12} {:>12} {:>12} {:>10}",
-             "N", "vᵀGv", "vᵀRv", "bᵀv", "d²_Gram", "σ(N)", "vᵀGv-1");
+    println!(
+        "  {:>5} {:>12} {:>12} {:>12} {:>12} {:>12} {:>10}",
+        "N", "vᵀGv", "vᵀRv", "bᵀv", "d²_Gram", "σ(N)", "vᵀGv-1"
+    );
 
     for &n in &[10, 20, 30, 50, 80, 100] {
         let log_n = (n as f64).ln();
 
         // Möbius-Fejér weights: v_k = -μ(k)·(1-logk/logN) for k = 1..N-1
-        let weights: Vec<f64> = (1..n).map(|k| {
-            let mu = mobius(k);
-            if mu == 0 { return 0.0; }
-            let log_weight = 1.0 - (k as f64).ln() / log_n;
-            -(mu as f64) * log_weight
-        }).collect();
+        let weights: Vec<f64> = (1..n)
+            .map(|k| {
+                let mu = mobius(k);
+                if mu == 0 {
+                    return 0.0;
+                }
+                let log_weight = 1.0 - (k as f64).ln() / log_n;
+                -(mu as f64) * log_weight
+            })
+            .collect();
 
         // Compute vᵀGv (Vasyunin)
         let mut vtgv = 0.0;
@@ -1237,8 +1524,16 @@ fn main() {
         }
         sigma *= 12.0;
 
-        println!("  {:>5} {:>12.6} {:>12.6} {:>12.6} {:>12.6} {:>12.4} {:>10.6}",
-                 n, vtgv, vtrv, btv, d2_gram, sigma, vtgv - 1.0);
+        println!(
+            "  {:>5} {:>12.6} {:>12.6} {:>12.6} {:>12.6} {:>12.4} {:>10.6}",
+            n,
+            vtgv,
+            vtrv,
+            btv,
+            d2_gram,
+            sigma,
+            vtgv - 1.0
+        );
     }
 
     println!("\n  Key observations:");
@@ -1253,12 +1548,16 @@ fn main() {
 
     for &n in &[10, 20, 30, 50, 80, 100] {
         let log_n = (n as f64).ln();
-        let weights: Vec<f64> = (1..n).map(|k| {
-            let mu = mobius(k);
-            if mu == 0 { return 0.0; }
-            let log_weight = 1.0 - (k as f64).ln() / log_n;
-            -(mu as f64) * log_weight
-        }).collect();
+        let weights: Vec<f64> = (1..n)
+            .map(|k| {
+                let mu = mobius(k);
+                if mu == 0 {
+                    return 0.0;
+                }
+                let log_weight = 1.0 - (k as f64).ln() / log_n;
+                -(mu as f64) * log_weight
+            })
+            .collect();
 
         let mut vtgv = 0.0;
         for i in 0..weights.len() {

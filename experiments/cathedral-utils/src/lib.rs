@@ -46,6 +46,7 @@ pub mod fmt;
 pub mod gcd_decomp;
 pub mod gpu;
 pub mod gram;
+pub mod harmonics;
 #[cfg(feature = "hpdf")]
 pub mod hpdf;
 pub mod jacobi;
@@ -60,6 +61,4 @@ pub mod spectral;
 pub mod spectral_stats;
 pub mod trigintaduonion;
 pub mod vasyunin;
-pub mod harmonics;
 pub mod zeta_zeros;
-

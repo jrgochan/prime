@@ -1,4 +1,13 @@
-#![allow(dead_code, unused_variables, unused_imports, unused_assignments, clippy::needless_range_loop, clippy::doc_lazy_continuation, non_snake_case, clippy::empty_line_after_doc_comments)]
+#![allow(
+    dead_code,
+    unused_variables,
+    unused_imports,
+    unused_assignments,
+    clippy::needless_range_loop,
+    clippy::doc_lazy_continuation,
+    non_snake_case,
+    clippy::empty_line_after_doc_comments
+)]
 // overcancellation-scan/src/bin/bd_convergence_probe.rs
 //
 // ╔═══════════════════════════════════════════════════════════════════╗
@@ -18,8 +27,8 @@
 // ╚═══════════════════════════════════════════════════════════════════╝
 
 use cathedral_utils::arith::{gcd, mobius_table};
-use std::f64::consts::PI;
 use std::collections::BTreeMap;
+use std::f64::consts::PI;
 
 const EULER_GAMMA: f64 = 0.5772156649015329;
 
@@ -29,7 +38,9 @@ fn vasyunin_const() -> f64 {
 
 /// Vasyunin sum V(a, b) = Σ_{m=1}^{a-1} cot(πm/a) · {mb/a}
 fn vasyunin_sum(a: usize, b: usize) -> f64 {
-    if a <= 1 { return 0.0; }
+    if a <= 1 {
+        return 0.0;
+    }
     let mut s = 0.0;
     for m in 1..a {
         let cot_val = 1.0 / (PI * m as f64 / a as f64).tan();
@@ -75,7 +86,9 @@ fn gram_diag(k: usize) -> f64 {
 
 /// BD witness weight: v(k) = -μ(k)/k · w(k,N) where w = 1 - ln(k)/ln(N)
 fn mertens_weight(k: usize, mu_k: i8, n: usize) -> f64 {
-    if k >= n || mu_k == 0 { return 0.0; }
+    if k >= n || mu_k == 0 {
+        return 0.0;
+    }
     let w = 1.0 - (k as f64).ln() / (n as f64).ln();
     -(mu_k as f64) / (k as f64) * w
 }
@@ -100,11 +113,15 @@ fn prime_factors(n: usize) -> Vec<usize> {
     while p * p <= m {
         if m.is_multiple_of(p) {
             factors.push(p);
-            while m.is_multiple_of(p) { m /= p; }
+            while m.is_multiple_of(p) {
+                m /= p;
+            }
         }
         p += 1;
     }
-    if m > 1 { factors.push(m); }
+    if m > 1 {
+        factors.push(m);
+    }
     factors
 }
 
@@ -129,11 +146,13 @@ fn main() {
     println!("    Does it → 0? (This IS the RH criterion)");
     println!("═══════════════════════════════════════════════════════════════");
     println!();
-    println!("{:>6}  {:>12}  {:>12}  {:>12}  {:>12}  {:>12}",
-             "N", "vᵀGv", "2·σ·c_term", "BD_norm²", "CotRes/vᵀGv", "BD·ln(N)");
+    println!(
+        "{:>6}  {:>12}  {:>12}  {:>12}  {:>12}  {:>12}",
+        "N", "vᵀGv", "2·σ·c_term", "BD_norm²", "CotRes/vᵀGv", "BD·ln(N)"
+    );
 
     let test_ns: Vec<usize> = vec![
-        30, 60, 100, 200, 360, 500, 720, 1000, 1500, 2000, 2520, 3000, 4000, 5000
+        30, 60, 100, 200, 360, 500, 720, 1000, 1500, 2000, 2520, 3000, 4000, 5000,
     ];
 
     let mut bd_data: Vec<(usize, f64, f64)> = Vec::new();
@@ -146,13 +165,21 @@ fn main() {
         let mut vtgv = 0.0;
         let mut cot_res = 0.0;
         for j in 1..=n {
-            if v[j-1].abs() < 1e-30 { continue; }
+            if v[j - 1].abs() < 1e-30 {
+                continue;
+            }
             for k in 1..=n {
-                if v[k-1].abs() < 1e-30 { continue; }
-                let g = if j == k { gram_diag(j) } else { gram_entry(j, k) };
-                vtgv += v[j-1] * v[k-1] * g;
+                if v[k - 1].abs() < 1e-30 {
+                    continue;
+                }
+                let g = if j == k {
+                    gram_diag(j)
+                } else {
+                    gram_entry(j, k)
+                };
+                vtgv += v[j - 1] * v[k - 1] * g;
                 if j != k {
-                    cot_res += v[j-1] * v[k-1] * cotangent_contribution(j, k);
+                    cot_res += v[j - 1] * v[k - 1] * cotangent_contribution(j, k);
                 }
             }
         }
@@ -163,21 +190,34 @@ fn main() {
         // Proof: substitute u = 1/(kt), split ∫ into [1/k, 1], [1, 2], [2, 3], ...
         //   = (1/k)[ln(k) + Σ_{m=1}^∞ (ln((m+1)/m) - 1/(m+1))]
         //   = (1/k)[ln(k) + 1 - γ]
-        let linear_term: f64 = (1..=n).map(|k| {
-            let kf = k as f64;
-            let inner = (kf.ln() + 1.0 - EULER_GAMMA) / kf;
-            v[k-1] * inner
-        }).sum();
-        
+        let linear_term: f64 = (1..=n)
+            .map(|k| {
+                let kf = k as f64;
+                let inner = (kf.ln() + 1.0 - EULER_GAMMA) / kf;
+                v[k - 1] * inner
+            })
+            .sum();
+
         // BD norm squared: ||1 - Σ v_k f_k||² = 1 - 2·σ + vᵀGv
         let bd_norm_sq = 1.0 - 2.0 * linear_term + vtgv;
 
-        let ratio = if vtgv.abs() > 1e-20 { cot_res / vtgv } else { 0.0 };
+        let ratio = if vtgv.abs() > 1e-20 {
+            cot_res / vtgv
+        } else {
+            0.0
+        };
         let bd_ln = bd_norm_sq * (n as f64).ln();
 
-        println!("{:>6}  {:>12.8}  {:>12.8}  {:>12.8}  {:>12.6}  {:>12.6}",
-                 n, vtgv, 2.0 * linear_term, bd_norm_sq, ratio, bd_ln);
-        
+        println!(
+            "{:>6}  {:>12.8}  {:>12.8}  {:>12.8}  {:>12.6}  {:>12.6}",
+            n,
+            vtgv,
+            2.0 * linear_term,
+            bd_norm_sq,
+            ratio,
+            bd_ln
+        );
+
         bd_data.push((n, bd_norm_sq, vtgv));
     }
 
@@ -192,15 +232,21 @@ fn main() {
     println!();
 
     let n_strata = 2520;
-    let v: Vec<f64> = (1..=n_strata).map(|k| mertens_weight(k, mu[k], n_strata)).collect();
-    
+    let v: Vec<f64> = (1..=n_strata)
+        .map(|k| mertens_weight(k, mu[k], n_strata))
+        .collect();
+
     let mut strata: BTreeMap<usize, f64> = BTreeMap::new();
     for j in 1..=n_strata {
-        if v[j-1].abs() < 1e-30 { continue; }
+        if v[j - 1].abs() < 1e-30 {
+            continue;
+        }
         for k in 1..=n_strata {
-            if j == k || v[k-1].abs() < 1e-30 { continue; }
+            if j == k || v[k - 1].abs() < 1e-30 {
+                continue;
+            }
             let d = gcd(j, k);
-            let contrib = v[j-1] * v[k-1] * cotangent_contribution(j, k);
+            let contrib = v[j - 1] * v[k - 1] * cotangent_contribution(j, k);
             *strata.entry(d).or_insert(0.0) += contrib;
         }
     }
@@ -210,7 +256,11 @@ fn main() {
     let mut sorted_strata: Vec<_> = strata.iter().collect();
     sorted_strata.sort_by(|a, b| b.1.abs().partial_cmp(&a.1.abs()).unwrap());
     for (d, val) in sorted_strata.iter().take(20) {
-        let pct = if total_cot.abs() > 1e-20 { *val / total_cot * 100.0 } else { 0.0 };
+        let pct = if total_cot.abs() > 1e-20 {
+            *val / total_cot * 100.0
+        } else {
+            0.0
+        };
         println!("{:>6}  {:>14.8}  {:>9.2}%", d, val, pct);
     }
     println!("  ...   {:>14.8}  {:>9.2}%", total_cot, 100.0);
@@ -225,23 +275,40 @@ fn main() {
     println!("═══════════════════════════════════════════════════════════════");
     println!();
 
-    let primes: Vec<usize> = (2..=n_strata).filter(|&p| {
-        if p < 2 { return false; }
-        for d in 2..=(p as f64).sqrt() as usize {
-            if p % d == 0 { return false; }
-        }
-        true
-    }).collect();
+    let primes: Vec<usize> = (2..=n_strata)
+        .filter(|&p| {
+            if p < 2 {
+                return false;
+            }
+            for d in 2..=(p as f64).sqrt() as usize {
+                if p % d == 0 {
+                    return false;
+                }
+            }
+            true
+        })
+        .collect();
 
-    println!("{:>6}  {:>14}  {:>14}  {:>14}", "p", "CotRes(p|d)", "Glass₁(p)", "Ratio");
+    println!(
+        "{:>6}  {:>14}  {:>14}  {:>14}",
+        "p", "CotRes(p|d)", "Glass₁(p)", "Ratio"
+    );
     for &p in primes.iter().take(20) {
-        let prime_contrib: f64 = strata.iter()
+        let prime_contrib: f64 = strata
+            .iter()
             .filter(|(d, _)| *d % p == 0)
             .map(|(_, v)| v)
             .sum();
         let glass1 = 1.0 / (1.0 + 1.0 / p as f64);
-        let ratio = if glass1.abs() > 1e-20 { prime_contrib / total_cot } else { 0.0 };
-        println!("{:>6}  {:>14.8}  {:>14.8}  {:>14.6}", p, prime_contrib, glass1, ratio);
+        let ratio = if glass1.abs() > 1e-20 {
+            prime_contrib / total_cot
+        } else {
+            0.0
+        };
+        println!(
+            "{:>6}  {:>14.8}  {:>14.8}  {:>14.6}",
+            p, prime_contrib, glass1, ratio
+        );
     }
 
     // ═══════════════════════════════════════════════════
@@ -254,13 +321,20 @@ fn main() {
     println!("═══════════════════════════════════════════════════════════════");
     println!();
 
-    println!("{:>6}  {:>12}  {:>12}  {:>12}  {:>12}", 
-             "N", "BD·ln(N)", "BD·ln²(N)", "BD·N^0.5", "BD·N");
+    println!(
+        "{:>6}  {:>12}  {:>12}  {:>12}  {:>12}",
+        "N", "BD·ln(N)", "BD·ln²(N)", "BD·N^0.5", "BD·N"
+    );
     for &(n, bd, _vtgv) in &bd_data {
         let ln_n = (n as f64).ln();
-        println!("{:>6}  {:>12.6}  {:>12.6}  {:>12.6}  {:>12.6}",
-                 n, bd * ln_n, bd * ln_n * ln_n, 
-                 bd * (n as f64).sqrt(), bd * n as f64);
+        println!(
+            "{:>6}  {:>12.6}  {:>12.6}  {:>12.6}  {:>12.6}",
+            n,
+            bd * ln_n,
+            bd * ln_n * ln_n,
+            bd * (n as f64).sqrt(),
+            bd * n as f64
+        );
     }
 
     println!();
@@ -280,19 +354,25 @@ fn main() {
     println!();
 
     let n_decomp = 2520;
-    let v_d: Vec<f64> = (1..=n_decomp).map(|k| mertens_weight(k, mu[k], n_decomp)).collect();
+    let v_d: Vec<f64> = (1..=n_decomp)
+        .map(|k| mertens_weight(k, mu[k], n_decomp))
+        .collect();
 
     let mut diag_sum = 0.0;
     let mut offdiag_term1 = 0.0;
     let mut offdiag_term2 = 0.0;
-    let mut offdiag_term3 = 0.0;  // dissolved cotangent
+    let mut offdiag_term3 = 0.0; // dissolved cotangent
     let mut offdiag_term4 = 0.0;
 
     for j in 1..=n_decomp {
-        if v_d[j-1].abs() < 1e-30 { continue; }
-        diag_sum += v_d[j-1] * v_d[j-1] * gram_diag(j);
+        if v_d[j - 1].abs() < 1e-30 {
+            continue;
+        }
+        diag_sum += v_d[j - 1] * v_d[j - 1] * gram_diag(j);
         for k in 1..=n_decomp {
-            if j == k || v_d[k-1].abs() < 1e-30 { continue; }
+            if j == k || v_d[k - 1].abs() < 1e-30 {
+                continue;
+            }
             let jf = j as f64;
             let kf = k as f64;
             let d = gcd(j, k);
@@ -300,7 +380,7 @@ fn main() {
             let kp = k / d;
             let df = d as f64;
 
-            let w = v_d[j-1] * v_d[k-1];
+            let w = v_d[j - 1] * v_d[k - 1];
             offdiag_term1 += w * c / 2.0 * (1.0 / jf + 1.0 / kf);
             offdiag_term2 += w * (jf - kf) / (2.0 * jf * kf) * (kf / jf).ln();
             let v_dissolved = dissolved_vasyunin(jp, kp);
@@ -311,38 +391,64 @@ fn main() {
 
     let vtgv_total = diag_sum + offdiag_term1 + offdiag_term2 + offdiag_term3 + offdiag_term4;
 
-    println!("  Diagonal (CG):        {:>14.8}  ({:.1}%)", diag_sum, diag_sum / vtgv_total * 100.0);
-    println!("  Off-diag term1 (CσS): {:>14.8}  ({:.1}%)", offdiag_term1, offdiag_term1 / vtgv_total * 100.0);
-    println!("  Off-diag term2 (log):  {:>14.8}  ({:.1}%)", offdiag_term2, offdiag_term2 / vtgv_total * 100.0);
-    println!("  Off-diag term3 (cot):  {:>14.8}  ({:.1}%)", offdiag_term3, offdiag_term3 / vtgv_total * 100.0);
-    println!("  Off-diag term4 (-S²):  {:>14.8}  ({:.1}%)", offdiag_term4, offdiag_term4 / vtgv_total * 100.0);
+    println!(
+        "  Diagonal (CG):        {:>14.8}  ({:.1}%)",
+        diag_sum,
+        diag_sum / vtgv_total * 100.0
+    );
+    println!(
+        "  Off-diag term1 (CσS): {:>14.8}  ({:.1}%)",
+        offdiag_term1,
+        offdiag_term1 / vtgv_total * 100.0
+    );
+    println!(
+        "  Off-diag term2 (log):  {:>14.8}  ({:.1}%)",
+        offdiag_term2,
+        offdiag_term2 / vtgv_total * 100.0
+    );
+    println!(
+        "  Off-diag term3 (cot):  {:>14.8}  ({:.1}%)",
+        offdiag_term3,
+        offdiag_term3 / vtgv_total * 100.0
+    );
+    println!(
+        "  Off-diag term4 (-S²):  {:>14.8}  ({:.1}%)",
+        offdiag_term4,
+        offdiag_term4 / vtgv_total * 100.0
+    );
     println!("  ──────────────────────────────────────────");
     println!("  Total vᵀGv:           {:>14.8}", vtgv_total);
     println!();
     println!("  CotRes (term3):       {:>14.8}", offdiag_term3);
-    println!("  CotRes/vᵀGv:          {:>14.8}", offdiag_term3 / vtgv_total);
+    println!(
+        "  CotRes/vᵀGv:          {:>14.8}",
+        offdiag_term3 / vtgv_total
+    );
 
     println!();
     println!("═══════════════════════════════════════════════════════════════");
     println!("§6. VERDICT");
     println!("═══════════════════════════════════════════════════════════════");
     println!();
-    
+
     if bd_data.len() >= 2 {
         let (n1, bd1, _) = bd_data[bd_data.len() - 2];
         let (n2, bd2, _) = bd_data[bd_data.len() - 1];
         let ln1 = (n1 as f64).ln();
         let ln2 = (n2 as f64).ln();
-        
+
         if bd1 > 0.0 && bd2 > 0.0 {
             let rate = (bd1.ln() - bd2.ln()) / (ln2 - ln1);
             println!("  Estimated power decay: BD ~ N^({:.3})", -rate);
             println!("  (If ≈ 0: logarithmic decay; if ≈ 0.5: square root; if ≈ 1: linear)");
         }
-        
+
         println!();
         println!("  BD(last)/BD(first) = {:.6}", bd2 / bd_data[0].1);
-        println!("  ln(last)/ln(first) = {:.6}", ln2 / (bd_data[0].0 as f64).ln());
+        println!(
+            "  ln(last)/ln(first) = {:.6}",
+            ln2 / (bd_data[0].0 as f64).ln()
+        );
     }
 
     println!();

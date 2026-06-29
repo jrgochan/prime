@@ -22,7 +22,9 @@ pub fn render_bar(value: f64, max_value: f64, width: usize) -> String {
     if max_value <= 0.0 {
         return " ".repeat(width);
     }
-    let filled = (value / max_value * width as f64).min(width as f64).max(0.0) as usize;
+    let filled = (value / max_value * width as f64)
+        .min(width as f64)
+        .max(0.0) as usize;
     let mut bar: String = "█".repeat(filled);
     let remaining = width.saturating_sub(filled);
     if remaining > 0 {

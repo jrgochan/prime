@@ -44,7 +44,10 @@ pub fn run(t_start: f64, t_end: f64, refine: bool, hd: HdMode) {
         let build_start = Instant::now();
         let t = DdLogTable::new(n_max);
         let build_time = build_start.elapsed();
-        println!("   DD log table: {} entries precomputed in {:.2?}", n_max, build_time);
+        println!(
+            "   DD log table: {} entries precomputed in {:.2?}",
+            n_max, build_time
+        );
         Some(t)
     } else {
         None
@@ -119,7 +122,12 @@ pub fn run(t_start: f64, t_end: f64, refine: bool, hd: HdMode) {
 
         println!(
             "    {:>4}  {:>20.14}  {:>12.6}  {:>12.6}  {:>12}{}",
-            i + 1, z, z_before, z_after, gap, known_marker
+            i + 1,
+            z,
+            z_before,
+            z_after,
+            gap,
+            known_marker
         );
     }
 
@@ -141,7 +149,10 @@ pub fn run(t_start: f64, t_end: f64, refine: bool, hd: HdMode) {
         let max_gap = gaps.iter().cloned().fold(0.0f64, f64::max);
         let expected = zeta_zeros::expected_zero_gap((t_start + t_end) / 2.0);
 
-        println!("    Mean gap:     {:.6} (expected: {:.6})", mean_gap, expected);
+        println!(
+            "    Mean gap:     {:.6} (expected: {:.6})",
+            mean_gap, expected
+        );
         println!("    Min gap:      {:.6}", min_gap);
         println!("    Max gap:      {:.6}", max_gap);
         println!(

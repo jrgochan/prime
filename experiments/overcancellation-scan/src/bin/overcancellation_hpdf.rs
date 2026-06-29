@@ -1,4 +1,13 @@
-#![allow(dead_code, unused_variables, unused_imports, unused_assignments, clippy::needless_range_loop, clippy::doc_lazy_continuation, non_snake_case, clippy::empty_line_after_doc_comments)]
+#![allow(
+    dead_code,
+    unused_variables,
+    unused_imports,
+    unused_assignments,
+    clippy::needless_range_loop,
+    clippy::doc_lazy_continuation,
+    non_snake_case,
+    clippy::empty_line_after_doc_comments
+)]
 // overcancellation-scan/src/bin/overcancellation_hpdf.rs
 //
 // ╔═══════════════════════════════════════════════════════════════════╗
@@ -25,7 +34,9 @@ fn vasyunin_const() -> f64 {
 
 /// Vasyunin sum V(a,b) = Σ_{m=1}^{a-1} cot(πm/a) · {mb/a}
 fn vasyunin_sum(a: usize, b: usize) -> f64 {
-    if a <= 1 { return 0.0; }
+    if a <= 1 {
+        return 0.0;
+    }
     let af = a as f64;
     let mut s = 0.0;
     for m in 1..a {
@@ -51,7 +62,7 @@ fn gram_entry_k1(k: usize) -> f64 {
     let term2 = (1.0 - kf) / (2.0 * kf) * kf.ln();
     // V(1,k) = 0 (empty sum), V(k,1) = Σ cot(πm/k)·{m/k}
     let vk1 = vasyunin_sum(k, 1);
-    let term3 = PI / (2.0 * kf) * vk1;  // V(1,k)=0, so just V(k,1)
+    let term3 = PI / (2.0 * kf) * vk1; // V(1,k)=0, so just V(k,1)
     let term4 = 1.0 / kf;
     term1 + term2 - term3 - term4
 }
@@ -78,19 +89,22 @@ fn main() {
     println!("C = ln(2π) − γ = {:.6}", c);
 
     let cache_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-        .parent().unwrap()
+        .parent()
+        .unwrap()
         .join("cache/hpdf");
 
     // HC numbers we have HPDF files for
     let hc_ns: Vec<usize> = vec![
-        6, 12, 36, 48, 60, 120, 180, 240, 360, 840,
-        1260, 1680, 2520, 5040, 7560, 10080, 20160, 27720, 45360, 55440,
+        6, 12, 36, 48, 60, 120, 180, 240, 360, 840, 1260, 1680, 2520, 5040, 7560, 10080, 20160,
+        27720, 45360, 55440,
     ];
 
     println!();
     println!("═══ SECTION 1: k≥2 Sector (HPDF matrix only) ═══");
-    println!("{:>8} {:>10} {:>10} {:>10} {:>10} {:>10} {:>10} {:>10} {:>10}",
-        "N", "vᵀGv_k2", "diag", "term1", "term2", "-term3", "-term4", "‖v‖²_k2", "1-vᵀGv");
+    println!(
+        "{:>8} {:>10} {:>10} {:>10} {:>10} {:>10} {:>10} {:>10} {:>10}",
+        "N", "vᵀGv_k2", "diag", "term1", "term2", "-term3", "-term4", "‖v‖²_k2", "1-vᵀGv"
+    );
     println!("{}", "─".repeat(90));
 
     let mut results = Vec::new();
@@ -125,7 +139,9 @@ fn main() {
         let mut v2 = vec![0.0f64; dim]; // v[i] for k = i+2
         for i in 0..dim {
             let k = i + 2;
-            if k >= n { break; }
+            if k >= n {
+                break;
+            }
             let mu_k = mu_raw[k] as f64;
             let w = 1.0 - (k as f64).ln() / log_n;
             v2[i] = -mu_k * w;
@@ -133,14 +149,17 @@ fn main() {
 
         // ═══ k≥2 sector computation ═══
         // vᵀGv using HPDF matrix (parallel row-vector multiply)
-        let vtgv_k2: f64 = (0..dim).into_par_iter().map(|i| {
-            let vi = v2[i];
-            let mut row_sum = 0.0;
-            for j in 0..dim {
-                row_sum += v2[j] * gram[i * dim + j];
-            }
-            vi * row_sum
-        }).sum();
+        let vtgv_k2: f64 = (0..dim)
+            .into_par_iter()
+            .map(|i| {
+                let vi = v2[i];
+                let mut row_sum = 0.0;
+                for j in 0..dim {
+                    row_sum += v2[j] * gram[i * dim + j];
+                }
+                vi * row_sum
+            })
+            .sum();
 
         // Wait — that double-counts. Let me fix: vᵀGv = Σ_i v_i * (Gv)_i
         // Actually no, the above is correct: Σ_i v_i * Σ_j G_{ij} v_j
@@ -161,7 +180,7 @@ fn main() {
         // OK, it's correct.
 
         // Norm squared
-        let norm_sq_k2: f64 = v2.iter().map(|x| x*x).sum();
+        let norm_sq_k2: f64 = v2.iter().map(|x| x * x).sum();
 
         // Diagonal contribution
         let diag_k2: f64 = (0..dim).map(|i| v2[i] * v2[i] * gram[i * dim + i]).sum();
@@ -171,7 +190,9 @@ fn main() {
         for i in 0..dim {
             let j = i + 2; // HPDF k starts at 2
             for ji in 0..dim {
-                if ji == i { continue; }
+                if ji == i {
+                    continue;
+                }
                 let k = ji + 2;
                 let w = v2[i] * v2[ji];
                 let (t1, t2, t4) = decompose_cheap(j, k);
@@ -185,21 +206,48 @@ fn main() {
         // → t3 = diag + t1 + t2 - t4 - vtgv → -t3 = vtgv - diag - t1 - t2 + t4
         let neg_t3 = vtgv_k2 - diag_k2 - t1_sum - t2_sum + t4_sum;
 
-        println!("{:>8} {:>+10.4} {:>+10.4} {:>+10.4} {:>+10.4} {:>+10.4} {:>+10.4} {:>10.2} {:>+10.4}",
-            n, vtgv_k2, diag_k2, t1_sum, t2_sum, neg_t3, -t4_sum, norm_sq_k2, 1.0 - vtgv_k2);
+        println!(
+            "{:>8} {:>+10.4} {:>+10.4} {:>+10.4} {:>+10.4} {:>+10.4} {:>+10.4} {:>10.2} {:>+10.4}",
+            n,
+            vtgv_k2,
+            diag_k2,
+            t1_sum,
+            t2_sum,
+            neg_t3,
+            -t4_sum,
+            norm_sq_k2,
+            1.0 - vtgv_k2
+        );
 
         // Store for k=1 augmentation
-        results.push((n, vtgv_k2, diag_k2, t1_sum, t2_sum, neg_t3, t4_sum, norm_sq_k2, v2.clone(), gram, dim, mu_raw));
+        results.push((
+            n,
+            vtgv_k2,
+            diag_k2,
+            t1_sum,
+            t2_sum,
+            neg_t3,
+            t4_sum,
+            norm_sq_k2,
+            v2.clone(),
+            gram,
+            dim,
+            mu_raw,
+        ));
     }
 
     // ═══ SECTION 2: Full k≥1 (k=1 row computed analytically) ═══
     println!();
     println!("═══ SECTION 2: Full k≥1 (with k=1 anchor) ═══");
-    println!("{:>8} {:>10} {:>10} {:>10} {:>10} {:>10} {:>10} {:>10} {:>10}",
-        "N", "vᵀGv", "diag", "term1", "term2", "-term3", "-term4", "‖v‖²", "1-vᵀGv");
+    println!(
+        "{:>8} {:>10} {:>10} {:>10} {:>10} {:>10} {:>10} {:>10} {:>10}",
+        "N", "vᵀGv", "diag", "term1", "term2", "-term3", "-term4", "‖v‖²", "1-vᵀGv"
+    );
     println!("{}", "─".repeat(90));
 
-    for (n, vtgv_k2, diag_k2, t1_k2, t2_k2, neg_t3_k2, t4_k2, norm_sq_k2, v2, _gram, dim, mu_raw) in &results {
+    for (n, vtgv_k2, diag_k2, t1_k2, t2_k2, neg_t3_k2, t4_k2, norm_sq_k2, v2, _gram, dim, mu_raw) in
+        &results
+    {
         let n = *n;
         let log_n = (n as f64).ln();
 
@@ -219,7 +267,9 @@ fn main() {
 
         for i in 0..*dim {
             let k = i + 2;
-            if k >= n { break; }
+            if k >= n {
+                break;
+            }
             let vk = v2[i];
             let g1k = gram_entry_k1(k);
 
@@ -244,8 +294,18 @@ fn main() {
         // -term3 by subtraction
         let neg_t3_full = vtgv_full - diag_full - t1_full - t2_full + t4_full;
 
-        println!("{:>8} {:>+10.4} {:>+10.4} {:>+10.4} {:>+10.4} {:>+10.4} {:>+10.4} {:>10.2} {:>+10.4}",
-            n, vtgv_full, diag_full, t1_full, t2_full, neg_t3_full, -t4_full, norm_sq_full, 1.0 - vtgv_full);
+        println!(
+            "{:>8} {:>+10.4} {:>+10.4} {:>+10.4} {:>+10.4} {:>+10.4} {:>+10.4} {:>10.2} {:>+10.4}",
+            n,
+            vtgv_full,
+            diag_full,
+            t1_full,
+            t2_full,
+            neg_t3_full,
+            -t4_full,
+            norm_sq_full,
+            1.0 - vtgv_full
+        );
     }
 
     println!();

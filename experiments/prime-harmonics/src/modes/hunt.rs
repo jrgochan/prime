@@ -16,10 +16,14 @@ pub fn run(bank: &PrimeOscillatorBank, t_start: f64, t_end: f64, steps: usize) {
 
     let dt = (t_end - t_start) / steps as f64;
 
-    println!("    {:>4}  {:>16}  {:>12}  {:>12}  {:>12}  {:>8}",
-        "#", "t (refined)", "|Σ| refined", "Z(t)", "Nearest ζ₀", "Quality");
-    println!("    {:>4}  {:>16}  {:>12}  {:>12}  {:>12}  {:>8}",
-        "────", "────────────────", "────────────", "────────────", "────────────", "────────");
+    println!(
+        "    {:>4}  {:>16}  {:>12}  {:>12}  {:>12}  {:>8}",
+        "#", "t (refined)", "|Σ| refined", "Z(t)", "Nearest ζ₀", "Quality"
+    );
+    println!(
+        "    {:>4}  {:>16}  {:>12}  {:>12}  {:>12}  {:>8}",
+        "────", "────────────────", "────────────", "────────────", "────────────", "────────"
+    );
 
     for (i, &(t_coarse, _n_coarse)) in minima.iter().enumerate() {
         // Golden-section refinement of interference minimum

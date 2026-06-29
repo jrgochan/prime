@@ -1,4 +1,13 @@
-#![allow(dead_code, unused_variables, unused_imports, unused_assignments, clippy::needless_range_loop, clippy::doc_lazy_continuation, non_snake_case, clippy::empty_line_after_doc_comments)]
+#![allow(
+    dead_code,
+    unused_variables,
+    unused_imports,
+    unused_assignments,
+    clippy::needless_range_loop,
+    clippy::doc_lazy_continuation,
+    non_snake_case,
+    clippy::empty_line_after_doc_comments
+)]
 // overcancellation-scan/src/bin/zero_resonance_probe.rs
 //
 // ╔═══════════════════════════════════════════════════════════════════╗
@@ -29,12 +38,20 @@ use std::f64::consts::PI;
 use std::time::Instant;
 
 fn is_prime(n: usize) -> bool {
-    if n < 2 { return false; }
-    if n < 4 { return true; }
-    if n.is_multiple_of(2) || n.is_multiple_of(3) { return false; }
+    if n < 2 {
+        return false;
+    }
+    if n < 4 {
+        return true;
+    }
+    if n.is_multiple_of(2) || n.is_multiple_of(3) {
+        return false;
+    }
     let mut i = 5;
     while i * i <= n {
-        if n.is_multiple_of(i) || n.is_multiple_of(i + 2) { return false; }
+        if n.is_multiple_of(i) || n.is_multiple_of(i + 2) {
+            return false;
+        }
         i += 6;
     }
     true
@@ -108,7 +125,12 @@ fn main() {
     println!();
     println!("  First 20 zeros:");
     for (i, &gamma) in zeros.iter().take(20).enumerate() {
-        println!("    γ_{:>2} = {:.6}   (2π/γ = {:.4})", i + 1, gamma, 2.0 * PI / gamma);
+        println!(
+            "    γ_{:>2} = {:.6}   (2π/γ = {:.4})",
+            i + 1,
+            gamma,
+            2.0 * PI / gamma
+        );
     }
 
     // ══════════════════════════════════════════════════
@@ -122,7 +144,12 @@ fn main() {
     let full_gram = build_gram(max_n);
     let full_dim = max_n - 1;
     println!();
-    println!("  [Built {}×{} Gram matrix in {:.1}s]", full_dim, full_dim, t0.elapsed().as_secs_f64());
+    println!(
+        "  [Built {}×{} Gram matrix in {:.1}s]",
+        full_dim,
+        full_dim,
+        t0.elapsed().as_secs_f64()
+    );
 
     let mut cos2_seq: Vec<(usize, f64)> = Vec::new(); // (N, cos²θ)
     let mut drop_seq: Vec<(usize, f64)> = Vec::new(); // (N, δ_N)
@@ -132,7 +159,9 @@ fn main() {
     for n in start_n..=max_n {
         let dim = n - 1;
         let prev_dim = dim - 1;
-        if prev_dim < 2 { continue; }
+        if prev_dim < 2 {
+            continue;
+        }
 
         let sub = extract_submatrix(&full_gram, full_dim, dim);
         let (lmin, _) = lambda_min_with_vec(&sub, dim);
@@ -146,9 +175,15 @@ fn main() {
         let cos2 = if g_nsq > 1e-30 {
             let proj = dot(&g_vec, &v_min_prev);
             proj * proj / g_nsq
-        } else { 0.0 };
+        } else {
+            0.0
+        };
 
-        let drop = if n > start_n { (prev_lmin - lmin).max(0.0) } else { 0.0 };
+        let drop = if n > start_n {
+            (prev_lmin - lmin).max(0.0)
+        } else {
+            0.0
+        };
 
         cos2_seq.push((n, cos2));
         drop_seq.push((n, drop));
@@ -162,7 +197,8 @@ fn main() {
 
     // Detrend: remove the 1/N³ trend from cos²θ to see the residual
     // Fit log(cos²θ) = α·log(N) + β, then residual = log(cos²θ) - fit
-    let fit_data: Vec<(f64, f64)> = cos2_seq.iter()
+    let fit_data: Vec<(f64, f64)> = cos2_seq
+        .iter()
         .filter(|&&(n, c)| n >= 30 && c > 1e-30)
         .map(|&(n, c)| ((n as f64).ln(), c.ln()))
         .collect();
@@ -176,13 +212,16 @@ fn main() {
         let a = (nf * sxy - sx * sy) / (nf * sx2 - sx * sx);
         let b = (sy - a * sx) / nf;
         (a, b)
-    } else { (-3.0, 0.0) };
+    } else {
+        (-3.0, 0.0)
+    };
 
     println!();
     println!("  Detrend: log(cos²θ) ≈ {:.4}·log(N) + {:.4}", alpha, beta);
 
     // Detrended residuals
-    let residuals: Vec<(usize, f64)> = cos2_seq.iter()
+    let residuals: Vec<(usize, f64)> = cos2_seq
+        .iter()
         .filter(|&&(n, c)| n >= 30 && c > 1e-30)
         .map(|&(n, c)| {
             let predicted = alpha * (n as f64).ln() + beta;
@@ -226,29 +265,42 @@ fn main() {
 
     println!();
     println!("  Top 15 spectral peaks of detrended cos²θ:");
-    println!("  {:>6} {:>10} {:>14} {:>20}",
-        "rank", "freq (1/N)", "power", "nearest γₖ/(2π)");
+    println!(
+        "  {:>6} {:>10} {:>14} {:>20}",
+        "rank", "freq (1/N)", "power", "nearest γₖ/(2π)"
+    );
     println!("  {}", "─".repeat(55));
 
     for (i, &(freq, power)) in sorted_spec.iter().take(15).enumerate() {
         // Convert frequency to "angular frequency" and compare to γₖ
         let _omega = freq * 2.0 * PI; // doesn't directly correspond...
-        // Actually the N-index Fourier frequency corresponds to
-        // oscillation per unit N. The zeta zeros create oscillations
-        // in the Mellin integral at "log-frequency" γₖ.
-        // So we should look at frequency in LOG(N) space.
-        // But let's also just check: does freq * N_range ≈ γₖ?
-        let period = if freq > 1e-10 { 1.0 / freq } else { f64::INFINITY };
+                                      // Actually the N-index Fourier frequency corresponds to
+                                      // oscillation per unit N. The zeta zeros create oscillations
+                                      // in the Mellin integral at "log-frequency" γₖ.
+                                      // So we should look at frequency in LOG(N) space.
+                                      // But let's also just check: does freq * N_range ≈ γₖ?
+        let period = if freq > 1e-10 {
+            1.0 / freq
+        } else {
+            f64::INFINITY
+        };
 
         // Find nearest zero
-        let nearest = zeros.iter()
+        let nearest = zeros
+            .iter()
             .map(|&g| (g, (period - g).abs()))
             .min_by(|a, b| a.1.partial_cmp(&b.1).unwrap())
             .map(|(g, _)| g)
             .unwrap_or(0.0);
 
-        println!("  {:6} {:10.6} {:14.6e} {:>10.4} (γ={:.3})",
-            i + 1, freq, power, period, nearest);
+        println!(
+            "  {:6} {:10.6} {:14.6e} {:>10.4} (γ={:.3})",
+            i + 1,
+            freq,
+            power,
+            period,
+            nearest
+        );
     }
 
     // ══════════════════════════════════════════════════
@@ -271,7 +323,8 @@ fn main() {
         let ln_n = ln_min + (i as f64 + 0.5) * d_ln;
         let n_target = ln_n.exp();
         // Find nearest residual
-        if let Some(&(_, r)) = residuals.iter()
+        if let Some(&(_, r)) = residuals
+            .iter()
             .min_by_key(|&&(n, _)| ((n as f64 - n_target).abs() * 1e6) as i64)
         {
             log_residuals[i] = r;
@@ -302,20 +355,40 @@ fn main() {
 
     println!();
     println!("  Top 15 peaks in log(N) Fourier space:");
-    println!("  {:>6} {:>12} {:>14} {:>20}",
-        "rank", "ω (log-freq)", "power", "nearest γₖ (match?)");
+    println!(
+        "  {:>6} {:>12} {:>14} {:>20}",
+        "rank", "ω (log-freq)", "power", "nearest γₖ (match?)"
+    );
     println!("  {}", "─".repeat(55));
 
     for (i, &(omega, power)) in sorted_log.iter().take(15).enumerate() {
-        let nearest = zeros.iter()
+        let nearest = zeros
+            .iter()
             .map(|&g| (g, (omega - g).abs()))
             .min_by(|a, b| a.1.partial_cmp(&b.1).unwrap());
         let (near_g, near_dist) = nearest.unwrap_or((0.0, f64::INFINITY));
-        let _match_pct = if near_g > 0.0 { 100.0 * (1.0 - near_dist / near_g) } else { 0.0 };
-        let flag = if near_dist < 0.5 { " ★" } else if near_dist < 1.5 { " ●" } else { "" };
+        let _match_pct = if near_g > 0.0 {
+            100.0 * (1.0 - near_dist / near_g)
+        } else {
+            0.0
+        };
+        let flag = if near_dist < 0.5 {
+            " ★"
+        } else if near_dist < 1.5 {
+            " ●"
+        } else {
+            ""
+        };
 
-        println!("  {:6} {:12.4} {:14.6e}    γ={:.3} (Δ={:.2}){}", 
-            i + 1, omega, power, near_g, near_dist, flag);
+        println!(
+            "  {:6} {:12.4} {:14.6e}    γ={:.3} (Δ={:.2}){}",
+            i + 1,
+            omega,
+            power,
+            near_g,
+            near_dist,
+            flag
+        );
     }
 
     // ══════════════════════════════════════════════════
@@ -327,13 +400,16 @@ fn main() {
     println!("  ANALYSIS C: Phase Correlation — cos(γₖ·ln N) vs cos²θ");
     println!("══════════════════════════════════════════════════════════════");
     println!();
-    println!("  {:>4} {:>10} {:>12} {:>12}",
-        "k", "γₖ", "corr(cos)", "corr(sin)");
+    println!(
+        "  {:>4} {:>10} {:>12} {:>12}",
+        "k", "γₖ", "corr(cos)", "corr(sin)"
+    );
     println!("  {}", "─".repeat(45));
 
     for (k, &gamma) in zeros.iter().take(30).enumerate() {
         // Correlation of cos(γ·ln(N)) with detrended log(cos²θ)
-        let pairs: Vec<(f64, f64, f64)> = residuals.iter()
+        let pairs: Vec<(f64, f64, f64)> = residuals
+            .iter()
             .map(|&(n, r)| {
                 let phase = gamma * (n as f64).ln();
                 (phase.cos(), phase.sin(), r)
@@ -345,20 +421,46 @@ fn main() {
 
         // Correlation with cos
         let mc: f64 = pairs.iter().map(|(c, _, _)| c).sum::<f64>() / n;
-        let cov_c: f64 = pairs.iter().map(|(c, _, r)| (c - mc) * (r - mr)).sum::<f64>() / n;
+        let cov_c: f64 = pairs
+            .iter()
+            .map(|(c, _, r)| (c - mc) * (r - mr))
+            .sum::<f64>()
+            / n;
         let sc: f64 = (pairs.iter().map(|(c, _, _)| (c - mc).powi(2)).sum::<f64>() / n).sqrt();
         let sr: f64 = (pairs.iter().map(|(_, _, r)| (r - mr).powi(2)).sum::<f64>() / n).sqrt();
-        let corr_cos = if sc > 0.0 && sr > 0.0 { cov_c / (sc * sr) } else { 0.0 };
+        let corr_cos = if sc > 0.0 && sr > 0.0 {
+            cov_c / (sc * sr)
+        } else {
+            0.0
+        };
 
         // Correlation with sin
         let ms: f64 = pairs.iter().map(|(_, s, _)| s).sum::<f64>() / n;
-        let cov_s: f64 = pairs.iter().map(|(_, s, r)| (s - ms) * (r - mr)).sum::<f64>() / n;
+        let cov_s: f64 = pairs
+            .iter()
+            .map(|(_, s, r)| (s - ms) * (r - mr))
+            .sum::<f64>()
+            / n;
         let ss: f64 = (pairs.iter().map(|(_, s, _)| (s - ms).powi(2)).sum::<f64>() / n).sqrt();
-        let corr_sin = if ss > 0.0 && sr > 0.0 { cov_s / (ss * sr) } else { 0.0 };
+        let corr_sin = if ss > 0.0 && sr > 0.0 {
+            cov_s / (ss * sr)
+        } else {
+            0.0
+        };
 
-        let flag = if corr_cos.abs() > 0.15 || corr_sin.abs() > 0.15 { " ★" } else { "" };
-        println!("  {:4} {:10.4} {:>+12.4} {:>+12.4}{}",
-            k + 1, gamma, corr_cos, corr_sin, flag);
+        let flag = if corr_cos.abs() > 0.15 || corr_sin.abs() > 0.15 {
+            " ★"
+        } else {
+            ""
+        };
+        println!(
+            "  {:4} {:10.4} {:>+12.4} {:>+12.4}{}",
+            k + 1,
+            gamma,
+            corr_cos,
+            corr_sin,
+            flag
+        );
     }
 
     // ══════════════════════════════════════════════════
@@ -373,7 +475,8 @@ fn main() {
     // For each N, compute a "zero proximity score":
     // Z(N) = Σₖ cos(γₖ · ln N) / k²  (damped sum over first K zeros)
     let k_max = zeros.len().min(50);
-    let zero_scores: Vec<(usize, f64)> = residuals.iter()
+    let zero_scores: Vec<(usize, f64)> = residuals
+        .iter()
         .map(|&(n, _)| {
             let ln_n = (n as f64).ln();
             let score: f64 = (0..k_max)
@@ -384,7 +487,8 @@ fn main() {
         .collect();
 
     // Correlate Z(N) with detrended cos²θ
-    let zpairs: Vec<(f64, f64)> = zero_scores.iter()
+    let zpairs: Vec<(f64, f64)> = zero_scores
+        .iter()
         .zip(residuals.iter())
         .map(|(&(_, z), &(_, r))| (z, r))
         .collect();
@@ -395,22 +499,32 @@ fn main() {
     let cov: f64 = zpairs.iter().map(|(z, r)| (z - mz) * (r - mr)).sum::<f64>() / n;
     let sz: f64 = (zpairs.iter().map(|(z, _)| (z - mz).powi(2)).sum::<f64>() / n).sqrt();
     let sr: f64 = (zpairs.iter().map(|(_, r)| (r - mr).powi(2)).sum::<f64>() / n).sqrt();
-    let corr_z = if sz > 0.0 && sr > 0.0 { cov / (sz * sr) } else { 0.0 };
+    let corr_z = if sz > 0.0 && sr > 0.0 {
+        cov / (sz * sr)
+    } else {
+        0.0
+    };
 
     println!();
     println!("  Z(N) = Σ_{{k=1}}^{{{}}} cos(γₖ·ln N) / k²", k_max);
     println!("  Correlation(Z(N), detrended cos²θ) = {:.6}", corr_z);
 
     // Also try: |Z(N)| vs |cos²θ residual|
-    let abs_pairs: Vec<(f64, f64)> = zpairs.iter()
-        .map(|&(z, r)| (z.abs(), r.abs()))
-        .collect();
+    let abs_pairs: Vec<(f64, f64)> = zpairs.iter().map(|&(z, r)| (z.abs(), r.abs())).collect();
     let mz: f64 = abs_pairs.iter().map(|(z, _)| z).sum::<f64>() / n;
     let mr: f64 = abs_pairs.iter().map(|(_, r)| r).sum::<f64>() / n;
-    let cov: f64 = abs_pairs.iter().map(|(z, r)| (z - mz) * (r - mr)).sum::<f64>() / n;
+    let cov: f64 = abs_pairs
+        .iter()
+        .map(|(z, r)| (z - mz) * (r - mr))
+        .sum::<f64>()
+        / n;
     let sz: f64 = (abs_pairs.iter().map(|(z, _)| (z - mz).powi(2)).sum::<f64>() / n).sqrt();
     let sr: f64 = (abs_pairs.iter().map(|(_, r)| (r - mr).powi(2)).sum::<f64>() / n).sqrt();
-    let corr_abs = if sz > 0.0 && sr > 0.0 { cov / (sz * sr) } else { 0.0 };
+    let corr_abs = if sz > 0.0 && sr > 0.0 {
+        cov / (sz * sr)
+    } else {
+        0.0
+    };
     println!("  Correlation(|Z(N)|, |residual|) = {:.6}", corr_abs);
 
     // ══════════════════════════════════════════════════
@@ -423,7 +537,8 @@ fn main() {
     println!("══════════════════════════════════════════════════════════════");
 
     // Same as Analysis C but for eigenvalue drops
-    let drop_residuals: Vec<(usize, f64)> = drop_seq.iter()
+    let drop_residuals: Vec<(usize, f64)> = drop_seq
+        .iter()
         .filter(|&&(n, d)| n >= 30 && d > 1e-30)
         .map(|&(n, d)| {
             let predicted = alpha * (n as f64).ln() + beta; // rough detrend
@@ -432,12 +547,15 @@ fn main() {
         .collect();
 
     println!();
-    println!("  {:>4} {:>10} {:>12} {:>12}",
-        "k", "γₖ", "corr_drop(cos)", "corr_drop(sin)");
+    println!(
+        "  {:>4} {:>10} {:>12} {:>12}",
+        "k", "γₖ", "corr_drop(cos)", "corr_drop(sin)"
+    );
     println!("  {}", "─".repeat(45));
 
     for (k, &gamma) in zeros.iter().take(20).enumerate() {
-        let pairs: Vec<(f64, f64, f64)> = drop_residuals.iter()
+        let pairs: Vec<(f64, f64, f64)> = drop_residuals
+            .iter()
             .map(|&(n, r)| {
                 let phase = gamma * (n as f64).ln();
                 (phase.cos(), phase.sin(), r)
@@ -447,20 +565,49 @@ fn main() {
         let n = pairs.len() as f64;
         let mr: f64 = pairs.iter().map(|(_, _, r)| r).sum::<f64>() / n;
         let mc: f64 = pairs.iter().map(|(c, _, _)| c).sum::<f64>() / n;
-        let cov_c: f64 = pairs.iter().map(|(c, _, r)| (c - mc) * (r - mr)).sum::<f64>() / n;
+        let cov_c: f64 = pairs
+            .iter()
+            .map(|(c, _, r)| (c - mc) * (r - mr))
+            .sum::<f64>()
+            / n;
         let sc: f64 = (pairs.iter().map(|(c, _, _)| (c - mc).powi(2)).sum::<f64>() / n).sqrt();
         let sr: f64 = (pairs.iter().map(|(_, _, r)| (r - mr).powi(2)).sum::<f64>() / n).sqrt();
-        let corr_cos = if sc > 0.0 && sr > 0.0 { cov_c / (sc * sr) } else { 0.0 };
+        let corr_cos = if sc > 0.0 && sr > 0.0 {
+            cov_c / (sc * sr)
+        } else {
+            0.0
+        };
 
         let ms: f64 = pairs.iter().map(|(_, s, _)| s).sum::<f64>() / n;
-        let cov_s: f64 = pairs.iter().map(|(_, s, r)| (s - ms) * (r - mr)).sum::<f64>() / n;
+        let cov_s: f64 = pairs
+            .iter()
+            .map(|(_, s, r)| (s - ms) * (r - mr))
+            .sum::<f64>()
+            / n;
         let ss: f64 = (pairs.iter().map(|(_, s, _)| (s - ms).powi(2)).sum::<f64>() / n).sqrt();
-        let corr_sin = if ss > 0.0 && sr > 0.0 { cov_s / (ss * sr) } else { 0.0 };
+        let corr_sin = if ss > 0.0 && sr > 0.0 {
+            cov_s / (ss * sr)
+        } else {
+            0.0
+        };
 
         let amp = (corr_cos * corr_cos + corr_sin * corr_sin).sqrt();
-        let flag = if amp > 0.15 { " ★" } else if amp > 0.10 { " ●" } else { "" };
-        println!("  {:4} {:10.4} {:>+12.4} {:>+12.4}  amp={:.4}{}",
-            k + 1, gamma, corr_cos, corr_sin, amp, flag);
+        let flag = if amp > 0.15 {
+            " ★"
+        } else if amp > 0.10 {
+            " ●"
+        } else {
+            ""
+        };
+        println!(
+            "  {:4} {:10.4} {:>+12.4} {:>+12.4}  amp={:.4}{}",
+            k + 1,
+            gamma,
+            corr_cos,
+            corr_sin,
+            amp,
+            flag
+        );
     }
 
     println!();

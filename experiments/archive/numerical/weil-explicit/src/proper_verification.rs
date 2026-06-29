@@ -515,10 +515,12 @@ fn ratio_mean(ev: &[f64]) -> f64 {
 }
 
 fn classify(rm: f64) -> &'static str {
-    let d = [("Poi", 0.3863),
+    let d = [
+        ("Poi", 0.3863),
         ("GOE", 0.5307),
         ("GUE", 0.5996),
-        ("GSE", 0.6744)];
+        ("GSE", 0.6744),
+    ];
     d.iter()
         .min_by(|a, b| (rm - a.1).abs().partial_cmp(&(rm - b.1).abs()).unwrap())
         .unwrap()

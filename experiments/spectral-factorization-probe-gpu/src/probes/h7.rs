@@ -44,7 +44,9 @@ pub fn h7_condition_number_fingerprint(keys: &[SemiprimeKey], cache: &GramCache)
                 None => continue,
             };
             let evals = &ger.eigenvalues;
-            if evals.is_empty() { continue; }
+            if evals.is_empty() {
+                continue;
+            }
 
             // λ_min is the first (cuSOLVER sorts ascending)
             let lambda_min = evals[0].abs().max(1e-300);
@@ -52,7 +54,9 @@ pub fn h7_condition_number_fingerprint(keys: &[SemiprimeKey], cache: &GramCache)
             let kappa = lambda_max / lambda_min;
             let is_factor_dim = key.n % m as u64 == 0;
 
-            if m == p { kappa_at_factor = Some(kappa); }
+            if m == p {
+                kappa_at_factor = Some(kappa);
+            }
 
             kappa_values.push(ConditionEntry {
                 dim: m,
@@ -64,33 +68,64 @@ pub fn h7_condition_number_fingerprint(keys: &[SemiprimeKey], cache: &GramCache)
         }
 
         // Compute statistics: mean κ at non-factor dims vs factor dims
-        let non_factor_kappas: Vec<f64> = kappa_values.iter()
+        let non_factor_kappas: Vec<f64> = kappa_values
+            .iter()
             .filter(|e| !e.is_factor_dim)
             .map(|e| e.kappa)
             .collect();
-        let factor_kappas: Vec<f64> = kappa_values.iter()
+        let factor_kappas: Vec<f64> = kappa_values
+            .iter()
             .filter(|e| e.is_factor_dim)
             .map(|e| e.kappa)
             .collect();
 
-        let mean_nf = if non_factor_kappas.is_empty() { 0.0 }
-            else { non_factor_kappas.iter().sum::<f64>() / non_factor_kappas.len() as f64 };
-        let mean_f = if factor_kappas.is_empty() { 0.0 }
-            else { factor_kappas.iter().sum::<f64>() / factor_kappas.len() as f64 };
+        let mean_nf = if non_factor_kappas.is_empty() {
+            0.0
+        } else {
+            non_factor_kappas.iter().sum::<f64>() / non_factor_kappas.len() as f64
+        };
+        let mean_f = if factor_kappas.is_empty() {
+            0.0
+        } else {
+            factor_kappas.iter().sum::<f64>() / factor_kappas.len() as f64
+        };
         let kappa_ratio = if mean_nf > 0.0 { mean_f / mean_nf } else { 1.0 };
 
         println!("    N={} = {}×{}", key.n, key.p, key.q);
         println!("      Probed κ(G_M) for M in [{}, {}]", lo, hi);
         for e in &kappa_values {
-            println!("        M={:5}: κ={:.4e}  λ_min={:.4e}  λ_max={:.4e} {}",
-                e.dim, e.kappa, e.lambda_min, e.lambda_max,
-                if e.is_factor_dim { "← FACTOR DIM" } else { "" });
+            println!(
+                "        M={:5}: κ={:.4e}  λ_min={:.4e}  λ_max={:.4e} {}",
+                e.dim,
+                e.kappa,
+                e.lambda_min,
+                e.lambda_max,
+                if e.is_factor_dim {
+                    "← FACTOR DIM"
+                } else {
+                    ""
+                }
+            );
         }
-        println!("      κ at factor dims: mean={:.4e} ({} dims)", mean_f, factor_kappas.len());
-        println!("      κ at non-factor:  mean={:.4e} ({} dims)", mean_nf, non_factor_kappas.len());
+        println!(
+            "      κ at factor dims: mean={:.4e} ({} dims)",
+            mean_f,
+            factor_kappas.len()
+        );
+        println!(
+            "      κ at non-factor:  mean={:.4e} ({} dims)",
+            mean_nf,
+            non_factor_kappas.len()
+        );
         println!("      Factor/non-factor κ ratio: {:.4}", kappa_ratio);
-        println!("      Signal: {}\n",
-            if (kappa_ratio - 1.0).abs() > 0.5 { "weak 〜" } else { "null ∅" });
+        println!(
+            "      Signal: {}\n",
+            if (kappa_ratio - 1.0).abs() > 0.5 {
+                "weak 〜"
+            } else {
+                "null ∅"
+            }
+        );
 
         results.push(H7Result {
             n: key.n,

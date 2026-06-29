@@ -240,9 +240,12 @@ extern "C" {
     pub fn gram_matvec_exec(d_x: *mut f64, d_y: *mut f64, dim: c_int, t_max: c_int);
     /// Full matvec: upload, compute, download.
     pub fn gram_matvec_full(
-        d_x: *mut f64, d_y: *mut f64,
-        h_x: *const f64, h_y: *mut f64,
-        dim: c_int, t_max: c_int,
+        d_x: *mut f64,
+        d_y: *mut f64,
+        h_x: *const f64,
+        h_y: *mut f64,
+        dim: c_int,
+        t_max: c_int,
     );
 }
 

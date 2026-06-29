@@ -1,4 +1,13 @@
-#![allow(dead_code, unused_variables, unused_imports, unused_assignments, clippy::needless_range_loop, clippy::doc_lazy_continuation, non_snake_case, clippy::empty_line_after_doc_comments)]
+#![allow(
+    dead_code,
+    unused_variables,
+    unused_imports,
+    unused_assignments,
+    clippy::needless_range_loop,
+    clippy::doc_lazy_continuation,
+    non_snake_case,
+    clippy::empty_line_after_doc_comments
+)]
 //! DROP PROFILE PROBE — Eigenvalue Drop Scaling Analysis
 //!
 //! Key question: How do eigenvalue drops δ_N = λ_min(G_N) - λ_min(G_{N+1}) scale?
@@ -39,7 +48,10 @@ fn build_gram(n: usize) -> Vec<f64> {
 fn lambda_min(g_flat: &[f64], dim: usize) -> f64 {
     let mat = nalgebra::DMatrix::from_row_slice(dim, dim, g_flat);
     let eig = mat.symmetric_eigen();
-    eig.eigenvalues.iter().cloned().fold(f64::INFINITY, f64::min)
+    eig.eigenvalues
+        .iter()
+        .cloned()
+        .fold(f64::INFINITY, f64::min)
 }
 
 /// Compute λ_min and the min eigenvector
@@ -65,7 +77,9 @@ fn num_divisors(n: usize) -> usize {
     while d * d <= n {
         if n.is_multiple_of(d) {
             count += 1;
-            if d != n / d { count += 1; }
+            if d != n / d {
+                count += 1;
+            }
         }
         d += 1;
     }
@@ -73,12 +87,20 @@ fn num_divisors(n: usize) -> usize {
 }
 
 fn is_prime(n: usize) -> bool {
-    if n < 2 { return false; }
-    if n < 4 { return true; }
-    if n.is_multiple_of(2) || n.is_multiple_of(3) { return false; }
+    if n < 2 {
+        return false;
+    }
+    if n < 4 {
+        return true;
+    }
+    if n.is_multiple_of(2) || n.is_multiple_of(3) {
+        return false;
+    }
     let mut i = 5;
     while i * i <= n {
-        if n.is_multiple_of(i) || n.is_multiple_of(i + 2) { return false; }
+        if n.is_multiple_of(i) || n.is_multiple_of(i + 2) {
+            return false;
+        }
         i += 6;
     }
     true
@@ -104,16 +126,26 @@ fn main() {
     let max_n: usize = 500;
     let start_n: usize = 3;
 
-    println!("  PHASE 1: Computing λ_min(G_N) for N = {}..{}", start_n, max_n);
-    println!("  {:>5} {:>12} {:>12} {:>12} {:>10} {:>5} {:>6}",
-        "N", "λ_min", "δ_N", "N³·δ_N", "N²·λ_min", "d(N)", "secs");
+    println!(
+        "  PHASE 1: Computing λ_min(G_N) for N = {}..{}",
+        start_n, max_n
+    );
+    println!(
+        "  {:>5} {:>12} {:>12} {:>12} {:>10} {:>5} {:>6}",
+        "N", "λ_min", "δ_N", "N³·δ_N", "N²·λ_min", "d(N)", "secs"
+    );
     println!("  {}", "─".repeat(75));
 
     // Pre-build the largest Gram matrix, then extract submatrices
     let t0 = Instant::now();
     let full_gram = build_gram(max_n);
     let full_dim = max_n - 1;
-    println!("  [Built {}×{} Gram matrix in {:.1}s]", full_dim, full_dim, t0.elapsed().as_secs_f64());
+    println!(
+        "  [Built {}×{} Gram matrix in {:.1}s]",
+        full_dim,
+        full_dim,
+        t0.elapsed().as_secs_f64()
+    );
 
     let mut lambdas: Vec<(usize, f64)> = Vec::new();
     let mut drops: Vec<(usize, f64, usize)> = Vec::new(); // (N, δ_N, d(N))
@@ -145,12 +177,18 @@ fn main() {
         let n_sq_lmin = (n as f64).powi(2) * lmin;
 
         // Print every row for N ≤ 30, then significant ones
-        let show = n <= 30 || n % 50 == 0 || n == max_n
-            || drop > 5e-6 || nd >= 12 || is_prime(n) && n <= 100;
+        let show = n <= 30
+            || n % 50 == 0
+            || n == max_n
+            || drop > 5e-6
+            || nd >= 12
+            || is_prime(n) && n <= 100;
 
         if show {
-            println!("  {:5} {:12.6e} {:12.6e} {:10.4} {:10.4} {:5} {:6.1}",
-                n, lmin, drop, n_cubed_drop, n_sq_lmin, nd, elapsed);
+            println!(
+                "  {:5} {:12.6e} {:12.6e} {:10.4} {:10.4} {:5} {:6.1}",
+                n, lmin, drop, n_cubed_drop, n_sq_lmin, nd, elapsed
+            );
         }
 
         if n > start_n {
@@ -161,7 +199,11 @@ fn main() {
 
         // Progress
         if n % 100 == 0 && n > 30 {
-            eprintln!("  ... N={} done ({:.0}s total)", n, t_start.elapsed().as_secs_f64());
+            eprintln!(
+                "  ... N={} done ({:.0}s total)",
+                n,
+                t_start.elapsed().as_secs_f64()
+            );
         }
     }
 
@@ -175,7 +217,8 @@ fn main() {
     println!("══════════════════════════════════════════════════════════════");
 
     // Filter to drops > 0 and N ≥ 10 for the fit
-    let fit_data: Vec<(f64, f64)> = drops.iter()
+    let fit_data: Vec<(f64, f64)> = drops
+        .iter()
         .filter(|(n, d, _)| *n >= 10 && *d > 1e-15)
         .map(|(n, d, _)| ((*n as f64).ln(), d.ln()))
         .collect();
@@ -191,17 +234,25 @@ fn main() {
         let c_coeff = log_c.exp();
         let mean_y = sy / n_pts;
         let ss_tot: f64 = fit_data.iter().map(|(_, y)| (y - mean_y).powi(2)).sum();
-        let ss_res: f64 = fit_data.iter()
-            .map(|(x, y)| (y - (alpha * x + log_c)).powi(2)).sum();
+        let ss_res: f64 = fit_data
+            .iter()
+            .map(|(x, y)| (y - (alpha * x + log_c)).powi(2))
+            .sum();
         let r2 = 1.0 - ss_res / ss_tot;
 
         println!();
-        println!("  δ_N ≈ {:.4} · N^({:.4})     R² = {:.6}", c_coeff, alpha, r2);
+        println!(
+            "  δ_N ≈ {:.4} · N^({:.4})     R² = {:.6}",
+            c_coeff, alpha, r2
+        );
         println!();
 
         if alpha > -3.5 && alpha < -2.5 {
             println!("  ┌─────────────────────────────────────────────────┐");
-            println!("  │ α ≈ {:.2} — CONSISTENT WITH δ_N ~ C/N³          │", alpha);
+            println!(
+                "  │ α ≈ {:.2} — CONSISTENT WITH δ_N ~ C/N³          │",
+                alpha
+            );
             println!("  │ This implies λ_min ~ C'/N² via telescoping!    │");
             println!("  │ The graduation path is OPEN.                    │");
             println!("  └─────────────────────────────────────────────────┘");
@@ -212,7 +263,8 @@ fn main() {
         }
 
         // Also fit just the tail (N > 100) for better asymptotic
-        let tail_data: Vec<(f64, f64)> = drops.iter()
+        let tail_data: Vec<(f64, f64)> = drops
+            .iter()
             .filter(|(n, d, _)| *n >= 100 && *d > 1e-15)
             .map(|(n, d, _)| ((*n as f64).ln(), d.ln()))
             .collect();
@@ -228,12 +280,16 @@ fn main() {
             let c_tail = log_c_tail.exp();
             let mean_y = sy / n_pts;
             let ss_tot: f64 = tail_data.iter().map(|(_, y)| (y - mean_y).powi(2)).sum();
-            let ss_res: f64 = tail_data.iter()
-                .map(|(x, y)| (y - (alpha_tail * x + log_c_tail)).powi(2)).sum();
+            let ss_res: f64 = tail_data
+                .iter()
+                .map(|(x, y)| (y - (alpha_tail * x + log_c_tail)).powi(2))
+                .sum();
             let r2_tail = 1.0 - ss_res / ss_tot;
             println!();
-            println!("  Tail fit (N≥100): δ_N ≈ {:.4} · N^({:.4})  R² = {:.6}",
-                c_tail, alpha_tail, r2_tail);
+            println!(
+                "  Tail fit (N≥100): δ_N ≈ {:.4} · N^({:.4})  R² = {:.6}",
+                c_tail, alpha_tail, r2_tail
+            );
         }
     }
 
@@ -246,18 +302,29 @@ fn main() {
     println!("  PHASE 3: Cumulative Drop Windows");
     println!("══════════════════════════════════════════════════════════════");
     println!();
-    println!("  {:>10} {:>12} {:>8} {:>12} {:>10}",
-        "window", "Σ drops", "count", "avg drop", "ratio");
+    println!(
+        "  {:>10} {:>12} {:>8} {:>12} {:>10}",
+        "window", "Σ drops", "count", "avg drop", "ratio"
+    );
 
     let windows: Vec<(usize, usize)> = vec![
-        (3, 50), (50, 100), (100, 150), (150, 200), (200, 250),
-        (250, 300), (300, 350), (350, 400), (400, 450), (450, 500),
+        (3, 50),
+        (50, 100),
+        (100, 150),
+        (150, 200),
+        (200, 250),
+        (250, 300),
+        (300, 350),
+        (350, 400),
+        (400, 450),
+        (450, 500),
     ];
 
     let mut prev_sum = 0.0f64;
     let mut window_sums: Vec<f64> = Vec::new();
     for (lo, hi) in &windows {
-        let in_window: Vec<f64> = drops.iter()
+        let in_window: Vec<f64> = drops
+            .iter()
             .filter(|(n, d, _)| *n >= *lo && *n < *hi && *d > 0.0)
             .map(|(_, d, _)| *d)
             .collect();
@@ -269,8 +336,10 @@ fn main() {
         } else {
             "-".to_string()
         };
-        println!("  {:>4}-{:<4} {:12.6e} {:8} {:12.6e} {:>10}",
-            lo, hi, sum, count, avg, ratio);
+        println!(
+            "  {:>4}-{:<4} {:12.6e} {:8} {:12.6e} {:>10}",
+            lo, hi, sum, count, avg, ratio
+        );
         window_sums.push(sum);
         prev_sum = sum;
     }
@@ -296,7 +365,8 @@ fn main() {
         let (lmin, v_min) = lambda_min_with_vec(&sub, dim);
 
         // Component analysis
-        let mut components: Vec<(usize, f64)> = v_min.iter()
+        let mut components: Vec<(usize, f64)> = v_min
+            .iter()
             .enumerate()
             .map(|(i, &v)| (i + 1, v * v))
             .collect();
@@ -310,15 +380,23 @@ fn main() {
         let mut n_99 = 0;
         for (i, (_, v)) in components.iter().enumerate() {
             cum += v;
-            if n_50 == 0 && cum >= 0.5 * total { n_50 = i + 1; }
-            if n_90 == 0 && cum >= 0.9 * total { n_90 = i + 1; }
-            if n_99 == 0 && cum >= 0.99 * total { n_99 = i + 1; }
+            if n_50 == 0 && cum >= 0.5 * total {
+                n_50 = i + 1;
+            }
+            if n_90 == 0 && cum >= 0.9 * total {
+                n_90 = i + 1;
+            }
+            if n_99 == 0 && cum >= 0.99 * total {
+                n_99 = i + 1;
+            }
         }
 
         // Oscillation: how many sign changes?
         let mut sign_changes = 0;
         for i in 1..dim {
-            if v_min[i] * v_min[i - 1] < 0.0 { sign_changes += 1; }
+            if v_min[i] * v_min[i - 1] < 0.0 {
+                sign_changes += 1;
+            }
         }
 
         // Arithmetic correlation: average |v_min[k]|² for primes vs composites
@@ -335,23 +413,46 @@ fn main() {
 
         println!();
         println!("  ── N = {} (dim = {}, λ_min = {:.6e}) ──", n, dim, lmin);
-        println!("  Components for 50% energy: {}/{} ({:.1}%)",
-            n_50, dim, 100.0 * n_50 as f64 / dim as f64);
-        println!("  Components for 90% energy: {}/{} ({:.1}%)",
-            n_90, dim, 100.0 * n_90 as f64 / dim as f64);
-        println!("  Components for 99% energy: {}/{} ({:.1}%)",
-            n_99, dim, 100.0 * n_99 as f64 / dim as f64);
-        println!("  Sign changes: {} ({:.1}% of max)",
-            sign_changes, 100.0 * sign_changes as f64 / (dim - 1) as f64);
-        println!("  Prime-index energy: {:.4}% ({} primes)",
-            100.0 * prime_energy / total, prime_count);
-        println!("  Composite-index energy: {:.4}% ({} composites)",
-            100.0 * comp_energy / total, comp_count);
+        println!(
+            "  Components for 50% energy: {}/{} ({:.1}%)",
+            n_50,
+            dim,
+            100.0 * n_50 as f64 / dim as f64
+        );
+        println!(
+            "  Components for 90% energy: {}/{} ({:.1}%)",
+            n_90,
+            dim,
+            100.0 * n_90 as f64 / dim as f64
+        );
+        println!(
+            "  Components for 99% energy: {}/{} ({:.1}%)",
+            n_99,
+            dim,
+            100.0 * n_99 as f64 / dim as f64
+        );
+        println!(
+            "  Sign changes: {} ({:.1}% of max)",
+            sign_changes,
+            100.0 * sign_changes as f64 / (dim - 1) as f64
+        );
+        println!(
+            "  Prime-index energy: {:.4}% ({} primes)",
+            100.0 * prime_energy / total,
+            prime_count
+        );
+        println!(
+            "  Composite-index energy: {:.4}% ({} composites)",
+            100.0 * comp_energy / total,
+            comp_count
+        );
         if prime_count > 0 && comp_count > 0 {
             let prime_avg = prime_energy / prime_count as f64;
             let comp_avg = comp_energy / comp_count as f64;
-            println!("  Prime/composite energy ratio: {:.4}",
-                prime_avg / comp_avg);
+            println!(
+                "  Prime/composite energy ratio: {:.4}",
+                prime_avg / comp_avg
+            );
         }
 
         // Top 10 components
@@ -380,16 +481,23 @@ fn main() {
     println!();
     println!("  λ_min(G_{}) = {:.10}", start_n, lmin_start);
     println!("  Σ drops     = {:.10}", total_drop);
-    println!("  λ_min(G_{}) - Σ drops = {:.10}", start_n, lmin_start - total_drop);
+    println!(
+        "  λ_min(G_{}) - Σ drops = {:.10}",
+        start_n,
+        lmin_start - total_drop
+    );
     println!("  λ_min(G_{}) (actual)  = {:.10}", max_n, lmin_end);
-    println!("  Consistency error: {:.2e}", (lmin_start - total_drop - lmin_end).abs());
+    println!(
+        "  Consistency error: {:.2e}",
+        (lmin_start - total_drop - lmin_end).abs()
+    );
 
     // N² · λ_min scaling
     println!();
     println!("  N²·λ_min trend:");
-    for &(n, lmin) in lambdas.iter().filter(|(n, _)|
+    for &(n, lmin) in lambdas.iter().filter(|(n, _)| {
         *n == 10 || *n == 50 || *n == 100 || *n == 200 || *n == 300 || *n == 400 || *n == 500
-    ) {
+    }) {
         println!("    N={:4}  N²·λ_min = {:.4}", n, (n as f64).powi(2) * lmin);
     }
 

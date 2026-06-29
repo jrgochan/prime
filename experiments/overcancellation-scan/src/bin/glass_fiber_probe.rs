@@ -1,4 +1,13 @@
-#![allow(dead_code, unused_variables, unused_imports, unused_assignments, clippy::needless_range_loop, clippy::doc_lazy_continuation, non_snake_case, clippy::empty_line_after_doc_comments)]
+#![allow(
+    dead_code,
+    unused_variables,
+    unused_imports,
+    unused_assignments,
+    clippy::needless_range_loop,
+    clippy::doc_lazy_continuation,
+    non_snake_case,
+    clippy::empty_line_after_doc_comments
+)]
 // overcancellation-scan/src/bin/glass_fiber_probe.rs
 //
 // ╔═══════════════════════════════════════════════════════════════════╗
@@ -57,7 +66,9 @@ fn dissolved_sym(a: usize, b: usize) -> f64 {
 
 /// BD witness weight: w(k,N) = 1 - ln(k)/ln(N)
 fn log_weight(k: usize, n: usize) -> f64 {
-    if k >= n { return 0.0; }
+    if k >= n {
+        return 0.0;
+    }
     1.0 - (k as f64).ln() / (n as f64).ln()
 }
 
@@ -85,15 +96,27 @@ fn main() {
     // SECTION 1: Verify symmetric dissolution
     // ═══════════════════════════════════════════════════
     println!("═══ §1: Symmetric Dissolution Verification ═══");
-    println!("{:>5} {:>5} {:>12} {:>12} {:>12} {:>12}", "a", "b", "V_sym(dir)", "V_sym(dis)", "V_anti", "|anti/sym|");
+    println!(
+        "{:>5} {:>5} {:>12} {:>12} {:>12} {:>12}",
+        "a", "b", "V_sym(dir)", "V_sym(dis)", "V_anti", "|anti/sym|"
+    );
     for a in 2..=12 {
         for b in 1..a {
-            if gcd(a, b) != 1 { continue; }
+            if gcd(a, b) != 1 {
+                continue;
+            }
             let vs = vasyunin_sym(a, b);
             let vd = dissolved_sym(a, b);
             let va = vasyunin_anti(a, b);
-            let ratio = if vs.abs() > 1e-15 { va.abs() / vs.abs() } else { f64::NAN };
-            println!("{:5} {:5} {:12.6} {:12.6} {:12.6} {:12.4}", a, b, vs, vd, va, ratio);
+            let ratio = if vs.abs() > 1e-15 {
+                va.abs() / vs.abs()
+            } else {
+                f64::NAN
+            };
+            println!(
+                "{:5} {:5} {:12.6} {:12.6} {:12.6} {:12.4}",
+                a, b, vs, vd, va, ratio
+            );
         }
     }
     println!();
@@ -132,7 +155,9 @@ fn main() {
 
             for k_idx in 0..size {
                 let k = k_idx + 1;
-                if k == j { continue; }
+                if k == j {
+                    continue;
+                }
 
                 let d = gcd(j, k);
                 let jp = j / d;
@@ -167,14 +192,31 @@ fn main() {
             }
         }
 
-        let ratio = if vtgv_total.abs() > 1e-15 { cotres_anti / vtgv_total } else { f64::NAN };
-        let anti_abs_ratio = if vtgv_total.abs() > 1e-15 { cotres_anti.abs() / vtgv_total } else { f64::NAN };
+        let ratio = if vtgv_total.abs() > 1e-15 {
+            cotres_anti / vtgv_total
+        } else {
+            f64::NAN
+        };
+        let anti_abs_ratio = if vtgv_total.abs() > 1e-15 {
+            cotres_anti.abs() / vtgv_total
+        } else {
+            f64::NAN
+        };
 
         println!("  N = {:>5}:  vᵀGv = {:+.8}", n, vtgv_total);
         println!("    CotRes_total = {:+.8}", cotres_total);
-        println!("    CotRes_sym   = {:+.8}  (rational, dissolved)", cotres_sym);
-        println!("    CotRes_anti  = {:+.8}  (transcendental, = RH)", cotres_anti);
-        println!("    |CotRes_anti|/vᵀGv = {:.6}  (need < 0.5 for Crown)", anti_abs_ratio);
+        println!(
+            "    CotRes_sym   = {:+.8}  (rational, dissolved)",
+            cotres_sym
+        );
+        println!(
+            "    CotRes_anti  = {:+.8}  (transcendental, = RH)",
+            cotres_anti
+        );
+        println!(
+            "    |CotRes_anti|/vᵀGv = {:.6}  (need < 0.5 for Crown)",
+            anti_abs_ratio
+        );
         println!("    CotRes_anti/vᵀGv   = {:+.6}", ratio);
 
         // Show top GCD strata contributions to antisymmetric
@@ -182,7 +224,9 @@ fn main() {
         anti_gcd_vec.sort_by(|a, b| b.1.abs().partial_cmp(&a.1.abs()).unwrap());
         print!("    Top GCD strata (anti): ");
         for (i, (&d, &val)) in anti_gcd_vec.iter().take(5).enumerate() {
-            if i > 0 { print!(", "); }
+            if i > 0 {
+                print!(", ");
+            }
             print!("d={}: {:+.4}", d, val);
         }
         println!();
@@ -195,7 +239,10 @@ fn main() {
     println!("═══ §3: Glass Fiber Cancellation Budget ═══");
     println!("Decomposition of Σ ln(1-1/p) through three Hopf fibers:");
     println!();
-    println!("{:>5} {:>12} {:>12} {:>12} {:>12} {:>12}", "p", "total", "dark", "Glass₁", "Glass₂", "Glass₃");
+    println!(
+        "{:>5} {:>12} {:>12} {:>12} {:>12} {:>12}",
+        "p", "total", "dark", "Glass₁", "Glass₂", "Glass₃"
+    );
 
     let primes: Vec<usize> = {
         let mut sieve = [true; 100];
@@ -230,21 +277,43 @@ fn main() {
         total_log += total;
 
         if p <= 13 {
-            println!("{:5} {:12.6} {:12.6} {:12.6} {:12.6} {:12.6}", p, total, dark, g1, g2, g3);
+            println!(
+                "{:5} {:12.6} {:12.6} {:12.6} {:12.6} {:12.6}",
+                p, total, dark, g1, g2, g3
+            );
         }
     }
     println!("  ...");
-    println!("{:>5} {:12.6} {:12.6} {:12.6} {:12.6} {:12.6}", "SUM", total_log, total_dark, total_g1, total_g2, total_g3);
+    println!(
+        "{:>5} {:12.6} {:12.6} {:12.6} {:12.6} {:12.6}",
+        "SUM", total_log, total_dark, total_g1, total_g2, total_g3
+    );
     println!();
     let sum_fibers = total_dark + total_g1 + total_g2 + total_g3;
-    println!("  Verification: Σ fibers = {:.6}, Σ total = {:.6}, diff = {:.2e}",
-        sum_fibers, total_log, (sum_fibers - total_log).abs());
+    println!(
+        "  Verification: Σ fibers = {:.6}, Σ total = {:.6}, diff = {:.2e}",
+        sum_fibers,
+        total_log,
+        (sum_fibers - total_log).abs()
+    );
     println!();
     println!("  Cancellation budget:");
-    println!("    Dark (ζ(8)→ζ(16)):  {:.1}%", 100.0 * total_dark / total_log);
-    println!("    Glass₁ (ℂ, U(1)):   {:.1}%", 100.0 * total_g1 / total_log);
-    println!("    Glass₂ (ℍ, SU(2)):  {:.1}%", 100.0 * total_g2 / total_log);
-    println!("    Glass₃ (𝕆, SU(3)):  {:.1}%", 100.0 * total_g3 / total_log);
+    println!(
+        "    Dark (ζ(8)→ζ(16)):  {:.1}%",
+        100.0 * total_dark / total_log
+    );
+    println!(
+        "    Glass₁ (ℂ, U(1)):   {:.1}%",
+        100.0 * total_g1 / total_log
+    );
+    println!(
+        "    Glass₂ (ℍ, SU(2)):  {:.1}%",
+        100.0 * total_g2 / total_log
+    );
+    println!(
+        "    Glass₃ (𝕆, SU(3)):  {:.1}%",
+        100.0 * total_g3 / total_log
+    );
     println!();
 
     // ═══════════════════════════════════════════════════
@@ -253,7 +322,10 @@ fn main() {
     println!("═══ §4: Scaling Analysis ═══");
     println!("Does CotRes_anti converge? Grow? Oscillate?");
     println!();
-    println!("{:>8} {:>12} {:>12} {:>12} {:>12}", "N", "CotRes_anti", "|anti|/vᵀGv", "CotRes_sym", "vᵀGv");
+    println!(
+        "{:>8} {:>12} {:>12} {:>12} {:>12}",
+        "N", "CotRes_anti", "|anti|/vᵀGv", "CotRes_sym", "vᵀGv"
+    );
 
     for &n in &[30, 60, 120, 240, 360, 720, 1000, 1260, 2520] {
         let mu = mobius_table(n + 1);
@@ -274,7 +346,9 @@ fn main() {
 
             for k_idx in 0..size {
                 let k = k_idx + 1;
-                if k == j { continue; }
+                if k == j {
+                    continue;
+                }
                 let d = gcd(j, k);
                 let jp = j / d;
                 let kp = k / d;
@@ -298,8 +372,15 @@ fn main() {
             }
         }
 
-        let ratio = if vtgv.abs() > 1e-15 { cotres_anti.abs() / vtgv } else { f64::NAN };
-        println!("{:8} {:+12.8} {:12.6} {:+12.8} {:12.8}", n, cotres_anti, ratio, cotres_sym, vtgv);
+        let ratio = if vtgv.abs() > 1e-15 {
+            cotres_anti.abs() / vtgv
+        } else {
+            f64::NAN
+        };
+        println!(
+            "{:8} {:+12.8} {:12.6} {:+12.8} {:12.8}",
+            n, cotres_anti, ratio, cotres_sym, vtgv
+        );
     }
 
     println!();

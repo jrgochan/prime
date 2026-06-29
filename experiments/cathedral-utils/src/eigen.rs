@@ -106,8 +106,12 @@ pub fn eigen_f64(mat: &[f64], dim: usize) -> EigenResult {
 
 /// Eigenvalues-only variant (slightly faster — skips eigenvector extraction).
 pub fn eigenvalues_only_f64(mat: &[f64], dim: usize) -> Vec<f64> {
-    if dim == 0 { return vec![]; }
-    if dim == 1 { return vec![mat[0]]; }
+    if dim == 0 {
+        return vec![];
+    }
+    if dim == 1 {
+        return vec![mat[0]];
+    }
 
     let na_mat = nalgebra::DMatrix::from_fn(dim, dim, |i, j| mat[i * dim + j]);
     let eigen = na_mat.symmetric_eigen();

@@ -10,21 +10,30 @@ pub fn banner(n: usize) {
 }
 
 /// Print the spectral summary header.
-pub fn spectral_header(
-    lambda_min: f64,
-    lambda_max: f64,
-    d2: f64,
-    vtgv: f64,
-    mertens_prod: f64,
-) {
+pub fn spectral_header(lambda_min: f64, lambda_max: f64, d2: f64, vtgv: f64, mertens_prod: f64) {
     println!();
     println!("  ┌─────────────────────────────────────────────────────────────────┐");
     println!("  │ SPECTRAL SUMMARY                                               │");
     println!("  ├─────────────────────────────────────────────────────────────────┤");
-    println!("  │ Eigenvalue range: [{:.8}, {:.8}]                    │", lambda_min, lambda_max);
-    println!("  │ Spectral gap (mass gap):   {:.8}                            │", lambda_min);
-    println!("  │ d²_N (vacuum energy):      {:.8}                            │", d2);
-    println!("  │ vᵀGv (ground state E):     {:.8}                            │", vtgv);
-    println!("  │ Mertens screening Π(1-1/p): {:.8}                           │", mertens_prod);
+    println!(
+        "  │ Eigenvalue range: [{:.8}, {:.8}]                    │",
+        lambda_min, lambda_max
+    );
+    println!(
+        "  │ Spectral gap (mass gap):   {:.8}                            │",
+        lambda_min
+    );
+    println!(
+        "  │ d²_N (vacuum energy):      {:.8}                            │",
+        d2
+    );
+    println!(
+        "  │ vᵀGv (ground state E):     {:.8}                            │",
+        vtgv
+    );
+    println!(
+        "  │ Mertens screening Π(1-1/p): {:.8}                           │",
+        mertens_prod
+    );
     println!("  └─────────────────────────────────────────────────────────────────┘");
 }

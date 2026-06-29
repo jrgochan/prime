@@ -108,17 +108,17 @@ struct TeardropShape {
     // Shape measurements
     max_zeta_abs: f64,
     min_zeta_abs: f64,
-    asymmetry: f64,          // (max - min) / (max + min)
-    pinch_angle: f64,        // angle where |ζ| is minimum (should be near the zero)
-    bulge_angle: f64,        // angle where |ζ| is maximum
-    phase_winding: f64,      // total phase change (should be ≈ 2π for simple zero)
+    asymmetry: f64,     // (max - min) / (max + min)
+    pinch_angle: f64,   // angle where |ζ| is minimum (should be near the zero)
+    bulge_angle: f64,   // angle where |ζ| is maximum
+    phase_winding: f64, // total phase change (should be ≈ 2π for simple zero)
     // Higher-dimensional measurements
-    d2_asymmetry: f64,       // asymmetry using D_2 partial sum
-    d5_asymmetry: f64,       // asymmetry using D_5 partial sum
-    d10_asymmetry: f64,      // asymmetry using D_10 partial sum
+    d2_asymmetry: f64,  // asymmetry using D_2 partial sum
+    d5_asymmetry: f64,  // asymmetry using D_5 partial sum
+    d10_asymmetry: f64, // asymmetry using D_10 partial sum
     // Teardrop orientation
-    centroid_re_shift: f64,  // how much the centroid shifts from circle center (Re)
-    centroid_im_shift: f64,  // how much the centroid shifts from circle center (Im)
+    centroid_re_shift: f64, // how much the centroid shifts from circle center (Re)
+    centroid_im_shift: f64, // how much the centroid shifts from circle center (Im)
 }
 
 fn analyze_teardrop(gamma: f64, radius: f64, n_points: usize) -> TeardropShape {
@@ -195,28 +195,58 @@ fn analyze_teardrop(gamma: f64, radius: f64, n_points: usize) -> TeardropShape {
     let mut total_winding = 0.0;
     for i in 1..phases.len() {
         let mut dphi = phases[i] - phases[i - 1];
-        if dphi > PI { dphi -= 2.0 * PI; }
-        if dphi < -PI { dphi += 2.0 * PI; }
+        if dphi > PI {
+            dphi -= 2.0 * PI;
+        }
+        if dphi < -PI {
+            dphi += 2.0 * PI;
+        }
         total_winding += dphi;
     }
     // Close the loop
     if !phases.is_empty() {
         let mut dphi = phases[0] - phases[phases.len() - 1];
-        if dphi > PI { dphi -= 2.0 * PI; }
-        if dphi < -PI { dphi += 2.0 * PI; }
+        if dphi > PI {
+            dphi -= 2.0 * PI;
+        }
+        if dphi < -PI {
+            dphi += 2.0 * PI;
+        }
         total_winding += dphi;
     }
 
     let asymmetry = if max_zeta + min_zeta > 0.0 {
         (max_zeta - min_zeta) / (max_zeta + min_zeta)
-    } else { 0.0 };
+    } else {
+        0.0
+    };
 
-    let centroid_re_shift = if wtotal > 0.0 { wcx / wtotal - center_re } else { 0.0 };
-    let centroid_im_shift = if wtotal > 0.0 { wcy / wtotal - center_im } else { 0.0 };
+    let centroid_re_shift = if wtotal > 0.0 {
+        wcx / wtotal - center_re
+    } else {
+        0.0
+    };
+    let centroid_im_shift = if wtotal > 0.0 {
+        wcy / wtotal - center_im
+    } else {
+        0.0
+    };
 
-    let d2_asym = if d2_max + d2_min > 0.0 { (d2_max - d2_min) / (d2_max + d2_min) } else { 0.0 };
-    let d5_asym = if d5_max + d5_min > 0.0 { (d5_max - d5_min) / (d5_max + d5_min) } else { 0.0 };
-    let d10_asym = if d10_max + d10_min > 0.0 { (d10_max - d10_min) / (d10_max + d10_min) } else { 0.0 };
+    let d2_asym = if d2_max + d2_min > 0.0 {
+        (d2_max - d2_min) / (d2_max + d2_min)
+    } else {
+        0.0
+    };
+    let d5_asym = if d5_max + d5_min > 0.0 {
+        (d5_max - d5_min) / (d5_max + d5_min)
+    } else {
+        0.0
+    };
+    let d10_asym = if d10_max + d10_min > 0.0 {
+        (d10_max - d10_min) / (d10_max + d10_min)
+    } else {
+        0.0
+    };
 
     TeardropShape {
         gamma,
@@ -263,21 +293,32 @@ fn main() {
     // Small radius teardrops (local structure near zero)
     println!("  ── LOCAL TEARDROPS (radius = 1.0) ──");
     println!();
-    println!("  {:>4} {:>8} {:>10} {:>10} {:>8} {:>8} {:>8} {:>8} {:>10} {:>10}",
-             "n", "γ", "|ζ|_max", "|ζ|_min", "asym", "winding", "D2_asy", "D10_asy", "Δ_Re", "Δ_Im");
+    println!(
+        "  {:>4} {:>8} {:>10} {:>10} {:>8} {:>8} {:>8} {:>8} {:>10} {:>10}",
+        "n", "γ", "|ζ|_max", "|ζ|_min", "asym", "winding", "D2_asy", "D10_asy", "Δ_Re", "Δ_Im"
+    );
     println!("  {}", "-".repeat(100));
 
     let small_radius = 1.0;
     let n_sample = 360;
 
     for (i, &gamma) in zeros.iter().take(30).enumerate() {
-        if gamma < 12.0 { continue; }
+        if gamma < 12.0 {
+            continue;
+        }
         let td = analyze_teardrop(gamma, small_radius, n_sample);
         println!(
             "  {:>4} {:>8.2} {:>10.4} {:>10.6} {:>8.4} {:>8.3} {:>8.4} {:>8.4} {:>+10.4} {:>+10.4}",
-            i + 1, gamma, td.max_zeta_abs, td.min_zeta_abs,
-            td.asymmetry, td.phase_winding / PI, td.d2_asymmetry, td.d10_asymmetry,
-            td.centroid_re_shift, td.centroid_im_shift
+            i + 1,
+            gamma,
+            td.max_zeta_abs,
+            td.min_zeta_abs,
+            td.asymmetry,
+            td.phase_winding / PI,
+            td.d2_asymmetry,
+            td.d10_asymmetry,
+            td.centroid_re_shift,
+            td.centroid_im_shift
         );
     }
     println!();
@@ -299,10 +340,20 @@ fn main() {
     let mut down_count = 0;
 
     for &gamma in zeros.iter().take(80) {
-        if gamma < 12.0 { continue; }
+        if gamma < 12.0 {
+            continue;
+        }
         let td = analyze_teardrop(gamma, small_radius, n_sample);
-        if td.centroid_re_shift > 0.0 { right_count += 1; } else { left_count += 1; }
-        if td.centroid_im_shift > 0.0 { up_count += 1; } else { down_count += 1; }
+        if td.centroid_re_shift > 0.0 {
+            right_count += 1;
+        } else {
+            left_count += 1;
+        }
+        if td.centroid_im_shift > 0.0 {
+            up_count += 1;
+        } else {
+            down_count += 1;
+        }
     }
     println!("  Centroid pointing RIGHT (toward s=1): {}", right_count);
     println!("  Centroid pointing LEFT  (toward s=0): {}", left_count);
@@ -318,17 +369,23 @@ fn main() {
     println!();
 
     let gamma_1 = zeros[0];
-    println!("  {:>8} {:>10} {:>10} {:>8} {:>8} {:>+10} {:>+10}",
-             "radius", "|ζ|_max", "|ζ|_min", "asym", "winding", "Δ_Re", "Δ_Im");
+    println!(
+        "  {:>8} {:>10} {:>10} {:>8} {:>8} {:>+10} {:>+10}",
+        "radius", "|ζ|_max", "|ζ|_min", "asym", "winding", "Δ_Re", "Δ_Im"
+    );
     println!("  {}", "-".repeat(70));
 
     for &r in &[0.1, 0.5, 1.0, 2.0, 5.0, 10.0] {
         let td = analyze_teardrop(gamma_1, r, n_sample);
         println!(
             "  {:>8.1} {:>10.4} {:>10.6} {:>8.4} {:>8.3} {:>+10.4} {:>+10.4}",
-            r, td.max_zeta_abs, td.min_zeta_abs,
-            td.asymmetry, td.phase_winding / PI,
-            td.centroid_re_shift, td.centroid_im_shift
+            r,
+            td.max_zeta_abs,
+            td.min_zeta_abs,
+            td.asymmetry,
+            td.phase_winding / PI,
+            td.centroid_re_shift,
+            td.centroid_im_shift
         );
     }
     println!();
@@ -344,18 +401,31 @@ fn main() {
     println!("  If D_K asymmetry grows with K, the teardrop has 'spectral depth'.");
     println!();
 
-    println!("  {:>4} {:>8} {:>10} {:>10} {:>10} {:>10} {:>12}",
-             "n", "γ", "D2_asym", "D5_asym", "D10_asym", "|ζ|_asym", "D10/D2");
+    println!(
+        "  {:>4} {:>8} {:>10} {:>10} {:>10} {:>10} {:>12}",
+        "n", "γ", "D2_asym", "D5_asym", "D10_asym", "|ζ|_asym", "D10/D2"
+    );
     println!("  {}", "-".repeat(70));
 
     for (i, &gamma) in zeros.iter().take(20).enumerate() {
-        if gamma < 12.0 { continue; }
+        if gamma < 12.0 {
+            continue;
+        }
         let td = analyze_teardrop(gamma, small_radius, n_sample);
-        let ratio = if td.d2_asymmetry > 0.0 { td.d10_asymmetry / td.d2_asymmetry } else { 0.0 };
+        let ratio = if td.d2_asymmetry > 0.0 {
+            td.d10_asymmetry / td.d2_asymmetry
+        } else {
+            0.0
+        };
         println!(
             "  {:>4} {:>8.2} {:>10.4} {:>10.4} {:>10.4} {:>10.4} {:>12.4}",
-            i + 1, gamma, td.d2_asymmetry, td.d5_asymmetry, td.d10_asymmetry,
-            td.asymmetry, ratio
+            i + 1,
+            gamma,
+            td.d2_asymmetry,
+            td.d5_asymmetry,
+            td.d10_asymmetry,
+            td.asymmetry,
+            ratio
         );
     }
     println!();
@@ -369,8 +439,10 @@ fn main() {
     println!("  For the first 5 zeros, analyze the full-radius teardrop.");
     println!();
 
-    println!("  {:>4} {:>8} {:>10} {:>10} {:>10} {:>8} {:>+10} {:>+10}",
-             "n", "γ", "radius", "|ζ|_max", "|ζ|_min", "asym", "Δ_Re", "Δ_Im");
+    println!(
+        "  {:>4} {:>8} {:>10} {:>10} {:>10} {:>8} {:>+10} {:>+10}",
+        "n", "γ", "radius", "|ζ|_max", "|ζ|_min", "asym", "Δ_Re", "Δ_Im"
+    );
     println!("  {}", "-".repeat(75));
 
     for (i, &gamma) in zeros.iter().take(5).enumerate() {
@@ -378,8 +450,14 @@ fn main() {
         let td = analyze_teardrop(gamma, big_r, n_sample);
         println!(
             "  {:>4} {:>8.2} {:>10.2} {:>10.4} {:>10.6} {:>8.4} {:>+10.4} {:>+10.4}",
-            i + 1, gamma, big_r, td.max_zeta_abs, td.min_zeta_abs,
-            td.asymmetry, td.centroid_re_shift, td.centroid_im_shift
+            i + 1,
+            gamma,
+            big_r,
+            td.max_zeta_abs,
+            td.min_zeta_abs,
+            td.asymmetry,
+            td.centroid_re_shift,
+            td.centroid_im_shift
         );
     }
     println!();

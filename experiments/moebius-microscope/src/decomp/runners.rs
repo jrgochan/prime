@@ -12,10 +12,10 @@ use std::time::Instant;
 
 use super::classify::classify_term;
 use super::gram::{finalize_gram_metrics, print_gram_summary};
+use super::physics::{self, PhysicsRow};
 #[cfg(feature = "hpdf")]
 use super::row::merge_single_row;
 use super::row::{merge_results, RowResult};
-use super::physics::{self, PhysicsRow};
 use super::state::Decomp;
 #[cfg(feature = "hpdf")]
 use super::state::TracePoint;

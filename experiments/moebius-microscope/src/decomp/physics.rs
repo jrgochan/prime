@@ -15,49 +15,49 @@ use cathedral_utils::arith::{self, Kahan};
 #[derive(Default)]
 pub struct PhysicsMetrics {
     // §11: Glass Bridge
-    pub vt_rv: f64,         // vᵀRv (Ramanujan residual)
-    pub rank1_term: f64,    // ¼(Σv)² (rank-1 noise)
-    pub sum_v: f64,         // Σ_k v_k
+    pub vt_rv: f64,      // vᵀRv (Ramanujan residual)
+    pub rank1_term: f64, // ¼(Σv)² (rank-1 noise)
+    pub sum_v: f64,      // Σ_k v_k
 
     // §12: Dark Gram
-    pub vt_dark_v: f64,     // vᵀG⁽²⁾v  (gcd⁴/(180j²k²) weighted)
+    pub vt_dark_v: f64, // vᵀG⁽²⁾v  (gcd⁴/(180j²k²) weighted)
 
     // §13: Coprime diagonal
-    pub coprime_pairs: u64, // # of (j,k) with gcd=1
-    pub total_pairs: u64,   // total # of active pairs
-    pub coprime_energy: f64,// Σ_{gcd(j,k)=1} v_j·G·v_k
+    pub coprime_pairs: u64,  // # of (j,k) with gcd=1
+    pub total_pairs: u64,    // total # of active pairs
+    pub coprime_energy: f64, // Σ_{gcd(j,k)=1} v_j·G·v_k
     pub non_coprime_energy: f64,
 
     // §14: Ward identity — row cancellation
-    pub max_row_residual: f64,    // max_j |Σ_k G(j,k)·v_k|
-    pub mean_row_residual: f64,   // mean |Σ_k G(j,k)·v_k|
-    pub ward_violation: f64,      // Σ_j (Σ_k G(j,k)·v_k)²
+    pub max_row_residual: f64,  // max_j |Σ_k G(j,k)·v_k|
+    pub mean_row_residual: f64, // mean |Σ_k G(j,k)·v_k|
+    pub ward_violation: f64,    // Σ_j (Σ_k G(j,k)·v_k)²
 
     // §15: Gauge decomposition
-    pub gauge_u1: f64,      // Σ where gcd(j,k) is odd
-    pub gauge_su2: f64,     // Σ where 2|gcd(j,k) but not 4
-    pub gauge_su3: f64,     // Σ where 3|gcd(j,k)
-    pub gauge_other: f64,   // everything else
+    pub gauge_u1: f64,    // Σ where gcd(j,k) is odd
+    pub gauge_su2: f64,   // Σ where 2|gcd(j,k) but not 4
+    pub gauge_su3: f64,   // Σ where 3|gcd(j,k)
+    pub gauge_other: f64, // everything else
 
     // §16: S-duality comparison
-    pub positive_energy: f64, // vᵀRv contribution from positive terms
-    pub dark_energy: f64,     // vᵀG⁽²⁾v contribution
-    pub comparison_ratio: f64,// R(j,k) / G⁽²⁾(j,k) average ratio
+    pub positive_energy: f64,  // vᵀRv contribution from positive terms
+    pub dark_energy: f64,      // vᵀG⁽²⁾v contribution
+    pub comparison_ratio: f64, // R(j,k) / G⁽²⁾(j,k) average ratio
 }
 
 /// Per-row accumulator for physics channels (added alongside RowResult).
 pub struct PhysicsRow {
-    pub ramanujan_sum: Kahan,    // Σ_k v_j · R(j,k) · v_k  for this row
-    pub dark_sum: Kahan,         // Σ_k v_j · G²(j,k) · v_k  for this row
-    pub row_ward: Kahan,         // Σ_k G(j,k) · v_k  (Ward residual)
-    pub coprime_sum: Kahan,      // Σ_{gcd=1} v_j · G(j,k) · v_k
+    pub ramanujan_sum: Kahan, // Σ_k v_j · R(j,k) · v_k  for this row
+    pub dark_sum: Kahan,      // Σ_k v_j · G²(j,k) · v_k  for this row
+    pub row_ward: Kahan,      // Σ_k G(j,k) · v_k  (Ward residual)
+    pub coprime_sum: Kahan,   // Σ_{gcd=1} v_j · G(j,k) · v_k
     pub coprime_count: u64,
     pub total_count: u64,
     pub gauge_u1: Kahan,
     pub gauge_su2: Kahan,
     pub gauge_su3: Kahan,
     pub gauge_other: Kahan,
-    pub positive_r: Kahan,       // positive Ramanujan terms
+    pub positive_r: Kahan, // positive Ramanujan terms
 }
 
 impl PhysicsRow {

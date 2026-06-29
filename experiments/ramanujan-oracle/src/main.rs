@@ -125,7 +125,9 @@ fn compute_sigma(n: usize, mu: &[i8]) -> f64 {
     // Instead of enumerating divisors of j, iterate d and visit multiples
     let mut y = vec![0.0f64; n + 1];
     for d in 1..=n {
-        if w[d].abs() < 1e-300 { continue; }
+        if w[d].abs() < 1e-300 {
+            continue;
+        }
         let mut j = d;
         while j <= n {
             let q = j / d; // μ(j/d)
@@ -192,7 +194,8 @@ fn compute_sigma_sos(n: usize, mu: &[i8]) -> (f64, Vec<(usize, f64, f64)>) {
     sigma *= 12.0;
 
     // Scale terms for display
-    let terms: Vec<_> = terms.into_iter()
+    let terms: Vec<_> = terms
+        .into_iter()
         .map(|(d, m1v, t)| (d, m1v, 12.0 * t))
         .collect();
 
@@ -249,7 +252,9 @@ fn verify_inverse(n: usize, mu: &[i8], test_n: usize) -> f64 {
     let small = test_n.min(n);
     // x = 𝟏 (all ones) — use compute_r_inv_b with b = 𝟏
     let mut b = vec![0.0f64; small + 1];
-    for k in 1..=small { b[k] = 1.0; }
+    for k in 1..=small {
+        b[k] = 1.0;
+    }
     let (r_inv_one, _) = compute_r_inv_b(small, mu, &b);
 
     // Compute R · (R⁻¹ · 𝟏) and check it equals 𝟏
@@ -289,10 +294,14 @@ fn smith_verification(n: usize, mu: &[i8]) -> (f64, f64) {
     let mut direct = 0.0;
     for j in 1..=check_n {
         let mu_j = mu[j] as f64;
-        if mu_j == 0.0 { continue; }
+        if mu_j == 0.0 {
+            continue;
+        }
         for k in 1..=check_n {
             let mu_k = mu[k] as f64;
-            if mu_k == 0.0 { continue; }
+            if mu_k == 0.0 {
+                continue;
+            }
             let d = gcd(j, k) as f64;
             direct += d * d / (12.0 * (j * k) as f64) * mu_j / j as f64 * mu_k / k as f64;
         }
@@ -307,12 +316,12 @@ fn smith_verification(n: usize, mu: &[i8]) -> (f64, f64) {
 struct RamanujanResult {
     n: usize,
     ndiv: usize,
-    sigma: f64,           // 𝟏ᵀR⁻¹𝟏
-    d_sq_frac: f64,       // d²(frac) = 4/(4+σ)
-    vt_rv_smith: f64,     // vᵀRv via Smith
-    euler_target: f64,    // 1/(2π²)
-    smith_error: f64,     // |vᵀRv - 1/(2π²)|
-    inverse_error: f64,   // max|R·R⁻¹x - x|
+    sigma: f64,         // 𝟏ᵀR⁻¹𝟏
+    d_sq_frac: f64,     // d²(frac) = 4/(4+σ)
+    vt_rv_smith: f64,   // vᵀRv via Smith
+    euler_target: f64,  // 1/(2π²)
+    smith_error: f64,   // |vᵀRv - 1/(2π²)|
+    inverse_error: f64, // max|R·R⁻¹x - x|
     elapsed_secs: f64,
 }
 
@@ -357,16 +366,20 @@ fn compute_at_n(n: usize) -> RamanujanResult {
     let (sigma_sos, terms) = compute_sigma_sos(n, &mu);
     let sos_err = ((sigma - sigma_sos) / sigma.max(1.0)).abs();
     eprintln!("    𝟏ᵀR⁻¹𝟏 (SOS)   = {sigma_sos:.6e}");
-    eprintln!("    SOS relative error: {sos_err:.2e} {}",
-        if sos_err < 1e-6 { "✅" } else { "❌" });
+    eprintln!(
+        "    SOS relative error: {sos_err:.2e} {}",
+        if sos_err < 1e-6 { "✅" } else { "❌" }
+    );
 
     // Show top SOS contributions
     if !terms.is_empty() && n <= 200_000 {
         eprintln!("    Top SOS terms (d, M₁(N/d), 12·d²·M₁²/J₂):");
         for &(d, m1v, term) in terms.iter().take(10) {
             let pct = 100.0 * term / sigma_sos.max(1.0);
-            eprintln!("      d={d:>6}: M₁({:>6}) = {m1v:>12.1}, term = {term:>14.2e} ({pct:>5.1}%)",
-                n / d);
+            eprintln!(
+                "      d={d:>6}: M₁({:>6}) = {m1v:>12.1}, term = {term:>14.2e} ({pct:>5.1}%)",
+                n / d
+            );
         }
     }
 
@@ -382,8 +395,11 @@ fn compute_at_n(n: usize) -> RamanujanResult {
     eprintln!("    6N = {bound_6n:.0}");
     eprintln!("    σ/6N = {:.4e}", sigma_sos / bound_6n);
     eprintln!("    Tail terms (d > N/2): {tail_count}");
-    eprintln!("    σ ≥ 6N: {} {}", sigma_exceeds,
-        if sigma_exceeds { "✅" } else { "❌" });
+    eprintln!(
+        "    σ ≥ 6N: {} {}",
+        sigma_exceeds,
+        if sigma_exceeds { "✅" } else { "❌" }
+    );
 
     let elapsed = t0.elapsed().as_secs_f64();
     eprintln!("    ✓ Done in {elapsed:.1}s\n");
@@ -416,8 +432,7 @@ fn main() {
     let sizes: Vec<usize> = if args.is_empty() {
         // Default HC ladder
         vec![
-            12, 24, 36, 48, 60, 120, 180, 240, 360, 720,
-            840, 1260, 1680, 2520, 5040, 7560, 10080,
+            12, 24, 36, 48, 60, 120, 180, 240, 360, 720, 840, 1260, 1680, 2520, 5040, 7560, 10080,
         ]
     } else {
         args.iter()
@@ -446,15 +461,20 @@ fn main() {
 
     // ─── Trend analysis ──────────────────────────────────────────
     println!("\n  ─── TREND: Does 𝟏ᵀR⁻¹𝟏 → ∞? ───\n");
-    println!("  {:>6} {:>14} {:>12} {:>14}",
-             "N", "𝟏ᵀR⁻¹𝟏", "d²(frac)", "σ/ln(N)");
+    println!(
+        "  {:>6} {:>14} {:>12} {:>14}",
+        "N", "𝟏ᵀR⁻¹𝟏", "d²(frac)", "σ/ln(N)"
+    );
     println!("  {}", "─".repeat(50));
 
     for r in &results {
         let ln_n = (r.n as f64).ln();
         println!(
             "  {:>6} {:>14.4} {:>12.8} {:>14.6}",
-            r.n, r.sigma, r.d_sq_frac, r.sigma / ln_n
+            r.n,
+            r.sigma,
+            r.d_sq_frac,
+            r.sigma / ln_n
         );
     }
 
@@ -467,7 +487,11 @@ fn main() {
         println!("  σ(N={}) = {:.4e}", last.n, last.sigma);
         println!(
             "  Growth: {} (ratio = {:.4e})",
-            if growing { "↑ INCREASING" } else { "↓ DECREASING" },
+            if growing {
+                "↑ INCREASING"
+            } else {
+                "↓ DECREASING"
+            },
             last.sigma / first.sigma
         );
         println!("  d² at largest N: {:.4e}", last.d_sq_frac);
@@ -485,7 +509,8 @@ fn main() {
 
     // ─── Growth exponent analysis ─────────────────────────────────
     // Fit α in σ ~ N^α via log-log regression
-    let valid: Vec<_> = results.iter()
+    let valid: Vec<_> = results
+        .iter()
         .filter(|r| r.sigma > 0.0 && r.n > 1)
         .collect();
     if valid.len() >= 2 {
@@ -498,14 +523,13 @@ fn main() {
             let _ln_n_ratio = (w[1].n as f64).ln() / (w[0].n as f64).ln();
             let _ln_sigma_ratio = w[1].sigma.ln() / w[0].sigma.ln();
             let _alpha = (w[1].sigma.ln() - w[0].sigma.ln())
-                / (w[1].n as f64).ln().max(1.0).min(f64::MAX)
-                .max(1.0);
+                / (w[1].n as f64).ln().max(1.0).min(f64::MAX).max(1.0);
             // Better: direct exponent from two points
-            let a = (w[1].sigma / w[0].sigma).ln()
-                / ((w[1].n as f64) / (w[0].n as f64)).ln();
+            let a = (w[1].sigma / w[0].sigma).ln() / ((w[1].n as f64) / (w[0].n as f64)).ln();
             println!(
                 "  {:>5}→{:<5} {:>12.2e} {:>10.3}",
-                w[0].n, w[1].n,
+                w[0].n,
+                w[1].n,
                 w[1].sigma / w[0].sigma,
                 a
             );
@@ -517,12 +541,14 @@ fn main() {
         let sum_y: f64 = valid.iter().map(|r| r.sigma.ln()).sum();
         let sum_xy: f64 = valid.iter().map(|r| (r.n as f64).ln() * r.sigma.ln()).sum();
         let sum_xx: f64 = valid.iter().map(|r| (r.n as f64).ln().powi(2)).sum();
-        let alpha = (n_pts * sum_xy - sum_x * sum_y)
-            / (n_pts * sum_xx - sum_x * sum_x);
+        let alpha = (n_pts * sum_xy - sum_x * sum_y) / (n_pts * sum_xx - sum_x * sum_x);
 
         println!("\n  Global fit: α = {alpha:.4}");
         println!("  RH prediction: α → 3.5  (= 3 + 1/2, critical line)");
-        println!("  Deviation from RH: |α - 3.5| = {:.4}", (alpha - 3.5).abs());
+        println!(
+            "  Deviation from RH: |α - 3.5| = {:.4}",
+            (alpha - 3.5).abs()
+        );
     }
 
     // ─── 1/(2π²) verification ────────────────────────────────────
@@ -580,12 +606,16 @@ fn main() {
         "results": &results,
     });
     let summary_path = cert_dir.join("ramanujan_summary.json");
-    std::fs::write(&summary_path, serde_json::to_string_pretty(&summary).unwrap()).ok();
+    std::fs::write(
+        &summary_path,
+        serde_json::to_string_pretty(&summary).unwrap(),
+    )
+    .ok();
 
     // ─── Markdown report ─────────────────────────────────────────
-    let report_dir = PathBuf::from(
-        std::env::var("CARGO_MANIFEST_DIR").unwrap_or_else(|_| ".".into())
-    ).join("../../docs/ai/antigravity/dark-sector");
+    let report_dir =
+        PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap_or_else(|_| ".".into()))
+            .join("../../docs/ai/antigravity/dark-sector");
     std::fs::create_dir_all(&report_dir).ok();
 
     let mut md = String::new();
@@ -613,7 +643,11 @@ fn main() {
     if let (Some(first), Some(last)) = (results.first(), results.last()) {
         md.push_str(&format!(
             "## Growth\n\nσ(N={}) = {:.4e}\nσ(N={}) = {:.4e}\nGrowth ratio: {:.4e}\n\n",
-            first.n, first.sigma, last.n, last.sigma, last.sigma / first.sigma
+            first.n,
+            first.sigma,
+            last.n,
+            last.sigma,
+            last.sigma / first.sigma
         ));
     }
     md.push_str("**Consistent with RH.** 🔮\n");

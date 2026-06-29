@@ -18,30 +18,43 @@
 //!
 //! Created: May 29, 2026 — The Dyson Protocol (Gemini directive)
 
-use std::time::Instant;
-use rayon::prelude::*;
+use crate::modes::anomaly::exact_gram;
 use nalgebra::{DMatrix, DVector};
-use crate::modes::anomaly::{exact_gram};
+use rayon::prelude::*;
+use std::time::Instant;
 
 const EULER_GAMMA: f64 = 0.5772156649015329;
 
 /// Möbius function μ(n)
 fn moebius_fn(n: usize) -> i32 {
-    if n == 1 { return 1; }
+    if n == 1 {
+        return 1;
+    }
     let mut temp = n;
     let mut d = 2usize;
     let mut count = 0;
     while d * d <= temp {
         if temp.is_multiple_of(d) {
             let mut exp = 0;
-            while temp.is_multiple_of(d) { temp /= d; exp += 1; }
-            if exp > 1 { return 0; }
+            while temp.is_multiple_of(d) {
+                temp /= d;
+                exp += 1;
+            }
+            if exp > 1 {
+                return 0;
+            }
             count += 1;
         }
         d += 1;
     }
-    if temp > 1 { count += 1; }
-    if count % 2 == 0 { 1 } else { -1 }
+    if temp > 1 {
+        count += 1;
+    }
+    if count % 2 == 0 {
+        1
+    } else {
+        -1
+    }
 }
 
 /// BD mean: b_k = (ln(k) + 1 - γ) / k
@@ -50,7 +63,11 @@ fn bd_mean(k: usize) -> f64 {
 }
 
 fn gcd(a: usize, b: usize) -> usize {
-    if b == 0 { a } else { gcd(b, a % b) }
+    if b == 0 {
+        a
+    } else {
+        gcd(b, a % b)
+    }
 }
 
 /// Full sawtooth Gram: R_true(j,k) = gcd(j,k)²/(12jk) + 1/4
@@ -64,14 +81,19 @@ fn r_true(j: usize, k: usize) -> f64 {
 fn build_gram_matrix(n: usize) -> DMatrix<f64> {
     let dim = n - 1;
     // Compute upper triangle in parallel (each row independently)
-    let upper: Vec<Vec<f64>> = (0..dim).into_par_iter().map(|i| {
-        let ki = i + 2;
-        (i..dim).map(|j| {
-            let kj = j + 2;
-            exact_gram(ki, kj)
-        }).collect()
-    }).collect();
-    
+    let upper: Vec<Vec<f64>> = (0..dim)
+        .into_par_iter()
+        .map(|i| {
+            let ki = i + 2;
+            (i..dim)
+                .map(|j| {
+                    let kj = j + 2;
+                    exact_gram(ki, kj)
+                })
+                .collect()
+        })
+        .collect();
+
     let mut g = DMatrix::zeros(dim, dim);
     for i in 0..dim {
         for j in i..dim {
@@ -123,21 +145,33 @@ pub fn run(n_max: usize) {
     println!("§1. DYSON EQUATION: d²_opt(G) = (1 - bᵀ R⁻¹ b) + (w*)ᵀ Δ v*");
     println!("════════════════════════════════════════════════════════════════════════════════════════════");
     println!();
-    println!("{:>6} {:>14} {:>14} {:>14} {:>12} {:>12} {:>8}",
-             "N", "d²_free", "scattering", "d²_opt(G)", "d²·lnN", "check", "time");
+    println!(
+        "{:>6} {:>14} {:>14} {:>14} {:>12} {:>12} {:>8}",
+        "N", "d²_free", "scattering", "d²_opt(G)", "d²·lnN", "check", "time"
+    );
     println!("{}", "-".repeat(90));
 
     let mut test_ns: Vec<usize> = vec![];
     for n in [5, 8, 10, 15, 20, 30, 40, 50, 60, 80, 100].iter() {
-        if *n <= n_max { test_ns.push(*n); }
+        if *n <= n_max {
+            test_ns.push(*n);
+        }
     }
     // Add larger N
     let mut n = 120;
     while n <= n_max {
         test_ns.push(n);
-        n += if n < 300 { 20 } else if n < 500 { 50 } else { 100 };
+        n += if n < 300 {
+            20
+        } else if n < 500 {
+            50
+        } else {
+            100
+        };
     }
-    if !test_ns.contains(&n_max) && n_max > 100 { test_ns.push(n_max); }
+    if !test_ns.contains(&n_max) && n_max > 100 {
+        test_ns.push(n_max);
+    }
 
     let mut dyson_results: Vec<(usize, f64, f64, f64)> = Vec::new();
 
@@ -159,11 +193,17 @@ pub fn run(n_max: usize) {
 
         let w_star = match lu_rt.solve(&b) {
             Some(w) => w,
-            None => { eprintln!("  N={}: R_true singular!", n); continue; }
+            None => {
+                eprintln!("  N={}: R_true singular!", n);
+                continue;
+            }
         };
         let v_star = match lu_g.solve(&b) {
             Some(v) => v,
-            None => { eprintln!("  N={}: G singular!", n); continue; }
+            None => {
+                eprintln!("  N={}: G singular!", n);
+                continue;
+            }
         };
 
         // Term 1: d²_free = 1 - bᵀ w*
@@ -184,8 +224,16 @@ pub fn run(n_max: usize) {
 
         dyson_results.push((n, d2_free, scattering, d2_opt));
 
-        println!("{:>6} {:>+14.8} {:>+14.8} {:>14.10} {:>12.6} {:>12.2e} {:>7.1?}",
-                 n, d2_free, scattering, d2_opt, d2_opt * log_n, check, elapsed);
+        println!(
+            "{:>6} {:>+14.8} {:>+14.8} {:>14.10} {:>12.6} {:>12.2e} {:>7.1?}",
+            n,
+            d2_free,
+            scattering,
+            d2_opt,
+            d2_opt * log_n,
+            check,
+            elapsed
+        );
     }
 
     // ═══════════════════════════════════════════════
@@ -198,8 +246,10 @@ pub fn run(n_max: usize) {
     println!();
     println!("d²_BD(w_bare) = d²_free + w_bare^T Δ_true w_bare   [UPPER BOUND on d²_opt]");
     println!();
-    println!("{:>6} {:>12} {:>14} {:>14} {:>14} {:>14} {:>10}",
-             "N", "cᵀw_bare", "d²_free", "w^TΔw", "d²_Born", "d²_opt", "ratio");
+    println!(
+        "{:>6} {:>12} {:>14} {:>14} {:>14} {:>14} {:>10}",
+        "N", "cᵀw_bare", "d²_free", "w^TΔw", "d²_Born", "d²_opt", "ratio"
+    );
     println!("{}", "-".repeat(90));
 
     for &n in &test_ns {
@@ -215,13 +265,19 @@ pub fn run(n_max: usize) {
         // Bare BD weights: w_bare = R_true⁻¹ b
         let w_bare = match lu_rt.solve(&b) {
             Some(w) => w,
-            None => { eprintln!("  N={}: R_true singular!", n); continue; }
+            None => {
+                eprintln!("  N={}: R_true singular!", n);
+                continue;
+            }
         };
 
         // Optimal: v* = G⁻¹ b
         let v_star = match lu_g.solve(&b) {
             Some(v) => v,
-            None => { eprintln!("  N={}: G singular!", n); continue; }
+            None => {
+                eprintln!("  N={}: G singular!", n);
+                continue;
+            }
         };
 
         // DC orthogonality: c^T w_bare (should → 0 by symmetry)
@@ -239,10 +295,16 @@ pub fn run(n_max: usize) {
         // Optimal: d²_opt = 1 - b^T v*
         let d2_opt = 1.0 - b.dot(&v_star);
 
-        let ratio = if d2_opt > 0.0 { d2_born / d2_opt } else { f64::INFINITY };
+        let ratio = if d2_opt > 0.0 {
+            d2_born / d2_opt
+        } else {
+            f64::INFINITY
+        };
 
-        println!("{:>6} {:>+12.8} {:>+14.8} {:>+14.8} {:>14.10} {:>14.10} {:>10.4}",
-                 n, ct_w_bare, d2_free, scatt, d2_born, d2_opt, ratio);
+        println!(
+            "{:>6} {:>+12.8} {:>+14.8} {:>+14.8} {:>14.10} {:>14.10} {:>10.4}",
+            n, ct_w_bare, d2_free, scatt, d2_born, d2_opt, ratio
+        );
     }
 
     // ═══════════════════════════════════════════════
@@ -256,8 +318,10 @@ pub fn run(n_max: usize) {
     println!("Wilsonian UV cutoff: w_k = -μ(k)(1 - lnk/lnN)/k");
     println!("HCNs: 120, 180, 240, 360, 720, 840, 1260, 1680, 2520");
     println!();
-    println!("{:>6} {:>14} {:>14} {:>14} {:>14} {:>14} {:>8}",
-             "N", "d²_saw(FM)", "2(c-b)ᵀv", "vᵀΔ_true v", "d²_BD(FM)", "d²_opt", "time");
+    println!(
+        "{:>6} {:>14} {:>14} {:>14} {:>14} {:>14} {:>8}",
+        "N", "d²_saw(FM)", "2(c-b)ᵀv", "vᵀΔ_true v", "d²_BD(FM)", "d²_opt", "time"
+    );
     println!("{}", "-".repeat(95));
 
     // HCNs up to reasonable N for CPU
@@ -302,21 +366,27 @@ pub fn run(n_max: usize) {
         let lu_g = g_mat.lu();
         let v_star = match lu_g.solve(&b) {
             Some(v) => v,
-            None => { continue; }
+            None => {
+                continue;
+            }
         };
         let d2_opt = 1.0 - b.dot(&v_star);
 
         let elapsed = t0.elapsed();
 
-        println!("{:>6} {:>+14.8} {:>+14.8} {:>+14.8} {:>14.10} {:>14.10} {:>7.1?}",
-                 n, d2_saw, mean_corr, anomaly, d2_bd, d2_opt, elapsed);
+        println!(
+            "{:>6} {:>+14.8} {:>+14.8} {:>+14.8} {:>14.10} {:>14.10} {:>7.1?}",
+            n, d2_saw, mean_corr, anomaly, d2_bd, d2_opt, elapsed
+        );
     }
 
     // Also run at non-HCN neighbors for comparison
     println!();
     println!("COMPARISON: Non-HCN neighbors");
-    println!("{:>6} {:>14} {:>14} {:>14} {:>14} {:>14} {:>8}",
-             "N", "d²_saw(FM)", "2(c-b)ᵀv", "vᵀΔ_true v", "d²_BD(FM)", "d²_opt", "time");
+    println!(
+        "{:>6} {:>14} {:>14} {:>14} {:>14} {:>14} {:>8}",
+        "N", "d²_saw(FM)", "2(c-b)ᵀv", "vᵀΔ_true v", "d²_BD(FM)", "d²_opt", "time"
+    );
     println!("{}", "-".repeat(95));
 
     let non_hcn_ns: Vec<usize> = vec![100, 150, 200, 300, 500, 700];
@@ -351,14 +421,18 @@ pub fn run(n_max: usize) {
         let lu_g = g_mat.lu();
         let v_star = match lu_g.solve(&b) {
             Some(v) => v,
-            None => { continue; }
+            None => {
+                continue;
+            }
         };
         let d2_opt = 1.0 - b.dot(&v_star);
 
         let elapsed = t0.elapsed();
 
-        println!("{:>6} {:>+14.8} {:>+14.8} {:>+14.8} {:>14.10} {:>14.10} {:>7.1?}",
-                 n, d2_saw, mean_corr, anomaly, d2_bd, d2_opt, elapsed);
+        println!(
+            "{:>6} {:>+14.8} {:>+14.8} {:>+14.8} {:>14.10} {:>14.10} {:>7.1?}",
+            n, d2_saw, mean_corr, anomaly, d2_bd, d2_opt, elapsed
+        );
     }
 
     // ═══════════════════════════════════════════════

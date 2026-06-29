@@ -1,4 +1,13 @@
-#![allow(dead_code, unused_variables, unused_imports, unused_assignments, clippy::needless_range_loop, clippy::doc_lazy_continuation, non_snake_case, clippy::empty_line_after_doc_comments)]
+#![allow(
+    dead_code,
+    unused_variables,
+    unused_imports,
+    unused_assignments,
+    clippy::needless_range_loop,
+    clippy::doc_lazy_continuation,
+    non_snake_case,
+    clippy::empty_line_after_doc_comments
+)]
 // overcancellation-scan/src/bin/d6_anomaly_probe.rs
 //
 // ╔═══════════════════════════════════════════════════════════════════╗
@@ -21,12 +30,20 @@ use rayon::prelude::*;
 use std::time::Instant;
 
 fn is_prime(n: usize) -> bool {
-    if n < 2 { return false; }
-    if n < 4 { return true; }
-    if n.is_multiple_of(2) || n.is_multiple_of(3) { return false; }
+    if n < 2 {
+        return false;
+    }
+    if n < 4 {
+        return true;
+    }
+    if n.is_multiple_of(2) || n.is_multiple_of(3) {
+        return false;
+    }
     let mut i = 5;
     while i * i <= n {
-        if n.is_multiple_of(i) || n.is_multiple_of(i + 2) { return false; }
+        if n.is_multiple_of(i) || n.is_multiple_of(i + 2) {
+            return false;
+        }
         i += 6;
     }
     true
@@ -38,7 +55,9 @@ fn num_divisors(n: usize) -> usize {
     while d * d <= n {
         if n.is_multiple_of(d) {
             count += 1;
-            if d != n / d { count += 1; }
+            if d != n / d {
+                count += 1;
+            }
         }
         d += 1;
     }
@@ -56,10 +75,14 @@ fn factorize(n: usize) -> Vec<(usize, usize)> {
             m /= p;
             e += 1;
         }
-        if e > 0 { factors.push((p, e)); }
+        if e > 0 {
+            factors.push((p, e));
+        }
         p += 1;
     }
-    if m > 1 { factors.push((m, 1)); }
+    if m > 1 {
+        factors.push((m, 1));
+    }
     factors
 }
 
@@ -67,7 +90,7 @@ fn factorize(n: usize) -> Vec<(usize, usize)> {
 fn classify_d6(n: usize) -> &'static str {
     let factors = factorize(n);
     match factors.len() {
-        1 => "p^5",         // p⁵ (e.g., 32)
+        1 => "p^5", // p⁵ (e.g., 32)
         2 => {
             let exps: Vec<usize> = factors.iter().map(|&(_, e)| e).collect();
             if exps.contains(&2) && exps.contains(&1) {
@@ -76,7 +99,7 @@ fn classify_d6(n: usize) -> &'static str {
                 "other"
             }
         }
-        3 => "pqr",          // three distinct primes
+        3 => "pqr", // three distinct primes
         _ => "other",
     }
 }
@@ -146,7 +169,12 @@ fn main() {
     let t0 = Instant::now();
     let full_gram = build_gram(max_n);
     let full_dim = max_n - 1;
-    println!("  [Built {}×{} Gram matrix in {:.1}s]", full_dim, full_dim, t0.elapsed().as_secs_f64());
+    println!(
+        "  [Built {}×{} Gram matrix in {:.1}s]",
+        full_dim,
+        full_dim,
+        t0.elapsed().as_secs_f64()
+    );
 
     // ══════════════════════════════════════════════════
     // Compute cos²θ, S(N) for all N
@@ -157,7 +185,7 @@ fn main() {
         cos2: f64,
         d_n: usize,
         class: String,
-        s_aggregate: f64,  // Σ v_min[k] / (k+1)
+        s_aggregate: f64, // Σ v_min[k] / (k+1)
         largest_prime_factor: usize,
         smallest_prime_factor: usize,
         gcd_with_prev_prime: usize,
@@ -167,15 +195,19 @@ fn main() {
     let mut prev_prime = 2usize;
 
     println!();
-    println!("  {:>5} {:>12} {:>5} {:>6} {:>12} {:>6} {:>6} {:>6}",
-        "N", "cos²θ", "d(N)", "class", "S_aggregate", "lpf", "spf", "gcd_p");
+    println!(
+        "  {:>5} {:>12} {:>5} {:>6} {:>12} {:>6} {:>6} {:>6}",
+        "N", "cos²θ", "d(N)", "class", "S_aggregate", "lpf", "spf", "gcd_p"
+    );
     println!("  {}", "─".repeat(75));
 
     for n in start_n..=max_n {
         let dim = n - 1;
         let prev_dim = dim - 1;
 
-        if prev_dim < 2 { continue; }
+        if prev_dim < 2 {
+            continue;
+        }
 
         let sub = extract_submatrix(&full_gram, full_dim, dim);
         let prev_sub = extract_submatrix(&full_gram, full_dim, prev_dim);
@@ -191,12 +223,12 @@ fn main() {
         let cos2 = if g_nsq > 1e-30 {
             let proj = dot(&g_vec, &v_min_prev);
             proj * proj / g_nsq
-        } else { 0.0 };
+        } else {
+            0.0
+        };
 
         // Entanglement brake aggregate: S = Σ v_min[k] / (k+1)
-        let s_agg: f64 = (0..prev_dim)
-            .map(|k| v_min_prev[k] / (k + 1) as f64)
-            .sum();
+        let s_agg: f64 = (0..prev_dim).map(|k| v_min_prev[k] / (k + 1) as f64).sum();
 
         let dn = num_divisors(n);
         let factors = factorize(n);
@@ -212,25 +244,44 @@ fn main() {
         let spf = factors.first().map(|&(p, _)| p).unwrap_or(1);
 
         fn gcd(mut a: usize, mut b: usize) -> usize {
-            while b != 0 { let t = b; b = a % b; a = t; } a
+            while b != 0 {
+                let t = b;
+                b = a % b;
+                a = t;
+            }
+            a
         }
         let gcd_p = gcd(n, prev_prime);
-        if is_prime(n) { prev_prime = n; }
-
-        let show = dn == 6 || is_prime(n) && n <= 200
-            || n <= 15 || n % 200 == 0 || n == max_n;
-
-        if show {
-            println!("  {:5} {:12.4e} {:5} {:>6} {:12.4e} {:6} {:6} {:6}",
-                n, cos2, dn, class, s_agg, lpf, spf, gcd_p);
+        if is_prime(n) {
+            prev_prime = n;
         }
 
-        records.push(Record { n, cos2, d_n: dn, class, s_aggregate: s_agg,
-            largest_prime_factor: lpf, smallest_prime_factor: spf,
-            gcd_with_prev_prime: gcd_p });
+        let show = dn == 6 || is_prime(n) && n <= 200 || n <= 15 || n % 200 == 0 || n == max_n;
+
+        if show {
+            println!(
+                "  {:5} {:12.4e} {:5} {:>6} {:12.4e} {:6} {:6} {:6}",
+                n, cos2, dn, class, s_agg, lpf, spf, gcd_p
+            );
+        }
+
+        records.push(Record {
+            n,
+            cos2,
+            d_n: dn,
+            class,
+            s_aggregate: s_agg,
+            largest_prime_factor: lpf,
+            smallest_prime_factor: spf,
+            gcd_with_prev_prime: gcd_p,
+        });
 
         if n % 200 == 0 {
-            eprintln!("  ... N={} done ({:.0}s total)", n, t_start.elapsed().as_secs_f64());
+            eprintln!(
+                "  ... N={} done ({:.0}s total)",
+                n,
+                t_start.elapsed().as_secs_f64()
+            );
         }
     }
 
@@ -243,46 +294,73 @@ fn main() {
     println!("  ANALYSIS 1: d(N)=6 Factorization Decomposition");
     println!("══════════════════════════════════════════════════════════════");
 
-    let d6_records: Vec<&Record> = records.iter()
+    let d6_records: Vec<&Record> = records
+        .iter()
         .filter(|r| r.d_n == 6 && r.cos2 > 1e-30)
         .collect();
 
-    let p2q: Vec<f64> = d6_records.iter()
+    let p2q: Vec<f64> = d6_records
+        .iter()
         .filter(|r| r.class == "p²q")
         .map(|r| r.cos2)
         .collect();
-    let pqr: Vec<f64> = d6_records.iter()
+    let pqr: Vec<f64> = d6_records
+        .iter()
         .filter(|r| r.class == "pqr")
         .map(|r| r.cos2)
         .collect();
 
     println!();
-    println!("  {:>8} {:>8} {:>14} {:>14} {:>10}",
-        "Type", "Count", "Mean cos²θ", "Max cos²θ", "Std");
+    println!(
+        "  {:>8} {:>8} {:>14} {:>14} {:>10}",
+        "Type", "Count", "Mean cos²θ", "Max cos²θ", "Std"
+    );
 
     for (name, data) in &[("p²q", &p2q), ("pqr", &pqr)] {
-        if data.is_empty() { continue; }
+        if data.is_empty() {
+            continue;
+        }
         let mean: f64 = data.iter().sum::<f64>() / data.len() as f64;
         let max: f64 = data.iter().cloned().fold(0.0f64, f64::max);
-        let std: f64 = (data.iter().map(|x| (x - mean).powi(2)).sum::<f64>()
-            / data.len() as f64).sqrt();
-        println!("  {:>8} {:>8} {:14.4e} {:14.4e} {:10.4e}",
-            name, data.len(), mean, max, std);
+        let std: f64 =
+            (data.iter().map(|x| (x - mean).powi(2)).sum::<f64>() / data.len() as f64).sqrt();
+        println!(
+            "  {:>8} {:>8} {:14.4e} {:14.4e} {:10.4e}",
+            name,
+            data.len(),
+            mean,
+            max,
+            std
+        );
     }
 
     // Show the actual d=6 numbers with their cos²θ
     println!();
     println!("  Top 20 d(N)=6 numbers by cos²θ:");
-    println!("  {:>5} {:>12} {:>6} {:>30}",
-        "N", "cos²θ", "type", "factorization");
+    println!(
+        "  {:>5} {:>12} {:>6} {:>30}",
+        "N", "cos²θ", "type", "factorization"
+    );
     let mut d6_sorted: Vec<&Record> = d6_records.clone();
     d6_sorted.sort_by(|a, b| b.cos2.partial_cmp(&a.cos2).unwrap());
     for r in d6_sorted.iter().take(20) {
-        let f: Vec<String> = factorize(r.n).iter()
-            .map(|&(p, e)| if e == 1 { format!("{}", p) } else { format!("{}^{}", p, e) })
+        let f: Vec<String> = factorize(r.n)
+            .iter()
+            .map(|&(p, e)| {
+                if e == 1 {
+                    format!("{}", p)
+                } else {
+                    format!("{}^{}", p, e)
+                }
+            })
             .collect();
-        println!("  {:5} {:12.4e} {:>6} {:>30}",
-            r.n, r.cos2, r.class, f.join(" · "));
+        println!(
+            "  {:5} {:12.4e} {:>6} {:>30}",
+            r.n,
+            r.cos2,
+            r.class,
+            f.join(" · ")
+        );
     }
 
     // ══════════════════════════════════════════════════
@@ -295,7 +373,8 @@ fn main() {
     println!("══════════════════════════════════════════════════════════════");
 
     // Compute correlation between |S_aggregate| and cos²θ
-    let brake_data: Vec<(f64, f64)> = records.iter()
+    let brake_data: Vec<(f64, f64)> = records
+        .iter()
         .filter(|r| r.n >= 20 && r.cos2 > 1e-30)
         .map(|r| (r.s_aggregate.abs(), r.cos2))
         .collect();
@@ -304,10 +383,28 @@ fn main() {
         let n = brake_data.len() as f64;
         let mx: f64 = brake_data.iter().map(|(x, _)| x).sum::<f64>() / n;
         let my: f64 = brake_data.iter().map(|(_, y)| y).sum::<f64>() / n;
-        let cov: f64 = brake_data.iter().map(|(x, y)| (x - mx) * (y - my)).sum::<f64>() / n;
-        let sx: f64 = (brake_data.iter().map(|(x, _)| (x - mx).powi(2)).sum::<f64>() / n).sqrt();
-        let sy: f64 = (brake_data.iter().map(|(_, y)| (y - my).powi(2)).sum::<f64>() / n).sqrt();
-        let corr = if sx > 0.0 && sy > 0.0 { cov / (sx * sy) } else { 0.0 };
+        let cov: f64 = brake_data
+            .iter()
+            .map(|(x, y)| (x - mx) * (y - my))
+            .sum::<f64>()
+            / n;
+        let sx: f64 = (brake_data
+            .iter()
+            .map(|(x, _)| (x - mx).powi(2))
+            .sum::<f64>()
+            / n)
+            .sqrt();
+        let sy: f64 = (brake_data
+            .iter()
+            .map(|(_, y)| (y - my).powi(2))
+            .sum::<f64>()
+            / n)
+            .sqrt();
+        let corr = if sx > 0.0 && sy > 0.0 {
+            cov / (sx * sy)
+        } else {
+            0.0
+        };
 
         println!();
         println!("  Pearson correlation(|S|, cos²θ) = {:.6}", corr);
@@ -315,7 +412,8 @@ fn main() {
     }
 
     // Log-log correlation
-    let log_brake: Vec<(f64, f64)> = brake_data.iter()
+    let log_brake: Vec<(f64, f64)> = brake_data
+        .iter()
         .filter(|&&(x, y)| x > 1e-30 && y > 1e-30)
         .map(|&(x, y)| (x.ln(), y.ln()))
         .collect();
@@ -324,21 +422,35 @@ fn main() {
         let n = log_brake.len() as f64;
         let mx: f64 = log_brake.iter().map(|(x, _)| x).sum::<f64>() / n;
         let my: f64 = log_brake.iter().map(|(_, y)| y).sum::<f64>() / n;
-        let cov: f64 = log_brake.iter().map(|(x, y)| (x - mx) * (y - my)).sum::<f64>() / n;
+        let cov: f64 = log_brake
+            .iter()
+            .map(|(x, y)| (x - mx) * (y - my))
+            .sum::<f64>()
+            / n;
         let sx: f64 = (log_brake.iter().map(|(x, _)| (x - mx).powi(2)).sum::<f64>() / n).sqrt();
         let sy: f64 = (log_brake.iter().map(|(_, y)| (y - my).powi(2)).sum::<f64>() / n).sqrt();
-        let log_corr = if sx > 0.0 && sy > 0.0 { cov / (sx * sy) } else { 0.0 };
+        let log_corr = if sx > 0.0 && sy > 0.0 {
+            cov / (sx * sy)
+        } else {
+            0.0
+        };
 
         println!("  Log-log correlation(ln|S|, ln cos²θ) = {:.6}", log_corr);
     }
 
     // By d(N) group: what is |S| like?
     println!();
-    println!("  {:>6} {:>8} {:>14} {:>14}",
-        "d(N)", "count", "mean |S|", "mean cos²θ");
-    let mut by_dn: std::collections::HashMap<usize, Vec<(f64, f64)>> = std::collections::HashMap::new();
+    println!(
+        "  {:>6} {:>8} {:>14} {:>14}",
+        "d(N)", "count", "mean |S|", "mean cos²θ"
+    );
+    let mut by_dn: std::collections::HashMap<usize, Vec<(f64, f64)>> =
+        std::collections::HashMap::new();
     for r in records.iter().filter(|r| r.n >= 20 && r.cos2 > 1e-30) {
-        by_dn.entry(r.d_n).or_default().push((r.s_aggregate.abs(), r.cos2));
+        by_dn
+            .entry(r.d_n)
+            .or_default()
+            .push((r.s_aggregate.abs(), r.cos2));
     }
     let mut keys: Vec<usize> = by_dn.keys().cloned().collect();
     keys.sort();
@@ -361,15 +473,20 @@ fn main() {
     println!("══════════════════════════════════════════════════════════════");
 
     let mut by_spf: std::collections::HashMap<usize, Vec<f64>> = std::collections::HashMap::new();
-    for r in records.iter().filter(|r| r.n >= 20 && !r.class.contains("prime") && r.cos2 > 1e-30) {
-        by_spf.entry(r.smallest_prime_factor).or_default().push(r.cos2);
+    for r in records
+        .iter()
+        .filter(|r| r.n >= 20 && !r.class.contains("prime") && r.cos2 > 1e-30)
+    {
+        by_spf
+            .entry(r.smallest_prime_factor)
+            .or_default()
+            .push(r.cos2);
     }
     let mut spf_keys: Vec<usize> = by_spf.keys().cloned().collect();
     spf_keys.sort();
 
     println!();
-    println!("  {:>6} {:>8} {:>14}",
-        "spf", "count", "mean cos²θ");
+    println!("  {:>6} {:>8} {:>14}", "spf", "count", "mean cos²θ");
     for spf in spf_keys {
         let vals = &by_spf[&spf];
         if vals.len() >= 3 {

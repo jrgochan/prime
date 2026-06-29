@@ -1,4 +1,10 @@
-#![allow(dead_code, unused_variables, clippy::needless_range_loop, clippy::empty_line_after_doc_comments, clippy::doc_lazy_continuation)]
+#![allow(
+    dead_code,
+    unused_variables,
+    clippy::needless_range_loop,
+    clippy::empty_line_after_doc_comments,
+    clippy::doc_lazy_continuation
+)]
 //! HPDF verification tool — build, convert, and verify Cathedral HDF5 files.
 //!
 //! Usage:

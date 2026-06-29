@@ -26,10 +26,10 @@
 //!    cargo run --release --bin gershgorin-spectroscope -- --dims 50,500,5000
 //! ═══════════════════════════════════════════════════════════════════════════
 
-use std::time::Instant;
-use std::collections::BTreeMap;
 use clap::Parser;
 use dark_gram_spectroscopy::dark_gram;
+use std::collections::BTreeMap;
+use std::time::Instant;
 
 /// Gershgorin Spectroscope v2 — GCD Anatomy & Spectral Cross-Check
 #[derive(Parser)]
@@ -110,7 +110,10 @@ fn main() {
     eprintln!("  🔬 GERSHGORIN SPECTROSCOPE v2 — GCD Anatomy & Spectral Probe");
     eprintln!("═══════════════════════════════════════════════════════════════");
     eprintln!();
-    eprintln!("  Coprime baseline: ρ_coprime → π²/6 - 1 = {:.6}", pi_sq_over_6_minus_1);
+    eprintln!(
+        "  Coprime baseline: ρ_coprime → π²/6 - 1 = {:.6}",
+        pi_sq_over_6_minus_1
+    );
     eprintln!("  v1 Discovery: Gershgorin FAILS at highly composite rows!");
     eprintln!("  v2 Goal: Anatomize the failure + confirm spectral PD");
     eprintln!("  Dimensions: {:?}", cli.dims);
@@ -131,17 +134,32 @@ fn main() {
 
         println!(
             "{}\t{:.6}\t{:.6}\t{:.6}\t{:.6}\t{}\t{}\t{}\t{}\t{}\t{}\t{:.3}",
-            dim, result.rho_max, result.rho_min, result.rho_mean, result.rho_median,
-            result.worst_row, worst_tau,
+            dim,
+            result.rho_max,
+            result.rho_min,
+            result.rho_mean,
+            result.rho_median,
+            result.worst_row,
+            worst_tau,
             if result.gershgorin_pd { "YES" } else { "NO" },
-            result.actual_lambda_min.map_or("N/A".to_string(), |v| format!("{:.6e}", v)),
-            result.actual_kappa.map_or("N/A".to_string(), |v| format!("{:.3e}", v)),
-            result.actual_pd.map_or("N/A".to_string(), |v| if v { "YES".to_string() } else { "NO".to_string() }),
+            result
+                .actual_lambda_min
+                .map_or("N/A".to_string(), |v| format!("{:.6e}", v)),
+            result
+                .actual_kappa
+                .map_or("N/A".to_string(), |v| format!("{:.3e}", v)),
+            result.actual_pd.map_or("N/A".to_string(), |v| if v {
+                "YES".to_string()
+            } else {
+                "NO".to_string()
+            }),
             result.elapsed_secs,
         );
 
         // Collect divisor correlation from the largest dimension
-        if dim == *cli.dims.last().unwrap_or(&0) || dim == cli.dims.iter().copied().max().unwrap_or(0) {
+        if dim == *cli.dims.last().unwrap_or(&0)
+            || dim == cli.dims.iter().copied().max().unwrap_or(0)
+        {
             // We'll compute this at the end
         }
 
@@ -154,19 +172,36 @@ fn main() {
     eprintln!("  📊 GERSHGORIN vs ACTUAL EIGENVALUES");
     eprintln!("═══════════════════════════════════════════════════════════════");
     eprintln!();
-    eprintln!("  {:>8}  {:>10}  {:>10}  {:>12}  {:>12}  {:>8}  {:>8}",
-        "N", "ρ_max", "ρ_mean", "Gersh λ_min", "Actual λ_min", "Gersh?", "Actual?");
-    eprintln!("  {:>8}  {:>10}  {:>10}  {:>12}  {:>12}  {:>8}  {:>8}",
-        "────────", "──────────", "──────────", "────────────", "────────────", "────────", "────────");
+    eprintln!(
+        "  {:>8}  {:>10}  {:>10}  {:>12}  {:>12}  {:>8}  {:>8}",
+        "N", "ρ_max", "ρ_mean", "Gersh λ_min", "Actual λ_min", "Gersh?", "Actual?"
+    );
+    eprintln!(
+        "  {:>8}  {:>10}  {:>10}  {:>12}  {:>12}  {:>8}  {:>8}",
+        "────────",
+        "──────────",
+        "──────────",
+        "────────────",
+        "────────────",
+        "────────",
+        "────────"
+    );
 
     for r in &all_results {
         eprintln!(
             "  {:>8}  {:>10.6}  {:>10.6}  {:>12.4e}  {:>12}  {:>8}  {:>8}",
-            r.dim, r.rho_max, r.rho_mean,
+            r.dim,
+            r.rho_max,
+            r.rho_mean,
             r.lambda_min_gershgorin,
-            r.actual_lambda_min.map_or("—".to_string(), |v| format!("{:.4e}", v)),
+            r.actual_lambda_min
+                .map_or("—".to_string(), |v| format!("{:.4e}", v)),
             if r.gershgorin_pd { "✅" } else { "❌" },
-            r.actual_pd.map_or("—".to_string(), |v| if v { "✅".to_string() } else { "❌".to_string() }),
+            r.actual_pd.map_or("—".to_string(), |v| if v {
+                "✅".to_string()
+            } else {
+                "❌".to_string()
+            }),
         );
     }
 
@@ -174,20 +209,34 @@ fn main() {
     if let Some(largest) = all_results.last() {
         eprintln!();
         eprintln!("═══════════════════════════════════════════════════════════════");
-        eprintln!("  🧬 GCD ANATOMY — Worst Row j={} (N={})", largest.worst_row, largest.dim);
+        eprintln!(
+            "  🧬 GCD ANATOMY — Worst Row j={} (N={})",
+            largest.worst_row, largest.dim
+        );
         eprintln!("═══════════════════════════════════════════════════════════════");
         eprintln!();
-        eprintln!("  τ({}) = {} divisors", largest.worst_row, count_divisors(largest.worst_row));
+        eprintln!(
+            "  τ({}) = {} divisors",
+            largest.worst_row,
+            count_divisors(largest.worst_row)
+        );
         eprintln!("  Divisors: {:?}", get_divisors(largest.worst_row));
         eprintln!();
         eprintln!("  Off-diagonal energy by GCD class:");
-        eprintln!("  {:>6}  {:>12}  {:>10}  {:>8}", "gcd", "energy", "% of total", "count");
-        eprintln!("  {:>6}  {:>12}  {:>10}  {:>8}", "──────", "────────────", "──────────", "────────");
+        eprintln!(
+            "  {:>6}  {:>12}  {:>10}  {:>8}",
+            "gcd", "energy", "% of total", "count"
+        );
+        eprintln!(
+            "  {:>6}  {:>12}  {:>10}  {:>8}",
+            "──────", "────────────", "──────────", "────────"
+        );
 
         let total_energy: f64 = largest.worst_row_gcd_anatomy.values().sum();
         for (&g, &energy) in &largest.worst_row_gcd_anatomy {
             let pct = 100.0 * energy / total_energy;
-            if pct > 0.1 { // Only show significant contributions
+            if pct > 0.1 {
+                // Only show significant contributions
                 eprintln!("  {:>6}  {:>12.6e}  {:>9.1}%  ", g, energy, pct);
             }
         }
@@ -195,29 +244,47 @@ fn main() {
         // ── Top-K worst and best rows ────────────────────────
         eprintln!();
         eprintln!("═══════════════════════════════════════════════════════════════");
-        eprintln!("  🔥 WORST ROWS — Highest Gershgorin Ratio (N={})", largest.dim);
+        eprintln!(
+            "  🔥 WORST ROWS — Highest Gershgorin Ratio (N={})",
+            largest.dim
+        );
         eprintln!("═══════════════════════════════════════════════════════════════");
         eprintln!();
-        eprintln!("  {:>6}  {:>8}  {:>10}  {:>12}  {:>10}  {:>10}",
-            "row j", "τ(j)", "ρ_j", "off-diag Σ", "resonant%", "disc_lo");
-        eprintln!("  {:>6}  {:>8}  {:>10}  {:>12}  {:>10}  {:>10}",
-            "──────", "────────", "──────────", "────────────", "──────────", "──────────");
+        eprintln!(
+            "  {:>6}  {:>8}  {:>10}  {:>12}  {:>10}  {:>10}",
+            "row j", "τ(j)", "ρ_j", "off-diag Σ", "resonant%", "disc_lo"
+        );
+        eprintln!(
+            "  {:>6}  {:>8}  {:>10}  {:>12}  {:>10}  {:>10}",
+            "──────", "────────", "──────────", "────────────", "──────────", "──────────"
+        );
 
         for row in &largest.worst_rows {
             eprintln!(
                 "  {:>6}  {:>8}  {:>10.6}  {:>12.6e}  {:>9.1}%  {:>10.4e}",
-                row.j, row.num_divisors, row.rho, row.off_diag_sum,
-                row.resonant_fraction * 100.0, row.disc_lower,
+                row.j,
+                row.num_divisors,
+                row.rho,
+                row.off_diag_sum,
+                row.resonant_fraction * 100.0,
+                row.disc_lower,
             );
         }
 
         eprintln!();
-        eprintln!("  🏔️ BEST ROWS — Lowest Gershgorin Ratio (N={})", largest.dim);
+        eprintln!(
+            "  🏔️ BEST ROWS — Lowest Gershgorin Ratio (N={})",
+            largest.dim
+        );
         eprintln!();
-        eprintln!("  {:>6}  {:>8}  {:>10}  {:>12}  {:>10}",
-            "row j", "τ(j)", "ρ_j", "off-diag Σ", "disc_lo");
-        eprintln!("  {:>6}  {:>8}  {:>10}  {:>12}  {:>10}",
-            "──────", "────────", "──────────", "────────────", "──────────");
+        eprintln!(
+            "  {:>6}  {:>8}  {:>10}  {:>12}  {:>10}",
+            "row j", "τ(j)", "ρ_j", "off-diag Σ", "disc_lo"
+        );
+        eprintln!(
+            "  {:>6}  {:>8}  {:>10}  {:>12}  {:>10}",
+            "──────", "────────", "──────────", "────────────", "──────────"
+        );
 
         for row in &largest.best_rows {
             eprintln!(
@@ -246,8 +313,10 @@ fn main() {
         largest_divisor_corr = pairs;
         eprintln!("  Observation: Rows with many divisors have the highest ρ.");
         eprintln!("  The worst rows (120, 60, 360...) are all HIGHLY COMPOSITE.");
-        eprintln!("  Primes and near-primes have ρ near the coprime baseline {:.4}.",
-            pi_sq_over_6_minus_1);
+        eprintln!(
+            "  Primes and near-primes have ρ near the coprime baseline {:.4}.",
+            pi_sq_over_6_minus_1
+        );
     }
 
     // ── Physics interpretation ───────────────────────────────
@@ -284,7 +353,8 @@ fn main() {
         timestamp: chrono_timestamp(),
         discovery: "Gershgorin fails for highly composite rows (ρ > 1 at j=12 for N≥100), \
                     but the matrix IS positive-definite by eigenvalue computation. \
-                    The proof path requires Schur product theorem or weighted Gershgorin.".to_string(),
+                    The proof path requires Schur product theorem or weighted Gershgorin."
+            .to_string(),
         results: all_results,
         divisor_correlation: largest_divisor_corr,
     };
@@ -295,16 +365,12 @@ fn main() {
     }
 
     eprintln!();
-    eprintln!(
-        "═══════════════════════════════════════════════════════════════"
-    );
+    eprintln!("═══════════════════════════════════════════════════════════════");
     eprintln!(
         "  🔬 Gershgorin Spectroscope v2 complete ({:.1}s)",
         t_total.elapsed().as_secs_f64()
     );
-    eprintln!(
-        "═══════════════════════════════════════════════════════════════"
-    );
+    eprintln!("═══════════════════════════════════════════════════════════════");
 }
 
 /// GCD helper
@@ -321,13 +387,19 @@ fn gcd(a: usize, b: usize) -> usize {
 
 /// Count divisors of n
 fn count_divisors(n: usize) -> usize {
-    if n == 0 { return 0; }
+    if n == 0 {
+        return 0;
+    }
     let mut count = 0;
     for d in 1..=n {
-        if d * d > n { break; }
+        if d * d > n {
+            break;
+        }
         if n.is_multiple_of(d) {
             count += 1;
-            if d != n / d { count += 1; }
+            if d != n / d {
+                count += 1;
+            }
         }
     }
     count
@@ -337,10 +409,14 @@ fn count_divisors(n: usize) -> usize {
 fn get_divisors(n: usize) -> Vec<usize> {
     let mut divs = Vec::new();
     for d in 1..=n {
-        if d * d > n { break; }
+        if d * d > n {
+            break;
+        }
         if n.is_multiple_of(d) {
             divs.push(d);
-            if d != n / d { divs.push(n / d); }
+            if d != n / d {
+                divs.push(n / d);
+            }
         }
     }
     divs.sort();
@@ -374,7 +450,11 @@ fn analyze_gershgorin_v2(dim: usize, top_k: usize, do_eigen: bool) -> DimResult 
             }
 
             let rho = off_diag_sum / diagonal;
-            let resonant_fraction = if off_diag_sum > 0.0 { resonant_sum / off_diag_sum } else { 0.0 };
+            let resonant_fraction = if off_diag_sum > 0.0 {
+                resonant_sum / off_diag_sum
+            } else {
+                0.0
+            };
 
             RowResult {
                 j,
@@ -390,18 +470,29 @@ fn analyze_gershgorin_v2(dim: usize, top_k: usize, do_eigen: bool) -> DimResult 
         .collect();
 
     // Statistics
-    let rho_max = row_results.iter().map(|r| r.rho).fold(f64::NEG_INFINITY, f64::max);
-    let rho_min = row_results.iter().map(|r| r.rho).fold(f64::INFINITY, f64::min);
+    let rho_max = row_results
+        .iter()
+        .map(|r| r.rho)
+        .fold(f64::NEG_INFINITY, f64::max);
+    let rho_min = row_results
+        .iter()
+        .map(|r| r.rho)
+        .fold(f64::INFINITY, f64::min);
     let rho_mean = row_results.iter().map(|r| r.rho).sum::<f64>() / dim as f64;
 
     let mut rho_sorted: Vec<f64> = row_results.iter().map(|r| r.rho).collect();
     rho_sorted.sort_by(|a, b| a.partial_cmp(b).unwrap());
     let rho_median = rho_sorted[dim / 2];
 
-    let worst_row = row_results.iter().max_by(|a, b| a.rho.partial_cmp(&b.rho).unwrap()).unwrap().j;
+    let worst_row = row_results
+        .iter()
+        .max_by(|a, b| a.rho.partial_cmp(&b.rho).unwrap())
+        .unwrap()
+        .j;
     let gershgorin_pd = rho_max < 1.0;
 
-    let lambda_min_gershgorin = row_results.iter()
+    let lambda_min_gershgorin = row_results
+        .iter()
         .map(|r| r.disc_lower)
         .fold(f64::INFINITY, f64::min);
 
@@ -435,7 +526,8 @@ fn analyze_gershgorin_v2(dim: usize, top_k: usize, do_eigen: bool) -> DimResult 
         let t_eigen = Instant::now();
         let mat = dark_gram::build_dark_gram(2, dim);
         let faer_mat = faer::Mat::from_fn(dim, dim, |i, j| mat[i * dim + j]);
-        let eig_vec = faer_mat.self_adjoint_eigenvalues(faer::Side::Lower)
+        let eig_vec = faer_mat
+            .self_adjoint_eigenvalues(faer::Side::Lower)
             .expect("eigenvalue computation failed");
         let mut eigenvalues: Vec<f64> = eig_vec;
         eigenvalues.sort_by(|a, b| a.partial_cmp(b).unwrap());
@@ -445,8 +537,13 @@ fn analyze_gershgorin_v2(dim: usize, top_k: usize, do_eigen: bool) -> DimResult 
         let kappa = lmax / lmin.abs().max(1e-300);
         let pd = lmin > 0.0;
 
-        eprintln!("    ✓ Eigenvalues: λ_min={:.6e}, λ_max={:.6e}, κ={:.3e} ({:.2}s)",
-            lmin, lmax, kappa, t_eigen.elapsed().as_secs_f64());
+        eprintln!(
+            "    ✓ Eigenvalues: λ_min={:.6e}, λ_max={:.6e}, κ={:.3e} ({:.2}s)",
+            lmin,
+            lmax,
+            kappa,
+            t_eigen.elapsed().as_secs_f64()
+        );
 
         (Some(lmin), Some(kappa), Some(pd))
     } else {
@@ -455,11 +552,17 @@ fn analyze_gershgorin_v2(dim: usize, top_k: usize, do_eigen: bool) -> DimResult 
 
     let elapsed = t0.elapsed().as_secs_f64();
 
-    eprintln!("    ρ_max     = {rho_max:.6} (row j={worst_row}, τ={})", count_divisors(worst_row));
+    eprintln!(
+        "    ρ_max     = {rho_max:.6} (row j={worst_row}, τ={})",
+        count_divisors(worst_row)
+    );
     eprintln!("    ρ_min     = {rho_min:.6}");
     eprintln!("    ρ_mean    = {rho_mean:.6}");
     eprintln!("    ρ_median  = {rho_median:.6}");
-    eprintln!("    Gersh PD? = {}", if gershgorin_pd { "✅ YES" } else { "❌ NO" });
+    eprintln!(
+        "    Gersh PD? = {}",
+        if gershgorin_pd { "✅ YES" } else { "❌ NO" }
+    );
     if let Some(pd) = actual_pd {
         eprintln!("    Actual PD = {}", if pd { "✅ YES" } else { "❌ NO" });
     }
@@ -488,7 +591,10 @@ fn analyze_gershgorin_v2(dim: usize, top_k: usize, do_eigen: bool) -> DimResult 
 
 /// Generate a simple timestamp string
 fn chrono_timestamp() -> String {
-    format!("{:?}", std::time::SystemTime::now()
-        .duration_since(std::time::UNIX_EPOCH)
-        .unwrap_or_default())
+    format!(
+        "{:?}",
+        std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap_or_default()
+    )
 }

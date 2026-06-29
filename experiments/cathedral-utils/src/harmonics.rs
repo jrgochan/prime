@@ -22,8 +22,8 @@
 //!  | `interferenceSumOver ps t`   | `PrimeOscillatorBank::interference()`|
 //! ═══════════════════════════════════════════════════════════════════════════
 
-use std::f64::consts::PI;
 use rayon::prelude::*;
+use std::f64::consts::PI;
 
 // ═══════════════════════════════════════════════════════════════════
 // SEGMENTED SIEVE — Memory-efficient prime enumeration for 10B+ scale
@@ -168,7 +168,10 @@ impl PrimeOscillatorBank {
     pub fn new(limit: usize) -> Self {
         let primes = segmented_sieve(limit);
         let log_p: Vec<f64> = primes.par_iter().map(|&p| (p as f64).ln()).collect();
-        let inv_sqrt_p: Vec<f64> = primes.par_iter().map(|&p| 1.0 / (p as f64).sqrt()).collect();
+        let inv_sqrt_p: Vec<f64> = primes
+            .par_iter()
+            .map(|&p| 1.0 / (p as f64).sqrt())
+            .collect();
 
         PrimeOscillatorBank {
             primes,
@@ -180,7 +183,10 @@ impl PrimeOscillatorBank {
     /// Create from a pre-built list of primes.
     pub fn from_primes(primes: Vec<usize>) -> Self {
         let log_p: Vec<f64> = primes.par_iter().map(|&p| (p as f64).ln()).collect();
-        let inv_sqrt_p: Vec<f64> = primes.par_iter().map(|&p| 1.0 / (p as f64).sqrt()).collect();
+        let inv_sqrt_p: Vec<f64> = primes
+            .par_iter()
+            .map(|&p| 1.0 / (p as f64).sqrt())
+            .collect();
         PrimeOscillatorBank {
             primes,
             log_p,

@@ -1,4 +1,10 @@
-#![allow(dead_code, unused_variables, clippy::needless_range_loop, clippy::empty_line_after_doc_comments, clippy::doc_lazy_continuation)]
+#![allow(
+    dead_code,
+    unused_variables,
+    clippy::needless_range_loop,
+    clippy::empty_line_after_doc_comments,
+    clippy::doc_lazy_continuation
+)]
 //! Prime Core Lanczos Probe — Matrix-Free N=1M Prime Core Test
 //!
 //! Tests the Prime Core Conjecture at arbitrary N without storing the
@@ -49,9 +55,7 @@ fn gram_entry_lanczos(j: usize, k: usize, t_max: usize) -> f64 {
         let d = g as f64;
         let tail_mean = 0.25 + d * d / (12.0 * jf * kf);
         let inv_t = 1.0 / t_max as f64;
-        return t_max as f64 * inv_jk
-            + tail_mean * inv_t
-            + tail_mean * 0.5 * inv_t * inv_t;
+        return t_max as f64 * inv_jk + tail_mean * inv_t + tail_mean * 0.5 * inv_t * inv_t;
     }
 
     let inv_kf = 1.0 / kf;
@@ -119,7 +123,8 @@ fn gram_matvec(x: &[f64], y: &mut [f64], dim: usize, t_max: usize) {
         for col in 0..dim {
             let k = col + 2;
             let v = x[col];
-            if v.abs() > 1e-300 { // skip zero entries (especially early in Lanczos)
+            if v.abs() > 1e-300 {
+                // skip zero entries (especially early in Lanczos)
                 sum += gram_entry_lanczos(j, k, t_max) * v;
             }
         }
@@ -133,24 +138,23 @@ fn gram_matvec(x: &[f64], y: &mut [f64], dim: usize, t_max: usize) {
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
-    let n: usize = args.get(1)
-        .and_then(|s| s.parse().ok())
-        .unwrap_or(100_000);
+    let n: usize = args.get(1).and_then(|s| s.parse().ok()).unwrap_or(100_000);
 
-    let k_primes: usize = args.get(2)
-        .and_then(|s| s.parse().ok())
-        .unwrap_or(10);
+    let k_primes: usize = args.get(2).and_then(|s| s.parse().ok()).unwrap_or(10);
 
-    let lanczos_m: usize = args.get(3)
-        .and_then(|s| s.parse().ok())
-        .unwrap_or(150);
+    let lanczos_m: usize = args.get(3).and_then(|s| s.parse().ok()).unwrap_or(150);
 
     // Parse --gpu flag to determine T default
     let use_gpu_flag = args.iter().any(|a| a == "--gpu");
-    let t_default = if use_gpu_flag { T_DEFAULT_GPU } else { T_DEFAULT_CPU };
+    let t_default = if use_gpu_flag {
+        T_DEFAULT_GPU
+    } else {
+        T_DEFAULT_CPU
+    };
 
     // Parse optional --T=<value>
-    let t_max: usize = args.iter()
+    let t_max: usize = args
+        .iter()
         .find(|a| a.starts_with("--T="))
         .and_then(|a| a[4..].parse().ok())
         .unwrap_or(t_default);
@@ -159,11 +163,18 @@ fn main() {
 
     println!("╔══════════════════════════════════════════════════════════════════════╗");
     println!("║  PRIME CORE LANCZOS PROBE — Matrix-Free                            ║");
-    println!("║  N = {:>10}  (dim = {:>10})                                 ║", n, dim);
-    println!("║  k_primes = {:>3}   lanczos_m = {:>4}   T = {:>6}                    ║",
-             k_primes, lanczos_m, t_max);
-    println!("║  Threads: {:>3}                                                      ║",
-             rayon::current_num_threads());
+    println!(
+        "║  N = {:>10}  (dim = {:>10})                                 ║",
+        n, dim
+    );
+    println!(
+        "║  k_primes = {:>3}   lanczos_m = {:>4}   T = {:>6}                    ║",
+        k_primes, lanczos_m, t_max
+    );
+    println!(
+        "║  Threads: {:>3}                                                      ║",
+        rayon::current_num_threads()
+    );
     println!("╚══════════════════════════════════════════════════════════════════════╝");
     println!();
 
@@ -172,10 +183,7 @@ fn main() {
     // ── Step 1: Find the first k primes ≤ N ──
     eprintln!("  [1/5] Sieving primes up to {}...", n);
     let prime_sieve = arith::sieve_primes(n);
-    let primes: Vec<usize> = (2..=n)
-        .filter(|&p| prime_sieve[p])
-        .take(k_primes)
-        .collect();
+    let primes: Vec<usize> = (2..=n).filter(|&p| prime_sieve[p]).take(k_primes).collect();
     let k = primes.len();
     eprintln!("    Using {} primes: {:?}", k, primes);
 
@@ -183,7 +191,10 @@ fn main() {
     let prime_indices: Vec<usize> = primes.iter().map(|&p| p - 2).collect();
 
     // ── Step 2: Build G_P (k×k prime subblock) using full-precision ──
-    eprintln!("  [2/5] Building G_P ({}×{}) with full-precision gram_entry_f64...", k, k);
+    eprintln!(
+        "  [2/5] Building G_P ({}×{}) with full-precision gram_entry_f64...",
+        k, k
+    );
     let t_gp = Instant::now();
     let mut gp_flat = vec![0.0f64; k * k];
     for i in 0..k {
@@ -225,7 +236,10 @@ fn main() {
     println!();
 
     // ── Step 4: Build prime-seeded starting vector ──
-    eprintln!("  [4/5] Building prime-seeded starting vector (dim={})...", dim);
+    eprintln!(
+        "  [4/5] Building prime-seeded starting vector (dim={})...",
+        dim
+    );
     let mut v0 = vec![0.0f64; dim];
     for (i, &pidx) in prime_indices.iter().enumerate() {
         if pidx < dim {
@@ -234,7 +248,9 @@ fn main() {
     }
     let norm: f64 = v0.iter().map(|x| x * x).sum::<f64>().sqrt();
     if norm > 1e-15 {
-        for x in &mut v0 { *x /= norm; }
+        for x in &mut v0 {
+            *x /= norm;
+        }
     }
     eprintln!("    Starting vector: ||v0|| = 1.0, {} nonzero entries", k);
 
@@ -249,7 +265,10 @@ fn main() {
     let gpu_available = {
         if use_gpu {
             if let Some(info) = cathedral_utils::gpu::detect() {
-                eprintln!("  🚀 GPU DETECTED: {} ({} MB VRAM)", info.name, info.vram_mb);
+                eprintln!(
+                    "  🚀 GPU DETECTED: {} ({} MB VRAM)",
+                    info.name, info.vram_mb
+                );
                 true
             } else {
                 eprintln!("  ⚠ GPU requested but not detected, falling back to CPU");
@@ -267,12 +286,20 @@ fn main() {
         false
     };
 
-    eprintln!("  [5/5] Running Lanczos (extract={}, m={}, dim={}, {})...",
-             lanczos_k, m, dim,
-             if gpu_available { "GPU" } else { "CPU" });
-    eprintln!("    Estimated matvec cost: {} × {} × {} = {:.2e} FLOPs/iter",
-             dim, dim, t_max,
-             (dim as f64) * (dim as f64) * (t_max as f64));
+    eprintln!(
+        "  [5/5] Running Lanczos (extract={}, m={}, dim={}, {})...",
+        lanczos_k,
+        m,
+        dim,
+        if gpu_available { "GPU" } else { "CPU" }
+    );
+    eprintln!(
+        "    Estimated matvec cost: {} × {} × {} = {:.2e} FLOPs/iter",
+        dim,
+        dim,
+        t_max,
+        (dim as f64) * (dim as f64) * (t_max as f64)
+    );
 
     let t_lanczos = Instant::now();
 
@@ -285,9 +312,7 @@ fn main() {
         let mut d_x: *mut f64 = std::ptr::null_mut();
         let mut d_y: *mut f64 = std::ptr::null_mut();
         let status = unsafe {
-            cathedral_utils::gpu::ffi::gram_matvec_alloc(
-                dim as c_int, &mut d_x, &mut d_y
-            )
+            cathedral_utils::gpu::ffi::gram_matvec_alloc(dim as c_int, &mut d_x, &mut d_y)
         };
         if status != 0 {
             eprintln!("  ✗ GPU alloc failed, falling back to CPU");
@@ -304,16 +329,21 @@ fn main() {
             };
             lanczos::lanczos_tridiag(&matvec, dim, m, Some(&v0))
         } else {
-            eprintln!("    GPU vectors allocated ({:.1} MB)",
-                     2.0 * dim as f64 * 8.0 / 1e6);
+            eprintln!(
+                "    GPU vectors allocated ({:.1} MB)",
+                2.0 * dim as f64 * 8.0 / 1e6
+            );
 
             let gpu_matvec = |x: &[f64], y: &mut [f64]| {
                 let t_mv = Instant::now();
                 unsafe {
                     cathedral_utils::gpu::ffi::gram_matvec_full(
-                        d_x, d_y,
-                        x.as_ptr(), y.as_mut_ptr(),
-                        dim as c_int, t_max as c_int,
+                        d_x,
+                        d_y,
+                        x.as_ptr(),
+                        y.as_mut_ptr(),
+                        dim as c_int,
+                        t_max as c_int,
                     );
                 }
                 let elapsed = t_mv.elapsed().as_secs_f64();
@@ -368,7 +398,11 @@ fn main() {
     let actual_m = tri.m;
 
     let lanczos_time = t_lanczos.elapsed().as_secs_f64();
-    eprintln!("    Lanczos done: {} iterations in {}", actual_m, format_time(lanczos_time));
+    eprintln!(
+        "    Lanczos done: {} iterations in {}",
+        actual_m,
+        format_time(lanczos_time)
+    );
 
     // Eigendecompose the tridiagonal
     let (ritz_values, ritz_vectors) = lanczos::tridiag_eigen(&tri);
@@ -397,34 +431,47 @@ fn main() {
     }
 
     // Map selected Ritz vectors in parallel
-    let mapped: Vec<(f64, Vec<f64>)> = extract_indices.par_iter().map(|&ri| {
-        let mut v = vec![0.0f64; dim];
-        let rv = &ritz_vectors[ri];
-        let rv_len = rv.len().min(basis.len());
-        for j in 0..rv_len {
-            let coeff = rv[j];
-            if coeff.abs() > 1e-15 {
-                for idx in 0..dim {
-                    v[idx] += coeff * basis[j][idx];
+    let mapped: Vec<(f64, Vec<f64>)> = extract_indices
+        .par_iter()
+        .map(|&ri| {
+            let mut v = vec![0.0f64; dim];
+            let rv = &ritz_vectors[ri];
+            let rv_len = rv.len().min(basis.len());
+            for j in 0..rv_len {
+                let coeff = rv[j];
+                if coeff.abs() > 1e-15 {
+                    for idx in 0..dim {
+                        v[idx] += coeff * basis[j][idx];
+                    }
                 }
             }
-        }
-        (ritz_values[ri], v)
-    }).collect();
+            (ritz_values[ri], v)
+        })
+        .collect();
 
     let full_eigenvalues: Vec<f64> = mapped.iter().map(|(l, _)| *l).collect();
     let full_eigenvectors: Vec<Vec<f64>> = mapped.into_iter().map(|(_, v)| v).collect();
 
-    eprintln!("    Mapped {} eigenvectors in {:.2}s",
-             full_eigenvectors.len(), t_map.elapsed().as_secs_f64());
+    eprintln!(
+        "    Mapped {} eigenvectors in {:.2}s",
+        full_eigenvectors.len(),
+        t_map.elapsed().as_secs_f64()
+    );
 
-    println!("  Lanczos complete: {} ({} iterations, {} Ritz values)",
-             format_time(lanczos_time), actual_m, ritz_values.len());
+    println!(
+        "  Lanczos complete: {} ({} iterations, {} Ritz values)",
+        format_time(lanczos_time),
+        actual_m,
+        ritz_values.len()
+    );
     println!();
 
     // ── Step 6: Find best-matching eigenvectors for each G_P mode ──
     println!("  ┌──────────────────────────────────────────────────────────────────────┐");
-    println!("  │ PRIME CORE OVERLAP TEST (N={:>10}, Lanczos m={:>4})              │", n, actual_m);
+    println!(
+        "  │ PRIME CORE OVERLAP TEST (N={:>10}, Lanczos m={:>4})              │",
+        n, actual_m
+    );
     println!("  ├──────────┬───────────────┬───────────────┬──────────┬───────────────┤");
     println!("  │ G_P idx  │  λ(G_P)       │  λ(Ritz)      │ overlap  │ prime purity  │");
     println!("  ├──────────┼───────────────┼───────────────┼──────────┼───────────────┤");
@@ -441,11 +488,14 @@ fn main() {
         let mut best_full_idx = 0;
 
         for (fi, full_v) in full_eigenvectors.iter().enumerate() {
-            let pi_v: Vec<f64> = prime_indices.iter().map(|&idx| {
-                if idx < dim { full_v[idx] } else { 0.0 }
-            }).collect();
+            let pi_v: Vec<f64> = prime_indices
+                .iter()
+                .map(|&idx| if idx < dim { full_v[idx] } else { 0.0 })
+                .collect();
             let pi_norm: f64 = pi_v.iter().map(|x| x * x).sum::<f64>().sqrt();
-            if pi_norm < 1e-15 { continue; }
+            if pi_norm < 1e-15 {
+                continue;
+            }
 
             let pi_v_norm: Vec<f64> = pi_v.iter().map(|x| x / pi_norm).collect();
             let dot: f64 = u.iter().zip(pi_v_norm.iter()).map(|(a, b)| a * b).sum();
@@ -458,21 +508,32 @@ fn main() {
         }
 
         let best_v = &full_eigenvectors[best_full_idx];
-        let prime_weight: f64 = prime_indices.iter()
+        let prime_weight: f64 = prime_indices
+            .iter()
             .filter(|&&idx| idx < dim)
             .map(|&idx| best_v[idx] * best_v[idx])
             .sum();
         let total_weight: f64 = best_v.iter().map(|x| x * x).sum();
-        let purity = if total_weight > 1e-30 { prime_weight / total_weight } else { 0.0 };
+        let purity = if total_weight > 1e-30 {
+            prime_weight / total_weight
+        } else {
+            0.0
+        };
 
-        let star = if best_overlap > 0.95 { "★★★" }
-            else if best_overlap > 0.80 { "★★ " }
-            else if best_overlap > 0.50 { "★  " }
-            else { "   " };
+        let star = if best_overlap > 0.95 {
+            "★★★"
+        } else if best_overlap > 0.80 {
+            "★★ "
+        } else if best_overlap > 0.50 {
+            "★  "
+        } else {
+            "   "
+        };
 
-        println!("  │ {:>7}  │ {:>12.6e} │ {:>12.6e} │ {:>7.4}  │ {:>7.4}       │ {}",
-                 gp_idx, gp_lambda, full_eigenvalues[best_full_idx],
-                 best_overlap, purity, star);
+        println!(
+            "  │ {:>7}  │ {:>12.6e} │ {:>12.6e} │ {:>7.4}  │ {:>7.4}       │ {}",
+            gp_idx, gp_lambda, full_eigenvalues[best_full_idx], best_overlap, purity, star
+        );
 
         if gp_idx == sentinel_gp_idx {
             sentinel_overlap = best_overlap;
@@ -487,27 +548,55 @@ fn main() {
     println!("  ┌──────────────────────────────────────────────────────────────────────┐");
     println!("  │ SENTINEL SUMMARY                                                     │");
     println!("  ├──────────────────────────────────────────────────────────────────────┤");
-    println!("  │   G_P eigenvalue:  {:.10e}                                    │", sentinel_gp_lambda);
-    println!("  │   Ritz eigenvalue: {:.10e}                                    │", sentinel_full_lambda);
-    println!("  │   Overlap |⟨u,πv⟩|²: {:.6}                                       │", sentinel_overlap);
-    println!("  │   Prime purity:     {:.6}                                       │", sentinel_purity);
-    println!("  │   λ error:          {:.4}%                                        │",
-             if sentinel_gp_lambda.abs() > 1e-30 {
-                 ((sentinel_gp_lambda - sentinel_full_lambda) / sentinel_gp_lambda).abs() * 100.0
-             } else { 0.0 });
+    println!(
+        "  │   G_P eigenvalue:  {:.10e}                                    │",
+        sentinel_gp_lambda
+    );
+    println!(
+        "  │   Ritz eigenvalue: {:.10e}                                    │",
+        sentinel_full_lambda
+    );
+    println!(
+        "  │   Overlap |⟨u,πv⟩|²: {:.6}                                       │",
+        sentinel_overlap
+    );
+    println!(
+        "  │   Prime purity:     {:.6}                                       │",
+        sentinel_purity
+    );
+    println!(
+        "  │   λ error:          {:.4}%                                        │",
+        if sentinel_gp_lambda.abs() > 1e-30 {
+            ((sentinel_gp_lambda - sentinel_full_lambda) / sentinel_gp_lambda).abs() * 100.0
+        } else {
+            0.0
+        }
+    );
 
     if sentinel_overlap > 0.95 {
         println!("  │                                                                      │");
-        println!("  │   ★★★ PRIME CORE CONJECTURE CONFIRMED at N={:>10} ★★★          │", n);
+        println!(
+            "  │   ★★★ PRIME CORE CONJECTURE CONFIRMED at N={:>10} ★★★          │",
+            n
+        );
     } else if sentinel_overlap > 0.80 {
         println!("  │                                                                      │");
-        println!("  │   ★★ STRONG EVIDENCE at N={:>10}                               │", n);
+        println!(
+            "  │   ★★ STRONG EVIDENCE at N={:>10}                               │",
+            n
+        );
     } else if sentinel_overlap > 0.50 {
         println!("  │                                                                      │");
-        println!("  │   ★ PARTIAL EVIDENCE at N={:>10}                                │", n);
+        println!(
+            "  │   ★ PARTIAL EVIDENCE at N={:>10}                                │",
+            n
+        );
     } else {
         println!("  │                                                                      │");
-        println!("  │   ✗ Conjecture NOT supported at N={:>10}                        │", n);
+        println!(
+            "  │   ✗ Conjecture NOT supported at N={:>10}                        │",
+            n
+        );
     }
     println!("  └──────────────────────────────────────────────────────────────────────┘");
 
@@ -518,7 +607,9 @@ fn main() {
     for i in 0..5.min(nr) {
         println!("    λ_Ritz[{}] = {:.10e}", i, ritz_values[i]);
     }
-    if nr > 10 { println!("    ..."); }
+    if nr > 10 {
+        println!("    ...");
+    }
     for i in (nr.saturating_sub(5))..nr {
         println!("    λ_Ritz[{}] = {:.10e}", i, ritz_values[i]);
     }
@@ -539,6 +630,10 @@ fn format_time(secs: f64) -> String {
     } else if secs < 3600.0 {
         format!("{}m {:.1}s", (secs / 60.0) as u64, secs % 60.0)
     } else {
-        format!("{}h {}m", (secs / 3600.0) as u64, ((secs % 3600.0) / 60.0) as u64)
+        format!(
+            "{}h {}m",
+            (secs / 3600.0) as u64,
+            ((secs % 3600.0) / 60.0) as u64
+        )
     }
 }

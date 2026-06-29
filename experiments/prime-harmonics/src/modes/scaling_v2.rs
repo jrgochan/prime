@@ -55,15 +55,19 @@ pub fn run(h5_dir: &str, max_n: usize) {
             let name = e.file_name();
             let name = name.to_string_lossy().to_string();
             let n: usize = name
-                .strip_prefix("gram_N").unwrap()
-                .strip_suffix(".h5").unwrap()
-                .parse().unwrap_or(0);
+                .strip_prefix("gram_N")
+                .unwrap()
+                .strip_suffix(".h5")
+                .unwrap()
+                .parse()
+                .unwrap_or(0);
             (n, e.path())
         })
         .collect();
     files.sort_by_key(|(n, _)| *n);
 
-    let (file_n, file_path) = files.iter()
+    let (file_n, file_path) = files
+        .iter()
         .find(|(n, _)| *n >= max_n)
         .or_else(|| files.last())
         .expect("No HPDF files found!");
@@ -78,10 +82,16 @@ pub fn run(h5_dir: &str, max_n: usize) {
     let t_load = Instant::now();
 
     let h5_file = hdf5::File::open(file_path).expect("Failed to open H5 file");
-    let file_dim: u64 = h5_file.attr("dim").expect("no dim").read_scalar().expect("read dim");
+    let file_dim: u64 = h5_file
+        .attr("dim")
+        .expect("no dim")
+        .read_scalar()
+        .expect("read dim");
     let file_dim = file_dim as usize;
 
-    let ds = h5_file.dataset("gram/upper_triangle").expect("No upper_triangle");
+    let ds = h5_file
+        .dataset("gram/upper_triangle")
+        .expect("No upper_triangle");
     let tri_arr: ndarray::Array1<f64> = ds.read_1d().expect("Failed to read triangle");
     let tri: Vec<f64> = tri_arr.to_vec();
 
@@ -90,7 +100,10 @@ pub fn run(h5_dir: &str, max_n: usize) {
     let b_full: Vec<f64> = b_arr.to_vec();
 
     let load_time = t_load.elapsed().as_secs_f64();
-    eprintln!("Loaded: dim={file_dim}, triangle={} entries ({load_time:.1}s)", tri.len());
+    eprintln!(
+        "Loaded: dim={file_dim}, triangle={} entries ({load_time:.1}s)",
+        tri.len()
+    );
 
     // Helper: get G(row, col) from flat upper triangle (0-indexed into file_dim×file_dim)
     let gram = |row: usize, col: usize| -> f64 {
@@ -102,7 +115,9 @@ pub fn run(h5_dir: &str, max_n: usize) {
     // ═══ Precompute number theory ═══
     let mut is_prime = vec![true; effective_max + 1];
     is_prime[0] = false;
-    if effective_max >= 1 { is_prime[1] = false; }
+    if effective_max >= 1 {
+        is_prime[1] = false;
+    }
     for i in 2..=effective_max {
         if is_prime[i] {
             let mut j = i * i;
@@ -230,13 +245,29 @@ pub fn run(h5_dir: &str, max_n: usize) {
         let d2_ln = d2 * ln_n;
         let d2_ln2 = d2 * ln_n * ln_n;
         // y²_new: the vacuum energy extracted at this step
-        let y2_new = if z.is_empty() { 0.0 } else { z.last().unwrap().powi(2) };
-        let p = if n <= effective_max && is_prime[n] { 1 } else { 0 };
-        let h = if n <= effective_max && is_hcn[n] { 1 } else { 0 };
+        let y2_new = if z.is_empty() {
+            0.0
+        } else {
+            z.last().unwrap().powi(2)
+        };
+        let p = if n <= effective_max && is_prime[n] {
+            1
+        } else {
+            0
+        };
+        let h = if n <= effective_max && is_hcn[n] {
+            1
+        } else {
+            0
+        };
         let t = if n <= effective_max { tau[n] } else { 0 };
-        let class = if n <= effective_max && is_hcn[n] { "HCN" }
-            else if n <= effective_max && is_prime[n] { "prime" }
-            else { "comp" };
+        let class = if n <= effective_max && is_hcn[n] {
+            "HCN"
+        } else if n <= effective_max && is_prime[n] {
+            "prime"
+        } else {
+            "comp"
+        };
 
         println!("{n}\t{d2:.12e}\t{ln_n:.6}\t{d2_ln:.10}\t{d2_ln2:.10}\t{y2_new:.12e}\t{p}\t{h}\t{t}\t{class}");
 
@@ -250,6 +281,9 @@ pub fn run(h5_dir: &str, max_n: usize) {
     let rate = max_dim as f64 / total;
     eprintln!();
     eprintln!("Done: {} values in {total:.1}s ({rate:.0} N/s)", max_dim);
-    eprintln!("Memory: L triangle = {} entries ({:.1} MB)",
-        tri_size, tri_size as f64 * 8.0 / 1e6);
+    eprintln!(
+        "Memory: L triangle = {} entries ({:.1} MB)",
+        tri_size,
+        tri_size as f64 * 8.0 / 1e6
+    );
 }

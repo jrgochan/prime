@@ -10,14 +10,18 @@
 //!
 //! Created: May 30, 2026 — Confinement (Mirror RH Closure)
 
+use nalgebra::{DMatrix, DVector};
 use std::path::Path;
 use std::time::Instant;
-use nalgebra::{DMatrix, DVector};
 
 const EULER_GAMMA: f64 = 0.5772156649015329;
 
 fn gcd(a: usize, b: usize) -> usize {
-    if b == 0 { a } else { gcd(b, a % b) }
+    if b == 0 {
+        a
+    } else {
+        gcd(b, a % b)
+    }
 }
 
 /// R_true(j,k) = gcd(j,k)²/(12jk) + 1/4
@@ -116,9 +120,17 @@ fn analyze_h5(path: &Path) -> Option<ConfinementResult> {
 
             // Skip eigendecomposition for non-PD R
             return Some(ConfinementResult {
-                max_n, dim, d2_opt, d2_stored, d2_free, scattering,
-                lambda_dc: None, lambda_2: None, spectral_gap: None,
-                spectral_radius: None, trace_delta,
+                max_n,
+                dim,
+                d2_opt,
+                d2_stored,
+                d2_free,
+                scattering,
+                lambda_dc: None,
+                lambda_2: None,
+                spectral_gap: None,
+                spectral_radius: None,
+                trace_delta,
             });
         }
     };
@@ -142,14 +154,20 @@ fn analyze_h5(path: &Path) -> Option<ConfinementResult> {
 
         let ldc = eigs[0];
         let l2 = if eigs.len() > 1 { eigs[1] } else { 0.0 };
-        let gap = if l2.abs() > 0.0 { ldc.abs() / l2.abs() } else { f64::INFINITY };
+        let gap = if l2.abs() > 0.0 {
+            ldc.abs() / l2.abs()
+        } else {
+            f64::INFINITY
+        };
 
         // Spectral radius of R⁻¹Δ via eigendecomposition
         eprintln!("  🔬 Computing ρ(R⁻¹Δ)...");
         let t_sr = Instant::now();
         let r_inv_delta = r_chol.solve(&delta);
         let product_eig = r_inv_delta.symmetric_eigen();
-        let rho = product_eig.eigenvalues.iter()
+        let rho = product_eig
+            .eigenvalues
+            .iter()
             .map(|x| x.abs())
             .fold(0.0f64, |a, b| a.max(b));
         eprintln!("  ✓ ρ(R⁻¹Δ) in {:.1}s", t_sr.elapsed().as_secs_f64());
@@ -164,8 +182,17 @@ fn analyze_h5(path: &Path) -> Option<ConfinementResult> {
     eprintln!("  ✅ Done in {elapsed:.1}s");
 
     Some(ConfinementResult {
-        max_n, dim, d2_opt, d2_stored, d2_free, scattering,
-        lambda_dc, lambda_2, spectral_gap, spectral_radius, trace_delta,
+        max_n,
+        dim,
+        d2_opt,
+        d2_stored,
+        d2_free,
+        scattering,
+        lambda_dc,
+        lambda_2,
+        spectral_gap,
+        spectral_radius,
+        trace_delta,
     })
 }
 
@@ -191,9 +218,12 @@ pub fn run(h5_dir: &str) {
             let name = name.to_string_lossy().to_string();
             // Extract N from "gram_N12345.h5"
             let n: usize = name
-                .strip_prefix("gram_N").unwrap()
-                .strip_suffix(".h5").unwrap()
-                .parse().unwrap_or(0);
+                .strip_prefix("gram_N")
+                .unwrap()
+                .strip_suffix(".h5")
+                .unwrap()
+                .parse()
+                .unwrap_or(0);
             (n, e.path())
         })
         .collect();
@@ -249,7 +279,10 @@ pub fn run(h5_dir: &str) {
     // Also print Dyson verification
     println!();
     println!("Dyson Equation Verification:");
-    println!("{:<10} {:>12} {:>12} {:>12} {:>12}", "N", "d²_free", "scattering", "d²_Dyson", "d²_opt");
+    println!(
+        "{:<10} {:>12} {:>12} {:>12} {:>12}",
+        "N", "d²_free", "scattering", "d²_Dyson", "d²_opt"
+    );
     for r in &results {
         let dyson = r.d2_free + r.scattering;
         println!(
