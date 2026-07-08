@@ -1,9 +1,9 @@
 //! Energy sweep mode — scan |interference| over a range with CSV/JSON output.
 
-use cathedral_utils::harmonics::PrimeOscillatorBank;
-use cathedral_utils::zeta_zeros::ZETA_ZEROS;
 use crate::cli::OutputFormat;
 use crate::display;
+use cathedral_utils::harmonics::PrimeOscillatorBank;
+use cathedral_utils::zeta_zeros::ZETA_ZEROS;
 use serde::Serialize;
 
 #[derive(Serialize)]
@@ -14,7 +14,13 @@ struct SweepPoint {
     norm: f64,
 }
 
-pub fn run(bank: &PrimeOscillatorBank, t_start: f64, t_end: f64, steps: usize, format: &OutputFormat) {
+pub fn run(
+    bank: &PrimeOscillatorBank,
+    t_start: f64,
+    t_end: f64,
+    steps: usize,
+    format: &OutputFormat,
+) {
     match format {
         OutputFormat::Csv => run_csv(bank, t_start, t_end, steps),
         OutputFormat::Json => run_json(bank, t_start, t_end, steps),
@@ -48,7 +54,10 @@ fn run_json(bank: &PrimeOscillatorBank, t_start: f64, t_end: f64, steps: usize) 
 }
 
 fn run_terminal(bank: &PrimeOscillatorBank, t_start: f64, t_end: f64, steps: usize) {
-    println!("🌀 ENERGY SWEEP [{:.2}, {:.2}], {} steps", t_start, t_end, steps);
+    println!(
+        "🌀 ENERGY SWEEP [{:.2}, {:.2}], {} steps",
+        t_start, t_end, steps
+    );
     println!("   {} primes", bank.len());
     println!();
 
@@ -59,9 +68,13 @@ fn run_terminal(bank: &PrimeOscillatorBank, t_start: f64, t_end: f64, steps: usi
     let stride = (steps / display_rows).max(1);
 
     for (i, &(t, n)) in sweep.iter().enumerate() {
-        if i % stride != 0 && i != steps { continue; }
+        if i % stride != 0 && i != steps {
+            continue;
+        }
         let bar = display::render_bar(n, max_norm, 50);
-        let is_zero = ZETA_ZEROS.iter().any(|&z| (t - z).abs() < (t_end - t_start) / steps as f64 * stride as f64 * 0.6);
+        let is_zero = ZETA_ZEROS
+            .iter()
+            .any(|&z| (t - z).abs() < (t_end - t_start) / steps as f64 * stride as f64 * 0.6);
         let marker = if is_zero { " ← ζ" } else { "" };
         println!("  t={:>8.3} |{bar}| {:>7.4}{marker}", t, n);
     }

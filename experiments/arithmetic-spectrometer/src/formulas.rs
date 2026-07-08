@@ -11,8 +11,8 @@
 //! 6. **α-related** for coupling constant searches
 //! 7. **Integer/rational** for exact-match detection
 
-use std::f64::consts::PI;
 use serde::Serialize;
+use std::f64::consts::PI;
 
 /// A candidate number-theoretic formula.
 #[derive(Debug, Clone, Serialize)]
@@ -57,11 +57,11 @@ impl ZetaConstants {
             alpha,
             glass: 15.0 / (PI * PI),
             zetas: vec![
-                (2,  PI.powi(2)  / 6.0,        "ζ(2)"),
-                (4,  PI.powi(4)  / 90.0,        "ζ(4)"),
-                (6,  PI.powi(6)  / 945.0,       "ζ(6)"),
-                (8,  PI.powi(8)  / 9450.0,      "ζ(8)"),
-                (10, PI.powi(10) / 93555.0,     "ζ(10)"),
+                (2, PI.powi(2) / 6.0, "ζ(2)"),
+                (4, PI.powi(4) / 90.0, "ζ(4)"),
+                (6, PI.powi(6) / 945.0, "ζ(6)"),
+                (8, PI.powi(8) / 9450.0, "ζ(8)"),
+                (10, PI.powi(10) / 93555.0, "ζ(10)"),
                 (12, 691.0 * PI.powi(12) / 638512875.0, "ζ(12)"),
             ],
         }
@@ -74,14 +74,23 @@ pub fn build_formulas() -> Vec<Formula> {
     let mut formulas = Vec::new();
 
     // 1. Powers of π with coefficients
-    let coefficients = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 8.0, 10.0, 12.0, 15.0,
-                        24.0, 30.0, 36.0, 60.0, 90.0, 120.0, 180.0, 360.0];
+    let coefficients = [
+        1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 8.0, 10.0, 12.0, 15.0, 24.0, 30.0, 36.0, 60.0, 90.0, 120.0,
+        180.0, 360.0,
+    ];
     for n in 1..=12 {
         for &coeff in &coefficients {
             let v = coeff * PI.powi(n);
-            let name = if coeff == 1.0 { format!("π^{}", n) }
-                       else { format!("{}·π^{}", coeff, n) };
-            formulas.push(Formula { name, value: v, method: FormulaMethod::PiPower });
+            let name = if coeff == 1.0 {
+                format!("π^{}", n)
+            } else {
+                format!("{}·π^{}", coeff, n)
+            };
+            formulas.push(Formula {
+                name,
+                value: v,
+                method: FormulaMethod::PiPower,
+            });
         }
     }
 
@@ -89,11 +98,13 @@ pub fn build_formulas() -> Vec<Formula> {
     for &(_, zk, zname) in &c.zetas {
         for pow in 1..=5 {
             formulas.push(Formula {
-                name: format!("{}^{}", zname, pow), value: zk.powi(pow),
+                name: format!("{}^{}", zname, pow),
+                value: zk.powi(pow),
                 method: FormulaMethod::ZetaValue,
             });
             formulas.push(Formula {
-                name: format!("1/{}^{}", zname, pow), value: 1.0 / zk.powi(pow),
+                name: format!("1/{}^{}", zname, pow),
+                value: 1.0 / zk.powi(pow),
                 method: FormulaMethod::ZetaValue,
             });
             for &coeff in &[2.0, 3.0, 4.0, 5.0, 6.0, 12.0, 24.0, 90.0, 180.0] {
@@ -108,7 +119,7 @@ pub fn build_formulas() -> Vec<Formula> {
 
     // 3. Cross-products: ζ(j)^a / ζ(k)^b
     for (i, &(_, zj, jname)) in c.zetas.iter().enumerate() {
-        for &(_, zk, kname) in &c.zetas[i+1..] {
+        for &(_, zk, kname) in &c.zetas[i + 1..] {
             let combos: Vec<(String, f64)> = vec![
                 (format!("{}·{}", jname, kname), zj * zk),
                 (format!("{}/{}", jname, kname), zj / zk),
@@ -118,7 +129,11 @@ pub fn build_formulas() -> Vec<Formula> {
                 (format!("{}³/{}", jname, kname), zj.powi(3) / zk),
             ];
             for (desc, val) in combos {
-                formulas.push(Formula { name: desc, value: val, method: FormulaMethod::ZetaCross });
+                formulas.push(Formula {
+                    name: desc,
+                    value: val,
+                    method: FormulaMethod::ZetaCross,
+                });
             }
         }
     }
@@ -149,7 +164,8 @@ pub fn build_formulas() -> Vec<Formula> {
     // 5. Glass combinations
     for pow in 1..=8 {
         formulas.push(Formula {
-            name: format!("glass^{}", pow), value: c.glass.powi(pow),
+            name: format!("glass^{}", pow),
+            value: c.glass.powi(pow),
             method: FormulaMethod::Glass,
         });
         for n in 1..=6 {
@@ -164,18 +180,26 @@ pub fn build_formulas() -> Vec<Formula> {
     // 6. α-related
     let alpha = c.alpha;
     for &(name, val) in &[
-        ("α", alpha), ("α²", alpha*alpha), ("1/α", 1.0/alpha),
-        ("α/π", alpha/PI), ("α²/3", alpha*alpha/3.0),
-        ("α·π", alpha*PI), ("α²·π", alpha*alpha*PI),
+        ("α", alpha),
+        ("α²", alpha * alpha),
+        ("1/α", 1.0 / alpha),
+        ("α/π", alpha / PI),
+        ("α²/3", alpha * alpha / 3.0),
+        ("α·π", alpha * PI),
+        ("α²·π", alpha * alpha * PI),
     ] {
-        formulas.push(Formula { name: name.to_string(), value: val, method: FormulaMethod::Alpha });
+        formulas.push(Formula {
+            name: name.to_string(),
+            value: val,
+            method: FormulaMethod::Alpha,
+        });
     }
 
     // 7. Corrected formulas (our discoveries)
     let zeta2 = c.zetas[0].1;
     formulas.push(Formula {
         name: "6π⁵·(1+α²/3)".to_string(),
-        value: 6.0 * PI.powi(5) * (1.0 + alpha*alpha/3.0),
+        value: 6.0 * PI.powi(5) * (1.0 + alpha * alpha / 3.0),
         method: FormulaMethod::Corrected,
     });
     formulas.push(Formula {
@@ -188,7 +212,8 @@ pub fn build_formulas() -> Vec<Formula> {
     for &(_, zk, zname) in &c.zetas {
         for &n in &[1.0, 2.0, 3.0, 4.0, 6.0, 8.0, 12.0, 24.0] {
             formulas.push(Formula {
-                name: format!("1/({}·{})", n, zname), value: 1.0 / (n * zk),
+                name: format!("1/({}·{})", n, zname),
+                value: 1.0 / (n * zk),
                 method: FormulaMethod::ZetaValue,
             });
         }
@@ -197,14 +222,33 @@ pub fn build_formulas() -> Vec<Formula> {
     // 9. Integers and simple rationals
     for n in 1..=500 {
         formulas.push(Formula {
-            name: format!("{}", n), value: n as f64,
+            name: format!("{}", n),
+            value: n as f64,
             method: FormulaMethod::IntegerRational,
         });
     }
-    for &(a, b) in &[(1,2),(1,3),(1,4),(2,3),(3,2),(3,4),(4,3),(5,2),(5,3),
-                      (7,2),(7,3),(8,3),(11,3),(22,7),(5,4),(7,4),(8,5)] {
+    for &(a, b) in &[
+        (1, 2),
+        (1, 3),
+        (1, 4),
+        (2, 3),
+        (3, 2),
+        (3, 4),
+        (4, 3),
+        (5, 2),
+        (5, 3),
+        (7, 2),
+        (7, 3),
+        (8, 3),
+        (11, 3),
+        (22, 7),
+        (5, 4),
+        (7, 4),
+        (8, 5),
+    ] {
         formulas.push(Formula {
-            name: format!("{}/{}", a, b), value: a as f64 / b as f64,
+            name: format!("{}/{}", a, b),
+            value: a as f64 / b as f64,
             method: FormulaMethod::IntegerRational,
         });
     }

@@ -1,4 +1,13 @@
-#![allow(dead_code, unused_variables, unused_imports, unused_assignments, clippy::needless_range_loop, clippy::doc_lazy_continuation, non_snake_case, clippy::empty_line_after_doc_comments)]
+#![allow(
+    dead_code,
+    unused_variables,
+    unused_imports,
+    unused_assignments,
+    clippy::needless_range_loop,
+    clippy::doc_lazy_continuation,
+    non_snake_case,
+    clippy::empty_line_after_doc_comments
+)]
 // overcancellation-scan/src/bin/cotangent_residual_hpdf.rs
 //
 // ╔═══════════════════════════════════════════════════════════════╗
@@ -23,7 +32,9 @@ fn vasyunin_const() -> f64 {
 
 /// Vasyunin cotangent sum V(a,b) = Σ_{m=1}^{a-1} cot(πm/a) · {mb/a}
 fn vasyunin_sum(a: usize, b: usize) -> f64 {
-    if a <= 1 { return 0.0; }
+    if a <= 1 {
+        return 0.0;
+    }
     let af = a as f64;
     let mut s = 0.0;
     for m in 1..a {
@@ -68,11 +79,12 @@ fn main() {
 
     let c = vasyunin_const();
     println!("  C = ln(2π) − γ = {:.6}", c);
-    println!("  C - 2/3 = {:.6}", c - 2.0/3.0);
+    println!("  C - 2/3 = {:.6}", c - 2.0 / 3.0);
     println!();
 
     let cache_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-        .parent().unwrap()
+        .parent()
+        .unwrap()
         .join("cache/hpdf");
 
     // HCN files available
@@ -81,8 +93,10 @@ fn main() {
     ];
 
     println!("═══ FULL k≥1 (HPDF k≥2 + analytic k=1 anchor) ═══");
-    println!("{:>8} {:>10} {:>10} {:>10} {:>10} {:>10} {:>10} {:>10} {:>10} {:>10}",
-        "N", "vᵀGv", "D", "CσS-S²", "R_cot", "R/rest", "vᵀA₁v", "|L₁/A₁|", "|L₁/A₁|·lnN", "1/lnN");
+    println!(
+        "{:>8} {:>10} {:>10} {:>10} {:>10} {:>10} {:>10} {:>10} {:>10} {:>10}",
+        "N", "vᵀGv", "D", "CσS-S²", "R_cot", "R/rest", "vᵀA₁v", "|L₁/A₁|", "|L₁/A₁|·lnN", "1/lnN"
+    );
     println!("{}", "─".repeat(108));
 
     for &n in &hc_ns {
@@ -119,7 +133,9 @@ fn main() {
         let mut v2 = vec![0.0f64; dim];
         for i in 0..dim {
             let k = i + 2;
-            if k >= n { break; }
+            if k >= n {
+                break;
+            }
             let mu_k = mu_raw[k] as f64;
             let cutoff = 1.0 - (k as f64).ln() / log_n;
             if cutoff > 0.0 {
@@ -130,7 +146,9 @@ fn main() {
         // Full norm for normalization (k=1 + k≥2)
         let norm_sq_full: f64 = v1 * v1 + v2.iter().map(|x| x * x).sum::<f64>();
         let norm = norm_sq_full.sqrt();
-        if norm < 1e-15 { continue; }
+        if norm < 1e-15 {
+            continue;
+        }
 
         // Normalize everything
         let v1_n = v1 / norm;
@@ -142,12 +160,15 @@ fn main() {
         // S = v₁/2 + Σ_{k=2..N} vₖ/(k+1)
         //   = v₁/(1+1) + Σ_{i=0..dim} v2_n[i]/(i+2+1)
         let s: f64 = v1_n / 2.0
-            + v2_n.iter().enumerate()
-                .map(|(i, &vi)| vi / (i as f64 + 3.0))  // k=i+2, k+1=i+3
+            + v2_n
+                .iter()
+                .enumerate()
+                .map(|(i, &vi)| vi / (i as f64 + 3.0)) // k=i+2, k+1=i+3
                 .sum::<f64>();
 
         // ═══ vᵀGv for k≥2 sector (from HPDF) ═══
-        let row_results: Vec<(f64, f64, f64)> = (0..dim).into_par_iter()
+        let row_results: Vec<(f64, f64, f64)> = (0..dim)
+            .into_par_iter()
             .map(|i| {
                 let mut row_full = 0.0;
                 let mut row_diag = 0.0;
@@ -181,7 +202,9 @@ fn main() {
         let mut cross_a1 = 0.0f64;
         for i in 0..dim {
             let k = i + 2;
-            if k >= n { break; }
+            if k >= n {
+                break;
+            }
             let g1k = gram_entry_k1(k);
             cross_vtgv += 2.0 * v1_n * v2_n[i] * g1k;
             cross_a1 += 2.0 * v1_n * v2_n[i] * b1_entry(1, k);
@@ -198,8 +221,16 @@ fn main() {
         let brake = c * sigma * s - s * s;
         let r_cot = vtgv - diag - brake;
         let rest = diag + brake;
-        let r_ratio = if rest.abs() > 1e-15 { r_cot / rest } else { f64::NAN };
-        let l1_ratio = if vta1v.abs() > 1e-15 { (vtl1v / vta1v).abs() } else { f64::NAN };
+        let r_ratio = if rest.abs() > 1e-15 {
+            r_cot / rest
+        } else {
+            f64::NAN
+        };
+        let l1_ratio = if vta1v.abs() > 1e-15 {
+            (vtl1v / vta1v).abs()
+        } else {
+            f64::NAN
+        };
         let l1_logn = l1_ratio * log_n;
         let inv_logn = 1.0 / log_n;
 

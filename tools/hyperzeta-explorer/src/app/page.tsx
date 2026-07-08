@@ -374,6 +374,9 @@ function detectJets(
     const pi = Math.floor(((phi + Math.PI) / (2 * Math.PI)) * JET_ANGULAR_BINS) % JET_ANGULAR_BINS;
     const ti = Math.min(Math.floor((theta / Math.PI) * JET_THETA_BINS), JET_THETA_BINS - 1);
 
+    // Guard against NaN indices from detached WASM buffers after engine recreation
+    if (pi < 0 || pi >= JET_ANGULAR_BINS || ti < 0 || ti >= JET_THETA_BINS || !Number.isFinite(pi) || !Number.isFinite(ti)) continue;
+
     bins[pi][ti].count++;
     bins[pi][ti].speed += spd;
     sampled++;
@@ -754,6 +757,7 @@ function ExplorerCloud({
   speed,
   paused,
   stepRef,
+  active,
   onMetrics,
   onJets,
   onShape,
@@ -767,6 +771,7 @@ function ExplorerCloud({
   speed: number;
   paused: boolean;
   stepRef: React.MutableRefObject<boolean>;
+  active: boolean;
   onMetrics: (c: number, h: number) => void;
   onJets: (j: JetInfo) => void;
   onShape: (s: ShapeInfo) => void;
@@ -789,6 +794,21 @@ function ExplorerCloud({
 
   useFrame(() => {
     if (!meshRef.current) return;
+
+    try {
+    // When inactive (non-particle modes like Spectrometer/Heptadecagon),
+    // skip all physics and rendering to prevent stale state drift
+    if (!active) {
+      meshRef.current.visible = false;
+      return;
+    }
+    meshRef.current.visible = true;
+
+    // Eagerly sync engine mode to eliminate race condition between
+    // React state updates and WASM engine state
+    if (wasmEngine.get_view_mode() !== mode.id) {
+      wasmEngine.set_view_mode(mode.id);
+    }
 
     // Pause/step logic
     const doStep = stepRef.current;
@@ -849,8 +869,8 @@ function ExplorerCloud({
       prevPositions.current.set(memoryArray);
     }
 
-    // Initialize instance colors on first frame or mode change
-    const needsColorInit = !colorsInitialized.current || lastModeId.current !== mode.id;
+    // Initialize instance colors on first frame, mode change, or fresh mesh (particle count change)
+    const needsColorInit = !colorsInitialized.current || lastModeId.current !== mode.id || !meshRef.current.instanceColor;
     if (needsColorInit) {
       // Pre-initialize all instance colors so the buffer exists
       color.set(mode.coreColor);
@@ -862,6 +882,9 @@ function ExplorerCloud({
       }
       colorsInitialized.current = true;
       lastModeId.current = mode.id;
+      // Reset previous positions to avoid stale data from freed WASM buffers
+      // (detectJets would otherwise compute NaN velocities and crash)
+      prevPositions.current = null;
     }
 
     // Update material color to match mode
@@ -967,10 +990,11 @@ function ExplorerCloud({
       }
       meshRef.current.instanceColor.needsUpdate = true;
     }
+    } catch { /* engine freed during particle count change */ }
   });
 
   return (
-    <instancedMesh ref={meshRef} args={[undefined, undefined, particleCount]}>
+    <instancedMesh ref={meshRef} args={[undefined, undefined, particleCount]} visible={active}>
       <sphereGeometry args={[0.08, 4, 4]} />
       <meshBasicMaterial
         ref={materialRef}
@@ -2003,37 +2027,44 @@ export default function Home() {
         </p>
       </div>
 
-      {modeIdx === 6 ? (
-        <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", background: "#000000" }}>
+      {/* Heptadecagon overlay — rendered above Canvas to avoid full Canvas remount */}
+      {modeIdx === 6 && (
+        <div style={{
+          position: "absolute", inset: 0, zIndex: 5,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          background: "#000000",
+        }}>
           <Heptadecagon width={700} height={700} interactive={true} />
         </div>
-      ) : (
-        <Canvas
-          camera={{ position: [0, 0, 30], fov: 60 }}
-          className="w-full h-full bg-[#000000]"
-        >
-          <ambientLight intensity={0.5} />
-          <OrbitControls autoRotate autoRotateSpeed={2.0} />
-          {modeIdx === 4 ? (
-            <SpectrometerGrid />
-          ) : hyperSystem ? (
-            <ExplorerCloud
-              wasmEngine={hyperSystem.engine}
-              memoryArray={hyperSystem.memory}
-              layerArray={hyperSystem.layers}
-              particleCount={particleCount}
-              mode={mode}
-              speed={speed}
-              paused={paused}
-              stepRef={stepRef}
-              onMetrics={handleMetrics}
-              onJets={handleJetsWithMorphology}
-              onShape={handleShape}
-              onBridge={handleBridge}
-            />
-          ) : null}
-        </Canvas>
       )}
+
+      {/* Canvas always mounted — prevents WebGL context teardown on mode switch */}
+      <Canvas
+        camera={{ position: [0, 0, 30], fov: 60 }}
+        className="w-full h-full bg-[#000000]"
+        style={{ visibility: modeIdx === 6 ? "hidden" : "visible" }}
+      >
+        <ambientLight intensity={0.5} />
+        <OrbitControls autoRotate autoRotateSpeed={2.0} />
+        {modeIdx === 4 && <SpectrometerGrid />}
+        {hyperSystem && (
+          <ExplorerCloud
+            wasmEngine={hyperSystem.engine}
+            memoryArray={hyperSystem.memory}
+            layerArray={hyperSystem.layers}
+            particleCount={particleCount}
+            mode={mode}
+            speed={speed}
+            paused={paused}
+            stepRef={stepRef}
+            active={modeIdx !== 4 && modeIdx !== 6}
+            onMetrics={handleMetrics}
+            onJets={handleJetsWithMorphology}
+            onShape={handleShape}
+            onBridge={handleBridge}
+          />
+        )}
+      </Canvas>
     </main>
   );
 }

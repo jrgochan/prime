@@ -1,4 +1,9 @@
-#![allow(dead_code, unused_variables, clippy::needless_range_loop, clippy::empty_line_after_doc_comments)]
+#![allow(
+    dead_code,
+    unused_variables,
+    clippy::needless_range_loop,
+    clippy::empty_line_after_doc_comments
+)]
 //! ═══════════════════════════════════════════════════════════════════════════
 //!  DARK GRAM SPECTROSCOPY v1
 //!  The Antimatter Engine — Bernoulli Basis Spectral Analysis
@@ -19,20 +24,27 @@
 //!    cargo run --release --bin dark-gram-spectroscopy -- --orders 2,3,4,6
 //! ═══════════════════════════════════════════════════════════════════════════
 
-use std::time::Instant;
 use clap::Parser;
+use std::time::Instant;
 
 use dark_gram_spectroscopy::dark_gram;
 
 #[derive(Parser)]
-#[command(name = "dark-gram-spectroscopy", about = "Dark Gram Matrix spectral analysis")]
+#[command(
+    name = "dark-gram-spectroscopy",
+    about = "Dark Gram Matrix spectral analysis"
+)]
 struct Cli {
     /// Bernoulli orders to test (comma-separated)
     #[arg(long, value_delimiter = ',', default_value = "2,3,4")]
     orders: Vec<usize>,
 
     /// Matrix dimensions to test (comma-separated)
-    #[arg(long, value_delimiter = ',', default_value = "12,24,60,120,240,360,720")]
+    #[arg(
+        long,
+        value_delimiter = ',',
+        default_value = "12,24,60,120,240,360,720"
+    )]
     dims: Vec<usize>,
 
     /// Maximum dimension (overrides dims if set)
@@ -64,8 +76,8 @@ fn main() {
     let dims = if let Some(max_dim) = cli.max_dim {
         // Generate standard HC schedule up to max_dim
         let hc = vec![
-            12, 24, 36, 48, 60, 120, 180, 240, 360, 720, 840, 1000,
-            1260, 1680, 2520, 5040, 7560, 10080, 15120, 20000,
+            12, 24, 36, 48, 60, 120, 180, 240, 360, 720, 840, 1000, 1260, 1680, 2520, 5040, 7560,
+            10080, 15120, 20000,
         ];
         hc.into_iter().filter(|&d| d <= max_dim).collect()
     } else {
@@ -106,16 +118,12 @@ fn main() {
     }
 
     eprintln!();
-    eprintln!(
-        "═══════════════════════════════════════════════════════════════"
-    );
+    eprintln!("═══════════════════════════════════════════════════════════════");
     eprintln!(
         "  🪞 Dark Gram Spectroscopy complete ({:.1}s)",
         t_total.elapsed().as_secs_f64()
     );
-    eprintln!(
-        "═══════════════════════════════════════════════════════════════"
-    );
+    eprintln!("═══════════════════════════════════════════════════════════════");
 }
 
 struct SpectralResult {
@@ -151,7 +159,8 @@ fn analyze_dark_gram(n: usize, dim: usize) -> SpectralResult {
     // Full eigendecomposition via faer (parallel on all cores)
     let t_eigen = Instant::now();
     let faer_mat = faer::Mat::from_fn(dim, dim, |i, j| mat[i * dim + j]);
-    let eig_vec = faer_mat.self_adjoint_eigenvalues(faer::Side::Lower)
+    let eig_vec = faer_mat
+        .self_adjoint_eigenvalues(faer::Side::Lower)
         .expect("eigenvalue computation failed");
     let mut eigenvalues: Vec<f64> = eig_vec;
     eigenvalues.sort_by(|a, b| b.partial_cmp(a).unwrap()); // Descending
@@ -184,11 +193,16 @@ fn analyze_dark_gram(n: usize, dim: usize) -> SpectralResult {
     // Effective rank (exponential of entropy)
     let total: f64 = eigenvalues.iter().filter(|&&x| x > 0.0).sum();
     let eff_rank = if total > 0.0 {
-        let entropy: f64 = eigenvalues.iter()
+        let entropy: f64 = eigenvalues
+            .iter()
             .filter(|&&x| x > 0.0)
             .map(|&x| {
                 let p = x / total;
-                if p > 1e-30 { -p * p.ln() } else { 0.0 }
+                if p > 1e-30 {
+                    -p * p.ln()
+                } else {
+                    0.0
+                }
             })
             .sum();
         entropy.exp()
@@ -235,7 +249,8 @@ fn classify_decay(eigenvalues: &[f64]) -> String {
     }
 
     // Filter positive eigenvalues
-    let positive: Vec<(usize, f64)> = eigenvalues.iter()
+    let positive: Vec<(usize, f64)> = eigenvalues
+        .iter()
         .enumerate()
         .take(n)
         .filter(|(_, &v)| v > 1e-300)
@@ -254,7 +269,10 @@ fn classify_decay(eigenvalues: &[f64]) -> String {
 
     // Power law fit: log(λ) vs log(k+1)
     let pow_r2 = r_squared(
-        &positive.iter().map(|(i, _)| ((*i + 1) as f64).ln()).collect::<Vec<_>>(),
+        &positive
+            .iter()
+            .map(|(i, _)| ((*i + 1) as f64).ln())
+            .collect::<Vec<_>>(),
         &positive.iter().map(|(_, v)| v.ln()).collect::<Vec<_>>(),
     );
 
@@ -272,7 +290,11 @@ fn r_squared(x: &[f64], y: &[f64]) -> f64 {
     let n = x.len() as f64;
     let x_mean = x.iter().sum::<f64>() / n;
     let y_mean = y.iter().sum::<f64>() / n;
-    let ss_xy: f64 = x.iter().zip(y).map(|(xi, yi)| (xi - x_mean) * (yi - y_mean)).sum();
+    let ss_xy: f64 = x
+        .iter()
+        .zip(y)
+        .map(|(xi, yi)| (xi - x_mean) * (yi - y_mean))
+        .sum();
     let ss_xx: f64 = x.iter().map(|xi| (xi - x_mean).powi(2)).sum();
     let ss_yy: f64 = y.iter().map(|yi| (yi - y_mean).powi(2)).sum();
     if ss_xx.abs() < 1e-30 || ss_yy.abs() < 1e-30 {
@@ -299,9 +321,7 @@ fn verify_closed_form() {
             tests += 1;
 
             if rel_err > 1e-6 {
-                eprintln!(
-                    "  ⚠ ({j},{k}): closed={closed:.6e}, quad={quad:.6e}, err={rel_err:.2e}"
-                );
+                eprintln!("  ⚠ ({j},{k}): closed={closed:.6e}, quad={quad:.6e}, err={rel_err:.2e}");
             }
         }
     }

@@ -28,7 +28,9 @@ pub fn h1_gcd_stratum_eigenvector(keys: &[SemiprimeKey]) {
     for key in keys.iter().take(5) {
         // Probe depth: min(√N, 200) to keep computation manageable
         let m = ((key.n as f64).sqrt() as usize).min(200).max(20);
-        if m < 10 { continue; }
+        if m < 10 {
+            continue;
+        }
 
         // Build Gram submatrix (indices 2..m+1)
         let dim = m - 1;
@@ -43,7 +45,9 @@ pub fn h1_gcd_stratum_eigenvector(keys: &[SemiprimeKey]) {
 
         // Eigendecompose — ground state is eigenvectors[0] (sorted ascending)
         let eig = eigen::eigen_f64(&gram_mat, dim);
-        if eig.eigenvalues.is_empty() { continue; }
+        if eig.eigenvalues.is_empty() {
+            continue;
+        }
 
         let ground = &eig.eigenvectors[0]; // Vec<f64>
 
@@ -64,13 +68,30 @@ pub fn h1_gcd_stratum_eigenvector(keys: &[SemiprimeKey]) {
         let r_count = (0..dim).filter(|i| (i + 2) % rand_p as usize == 0).count();
 
         // Normalize by number of lattice points
-        let p_density = if p_count > 0 { p_weight / p_count as f64 } else { 0.0 };
-        let r_density = if r_count > 0 { rand_weight / r_count as f64 } else { 0.0 };
+        let p_density = if p_count > 0 {
+            p_weight / p_count as f64
+        } else {
+            0.0
+        };
+        let r_density = if r_count > 0 {
+            rand_weight / r_count as f64
+        } else {
+            0.0
+        };
 
-        println!("    N={}: factor p={} density={:.6e}, non-factor p'={} density={:.6e}, ratio={:.3}",
-            key.n, key.p, p_density, rand_p,
+        println!(
+            "    N={}: factor p={} density={:.6e}, non-factor p'={} density={:.6e}, ratio={:.3}",
+            key.n,
+            key.p,
+            p_density,
+            rand_p,
             r_density,
-            if r_density > 0.0 { p_density / r_density } else { f64::INFINITY });
+            if r_density > 0.0 {
+                p_density / r_density
+            } else {
+                f64::INFINITY
+            }
+        );
 
         factor_pr_sum += p_density;
         random_pr_sum += r_density;
@@ -79,11 +100,20 @@ pub fn h1_gcd_stratum_eigenvector(keys: &[SemiprimeKey]) {
 
     if count > 0 {
         let avg_ratio = (factor_pr_sum / count as f64) / (random_pr_sum / count as f64);
-        println!("    ▸ Average factor/non-factor density ratio: {:.4}", avg_ratio);
-        println!("    ▸ Signal: {}\n",
-            if avg_ratio > 1.5 { "STRONG ⚡" }
-            else if avg_ratio > 1.1 { "weak 〜" }
-            else { "null ∅" });
+        println!(
+            "    ▸ Average factor/non-factor density ratio: {:.4}",
+            avg_ratio
+        );
+        println!(
+            "    ▸ Signal: {}\n",
+            if avg_ratio > 1.5 {
+                "STRONG ⚡"
+            } else if avg_ratio > 1.1 {
+                "weak 〜"
+            } else {
+                "null ∅"
+            }
+        );
     }
 }
 
@@ -105,11 +135,13 @@ pub fn h2_optimal_weight_structure(keys: &[SemiprimeKey]) {
         let ln_n = (key.n as f64).ln();
 
         // Compute witness weights for indices 2..m
-        let mut weights: Vec<(usize, f64)> = (2..m).map(|k| {
-            let mu_k = if k < mu.len() { mu[k] as f64 } else { 0.0 };
-            let w = -mu_k * (1.0 - (k as f64).ln() / ln_n);
-            (k, w.abs())
-        }).collect();
+        let mut weights: Vec<(usize, f64)> = (2..m)
+            .map(|k| {
+                let mu_k = if k < mu.len() { mu[k] as f64 } else { 0.0 };
+                let w = -mu_k * (1.0 - (k as f64).ln() / ln_n);
+                (k, w.abs())
+            })
+            .collect();
 
         // Sort by absolute weight (descending)
         weights.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap());
@@ -119,18 +151,39 @@ pub fn h2_optimal_weight_structure(keys: &[SemiprimeKey]) {
         let q_in_range = (key.q as usize) < m;
         let q_rank = if q_in_range {
             weights.iter().position(|(k, _)| *k == key.q as usize)
-        } else { None };
+        } else {
+            None
+        };
 
-        let p_weight = weights.iter().find(|(k, _)| *k == key.p as usize)
-            .map(|(_, w)| *w).unwrap_or(0.0);
-        let median_weight = weights.get(weights.len() / 2).map(|(_, w)| *w).unwrap_or(1.0);
+        let p_weight = weights
+            .iter()
+            .find(|(k, _)| *k == key.p as usize)
+            .map(|(_, w)| *w)
+            .unwrap_or(0.0);
+        let median_weight = weights
+            .get(weights.len() / 2)
+            .map(|(_, w)| *w)
+            .unwrap_or(1.0);
 
-        println!("    N={}: p={} rank={}/{}, |w_p|={:.6e}, median={:.6e}, ratio={:.2}{}",
-            key.n, key.p,
-            p_rank.map(|r| r + 1).unwrap_or(0), weights.len(),
-            p_weight, median_weight,
-            if median_weight > 0.0 { p_weight / median_weight } else { 0.0 },
-            if let Some(qr) = q_rank { format!(", q={} rank={}", key.q, qr + 1) } else { String::new() });
+        println!(
+            "    N={}: p={} rank={}/{}, |w_p|={:.6e}, median={:.6e}, ratio={:.2}{}",
+            key.n,
+            key.p,
+            p_rank.map(|r| r + 1).unwrap_or(0),
+            weights.len(),
+            p_weight,
+            median_weight,
+            if median_weight > 0.0 {
+                p_weight / median_weight
+            } else {
+                0.0
+            },
+            if let Some(qr) = q_rank {
+                format!(", q={} rank={}", key.q, qr + 1)
+            } else {
+                String::new()
+            }
+        );
     }
     println!();
 }
@@ -167,19 +220,35 @@ pub fn h3_vasyunin_cotangent_anomaly(keys: &[SemiprimeKey]) {
         let p90_nf = percentile(&non_factor_sums, 90.0);
 
         println!("    N={} = {}×{}", key.n, key.p, key.q);
-        println!("      Non-factor |V(m,N)| median={:.4e}, p90={:.4e}", median_nf, p90_nf);
+        println!(
+            "      Non-factor |V(m,N)| median={:.4e}, p90={:.4e}",
+            median_nf, p90_nf
+        );
         for (m, v) in &anomalies {
-            let label = if *m == key.p { " ← FACTOR p" }
-                else if *m == key.q { " ← FACTOR q" }
-                else { " (divisor)" };
+            let label = if *m == key.p {
+                " ← FACTOR p"
+            } else if *m == key.q {
+                " ← FACTOR q"
+            } else {
+                " (divisor)"
+            };
             println!("      V({}, N) = {:.4e}{}", m, v, label);
         }
 
         // Check: how many non-factors have |V| < min(factor |V|)?
-        let min_factor_v = anomalies.iter().map(|(_, v)| *v).fold(f64::INFINITY, f64::min);
-        let false_positives = non_factor_sums.iter().filter(|&&v| v <= min_factor_v * 1.1).count();
-        println!("      False positives (|V| ≤ factor level): {}/{}\n",
-            false_positives, non_factor_sums.len());
+        let min_factor_v = anomalies
+            .iter()
+            .map(|(_, v)| *v)
+            .fold(f64::INFINITY, f64::min);
+        let false_positives = non_factor_sums
+            .iter()
+            .filter(|&&v| v <= min_factor_v * 1.1)
+            .count();
+        println!(
+            "      False positives (|V| ≤ factor level): {}/{}\n",
+            false_positives,
+            non_factor_sums.len()
+        );
     }
 }
 
@@ -195,7 +264,9 @@ pub fn h4_mobius_local_structure(keys: &[SemiprimeKey]) {
     println!("  ─────────────────────────────────────");
 
     for key in keys.iter().take(5) {
-        if key.n > 500_000 { continue; } // Möbius sieve limit
+        if key.n > 500_000 {
+            continue;
+        } // Möbius sieve limit
 
         let n = key.n as usize;
         let window = (n / 10).min(1000).max(50);
@@ -226,36 +297,55 @@ pub fn h4_mobius_local_structure(keys: &[SemiprimeKey]) {
         let lambda_n = lambda[n];
 
         println!("    N={} = {}×{}", key.n, key.p, key.q);
-        println!("      μ(N)={}, λ(N)={}, Ω(N)={}, M(N)={}, L(N)={}",
-            mu_n, lambda_n, omega_n, m_at_n, l_at_n);
+        println!(
+            "      μ(N)={}, λ(N)={}, Ω(N)={}, M(N)={}, L(N)={}",
+            mu_n, lambda_n, omega_n, m_at_n, l_at_n
+        );
 
         // Local Mertens gradient: M(N+p) - M(N) vs M(N+r) - M(N) for random r
         let m_diff_p = if n + key.p as usize <= hi {
             let mut s = 0i64;
-            for k in (n+1)..=(n + key.p as usize) { s += mu[k] as i64; }
+            for k in (n + 1)..=(n + key.p as usize) {
+                s += mu[k] as i64;
+            }
             Some(s)
-        } else { None };
+        } else {
+            None
+        };
 
         let r = next_non_factor_prime(key.p, key.n) as usize;
         let m_diff_r = if n + r <= hi {
             let mut s = 0i64;
-            for k in (n+1)..=(n + r) { s += mu[k] as i64; }
+            for k in (n + 1)..=(n + r) {
+                s += mu[k] as i64;
+            }
             Some(s)
-        } else { None };
+        } else {
+            None
+        };
 
         if let (Some(dp), Some(dr)) = (m_diff_p, m_diff_r) {
-            println!("      ΔM(N→N+p) = {}, ΔM(N→N+{}) = {}, diff = {}",
-                dp, r, dr, (dp - dr).abs());
+            println!(
+                "      ΔM(N→N+p) = {}, ΔM(N→N+{}) = {}, diff = {}",
+                dp,
+                r,
+                dr,
+                (dp - dr).abs()
+            );
         }
 
         // Count squarefree integers in [N-p..N+p]
         let p = key.p as usize;
-        let sqfree_count = (n.saturating_sub(p)..=(n+p).min(hi))
+        let sqfree_count = (n.saturating_sub(p)..=(n + p).min(hi))
             .filter(|&k| k > 0 && k < mu.len() && mu[k] != 0)
             .count();
         let expected_sqfree = (2 * p + 1) as f64 * 6.0 / std::f64::consts::PI.powi(2);
-        println!("      Squarefree in [N-p, N+p]: {} (expected {:.1}), ratio={:.3}\n",
-            sqfree_count, expected_sqfree, sqfree_count as f64 / expected_sqfree);
+        println!(
+            "      Squarefree in [N-p, N+p]: {} (expected {:.1}), ratio={:.3}\n",
+            sqfree_count,
+            expected_sqfree,
+            sqfree_count as f64 / expected_sqfree
+        );
     }
 }
 
@@ -287,7 +377,9 @@ pub fn h5_composite_anchoring(keys: &[SemiprimeKey]) {
         }
 
         let eig = eigen::eigen_f64(&gram_mat, dim);
-        if eig.eigenvalues.is_empty() { continue; }
+        if eig.eigenvalues.is_empty() {
+            continue;
+        }
 
         let ground = &eig.eigenvectors[0]; // ground state
         let full_pr = spectral::participation_ratio(ground);
@@ -298,9 +390,13 @@ pub fn h5_composite_anchoring(keys: &[SemiprimeKey]) {
         let mut prime_weights: Vec<(usize, f64, bool)> = Vec::new();
 
         for d in 2..m {
-            if !sieve[d] { continue; }
+            if !sieve[d] {
+                continue;
+            }
             let mult_count = (0..dim).filter(|i| (i + 2) % d == 0).count();
-            if mult_count == 0 { continue; }
+            if mult_count == 0 {
+                continue;
+            }
 
             let weight: f64 = (0..dim)
                 .filter(|i| (i + 2) % d == 0)
@@ -315,16 +411,32 @@ pub fn h5_composite_anchoring(keys: &[SemiprimeKey]) {
         // Sort by density (ascending — factors should be near bottom if "avoided")
         prime_weights.sort_by(|a, b| a.1.partial_cmp(&b.1).unwrap());
 
-        println!("    N={} = {}×{}, M={}, PR={:.4}", key.n, key.p, key.q, m, full_pr);
+        println!(
+            "    N={} = {}×{}, M={}, PR={:.4}",
+            key.n, key.p, key.q, m, full_pr
+        );
         println!("      Prime divisor density ranking (low = avoided):");
         for (i, (d, density, is_factor)) in prime_weights.iter().take(10).enumerate() {
-            println!("        #{}: d={:5} density={:.6e} {}",
-                i + 1, d, density, if *is_factor { "← FACTOR" } else { "" });
+            println!(
+                "        #{}: d={:5} density={:.6e} {}",
+                i + 1,
+                d,
+                density,
+                if *is_factor { "← FACTOR" } else { "" }
+            );
         }
 
         // Where do the actual factors rank?
-        if let Some(p_rank) = prime_weights.iter().position(|(d, _, _)| *d == key.p as usize) {
-            println!("      Factor p={} rank: {}/{}", key.p, p_rank + 1, prime_weights.len());
+        if let Some(p_rank) = prime_weights
+            .iter()
+            .position(|(d, _, _)| *d == key.p as usize)
+        {
+            println!(
+                "      Factor p={} rank: {}/{}",
+                key.p,
+                p_rank + 1,
+                prime_weights.len()
+            );
         }
         println!();
     }
@@ -344,7 +456,9 @@ pub fn h6_quadratic_form_probe(keys: &[SemiprimeKey]) {
     for key in keys.iter().take(3) {
         let m = ((key.p as usize) * 2).min(300).max(20);
         let n = key.n as usize;
-        if n > 500_000 { continue; }
+        if n > 500_000 {
+            continue;
+        }
 
         let mu = arith::mobius_table(m);
         let v = cathedral_utils::mertens::witness_vector(m, &mu);
@@ -369,7 +483,9 @@ pub fn h6_quadratic_form_probe(keys: &[SemiprimeKey]) {
         let mut results: Vec<(usize, f64, f64, bool)> = Vec::new();
 
         for d in 2..m.min(100) {
-            if !sieve[d] { continue; }
+            if !sieve[d] {
+                continue;
+            }
 
             let mut v_masked = v.clone();
             for i in 0..dim {
@@ -386,16 +502,30 @@ pub fn h6_quadratic_form_probe(keys: &[SemiprimeKey]) {
         // Sort by delta (descending — removing factors should change d² most)
         results.sort_by(|a, b| b.2.partial_cmp(&a.2).unwrap());
 
-        println!("    N={} = {}×{}, d²_full = {:.8}", key.n, key.p, key.q, d2_full);
+        println!(
+            "    N={} = {}×{}, d²_full = {:.8}",
+            key.n, key.p, key.q, d2_full
+        );
         println!("      Top-10 primes by |Δd²| when their multiples are masked:");
         for (i, (d, d2_m, delta, is_factor)) in results.iter().take(10).enumerate() {
-            println!("        #{}: p={:5} |Δd²|={:.6e}  d²_masked={:.8} {}",
-                i + 1, d, delta, d2_m, if *is_factor { "← FACTOR" } else { "" });
+            println!(
+                "        #{}: p={:5} |Δd²|={:.6e}  d²_masked={:.8} {}",
+                i + 1,
+                d,
+                delta,
+                d2_m,
+                if *is_factor { "← FACTOR" } else { "" }
+            );
         }
 
         // Factor rank
         if let Some(rank) = results.iter().position(|(d, _, _, _)| *d == key.p as usize) {
-            println!("      Factor p={} rank: {}/{}", key.p, rank + 1, results.len());
+            println!(
+                "      Factor p={} rank: {}/{}",
+                key.p,
+                rank + 1,
+                results.len()
+            );
         }
         println!();
     }
@@ -407,7 +537,9 @@ pub fn h6_quadratic_form_probe(keys: &[SemiprimeKey]) {
 
 /// Vasyunin cotangent sum: V(m, n) = Σ_{j=1}^{m-1} {j·n/m} · cot(π·j/m)
 fn vasyunin_sum(m: u64, n: u64) -> f64 {
-    if m <= 1 { return 0.0; }
+    if m <= 1 {
+        return 0.0;
+    }
     let mut sum = 0.0f64;
     for j in 1..m {
         let frac = ((j * (n % m)) % m) as f64 / m as f64; // {j·n/m}
@@ -421,19 +553,31 @@ fn vasyunin_sum(m: u64, n: u64) -> f64 {
 fn next_non_factor_prime(start: u64, n: u64) -> u64 {
     let mut p = start + 2;
     loop {
-        if is_prime_u64(p) && !n.is_multiple_of(p) { return p; }
+        if is_prime_u64(p) && !n.is_multiple_of(p) {
+            return p;
+        }
         p += if p.is_multiple_of(2) { 1 } else { 2 };
-        if p > start + 1000 { return start + 1; } // fallback
+        if p > start + 1000 {
+            return start + 1;
+        } // fallback
     }
 }
 
 fn is_prime_u64(n: u64) -> bool {
-    if n < 2 { return false; }
-    if n < 4 { return true; }
-    if n.is_multiple_of(2) || n.is_multiple_of(3) { return false; }
+    if n < 2 {
+        return false;
+    }
+    if n < 4 {
+        return true;
+    }
+    if n.is_multiple_of(2) || n.is_multiple_of(3) {
+        return false;
+    }
     let mut i = 5u64;
     while i * i <= n {
-        if n.is_multiple_of(i) || n.is_multiple_of(i + 2) { return false; }
+        if n.is_multiple_of(i) || n.is_multiple_of(i + 2) {
+            return false;
+        }
         i += 6;
     }
     true
@@ -441,7 +585,9 @@ fn is_prime_u64(n: u64) -> bool {
 
 /// Percentile of a sorted slice.
 fn percentile(data: &[f64], pct: f64) -> f64 {
-    if data.is_empty() { return 0.0; }
+    if data.is_empty() {
+        return 0.0;
+    }
     let mut sorted = data.to_vec();
     sorted.sort_by(|a, b| a.partial_cmp(b).unwrap());
     let idx = ((pct / 100.0) * (sorted.len() - 1) as f64) as usize;

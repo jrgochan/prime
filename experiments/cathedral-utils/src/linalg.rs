@@ -35,7 +35,6 @@ pub fn dense_matvec_par(mat: &[f64], dim: usize, v: &[f64], out: &mut [f64]) {
     });
 }
 
-
 /// Shifted matrix-vector product: `out = (σI - mat) · v`.
 ///
 /// Computes `out[i] = σ * v[i] - (mat · v)[i]`. Used by Lanczos iteration

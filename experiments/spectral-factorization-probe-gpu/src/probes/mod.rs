@@ -4,6 +4,9 @@
 //! Shared infrastructure (Gram cache, HPDF loading, utilities) lives here.
 
 pub mod h1;
+pub mod h10;
+pub mod h11;
+pub mod h12;
 pub mod h2;
 pub mod h3;
 pub mod h4;
@@ -12,13 +15,13 @@ pub mod h6;
 pub mod h7;
 pub mod h8;
 pub mod h9;
-pub mod h10;
-pub mod h11;
-pub mod h12;
 pub mod ssh_probe;
 
 // Re-export probe entry points
 pub use h1::h1_gcd_stratum_eigenvector;
+pub use h10::h10_dark_sector_crossover;
+pub use h11::h11_sherman_morrison_sensitivity;
+pub use h12::h12_mellin_critical_line;
 pub use h2::h2_optimal_weight_structure;
 pub use h3::h3_vasyunin_cotangent_anomaly;
 pub use h4::h4_mobius_local_structure;
@@ -27,9 +30,6 @@ pub use h6::h6_quadratic_form_probe;
 pub use h7::h7_condition_number_fingerprint;
 pub use h8::h8_eigenvalue_interlacing;
 pub use h9::h9_participation_ratio_harmonics;
-pub use h10::h10_dark_sector_crossover;
-pub use h11::h11_sherman_morrison_sensitivity;
-pub use h12::h12_mellin_critical_line;
 
 use crate::gpu;
 use rayon::prelude::*;
@@ -52,13 +52,18 @@ impl HpdfIndex {
         let mut files = Vec::new();
         for entry in std::fs::read_dir(dir).ok()?.flatten() {
             let name = entry.file_name().to_string_lossy().to_string();
-            if let Some(n_str) = name.strip_prefix("gram_N").and_then(|s| s.strip_suffix(".h5")) {
+            if let Some(n_str) = name
+                .strip_prefix("gram_N")
+                .and_then(|s| s.strip_suffix(".h5"))
+            {
                 if let Ok(n) = n_str.parse::<usize>() {
                     files.push((n, entry.path()));
                 }
             }
         }
-        if files.is_empty() { return None; }
+        if files.is_empty() {
+            return None;
+        }
         files.sort_by_key(|&(n, _)| n);
         Some(HpdfIndex { files })
     }
@@ -93,12 +98,14 @@ pub struct GramEigenResult {
 impl GramCache {
     /// Create a new cache, scanning for available HPDF files.
     pub fn new(hpdf_dir: Option<&Path>) -> Self {
-        let hpdf_index = hpdf_dir
-            .filter(|d| d.exists())
-            .and_then(HpdfIndex::scan);
+        let hpdf_index = hpdf_dir.filter(|d| d.exists()).and_then(HpdfIndex::scan);
 
         if let Some(ref idx) = hpdf_index {
-            eprintln!("  [GramCache] HPDF: {} files, max N={}", idx.files.len(), idx.max_n());
+            eprintln!(
+                "  [GramCache] HPDF: {} files, max N={}",
+                idx.files.len(),
+                idx.max_n()
+            );
         } else if hpdf_dir.is_some() {
             eprintln!("  [GramCache] No HPDF files found");
         }
@@ -152,7 +159,10 @@ impl GramCache {
         let t = t0.elapsed().as_secs_f64();
         eprintln!("    [Gram] Built {}×{} in {:.3}s", dim, dim, t);
         let arc = Arc::new(gram);
-        self.gram_only_cache.lock().unwrap().insert(dim, Arc::clone(&arc));
+        self.gram_only_cache
+            .lock()
+            .unwrap()
+            .insert(dim, Arc::clone(&arc));
         arc
     }
 
@@ -171,18 +181,25 @@ impl GramCache {
                 );
                 let ground: Vec<f64> = (0..dim).map(|i| eig.eigenvectors[i]).collect();
                 Some(GramEigenResult {
-                    gram: gram_mat, eigenvalues: eig.eigenvalues, ground_state: ground,
-                    build_time: t_build, eigen_time: eig.gpu_time_secs,
+                    gram: gram_mat,
+                    eigenvalues: eig.eigenvalues,
+                    ground_state: ground,
+                    build_time: t_build,
+                    eigen_time: eig.gpu_time_secs,
                 })
             }
             Err(e) => {
                 eprintln!("    [GPU] Eigen failed: {}, falling back to CPU", e);
                 let eig = cathedral_utils::eigen::eigen_f64(&gram_mat, dim);
-                if eig.eigenvalues.is_empty() { return None; }
+                if eig.eigenvalues.is_empty() {
+                    return None;
+                }
                 Some(GramEigenResult {
-                    gram: gram_mat, eigenvalues: eig.eigenvalues,
+                    gram: gram_mat,
+                    eigenvalues: eig.eigenvalues,
                     ground_state: eig.eigenvectors[0].clone(),
-                    build_time: t_build, eigen_time: t0.elapsed().as_secs_f64() - t_build,
+                    build_time: t_build,
+                    eigen_time: t0.elapsed().as_secs_f64() - t_build,
                 })
             }
         }
@@ -199,18 +216,26 @@ impl GramCache {
         }
 
         // Fallback: CPU build with f64 Kahan (same as before, but parallel)
-        eprintln!("    [CPU] Building {}×{} Gram matrix (f64 Kahan)...", dim, dim);
+        eprintln!(
+            "    [CPU] Building {}×{} Gram matrix (f64 Kahan)...",
+            dim, dim
+        );
         let entries: Vec<(usize, usize, f64)> = (0..dim)
             .into_par_iter()
             .flat_map(|i| {
-                (i..dim).map(move |j| {
-                    let g = cathedral_utils::gram::gram_entry_f64(i + 2, j + 2);
-                    (i, j, g)
-                }).collect::<Vec<_>>()
+                (i..dim)
+                    .map(move |j| {
+                        let g = cathedral_utils::gram::gram_entry_f64(i + 2, j + 2);
+                        (i, j, g)
+                    })
+                    .collect::<Vec<_>>()
             })
             .collect();
         let mut mat = vec![0.0f64; dim * dim];
-        for (i, j, g) in entries { mat[i * dim + j] = g; mat[j * dim + i] = g; }
+        for (i, j, g) in entries {
+            mat[i * dim + j] = g;
+            mat[j * dim + i] = g;
+        }
         mat
     }
 
@@ -225,13 +250,19 @@ impl GramCache {
         let idx = self.hpdf_index.as_ref()?;
         let (file_n, path) = idx.best_file_for(max_n)?;
 
-        eprintln!("    [HPDF] Loading from gram_N{}.h5 (need {}×{}) ...", file_n, dim, dim);
+        eprintln!(
+            "    [HPDF] Loading from gram_N{}.h5 (need {}×{}) ...",
+            file_n, dim, dim
+        );
         let t0 = std::time::Instant::now();
         let reader = HpdfReader::open(path).ok()?;
         let file_dim = reader.dim();
 
         if file_dim < dim {
-            eprintln!("    [HPDF] File dim {} < needed {}, skipping", file_dim, dim);
+            eprintln!(
+                "    [HPDF] File dim {} < needed {}, skipping",
+                file_dim, dim
+            );
             return None;
         }
 
@@ -239,18 +270,28 @@ impl GramCache {
         let full_mat = reader.read_gram_full().ok()?;
 
         if file_dim == dim {
-            eprintln!("    [HPDF] Loaded full {}×{} in {:.3}s", dim, dim, t0.elapsed().as_secs_f64());
+            eprintln!(
+                "    [HPDF] Loaded full {}×{} in {:.3}s",
+                dim,
+                dim,
+                t0.elapsed().as_secs_f64()
+            );
             return Some(full_mat);
         }
 
         // Extract upper-left dim×dim submatrix in memory
         let mut sub = vec![0.0f64; dim * dim];
         for i in 0..dim {
-            sub[i * dim..i * dim + dim].copy_from_slice(&full_mat[i * file_dim..i * file_dim + dim]);
+            sub[i * dim..i * dim + dim]
+                .copy_from_slice(&full_mat[i * file_dim..i * file_dim + dim]);
         }
         eprintln!(
             "    [HPDF] Extracted {}×{} from {}×{} in {:.3}s",
-            dim, dim, file_dim, file_dim, t0.elapsed().as_secs_f64()
+            dim,
+            dim,
+            file_dim,
+            file_dim,
+            t0.elapsed().as_secs_f64()
         );
         Some(sub)
     }
@@ -261,7 +302,9 @@ impl GramCache {
 // ═══════════════════════════════════════════════════════════════
 
 pub fn vasyunin_sum(m: u64, n: u64) -> f64 {
-    if m <= 1 { return 0.0; }
+    if m <= 1 {
+        return 0.0;
+    }
     let mut sum = 0.0f64;
     for j in 1..m {
         let frac = ((j * (n % m)) % m) as f64 / m as f64;
@@ -274,22 +317,39 @@ pub fn vasyunin_sum(m: u64, n: u64) -> f64 {
 pub fn next_non_factor_prime(start: u64, n: u64) -> u64 {
     let mut p = start + 2;
     loop {
-        if is_prime_u64(p) && !n.is_multiple_of(p) { return p; }
+        if is_prime_u64(p) && !n.is_multiple_of(p) {
+            return p;
+        }
         p += if p.is_multiple_of(2) { 1 } else { 2 };
-        if p > start + 1000 { return start + 1; }
+        if p > start + 1000 {
+            return start + 1;
+        }
     }
 }
 
 pub fn is_prime_u64(n: u64) -> bool {
-    if n < 2 { return false; } else if n < 4 { return true; }
-    if n.is_multiple_of(2) || n.is_multiple_of(3) { return false; }
+    if n < 2 {
+        return false;
+    } else if n < 4 {
+        return true;
+    }
+    if n.is_multiple_of(2) || n.is_multiple_of(3) {
+        return false;
+    }
     let mut i = 5u64;
-    while i * i <= n { if n.is_multiple_of(i) || n.is_multiple_of(i + 2) { return false; } i += 6; }
+    while i * i <= n {
+        if n.is_multiple_of(i) || n.is_multiple_of(i + 2) {
+            return false;
+        }
+        i += 6;
+    }
     true
 }
 
 pub fn percentile(data: &[f64], pct: f64) -> f64 {
-    if data.is_empty() { return 0.0; }
+    if data.is_empty() {
+        return 0.0;
+    }
     let mut sorted = data.to_vec();
     sorted.sort_by(|a, b| a.partial_cmp(b).unwrap());
     let idx = ((pct / 100.0) * (sorted.len() - 1) as f64) as usize;

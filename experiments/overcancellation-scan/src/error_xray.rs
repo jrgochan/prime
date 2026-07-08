@@ -1,4 +1,8 @@
-#![allow(dead_code, clippy::needless_range_loop, clippy::empty_line_after_doc_comments)]
+#![allow(
+    dead_code,
+    clippy::needless_range_loop,
+    clippy::empty_line_after_doc_comments
+)]
 //! # Error Matrix X-Ray: The G_V = R + E Decomposition
 //!
 //! ## Purpose
@@ -35,14 +39,18 @@ const LN2PI: f64 = 1.8378770664093453;
 
 /// Vasyunin cotangent sum V(a,b) = Σ_{m=1}^{a-1} {mb/a}·cot(πm/a)
 fn vasyunin_sum(a: usize, b: usize) -> f64 {
-    if a <= 1 { return 0.0; }
+    if a <= 1 {
+        return 0.0;
+    }
     let af = a as f64;
     let mut total = 0.0;
     for m in 1..a {
         let frac = ((m * b) % a) as f64 / af;
         let angle = PI * m as f64 / af;
         let (sin_v, cos_v) = angle.sin_cos();
-        if sin_v.abs() < 1e-15 { continue; }
+        if sin_v.abs() < 1e-15 {
+            continue;
+        }
         total += frac * cos_v / sin_v;
     }
     total
@@ -96,7 +104,9 @@ fn error_log(j: usize, k: usize) -> f64 {
 /// Cotangent component: -πd/(2jk)·(V(j',k')+V(k',j'))
 /// On diagonal: 0 (since V(1,1) = 0)
 fn error_cot(j: usize, k: usize) -> f64 {
-    if j == k { return 0.0; }
+    if j == k {
+        return 0.0;
+    }
     let d = gcd(j, k);
     let (jp, kp) = (j / d, k / d);
     let df = d as f64;
@@ -120,11 +130,11 @@ struct XRayResult {
     vt_ev: f64,       // vᵀEv = vᵀG_Vv - vᵀRv
     vt_ev_log: f64,   // log component of vᵀEv
     vt_ev_cot: f64,   // cotangent component of vᵀEv
-    vt_ev_const: f64,  // constant component of vᵀEv
-    vt_ev_ram: f64,    // -vᵀRv component
-    bt_v: f64,         // bᵀv (mean vector · weights)
-    sigma_half: f64,   // (Σv_k)/2
-    d_sq: f64,         // 1 - 2bᵀv + vᵀG_Vv
+    vt_ev_const: f64, // constant component of vᵀEv
+    vt_ev_ram: f64,   // -vᵀRv component
+    bt_v: f64,        // bᵀv (mean vector · weights)
+    sigma_half: f64,  // (Σv_k)/2
+    d_sq: f64,        // 1 - 2bᵀv + vᵀG_Vv
     elapsed_ms: f64,
 }
 
@@ -133,35 +143,43 @@ fn xray_scan(mu: &[i8], n: usize) -> XRayResult {
     let log_n = (n as f64).ln();
 
     // Build Möbius-Fejér weights: v_k = -μ(k)·(1 - logk/logN) for k=1..N
-    let v: Vec<f64> = (0..=n).map(|k| {
-        if k == 0 || mu[k] == 0 { 0.0 }
-        else { -(mu[k] as f64) * (1.0 - (k as f64).ln() / log_n) }
-    }).collect();
+    let v: Vec<f64> = (0..=n)
+        .map(|k| {
+            if k == 0 || mu[k] == 0 {
+                0.0
+            } else {
+                -(mu[k] as f64) * (1.0 - (k as f64).ln() / log_n)
+            }
+        })
+        .collect();
 
     // Collect active indices (squarefree k with v[k] != 0)
     let active: Vec<usize> = (1..=n).filter(|&k| v[k] != 0.0).collect();
 
     // Parallel computation: each j-row computed independently via Rayon
-    let row_sums: Vec<(f64, f64, f64, f64, f64, f64)> = active.par_iter().map(|&j| {
-        let mut gv = 0.0f64;
-        let mut rv = 0.0f64;
-        let mut ev_log = 0.0f64;
-        let mut ev_cot = 0.0f64;
-        let mut ev_const = 0.0f64;
-        let mut ev_ram = 0.0f64;
+    let row_sums: Vec<(f64, f64, f64, f64, f64, f64)> = active
+        .par_iter()
+        .map(|&j| {
+            let mut gv = 0.0f64;
+            let mut rv = 0.0f64;
+            let mut ev_log = 0.0f64;
+            let mut ev_cot = 0.0f64;
+            let mut ev_const = 0.0f64;
+            let mut ev_ram = 0.0f64;
 
-        for &k in &active {
-            let vjvk = v[j] * v[k];
-            gv += vjvk * gram_entry_vasyunin(j, k);
-            let r_jk = ramanujan_entry(j, k);
-            rv += vjvk * r_jk;
-            ev_log += vjvk * error_log(j, k);
-            ev_cot += vjvk * error_cot(j, k);
-            ev_const += vjvk * error_const(j, k);
-            ev_ram += vjvk * (-r_jk);
-        }
-        (gv, rv, ev_log, ev_cot, ev_const, ev_ram)
-    }).collect();
+            for &k in &active {
+                let vjvk = v[j] * v[k];
+                gv += vjvk * gram_entry_vasyunin(j, k);
+                let r_jk = ramanujan_entry(j, k);
+                rv += vjvk * r_jk;
+                ev_log += vjvk * error_log(j, k);
+                ev_cot += vjvk * error_cot(j, k);
+                ev_const += vjvk * error_const(j, k);
+                ev_ram += vjvk * (-r_jk);
+            }
+            (gv, rv, ev_log, ev_cot, ev_const, ev_ram)
+        })
+        .collect();
 
     // Reduce
     let mut vt_gv = 0.0f64;
@@ -184,7 +202,9 @@ fn xray_scan(mu: &[i8], n: usize) -> XRayResult {
     // Mean vector: b_k = (ln(k) + 1 - γ) / k
     let mut bt_v = 0.0f64;
     for k in 1..=n {
-        if v[k] == 0.0 { continue; }
+        if v[k] == 0.0 {
+            continue;
+        }
         bt_v += ((k as f64).ln() + 1.0 - EULER_GAMMA) / k as f64 * v[k];
     }
 
@@ -197,9 +217,18 @@ fn xray_scan(mu: &[i8], n: usize) -> XRayResult {
     let elapsed_ms = t0.elapsed().as_secs_f64() * 1000.0;
 
     XRayResult {
-        n, vt_gv, vt_rv, vt_ev,
-        vt_ev_log, vt_ev_cot, vt_ev_const, vt_ev_ram,
-        bt_v, sigma_half, d_sq, elapsed_ms,
+        n,
+        vt_gv,
+        vt_rv,
+        vt_ev,
+        vt_ev_log,
+        vt_ev_cot,
+        vt_ev_const,
+        vt_ev_ram,
+        bt_v,
+        sigma_half,
+        d_sq,
+        elapsed_ms,
     }
 }
 
@@ -220,8 +249,8 @@ fn main() {
     // N values — cotangent sums are O(N/gcd), total is O(N² × avg_coprime_part)
     // Feasible up to ~3000 on CPU in reasonable time
     let test_points: Vec<usize> = vec![
-        10, 20, 30, 50, 80, 100, 150, 200, 300, 500, 750, 1000,
-        1500, 2000, 3000, 4000, 5000, 6000, 8000,
+        10, 20, 30, 50, 80, 100, 150, 200, 300, 500, 750, 1000, 1500, 2000, 3000, 4000, 5000, 6000,
+        8000,
     ];
 
     let max_n = *test_points.iter().max().unwrap();
@@ -238,8 +267,10 @@ fn main() {
     println!("  §3a. THE X-RAY: vᵀG_Vv vs vᵀRv vs vᵀEv");
     println!("═══════════════════════════════════════════════════════════════════\n");
 
-    println!("{:>6} {:>10} {:>10} {:>10} {:>10} {:>10} {:>8}",
-             "N", "vᵀG_Vv", "vᵀRv", "vᵀEv", "d²_BD", "(Ev)·lnN", "ms");
+    println!(
+        "{:>6} {:>10} {:>10} {:>10} {:>10} {:>10} {:>8}",
+        "N", "vᵀG_Vv", "vᵀRv", "vᵀEv", "d²_BD", "(Ev)·lnN", "ms"
+    );
     println!("{}", "─".repeat(72));
 
     let mut results: Vec<XRayResult> = Vec::new();
@@ -248,9 +279,16 @@ fn main() {
         let r = xray_scan(&mu, n);
         let log_n = (n as f64).ln();
 
-        println!("{:>6} {:>10.6} {:>10.6} {:>10.6} {:>10.6} {:>10.4} {:>7.0}",
-                 n, r.vt_gv, r.vt_rv, r.vt_ev, r.d_sq,
-                 r.vt_ev * log_n, r.elapsed_ms);
+        println!(
+            "{:>6} {:>10.6} {:>10.6} {:>10.6} {:>10.6} {:>10.4} {:>7.0}",
+            n,
+            r.vt_gv,
+            r.vt_rv,
+            r.vt_ev,
+            r.d_sq,
+            r.vt_ev * log_n,
+            r.elapsed_ms
+        );
 
         results.push(r);
     }
@@ -263,16 +301,23 @@ fn main() {
     println!("  §3b. ERROR DECOMPOSITION: vᵀEv = E_log + E_cot + E_const + E_R");
     println!("═══════════════════════════════════════════════════════════════════\n");
 
-    println!("{:>6} {:>10} {:>10} {:>10} {:>10} {:>10} {:>8}",
-             "N", "E_log", "E_cot", "E_const", "E_R(-R)", "Total_E", "Check");
+    println!(
+        "{:>6} {:>10} {:>10} {:>10} {:>10} {:>10} {:>8}",
+        "N", "E_log", "E_cot", "E_const", "E_R(-R)", "Total_E", "Check"
+    );
     println!("{}", "─".repeat(72));
 
     for r in &results {
         let total = r.vt_ev_log + r.vt_ev_cot + r.vt_ev_const + r.vt_ev_ram;
-        let check = if (total - r.vt_ev).abs() < 1e-8 { "✅" } else { "❌" };
-        println!("{:>6} {:>10.6} {:>10.6} {:>10.6} {:>10.6} {:>10.6} {:>6}",
-                 r.n, r.vt_ev_log, r.vt_ev_cot, r.vt_ev_const, r.vt_ev_ram,
-                 total, check);
+        let check = if (total - r.vt_ev).abs() < 1e-8 {
+            "✅"
+        } else {
+            "❌"
+        };
+        println!(
+            "{:>6} {:>10.6} {:>10.6} {:>10.6} {:>10.6} {:>10.6} {:>6}",
+            r.n, r.vt_ev_log, r.vt_ev_cot, r.vt_ev_const, r.vt_ev_ram, total, check
+        );
     }
 
     // ═══════════════════════════════════════════════
@@ -283,19 +328,25 @@ fn main() {
     println!("  §3c. COMPONENT DOMINANCE: Which part of E matters most?");
     println!("═══════════════════════════════════════════════════════════════════\n");
 
-    println!("{:>6} {:>10} {:>10} {:>10} {:>10}",
-             "N", "%_log", "%_cot", "%_const", "%_R");
+    println!(
+        "{:>6} {:>10} {:>10} {:>10} {:>10}",
+        "N", "%_log", "%_cot", "%_const", "%_R"
+    );
     println!("{}", "─".repeat(50));
 
     for r in &results {
-        if r.vt_ev.abs() < 1e-15 { continue; }
+        if r.vt_ev.abs() < 1e-15 {
+            continue;
+        }
         let total = r.vt_ev.abs();
-        println!("{:>6} {:>9.1}% {:>9.1}% {:>9.1}% {:>9.1}%",
-                 r.n,
-                 r.vt_ev_log / total * 100.0,
-                 r.vt_ev_cot / total * 100.0,
-                 r.vt_ev_const / total * 100.0,
-                 r.vt_ev_ram / total * 100.0);
+        println!(
+            "{:>6} {:>9.1}% {:>9.1}% {:>9.1}% {:>9.1}%",
+            r.n,
+            r.vt_ev_log / total * 100.0,
+            r.vt_ev_cot / total * 100.0,
+            r.vt_ev_const / total * 100.0,
+            r.vt_ev_ram / total * 100.0
+        );
     }
 
     // ═══════════════════════════════════════════════
@@ -306,17 +357,29 @@ fn main() {
     println!("  §3d. CONVERGENCE: Does (vᵀEv)·logN → constant?");
     println!("═══════════════════════════════════════════════════════════════════\n");
 
-    println!("{:>6} {:>12} {:>12} {:>12} {:>12} {:>12}",
-             "N", "vᵀEv", "vᵀEv·lnN", "vᵀGv-1", "(Gv-1)·lnN", "vᵀGv<1?");
+    println!(
+        "{:>6} {:>12} {:>12} {:>12} {:>12} {:>12}",
+        "N", "vᵀEv", "vᵀEv·lnN", "vᵀGv-1", "(Gv-1)·lnN", "vᵀGv<1?"
+    );
     println!("{}", "─".repeat(78));
 
     for r in &results {
         let log_n = (r.n as f64).ln();
         let gv_minus_1 = r.vt_gv - 1.0;
-        let under_one = if r.vt_gv < 1.0 { "  ✅ <1" } else { "  ❌ ≥1" };
-        println!("{:>6} {:>12.8} {:>12.6} {:>12.8} {:>12.6} {}",
-                 r.n, r.vt_ev, r.vt_ev * log_n,
-                 gv_minus_1, gv_minus_1 * log_n, under_one);
+        let under_one = if r.vt_gv < 1.0 {
+            "  ✅ <1"
+        } else {
+            "  ❌ ≥1"
+        };
+        println!(
+            "{:>6} {:>12.8} {:>12.6} {:>12.8} {:>12.6} {}",
+            r.n,
+            r.vt_ev,
+            r.vt_ev * log_n,
+            gv_minus_1,
+            gv_minus_1 * log_n,
+            under_one
+        );
     }
 
     // ═══════════════════════════════════════════════
@@ -355,19 +418,23 @@ fn main() {
     println!("  §3f. SCALING: How do the components behave?");
     println!("═══════════════════════════════════════════════════════════════════\n");
 
-    println!("{:>6} {:>12} {:>12} {:>12} {:>12} {:>12}",
-             "N", "Elog·lnN", "Ecot·lnN", "Econst·lnN", "ER·lnN", "Etot·lnN");
+    println!(
+        "{:>6} {:>12} {:>12} {:>12} {:>12} {:>12}",
+        "N", "Elog·lnN", "Ecot·lnN", "Econst·lnN", "ER·lnN", "Etot·lnN"
+    );
     println!("{}", "─".repeat(78));
 
     for r in &results {
         let log_n = (r.n as f64).ln();
-        println!("{:>6} {:>12.6} {:>12.6} {:>12.6} {:>12.6} {:>12.6}",
-                 r.n,
-                 r.vt_ev_log * log_n,
-                 r.vt_ev_cot * log_n,
-                 r.vt_ev_const * log_n,
-                 r.vt_ev_ram * log_n,
-                 r.vt_ev * log_n);
+        println!(
+            "{:>6} {:>12.6} {:>12.6} {:>12.6} {:>12.6} {:>12.6}",
+            r.n,
+            r.vt_ev_log * log_n,
+            r.vt_ev_cot * log_n,
+            r.vt_ev_const * log_n,
+            r.vt_ev_ram * log_n,
+            r.vt_ev * log_n
+        );
     }
 
     // ═══════════════════════════════════════════════
@@ -378,15 +445,27 @@ fn main() {
     println!("  §3g. RATIO: vᵀEv / vᵀRv — Is E proportional to R?");
     println!("═══════════════════════════════════════════════════════════════════\n");
 
-    println!("{:>6} {:>12} {:>12} {:>12} {:>12}",
-             "N", "vᵀEv", "vᵀRv", "E/R ratio", "E/G ratio");
+    println!(
+        "{:>6} {:>12} {:>12} {:>12} {:>12}",
+        "N", "vᵀEv", "vᵀRv", "E/R ratio", "E/G ratio"
+    );
     println!("{}", "─".repeat(56));
 
     for r in &results {
-        let e_r_ratio = if r.vt_rv.abs() > 1e-15 { r.vt_ev / r.vt_rv } else { f64::NAN };
-        let e_g_ratio = if r.vt_gv.abs() > 1e-15 { r.vt_ev / r.vt_gv } else { f64::NAN };
-        println!("{:>6} {:>12.8} {:>12.8} {:>12.6} {:>12.6}",
-                 r.n, r.vt_ev, r.vt_rv, e_r_ratio, e_g_ratio);
+        let e_r_ratio = if r.vt_rv.abs() > 1e-15 {
+            r.vt_ev / r.vt_rv
+        } else {
+            f64::NAN
+        };
+        let e_g_ratio = if r.vt_gv.abs() > 1e-15 {
+            r.vt_ev / r.vt_gv
+        } else {
+            f64::NAN
+        };
+        println!(
+            "{:>6} {:>12.8} {:>12.8} {:>12.6} {:>12.6}",
+            r.n, r.vt_ev, r.vt_rv, e_r_ratio, e_g_ratio
+        );
     }
 
     // ═══════════════════════════════════════════════
@@ -400,8 +479,10 @@ fn main() {
     println!("       e = {:.10}", euler_e);
     println!("═══════════════════════════════════════════════════════════════════\n");
 
-    println!("{:>6} {:>12} {:>12} {:>12} {:>12} {:>12}",
-             "N", "vᵀGv", "1-vᵀGv", "(1-Gv)·lnN", "gap from e", "gap·lnN");
+    println!(
+        "{:>6} {:>12} {:>12} {:>12} {:>12} {:>12}",
+        "N", "vᵀGv", "1-vᵀGv", "(1-Gv)·lnN", "gap from e", "gap·lnN"
+    );
     println!("{}", "─".repeat(78));
 
     for r in &results {
@@ -410,15 +491,19 @@ fn main() {
         let product = one_minus * log_n;
         let gap = product - euler_e;
         let gap_ln = gap * log_n;
-        println!("{:>6} {:>12.8} {:>12.8} {:>12.6} {:>+12.6} {:>12.4}",
-                 r.n, r.vt_gv, one_minus, product, gap, gap_ln);
+        println!(
+            "{:>6} {:>12.8} {:>12.8} {:>12.6} {:>+12.6} {:>12.4}",
+            r.n, r.vt_gv, one_minus, product, gap, gap_ln
+        );
     }
 
     // Subleading analysis
     println!("\n  Subleading: If (1-Gv)·lnN = e + C/lnN + ..., then C ≈ gap·lnN");
     println!("  Looking for gap·lnN to stabilize:");
     for r in &results {
-        if r.n < 100 { continue; }
+        if r.n < 100 {
+            continue;
+        }
         let log_n = (r.n as f64).ln();
         let product = (1.0 - r.vt_gv) * log_n;
         let gap = product - euler_e;
@@ -451,9 +536,15 @@ fn main() {
         let drift = (c_last - c_prev).abs();
         println!("║                                                                ║");
         if drift < 0.1 {
-            println!("║   ★ (vᵀEv)·logN appears convergent ≈ {:.4}              ║", c_last);
+            println!(
+                "║   ★ (vᵀEv)·logN appears convergent ≈ {:.4}              ║",
+                c_last
+            );
         } else {
-            println!("║   ⚠️  (vᵀEv)·logN still drifting: {:.4} → {:.4}          ║", c_prev, c_last);
+            println!(
+                "║   ⚠️  (vᵀEv)·logN still drifting: {:.4} → {:.4}          ║",
+                c_prev, c_last
+            );
         }
     }
 
@@ -464,7 +555,10 @@ fn main() {
         let gap = (euler_product - euler_e).abs();
         println!("║                                                                ║");
         println!("║   Euler convergence at N={}:", last.n);
-        println!("║     (1 - vᵀGv)·lnN = {:.6}  (e = {:.6})", euler_product, euler_e);
+        println!(
+            "║     (1 - vᵀGv)·lnN = {:.6}  (e = {:.6})",
+            euler_product, euler_e
+        );
         println!("║     gap = {:.6} ({:.2}%)", gap, gap / euler_e * 100.0);
     }
 

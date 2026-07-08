@@ -4,23 +4,7 @@
 
 /// Sieve of Eratosthenes: returns `is_prime[0..=n]`
 pub fn sieve_primes(n: usize) -> Vec<bool> {
-    let mut is_prime = vec![true; n + 1];
-    is_prime[0] = false;
-    if n >= 1 {
-        is_prime[1] = false;
-    }
-    let mut p = 2;
-    while p * p <= n {
-        if is_prime[p] {
-            let mut m = p * p;
-            while m <= n {
-                is_prime[m] = false;
-                m += p;
-            }
-        }
-        p += 1;
-    }
-    is_prime
+    cathedral_utils::arith::sieve_primes(n)
 }
 
 /// Compute μ(k) for k = 0..=n using linear sieve.

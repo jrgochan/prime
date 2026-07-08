@@ -1,4 +1,13 @@
-#![allow(dead_code, unused_variables, unused_imports, unused_assignments, clippy::needless_range_loop, clippy::doc_lazy_continuation, non_snake_case, clippy::empty_line_after_doc_comments)]
+#![allow(
+    dead_code,
+    unused_variables,
+    unused_imports,
+    unused_assignments,
+    clippy::needless_range_loop,
+    clippy::doc_lazy_continuation,
+    non_snake_case,
+    clippy::empty_line_after_doc_comments
+)]
 //! Eigenvalue scaling probe for the BD-basis Gram matrix.
 //!
 //! PARALLEL VERSION — uses rayon to build Gram matrix entries in parallel.
@@ -19,12 +28,14 @@ fn main() {
     println!();
 
     let test_ns: Vec<usize> = vec![
-        3, 5, 8, 10, 15, 20, 30, 40, 50, 60, 80, 100,
-        120, 150, 200, 250, 300, 400, 500, 600, 750, 1000,
+        3, 5, 8, 10, 15, 20, 30, 40, 50, 60, 80, 100, 120, 150, 200, 250, 300, 400, 500, 600, 750,
+        1000,
     ];
 
-    println!("  {:>5} {:>5} {:>14} {:>14} {:>12} {:>10} {:>10} {:>8}",
-        "N", "dim", "λ_min", "λ_max", "κ", "log·λ_min", "N²·λ_min", "secs");
+    println!(
+        "  {:>5} {:>5} {:>14} {:>14} {:>12} {:>10} {:>10} {:>8}",
+        "N", "dim", "λ_min", "λ_max", "κ", "log·λ_min", "N²·λ_min", "secs"
+    );
     println!("  {}", "─".repeat(90));
 
     let mut log_data: Vec<(f64, f64)> = Vec::new();
@@ -62,13 +73,25 @@ fn main() {
 
         let lam_min = eigenvalues[0];
         let lam_max = eigenvalues[dim - 1];
-        let kappa = if lam_min > 0.0 { lam_max / lam_min } else { f64::INFINITY };
+        let kappa = if lam_min > 0.0 {
+            lam_max / lam_min
+        } else {
+            f64::INFINITY
+        };
         let log_n = (n as f64).ln();
         let elapsed = t0.elapsed().as_secs_f64();
 
-        println!("  {:5} {:5} {:14.8} {:14.8} {:12.1} {:10.6} {:10.4} {:8.1}",
-            n, dim, lam_min, lam_max, kappa,
-            log_n * lam_min, (n as f64).powi(2) * lam_min, elapsed);
+        println!(
+            "  {:5} {:5} {:14.8} {:14.8} {:12.1} {:10.6} {:10.4} {:8.1}",
+            n,
+            dim,
+            lam_min,
+            lam_max,
+            kappa,
+            log_n * lam_min,
+            (n as f64).powi(2) * lam_min,
+            elapsed
+        );
 
         if n >= 10 {
             log_data.push(((n as f64).ln(), lam_min.ln()));
@@ -94,8 +117,10 @@ fn main() {
         // R² goodness of fit
         let mean_y = sum_y / n_pts;
         let ss_tot: f64 = log_data.iter().map(|(_, y)| (y - mean_y).powi(2)).sum();
-        let ss_res: f64 = log_data.iter()
-            .map(|(x, y)| (y - (alpha * x + log_c)).powi(2)).sum();
+        let ss_res: f64 = log_data
+            .iter()
+            .map(|(x, y)| (y - (alpha * x + log_c)).powi(2))
+            .sum();
         let r_squared = 1.0 - ss_res / ss_tot;
 
         println!();
@@ -110,7 +135,10 @@ fn main() {
         println!("  │ MODEL COMPARISON                                │");
         println!("  ├─────────────────────────────────────────────────┤");
         println!("  │ Old axiom:  λ_min ≥ c/log(N)  (α = 0, log)    │");
-        println!("  │ Data fit:   λ_min ≈ {:.3}/N^{:.2}   (power law) │", c, -alpha);
+        println!(
+            "  │ Data fit:   λ_min ≈ {:.3}/N^{:.2}   (power law) │",
+            c, -alpha
+        );
         if alpha > -1.5 {
             println!("  │ VERDICT: Slower than 1/N^1.5 — axiom may hold │");
         } else if alpha > -2.5 {

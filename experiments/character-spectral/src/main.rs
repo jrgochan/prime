@@ -1,4 +1,9 @@
-#![allow(dead_code, unused_variables, clippy::needless_range_loop, clippy::empty_line_after_doc_comments)]
+#![allow(
+    dead_code,
+    unused_variables,
+    clippy::needless_range_loop,
+    clippy::empty_line_after_doc_comments
+)]
 //! ═══════════════════════════════════════════════════════════════════════════
 //!  CATHEDRAL CHARACTER-PROJECTED SPECTRAL PROBE
 //!  128-bit MPFR · Jacobi Eigensolve · Mod-8 Character Decomposition

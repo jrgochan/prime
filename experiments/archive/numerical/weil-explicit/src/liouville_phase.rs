@@ -288,10 +288,12 @@ fn ratio_mean(eigenvalues: &[f64]) -> f64 {
 }
 
 fn classify_beta(r_mean: f64) -> (&'static str, f64) {
-    let fits = [("Poisson", 0.3863),
+    let fits = [
+        ("Poisson", 0.3863),
         ("GOE (β=1)", 0.5307),
         ("GUE (β=2)", 0.5996),
-        ("GSE (β=4)", 0.6744)];
+        ("GSE (β=4)", 0.6744),
+    ];
     let best = fits
         .iter()
         .min_by(|a, b| {

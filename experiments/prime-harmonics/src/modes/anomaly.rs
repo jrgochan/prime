@@ -17,8 +17,9 @@
 //!
 //! This gives EXACT values (no quadrature) in O(max(j,k)) per entry.
 
-use std::time::Instant;
+use cathedral_utils::arith::gcd;
 use rayon::prelude::*;
+use std::time::Instant;
 
 /// Compute the exact BD Gram entry G(j,k) = ∫₀¹ {1/(jx)}{1/(kx)} dx
 /// using the analytical piecewise-linear integration.
@@ -65,9 +66,15 @@ pub fn exact_gram(j: usize, k: usize) -> f64 {
         }
 
         u_prev = u_next;
-        if next_j <= next_k { mj += 1; }
-        if next_k <= next_j { mk += 1; }
-        if next_bp >= m_max { break; }
+        if next_j <= next_k {
+            mj += 1;
+        }
+        if next_k <= next_j {
+            mk += 1;
+        }
+        if next_bp >= m_max {
+            break;
+        }
     }
 
     // Tail correction
@@ -81,33 +88,44 @@ fn sawtooth_gram(j: usize, k: usize) -> f64 {
     (g * g) as f64 / (12.0 * j as f64 * k as f64)
 }
 
-fn gcd(a: usize, b: usize) -> usize {
-    if b == 0 { a } else { gcd(b, a % b) }
-}
-
 /// Compute μ(n) (Möbius function)
 fn moebius(n: usize) -> i32 {
-    if n == 1 { return 1; }
+    if n == 1 {
+        return 1;
+    }
     let mut temp = n;
     let mut d = 2usize;
     let mut count = 0;
     while d * d <= temp {
         if temp.is_multiple_of(d) {
             let mut exp = 0;
-            while temp.is_multiple_of(d) { temp /= d; exp += 1; }
-            if exp > 1 { return 0; }
+            while temp.is_multiple_of(d) {
+                temp /= d;
+                exp += 1;
+            }
+            if exp > 1 {
+                return 0;
+            }
             count += 1;
         }
         d += 1;
     }
-    if temp > 1 { count += 1; }
-    if count % 2 == 0 { 1 } else { -1 }
+    if temp > 1 {
+        count += 1;
+    }
+    if count % 2 == 0 {
+        1
+    } else {
+        -1
+    }
 }
 
 /// Fejér-Möbius weight: v_k = -μ(k)(1 - ln(k)/ln(N))
 fn fejer_weight(k: usize, n: usize) -> f64 {
     let mu = moebius(k);
-    if mu == 0 { return 0.0; }
+    if mu == 0 {
+        return 0.0;
+    }
     -(mu as f64) * (1.0 - (k as f64).ln() / (n as f64).ln())
 }
 
@@ -133,19 +151,22 @@ fn compute_mean(k: usize) -> f64 {
 /// Uses Rayon for row-parallelism.
 fn sparse_quad_form(
     v: &[f64],
-    nonzero_idx: &[usize],  // indices where v[i] != 0
+    nonzero_idx: &[usize], // indices where v[i] != 0
     entry_fn: impl Fn(usize, usize) -> f64 + Sync,
 ) -> f64 {
-    nonzero_idx.par_iter().map(|&i| {
-        let vi = v[i];
-        let ki = i + 2;
-        let mut row_sum = 0.0f64;
-        for &j in nonzero_idx {
-            let kj = j + 2;
-            row_sum += v[j] * entry_fn(ki, kj);
-        }
-        vi * row_sum
-    }).sum()
+    nonzero_idx
+        .par_iter()
+        .map(|&i| {
+            let vi = v[i];
+            let ki = i + 2;
+            let mut row_sum = 0.0f64;
+            for &j in nonzero_idx {
+                let kj = j + 2;
+                row_sum += v[j] * entry_fn(ki, kj);
+            }
+            vi * row_sum
+        })
+        .sum()
 }
 
 pub fn run(n_max: usize) {
@@ -163,8 +184,10 @@ pub fn run(n_max: usize) {
     println!("§1. ANOMALY DIAGONAL: Δ(k,k) = G(k,k) - 1/12");
     println!("═══════════════════════════════════════════════════════════════");
     println!();
-    println!("{:>6} {:>14} {:>14} {:>14} {:>14}",
-             "k", "R(k,k)=1/12", "G(k,k)", "Δ(k,k)", "Δ·12k²");
+    println!(
+        "{:>6} {:>14} {:>14} {:>14} {:>14}",
+        "k", "R(k,k)=1/12", "G(k,k)", "Δ(k,k)", "Δ·12k²"
+    );
     println!("{}", "-".repeat(70));
 
     for k in 2..=n_max.min(50) {
@@ -172,8 +195,10 @@ pub fn run(n_max: usize) {
         let g = exact_gram(k, k);
         let delta = g - r;
         let scaled = delta * 12.0 * (k * k) as f64;
-        println!("{:>6} {:>14.10} {:>14.10} {:>+14.10} {:>14.6}",
-                 k, r, g, delta, scaled);
+        println!(
+            "{:>6} {:>14.10} {:>14.10} {:>+14.10} {:>14.6}",
+            k, r, g, delta, scaled
+        );
     }
     println!();
 
@@ -184,21 +209,33 @@ pub fn run(n_max: usize) {
     println!("§2. v^T Δ v / log N (RH ↔ this is bounded)");
     println!("═══════════════════════════════════════════════════════════════");
     println!();
-    println!("{:>6} {:>12} {:>12} {:>12} {:>12} {:>12} {:>12} {:>8}",
-             "N", "v^T R v", "v^T G v", "v^T Δ v", "v^TΔv/lnN", "d²_BD", "d²·lnN", "nnz/N");
+    println!(
+        "{:>6} {:>12} {:>12} {:>12} {:>12} {:>12} {:>12} {:>8}",
+        "N", "v^T R v", "v^T G v", "v^T Δ v", "v^TΔv/lnN", "d²_BD", "d²·lnN", "nnz/N"
+    );
     println!("{}", "-".repeat(92));
 
     let mut test_ns: Vec<usize> = vec![];
     // Dense for small N
-    for n in (5..=n_max.min(50)).step_by(1) { test_ns.push(n); }
+    for n in (5..=n_max.min(50)).step_by(1) {
+        test_ns.push(n);
+    }
     // Coarser for larger N
     if n_max > 50 {
         let mut n = 60;
         while n <= n_max {
             test_ns.push(n);
-            n += if n < 200 { 20 } else if n < 500 { 50 } else { 100 };
+            n += if n < 200 {
+                20
+            } else if n < 500 {
+                50
+            } else {
+                100
+            };
         }
-        if !test_ns.contains(&n_max) { test_ns.push(n_max); }
+        if !test_ns.contains(&n_max) {
+            test_ns.push(n_max);
+        }
     }
 
     for &n in &test_ns {
@@ -210,9 +247,10 @@ pub fn run(n_max: usize) {
         let nnz = nonzero_idx.len();
 
         // Compute b^T v
-        let b_v: f64 = nonzero_idx.par_iter().map(|&i| {
-            compute_mean(i + 2) * v[i]
-        }).sum();
+        let b_v: f64 = nonzero_idx
+            .par_iter()
+            .map(|&i| compute_mean(i + 2) * v[i])
+            .sum();
 
         // Compute v^T R v (sparse, parallel)
         let v_r_v = sparse_quad_form(&v, &nonzero_idx, sawtooth_gram);
@@ -224,10 +262,17 @@ pub fn run(n_max: usize) {
         let log_n = (n as f64).ln();
         let d2_bd = 1.0 - 2.0 * b_v + v_g_v;
 
-        println!("{:>6} {:>12.6} {:>12.6} {:>+12.6} {:>12.6} {:>12.6} {:>12.4} {:>7.1}%",
-                 n, v_r_v, v_g_v, v_delta_v, v_delta_v / log_n,
-                 d2_bd, d2_bd * log_n,
-                 100.0 * nnz as f64 / dim as f64);
+        println!(
+            "{:>6} {:>12.6} {:>12.6} {:>+12.6} {:>12.6} {:>12.6} {:>12.4} {:>7.1}%",
+            n,
+            v_r_v,
+            v_g_v,
+            v_delta_v,
+            v_delta_v / log_n,
+            d2_bd,
+            d2_bd * log_n,
+            100.0 * nnz as f64 / dim as f64
+        );
     }
 
     println!();
@@ -245,6 +290,4 @@ pub fn run(n_max: usize) {
     println!();
 
     println!();
-
 }
-

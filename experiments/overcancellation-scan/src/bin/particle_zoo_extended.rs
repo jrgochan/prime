@@ -1,4 +1,13 @@
-#![allow(dead_code, unused_variables, unused_imports, unused_assignments, clippy::needless_range_loop, clippy::doc_lazy_continuation, non_snake_case, clippy::empty_line_after_doc_comments)]
+#![allow(
+    dead_code,
+    unused_variables,
+    unused_imports,
+    unused_assignments,
+    clippy::needless_range_loop,
+    clippy::doc_lazy_continuation,
+    non_snake_case,
+    clippy::empty_line_after_doc_comments
+)]
 // overcancellation-scan/src/bin/particle_zoo_extended.rs
 //
 // ╔═══════════════════════════════════════════════════════════════════╗
@@ -30,9 +39,9 @@ fn vasyunin_const() -> f64 {
 /// Compute smallest prime factor sieve + full factorization data.
 /// Returns (mu, lambda, big_omega, little_omega, is_squarefree, factorization)
 struct ArithData {
-    mu: Vec<i8>,           // Möbius function
-    lambda: Vec<i8>,       // Liouville function (-1)^Ω(n)
-    big_omega: Vec<u32>,   // Ω(n) = total prime factors with multiplicity
+    mu: Vec<i8>,            // Möbius function
+    lambda: Vec<i8>,        // Liouville function (-1)^Ω(n)
+    big_omega: Vec<u32>,    // Ω(n) = total prime factors with multiplicity
     little_omega: Vec<u32>, // ω(n) = distinct prime factors
     is_squarefree: Vec<bool>,
     smallest_pf: Vec<usize>, // smallest prime factor
@@ -51,13 +60,19 @@ fn compute_arith_data(max_n: usize) -> ArithData {
 
     // Sieve for factorization data
     let mut remaining = vec![0usize; max_n + 1];
-    for i in 0..=max_n { remaining[i] = i; }
+    for i in 0..=max_n {
+        remaining[i] = i;
+    }
 
     for p in 2..=max_n {
-        if smallest_pf[p] != 0 { continue; } // not prime
-        // p is prime
+        if smallest_pf[p] != 0 {
+            continue;
+        } // not prime
+          // p is prime
         for m in (p..=max_n).step_by(p) {
-            if smallest_pf[m] == 0 { smallest_pf[m] = p; }
+            if smallest_pf[m] == 0 {
+                smallest_pf[m] = p;
+            }
             little_omega[m] += 1;
 
             let mut count = 0u32;
@@ -77,13 +92,24 @@ fn compute_arith_data(max_n: usize) -> ArithData {
     mu[1] = 1;
     for n in 1..=max_n {
         mu[n] = mu_table[n];
-        lambda[n] = if big_omega[n].is_multiple_of(2) { 1 } else { -1 };
+        lambda[n] = if big_omega[n].is_multiple_of(2) {
+            1
+        } else {
+            -1
+        };
     }
 
     is_squarefree[0] = false;
     is_squarefree[1] = true;
 
-    ArithData { mu, lambda, big_omega, little_omega, is_squarefree, smallest_pf }
+    ArithData {
+        mu,
+        lambda,
+        big_omega,
+        little_omega,
+        is_squarefree,
+        smallest_pf,
+    }
 }
 
 // ═══════════════════════════════════════════════════════
@@ -134,9 +160,15 @@ impl ParticleType {
 }
 
 fn classify(n: usize, data: &ArithData) -> ParticleType {
-    if n == 1 { return ParticleType::Vacuum; }
-    if !data.is_squarefree[n] { return ParticleType::Excluded; }
-    if n == 2 { return ParticleType::Higgs; }
+    if n == 1 {
+        return ParticleType::Vacuum;
+    }
+    if !data.is_squarefree[n] {
+        return ParticleType::Excluded;
+    }
+    if n == 2 {
+        return ParticleType::Higgs;
+    }
 
     match data.little_omega[n] {
         1 => ParticleType::PrimeQuark,
@@ -154,7 +186,9 @@ fn classify(n: usize, data: &ArithData) -> ParticleType {
 
 /// Vasyunin sum V(a,b)
 fn vasyunin_sum(a: usize, b: usize) -> f64 {
-    if a <= 1 { return 0.0; }
+    if a <= 1 {
+        return 0.0;
+    }
     let af = a as f64;
     let mut s = 0.0;
     for m in 1..a {
@@ -252,13 +286,14 @@ fn main() {
     let data = compute_arith_data(n);
 
     // Build witness vector
-    let v: Vec<f64> = (1..n).map(|k| {
-        -(data.mu[k] as f64) * (1.0 - (k as f64).ln() / (n as f64).ln())
-    }).collect();
+    let v: Vec<f64> = (1..n)
+        .map(|k| -(data.mu[k] as f64) * (1.0 - (k as f64).ln() / (n as f64).ln()))
+        .collect();
 
     // Compute per-row Gram contributions (parallel)
     eprint!("Computing Gram row contributions...");
-    let rows: Vec<RowContrib> = (1..n).into_par_iter()
+    let rows: Vec<RowContrib> = (1..n)
+        .into_par_iter()
         .map(|j| compute_row_contrib(j, &v, n, &data))
         .collect();
     eprintln!(" done.");
@@ -270,7 +305,9 @@ fn main() {
     for j in 1..n {
         let ptype = classify(j, &data);
         let row = &rows[j - 1];
-        let entry = type_counts.entry(ptype.label()).or_insert((0, 0.0, 0.0, 0.0));
+        let entry = type_counts
+            .entry(ptype.label())
+            .or_insert((0, 0.0, 0.0, 0.0));
         entry.0 += 1;
         entry.1 += row.diag;
         entry.2 += row.bosonic_off;
@@ -286,38 +323,73 @@ fn main() {
     println!("╔══════════════════════════════════════════════════════════════════════════════╗");
     println!("║  PARTICLE TYPE CENSUS                                                      ║");
     println!("╠══════════════════════════════════════════════════════════════════════════════╣");
-    println!("║ {:<12} {:>6} {:>12} {:>12} {:>12} {:>12} ║",
-        "Type", "Count", "Diagonal", "Bosonic", "Fermionic", "Total");
+    println!(
+        "║ {:<12} {:>6} {:>12} {:>12} {:>12} {:>12} ║",
+        "Type", "Count", "Diagonal", "Bosonic", "Fermionic", "Total"
+    );
     println!("╠══════════════════════════════════════════════════════════════════════════════╣");
 
-    let order = ["Vacuum", "Higgs", "Quark", "Meson", "Baryon",
-                 "Tetraquark", "Pentaquark", "Exotic", "Excluded"];
+    let order = [
+        "Vacuum",
+        "Higgs",
+        "Quark",
+        "Meson",
+        "Baryon",
+        "Tetraquark",
+        "Pentaquark",
+        "Exotic",
+        "Excluded",
+    ];
     for label in &order {
         if let Some(&(count, d, b, f)) = type_counts.get(label) {
-            println!("║ {:<12} {:>6} {:>+12.4} {:>+12.4} {:>+12.4} {:>+12.4} ║",
-                label, count, d, b, f, d + b + f);
+            println!(
+                "║ {:<12} {:>6} {:>+12.4} {:>+12.4} {:>+12.4} {:>+12.4} ║",
+                label,
+                count,
+                d,
+                b,
+                f,
+                d + b + f
+            );
         }
     }
 
     println!("╠══════════════════════════════════════════════════════════════════════════════╣");
-    println!("║ {:<12} {:>6} {:>+12.4} {:>+12.4} {:>+12.4} {:>+12.4} ║",
-        "TOTAL", n - 1, total_diag, total_bos, total_fer, vtgv);
+    println!(
+        "║ {:<12} {:>6} {:>+12.4} {:>+12.4} {:>+12.4} {:>+12.4} ║",
+        "TOTAL",
+        n - 1,
+        total_diag,
+        total_bos,
+        total_fer,
+        vtgv
+    );
     println!("║                                                                            ║");
-    println!("║  vᵀGv = {:.10}   1 - vᵀGv = {:.10}                      ║", vtgv, 1.0 - vtgv);
+    println!(
+        "║  vᵀGv = {:.10}   1 - vᵀGv = {:.10}                      ║",
+        vtgv,
+        1.0 - vtgv
+    );
 
     if vtgv < 1.0 {
-        println!("║  STATUS: ✅ vᵀGv < 1  (Nyman-Beurling margin = {:.6})                   ║", 1.0 - vtgv);
+        println!(
+            "║  STATUS: ✅ vᵀGv < 1  (Nyman-Beurling margin = {:.6})                   ║",
+            1.0 - vtgv
+        );
     }
     println!("╚══════════════════════════════════════════════════════════════════════════════╝");
 
     // ═══════ TSV output ═══════
     println!();
-    println!("# TSV: n, mu, lambda, Omega, omega, sqfree, type, v_n, diag, bos_off, fer_off, total");
+    println!(
+        "# TSV: n, mu, lambda, Omega, omega, sqfree, type, v_n, diag, bos_off, fer_off, total"
+    );
     println!("n\tmu\tlambda\tOmega\tomega\tsqfree\ttype\tv_n\tdiag\tbos_off\tfer_off\ttotal");
     for j in 1..n {
         let ptype = classify(j, &data);
         let row = &rows[j - 1];
-        println!("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{:.8}\t{:.8}\t{:.8}\t{:.8}\t{:.8}",
+        println!(
+            "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{:.8}\t{:.8}\t{:.8}\t{:.8}\t{:.8}",
             j,
             data.mu[j],
             data.lambda[j],

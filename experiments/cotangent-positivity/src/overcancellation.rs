@@ -1,3 +1,4 @@
+use cathedral_utils::arith::gcd;
 use rayon::prelude::*;
 use std::collections::HashMap;
 use std::f64::consts::PI;
@@ -20,33 +21,40 @@ fn sieve_mobius(n: usize) -> Vec<i8> {
             mu[i] = -1;
         }
         for &p in &primes {
-            if i * p > n { break; }
+            if i * p > n {
+                break;
+            }
             is_prime[i * p] = false;
-            if i % p == 0 { mu[i * p] = 0; break; }
-            else { mu[i * p] = -mu[i]; }
+            if i % p == 0 {
+                mu[i * p] = 0;
+                break;
+            } else {
+                mu[i * p] = -mu[i];
+            }
         }
     }
     mu
 }
 
-fn gcd(mut a: usize, mut b: usize) -> usize {
-    while b != 0 { let t = b; b = a % b; a = t; }
-    a
-}
-
 /// Vasyunin sum V(a,b) = Σ_{m=1}^{a-1} {m·b/a} · cot(π·m/a)
 fn vasyunin_sum(a: usize, b: usize) -> f64 {
-    if a <= 1 { return 0.0; }
+    if a <= 1 {
+        return 0.0;
+    }
     let af = a as f64;
     let bf = b as f64;
     let mut total = 0.0;
     for m in 1..a {
         let mf = m as f64;
         let mut frac_part = (mf * bf / af).fract();
-        if frac_part < 0.0 { frac_part += 1.0; }
+        if frac_part < 0.0 {
+            frac_part += 1.0;
+        }
         let angle = PI * mf / af;
         let sin_val = angle.sin();
-        if sin_val.abs() < 1e-15 { continue; }
+        if sin_val.abs() < 1e-15 {
+            continue;
+        }
         total += frac_part * angle.cos() / sin_val;
     }
     total
@@ -58,8 +66,11 @@ fn bd_weights(n: usize, mu: &[i8]) -> Vec<f64> {
     (0..n - 1)
         .map(|i| {
             let j = i + 1;
-            if mu[j] == 0 { 0.0 }
-            else { -(mu[j] as f64) * (1.0 - (j as f64).ln() / log_n) }
+            if mu[j] == 0 {
+                0.0
+            } else {
+                -(mu[j] as f64) * (1.0 - (j as f64).ln() / log_n)
+            }
         })
         .collect()
 }
@@ -108,16 +119,24 @@ fn precompute_pair_sums(n: usize, mu: &[i8]) -> HashMap<(usize, usize), f64> {
     let mut needed: Vec<(usize, usize)> = Vec::new();
     let mut seen = std::collections::HashSet::new();
     for j in 1..n {
-        if mu[j] == 0 { continue; }
+        if mu[j] == 0 {
+            continue;
+        }
         for k in 1..n {
-            if j == k || mu[k] == 0 { continue; }
+            if j == k || mu[k] == 0 {
+                continue;
+            }
             let d = gcd(j, k);
-            let a = j / d; let b = k / d;
+            let a = j / d;
+            let b = k / d;
             let key = if a <= b { (a, b) } else { (b, a) };
-            if seen.insert(key) { needed.push(key); }
+            if seen.insert(key) {
+                needed.push(key);
+            }
         }
     }
-    needed.par_iter()
+    needed
+        .par_iter()
         .map(|&(a, b)| ((a, b), vasyunin_sum(a, b) + vasyunin_sum(b, a)))
         .collect()
 }
@@ -128,10 +147,10 @@ struct OvercancellationResult {
     vtgv: f64,
     vt_b1_v: f64,
     vt_l1_v: f64,
-    bt_v: f64,       // bᵀv — the dot product convergence
-    d2: f64,          // d²_N = 1 - 2bᵀv + vtGv
-    margin_bt: f64,   // 2(1-bᵀv) — the PNT margin
-    ratio: f64,       // d²_N / (2(1-bᵀv)) — MUST BE ≤ 1 for vtGv ≤ 1
+    bt_v: f64,      // bᵀv — the dot product convergence
+    d2: f64,        // d²_N = 1 - 2bᵀv + vtGv
+    margin_bt: f64, // 2(1-bᵀv) — the PNT margin
+    ratio: f64,     // d²_N / (2(1-bᵀv)) — MUST BE ≤ 1 for vtGv ≤ 1
     elapsed: f64,
 }
 
@@ -160,7 +179,9 @@ fn analyze(n: usize) -> OvercancellationResult {
             let mut row_b1 = 0.0;
 
             for k_idx in 0..dim {
-                if k_idx == i || v[k_idx] == 0.0 { continue; }
+                if k_idx == i || v[k_idx] == 0.0 {
+                    continue;
+                }
                 let k = k_idx + 1;
 
                 row_g += v[i] * v[k_idx] * gram_offdiag(j, k, &pair_sums);
@@ -183,11 +204,24 @@ fn analyze(n: usize) -> OvercancellationResult {
 
     let d2 = 1.0 - 2.0 * bt_v + vtgv;
     let margin_bt = 2.0 * (1.0 - bt_v);
-    let ratio = if margin_bt.abs() > 1e-15 { d2 / margin_bt } else { f64::NAN };
+    let ratio = if margin_bt.abs() > 1e-15 {
+        d2 / margin_bt
+    } else {
+        f64::NAN
+    };
 
     let elapsed = start.elapsed().as_secs_f64();
     OvercancellationResult {
-        n, dim, vtgv, vt_b1_v, vt_l1_v, bt_v, d2, margin_bt, ratio, elapsed,
+        n,
+        dim,
+        vtgv,
+        vt_b1_v,
+        vt_l1_v,
+        bt_v,
+        d2,
+        margin_bt,
+        ratio,
+        elapsed,
     }
 }
 
@@ -198,14 +232,15 @@ fn main() {
     println!("  Cores: {}", rayon::current_num_threads());
     println!("═══════════════════════════════════════════════════════════════════════════════════════════════════");
     println!();
-    println!("{:>6} │ {:>10} │ {:>10} │ {:>10} │ {:>10} │ {:>10} │ {:>10} │ {:>8} │ {:>6}",
-        "N", "vtGv", "vt_B1_v", "vt_L1_v", "bᵀv", "d²_N", "2(1-bᵀv)", "ratio", "time");
+    println!(
+        "{:>6} │ {:>10} │ {:>10} │ {:>10} │ {:>10} │ {:>10} │ {:>10} │ {:>8} │ {:>6}",
+        "N", "vtGv", "vt_B1_v", "vt_L1_v", "bᵀv", "d²_N", "2(1-bᵀv)", "ratio", "time"
+    );
     println!("────────────────────────────────────────────────────────────────────────────────────────────────────");
 
     let ns: Vec<usize> = vec![
-        60, 120, 180, 240, 360, 480, 720, 840, 1000, 1260,
-        1680, 2520, 5040, 7560, 10080, 15120, 20160, 25200,
-        30240, 40320, 50400,
+        60, 120, 180, 240, 360, 480, 720, 840, 1000, 1260, 1680, 2520, 5040, 7560, 10080, 15120,
+        20160, 25200, 30240, 40320, 50400,
     ];
 
     let mut results: Vec<OvercancellationResult> = Vec::new();
@@ -230,12 +265,27 @@ fn main() {
 
     let tsv_path = format!("{}/overcancellation.tsv", results_dir);
     let mut f = fs::File::create(&tsv_path).unwrap();
-    writeln!(f, "N\tdim\tvtGv\tvt_B1_v\tvt_L1_v\tbt_v\td2_N\tmargin_bt\tratio\tmargin_vtGv").unwrap();
+    writeln!(
+        f,
+        "N\tdim\tvtGv\tvt_B1_v\tvt_L1_v\tbt_v\td2_N\tmargin_bt\tratio\tmargin_vtGv"
+    )
+    .unwrap();
     for r in &results {
-        writeln!(f, "{}\t{}\t{:.10}\t{:.10}\t{:.10}\t{:.10}\t{:.10}\t{:.10}\t{:.10}\t{:.10}",
-            r.n, r.dim, r.vtgv, r.vt_b1_v, r.vt_l1_v, r.bt_v, r.d2, r.margin_bt,
-            r.ratio, 1.0 - r.vtgv
-        ).unwrap();
+        writeln!(
+            f,
+            "{}\t{}\t{:.10}\t{:.10}\t{:.10}\t{:.10}\t{:.10}\t{:.10}\t{:.10}\t{:.10}",
+            r.n,
+            r.dim,
+            r.vtgv,
+            r.vt_b1_v,
+            r.vt_l1_v,
+            r.bt_v,
+            r.d2,
+            r.margin_bt,
+            r.ratio,
+            1.0 - r.vtgv
+        )
+        .unwrap();
     }
 
     println!();

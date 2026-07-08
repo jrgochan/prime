@@ -79,7 +79,6 @@ pub fn cathedral_physics_dictionary() -> Vec<ProofNode> {
             file: "HCPrimeStructure.lean",
             observables: &["prime_coverage", "activation_threshold"],
         },
-
         // ═══════ EULER PRODUCT ═══════
         ProofNode {
             lean_name: "gcdWeighted_euler",
@@ -105,7 +104,6 @@ pub fn cathedral_physics_dictionary() -> Vec<ProofNode> {
             file: "HCPrimeStructure.lean",
             observables: &["mertens_product", "screening_rate"],
         },
-
         // ═══════ MERTENS BRIDGE ═══════
         ProofNode {
             lean_name: "mertens_third_asymptotic",
@@ -115,7 +113,6 @@ pub fn cathedral_physics_dictionary() -> Vec<ProofNode> {
             file: "MertensBridge.lean",
             observables: &["mertens_third_fit"],
         },
-
         // ═══════ GRAM BOUND (NEXT TARGET) ═══════
         ProofNode {
             lean_name: "hc_gram_bound",
@@ -125,7 +122,6 @@ pub fn cathedral_physics_dictionary() -> Vec<ProofNode> {
             file: "HCGramBridge.lean",
             observables: &["vtgv", "gram_bound_gap"],
         },
-
         // ═══════ VARIANCE DECOMPOSITION ═══════
         ProofNode {
             lean_name: "vasyuninCovMatrix_decomp",
@@ -135,7 +131,6 @@ pub fn cathedral_physics_dictionary() -> Vec<ProofNode> {
             file: "VasyuninBypass.lean",
             observables: &["seesaw_vacuum_energy", "condition_number"],
         },
-
         // ═══════ LINEAR ALGEBRA ═══════
         ProofNode {
             lean_name: "gram_psd",
@@ -151,17 +146,25 @@ pub fn cathedral_physics_dictionary() -> Vec<ProofNode> {
 /// Display the proof tree bridge.
 pub fn display_proof_tree() {
     let nodes = cathedral_physics_dictionary();
-    let proved = nodes.iter().filter(|n| n.status == ProofStatus::Proved).count();
+    let proved = nodes
+        .iter()
+        .filter(|n| n.status == ProofStatus::Proved)
+        .count();
     let total = nodes.len();
 
     println!("  ┌─────────────────────────────────────────────────────────────────┐");
-    println!("  │ PROOF TREE ↔ PHYSICS BRIDGE ({}/{} proved)                  │", proved, total);
+    println!(
+        "  │ PROOF TREE ↔ PHYSICS BRIDGE ({}/{} proved)                  │",
+        proved, total
+    );
     println!("  ├──────────────────────────┬──────────────────┬──────────────────┤");
     println!("  │ Cathedral Theorem        │ Physics Dual     │ Status           │");
     println!("  ├──────────────────────────┼──────────────────┼──────────────────┤");
     for node in &nodes {
-        println!("  │ {:24} │ {:16} │ {:16} │",
-                 node.lean_name, node.physics_name, node.status);
+        println!(
+            "  │ {:24} │ {:16} │ {:16} │",
+            node.lean_name, node.physics_name, node.status
+        );
     }
     println!("  └──────────────────────────┴──────────────────┴──────────────────┘");
 }

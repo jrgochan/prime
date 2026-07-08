@@ -7,7 +7,9 @@
 //!
 //! Let P = {p₁, p₂, ..., pₖ} be the first k primes. Define the prime subblock:
 //!
-//!     G_P(i,j) = G_N(pᵢ-1, pⱼ-1)   (0-indexed into the dim×dim matrix)
+//! ```text
+//! G_P(i,j) = G_N(pᵢ-1, pⱼ-1)   (0-indexed into the dim×dim matrix)
+//! ```
 //!
 //! **Conjecture**: As N → ∞, there exist O(1) eigenvectors of G_N whose
 //! restriction to prime indices converges to the eigenvectors of G_P, with
@@ -29,7 +31,7 @@ use cathedral_utils::fmt as cfmt;
 pub struct PrimeCoreResult {
     pub n: usize,
     pub dim: usize,
-    pub k_primes: usize,  // Number of primes used for G_P
+    pub k_primes: usize, // Number of primes used for G_P
     pub primes: Vec<usize>,
 
     /// G_P eigenvalues (sorted ascending)
@@ -48,15 +50,15 @@ pub struct PrimeCoreResult {
 /// Match between a G_P eigenvector and a full eigenvector.
 #[derive(Debug, Clone, serde::Serialize)]
 pub struct PrimeCoreMatch {
-    pub gp_index: usize,         // Index in G_P eigenvalues (ascending)
+    pub gp_index: usize, // Index in G_P eigenvalues (ascending)
     pub gp_eigenvalue: f64,
     pub gp_eigenvector: Vec<f64>, // k-dimensional
 
-    pub full_index: usize,       // Index in full eigenvalues (ascending)
+    pub full_index: usize, // Index in full eigenvalues (ascending)
     pub full_eigenvalue: f64,
-    pub overlap: f64,            // |<u, π(v)>|²
-    pub eigenvalue_error: f64,   // |λ_GP - λ_full| / λ_GP
-    pub full_purity: f64,        // The full eigenvector's purity on primes (P₁)
+    pub overlap: f64,          // |<u, π(v)>|²
+    pub eigenvalue_error: f64, // |λ_GP - λ_full| / λ_GP
+    pub full_purity: f64,      // The full eigenvector's purity on primes (P₁)
 
     /// Components of the full eigenvector on the first k primes
     pub full_prime_components: Vec<f64>,
@@ -82,10 +84,7 @@ impl PrimeCoreResult {
 
         // Step 1: Identify the first k primes ≤ N
         let prime_sieve = arith::sieve_primes(n);
-        let primes: Vec<usize> = (2..=n)
-            .filter(|&p| prime_sieve[p])
-            .take(k_primes)
-            .collect();
+        let primes: Vec<usize> = (2..=n).filter(|&p| prime_sieve[p]).take(k_primes).collect();
         let k = primes.len();
 
         eprintln!("    [Prime Core] Using {} primes: {:?}", k, primes);
@@ -137,7 +136,9 @@ impl PrimeCoreResult {
                 let pi_v: Vec<f64> = prime_indices.iter().map(|&idx| v[idx]).collect();
                 let pi_norm: f64 = pi_v.iter().map(|x| x * x).sum::<f64>().sqrt();
 
-                if pi_norm < 1e-15 { continue; }
+                if pi_norm < 1e-15 {
+                    continue;
+                }
 
                 // Normalize π(v)
                 let pi_v_norm: Vec<f64> = pi_v.iter().map(|x| x / pi_norm).collect();
@@ -154,10 +155,8 @@ impl PrimeCoreResult {
 
             // Extract match data
             let best_v = &eigenvectors[best_full_idx];
-            let full_prime_components: Vec<f64> = prime_indices
-                .iter()
-                .map(|&idx| best_v[idx])
-                .collect();
+            let full_prime_components: Vec<f64> =
+                prime_indices.iter().map(|&idx| best_v[idx]).collect();
 
             // Compute purity of the full eigenvector on primes
             let prime_weight: f64 = prime_indices
@@ -165,7 +164,11 @@ impl PrimeCoreResult {
                 .map(|&idx| best_v[idx] * best_v[idx])
                 .sum();
             let total_weight: f64 = best_v.iter().map(|x| x * x).sum();
-            let full_purity = if total_weight > 1e-30 { prime_weight / total_weight } else { 0.0 };
+            let full_purity = if total_weight > 1e-30 {
+                prime_weight / total_weight
+            } else {
+                0.0
+            };
 
             let eigenvalue_error = if gp_lambda.abs() > 1e-30 {
                 (gp_lambda - eigenvalues[best_full_idx]).abs() / gp_lambda.abs()
@@ -187,7 +190,8 @@ impl PrimeCoreResult {
         }
 
         // Find the sentinel (highest overlap)
-        let sentinel = matches.iter()
+        let sentinel = matches
+            .iter()
             .max_by(|a, b| a.overlap.partial_cmp(&b.overlap).unwrap())
             .unwrap();
 
@@ -210,10 +214,15 @@ impl PrimeCoreResult {
         println!();
         println!("  ┌─────────────────────────────────────────────────────────────────┐");
         println!("  │ PRIME CORE CONJECTURE TEST                                      │");
-        println!("  │ G_P subblock ({0}×{0}) vs full G_N ({1}×{1})                    │",
-                 self.k_primes, self.dim);
+        println!(
+            "  │ G_P subblock ({0}×{0}) vs full G_N ({1}×{1})                    │",
+            self.k_primes, self.dim
+        );
         println!("  ├─────────────────────────────────────────────────────────────────┤");
-        println!("  │ Primes used: {:?}", &self.primes[..self.primes.len().min(15)]);
+        println!(
+            "  │ Primes used: {:?}",
+            &self.primes[..self.primes.len().min(15)]
+        );
         println!("  ├─────────────────────────────────────────────────────────────────┤");
         println!("  │                                                                 │");
 
@@ -222,57 +231,108 @@ impl PrimeCoreResult {
         println!("  │ ─────────┼────────────────┼────────────────┼──────────┼──────────│");
 
         for m in &self.matches {
-            let check = if m.overlap > 0.95 { "★★★" }
-                else if m.overlap > 0.80 { "★★ " }
-                else if m.overlap > 0.50 { "★  " }
-                else { "   " };
-            println!("  │  {:>6}  │ {:>13.6e} │ {:>13.6e} │ {:>7.3}% │ {:>7.4}  │ {}",
-                     m.gp_index, m.gp_eigenvalue, m.full_eigenvalue,
-                     m.eigenvalue_error * 100.0, m.overlap, check);
+            let check = if m.overlap > 0.95 {
+                "★★★"
+            } else if m.overlap > 0.80 {
+                "★★ "
+            } else if m.overlap > 0.50 {
+                "★  "
+            } else {
+                "   "
+            };
+            println!(
+                "  │  {:>6}  │ {:>13.6e} │ {:>13.6e} │ {:>7.3}% │ {:>7.4}  │ {}",
+                m.gp_index,
+                m.gp_eigenvalue,
+                m.full_eigenvalue,
+                m.eigenvalue_error * 100.0,
+                m.overlap,
+                check
+            );
         }
         println!("  │                                                                 │");
 
         // Sentinel highlight
-        let sentinel = self.matches.iter()
+        let sentinel = self
+            .matches
+            .iter()
             .max_by(|a, b| a.overlap.partial_cmp(&b.overlap).unwrap())
             .unwrap();
         println!("  ├─────────────────────────────────────────────────────────────────┤");
         println!("  │ SENTINEL (highest overlap):                                     │");
-        println!("  │   G_P eigenvalue:  {:.10e}                              │", sentinel.gp_eigenvalue);
-        println!("  │   Full eigenvalue: {:.10e}                              │", sentinel.full_eigenvalue);
-        println!("  │   Overlap |<u,πv>|²: {:.6}                                   │", sentinel.overlap);
-        println!("  │   λ error:         {:.4}%                                      │", sentinel.eigenvalue_error * 100.0);
-        println!("  │   Full v purity:   {:.4} (weight on prime indices)             │", sentinel.full_purity);
+        println!(
+            "  │   G_P eigenvalue:  {:.10e}                              │",
+            sentinel.gp_eigenvalue
+        );
+        println!(
+            "  │   Full eigenvalue: {:.10e}                              │",
+            sentinel.full_eigenvalue
+        );
+        println!(
+            "  │   Overlap |<u,πv>|²: {:.6}                                   │",
+            sentinel.overlap
+        );
+        println!(
+            "  │   λ error:         {:.4}%                                      │",
+            sentinel.eigenvalue_error * 100.0
+        );
+        println!(
+            "  │   Full v purity:   {:.4} (weight on prime indices)             │",
+            sentinel.full_purity
+        );
 
         // Overall verdict
         let high_overlap_count = self.matches.iter().filter(|m| m.overlap > 0.80).count();
         let good_overlap_count = self.matches.iter().filter(|m| m.overlap > 0.50).count();
-        let mean_overlap: f64 = self.matches.iter().map(|m| m.overlap).sum::<f64>() / self.matches.len() as f64;
-        let mean_eigenvalue_error: f64 = self.matches.iter().map(|m| m.eigenvalue_error).sum::<f64>() / self.matches.len() as f64;
+        let mean_overlap: f64 =
+            self.matches.iter().map(|m| m.overlap).sum::<f64>() / self.matches.len() as f64;
+        let mean_eigenvalue_error: f64 =
+            self.matches.iter().map(|m| m.eigenvalue_error).sum::<f64>()
+                / self.matches.len() as f64;
 
         println!("  ├─────────────────────────────────────────────────────────────────┤");
         println!("  │ SUMMARY:                                                        │");
-        println!("  │   Eigenvectors with overlap > 0.80: {}/{}                       │",
-                 high_overlap_count, self.k_primes);
-        println!("  │   Eigenvectors with overlap > 0.50: {}/{}                       │",
-                 good_overlap_count, self.k_primes);
-        println!("  │   Mean overlap:     {:.6}                                      │", mean_overlap);
-        println!("  │   Mean λ error:     {:.4}%                                      │", mean_eigenvalue_error * 100.0);
+        println!(
+            "  │   Eigenvectors with overlap > 0.80: {}/{}                       │",
+            high_overlap_count, self.k_primes
+        );
+        println!(
+            "  │   Eigenvectors with overlap > 0.50: {}/{}                       │",
+            good_overlap_count, self.k_primes
+        );
+        println!(
+            "  │   Mean overlap:     {:.6}                                      │",
+            mean_overlap
+        );
+        println!(
+            "  │   Mean λ error:     {:.4}%                                      │",
+            mean_eigenvalue_error * 100.0
+        );
 
         if high_overlap_count as f64 >= self.k_primes as f64 * 0.5 {
             println!("  │                                                                 │");
-            println!("  │   {}{}★★★ CONJECTURE CONFIRMED ★★★{}                              │",
-                     cfmt::BOLD, cfmt::GREEN, cfmt::RESET);
+            println!(
+                "  │   {}{}★★★ CONJECTURE CONFIRMED ★★★{}                              │",
+                cfmt::BOLD,
+                cfmt::GREEN,
+                cfmt::RESET
+            );
             println!("  │   G_N eigenvectors converge to G_P eigenvectors!                │");
         } else if good_overlap_count as f64 >= self.k_primes as f64 * 0.3 {
             println!("  │                                                                 │");
-            println!("  │   {}★★ PARTIAL CONFIRMATION ★★{}                                 │",
-                     cfmt::YELLOW, cfmt::RESET);
+            println!(
+                "  │   {}★★ PARTIAL CONFIRMATION ★★{}                                 │",
+                cfmt::YELLOW,
+                cfmt::RESET
+            );
             println!("  │   Some G_P modes are preserved in the full spectrum.            │");
         } else {
             println!("  │                                                                 │");
-            println!("  │   {}✗ CONJECTURE NOT SUPPORTED ✗{}                               │",
-                     cfmt::RED, cfmt::RESET);
+            println!(
+                "  │   {}✗ CONJECTURE NOT SUPPORTED ✗{}                               │",
+                cfmt::RED,
+                cfmt::RESET
+            );
         }
 
         println!("  └─────────────────────────────────────────────────────────────────┘");
@@ -285,8 +345,12 @@ impl PrimeCoreResult {
         println!("  ├────────┼───────────────┼───────────────┤");
 
         // Normalize full prime components for comparison
-        let full_norm: f64 = sentinel.full_prime_components
-            .iter().map(|x| x * x).sum::<f64>().sqrt();
+        let full_norm: f64 = sentinel
+            .full_prime_components
+            .iter()
+            .map(|x| x * x)
+            .sum::<f64>()
+            .sqrt();
         for (i, &p) in self.primes.iter().enumerate() {
             let u_comp = sentinel.gp_eigenvector[i];
             let v_comp = if full_norm > 1e-15 {
@@ -295,8 +359,10 @@ impl PrimeCoreResult {
                 0.0
             };
             let sign_match = if u_comp * v_comp >= 0.0 { " " } else { "!" };
-            println!("  │ {:>5}  │ {:>+12.6} │ {:>+12.6} │{}",
-                     p, u_comp, v_comp, sign_match);
+            println!(
+                "  │ {:>5}  │ {:>+12.6} │ {:>+12.6} │{}",
+                p, u_comp, v_comp, sign_match
+            );
         }
         println!("  └────────┴───────────────┴───────────────┘");
     }
@@ -306,8 +372,7 @@ impl PrimeCoreResult {
 pub fn write_prime_core_json(result: &PrimeCoreResult, dir: &str) -> std::io::Result<()> {
     std::fs::create_dir_all(dir)?;
     let path = format!("{dir}/prime_core_N{}.json", result.n);
-    let json_str = serde_json::to_string_pretty(result)
-        .map_err(std::io::Error::other)?;
+    let json_str = serde_json::to_string_pretty(result).map_err(std::io::Error::other)?;
     std::fs::write(&path, json_str)?;
     eprintln!("  ✓ Prime core → {path}");
     Ok(())

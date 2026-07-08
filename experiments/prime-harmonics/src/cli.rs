@@ -25,10 +25,7 @@ pub enum Mode {
         steps: usize,
     },
     /// Phase portrait at a specific height
-    Portrait {
-        height: f64,
-        top_primes: usize,
-    },
+    Portrait { height: f64, top_primes: usize },
     /// Energy sweep with optional CSV/JSON output
     Sweep {
         t_start: f64,
@@ -50,7 +47,11 @@ pub enum Mode {
     /// Mirror mode — reconstruct primes from zeros
     Mirror { x_max: f64 },
     /// Eta mode — complete winding cancellation analysis
-    Eta { n_max: usize, num_zeros: usize, verbose: bool },
+    Eta {
+        n_max: usize,
+        num_zeros: usize,
+        verbose: bool,
+    },
     /// Anomaly mode — Bridge 2: Δ = G - R perturbation analysis
     Anomaly { n_max: usize },
     /// Dyson mode — The Nuclear Option: d²_opt = d²_free + scattering
@@ -139,10 +140,7 @@ pub fn parse_args() -> Config {
                     i += 2;
                     top_primes = args[i].parse().unwrap();
                 }
-                mode = Mode::Portrait {
-                    height,
-                    top_primes,
-                };
+                mode = Mode::Portrait { height, top_primes };
             }
             "--sweep" | "-s" => {
                 i += 1;
@@ -189,9 +187,18 @@ pub fn parse_args() -> Config {
                 let mut hd = HdMode::Off;
                 while i + 1 < args.len() {
                     match args[i + 1].as_str() {
-                        "--stats" => { i += 1; refine = true; }
-                        "--hd" => { i += 1; hd = HdMode::Fast; }
-                        "--hd-full" => { i += 1; hd = HdMode::Full; }
+                        "--stats" => {
+                            i += 1;
+                            refine = true;
+                        }
+                        "--hd" => {
+                            i += 1;
+                            hd = HdMode::Fast;
+                        }
+                        "--hd-full" => {
+                            i += 1;
+                            hd = HdMode::Full;
+                        }
                         _ => break,
                     }
                 }
@@ -236,7 +243,11 @@ pub fn parse_args() -> Config {
                         _ => break,
                     }
                 }
-                mode = Mode::Eta { n_max, num_zeros, verbose };
+                mode = Mode::Eta {
+                    n_max,
+                    num_zeros,
+                    verbose,
+                };
             }
             "--anomaly" => {
                 i += 1;

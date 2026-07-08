@@ -1,4 +1,13 @@
-#![allow(dead_code, unused_variables, unused_imports, unused_assignments, clippy::needless_range_loop, clippy::doc_lazy_continuation, non_snake_case, clippy::empty_line_after_doc_comments)]
+#![allow(
+    dead_code,
+    unused_variables,
+    unused_imports,
+    unused_assignments,
+    clippy::needless_range_loop,
+    clippy::doc_lazy_continuation,
+    non_snake_case,
+    clippy::empty_line_after_doc_comments
+)]
 // overcancellation-scan/src/bin/overcancellation_anatomy.rs
 //
 // ╔═══════════════════════════════════════════════════════════════════╗
@@ -23,7 +32,9 @@ fn vasyunin_const() -> f64 {
 
 /// Vasyunin sum V(a,b) = Σ_{m=1}^{a-1} cot(πm/a) · {mb/a}
 fn vasyunin_sum(a: usize, b: usize) -> f64 {
-    if a <= 1 { return 0.0; }
+    if a <= 1 {
+        return 0.0;
+    }
     let af = a as f64;
     let mut s = 0.0;
     for m in 1..a {
@@ -80,8 +91,8 @@ fn compute_row(j: usize, v: &[f64], n: usize) -> (f64, f64, f64, f64, f64) {
 
             row_t1 += w * t1;
             row_t2 += w * t2;
-            row_t3 += w * t3;  // note: subtracted in G, so -term3 contribution
-            row_t4 += w * t4;  // note: subtracted in G, so -term4 contribution
+            row_t3 += w * t3; // note: subtracted in G, so -term3 contribution
+            row_t4 += w * t4; // note: subtracted in G, so -term4 contribution
         }
     }
 
@@ -104,8 +115,10 @@ fn main() {
     // Start with smaller N values, go up to 2520
     let ns: Vec<usize> = vec![30, 60, 100, 300, 600, 1000, 2520];
 
-    println!("{:>6} {:>10} {:>10} {:>10} {:>10} {:>10} {:>10} {:>10} {:>10} {:>10}",
-        "N", "vᵀGv", "1-vᵀGv", "‖v‖²", "diag", "term1", "term2", "-term3", "-term4", "vᵀGv/‖v‖²");
+    println!(
+        "{:>6} {:>10} {:>10} {:>10} {:>10} {:>10} {:>10} {:>10} {:>10} {:>10}",
+        "N", "vᵀGv", "1-vᵀGv", "‖v‖²", "diag", "term1", "term2", "-term3", "-term4", "vᵀGv/‖v‖²"
+    );
     println!("{}", "─".repeat(106));
 
     for &n in &ns {
@@ -115,17 +128,22 @@ fn main() {
         // Build witness vector
         let mut v = vec![0.0f64; size];
         for k in 1..n {
-            v[k-1] = -(mu[k] as f64) * log_weight(k, n);
+            v[k - 1] = -(mu[k] as f64) * log_weight(k, n);
         }
 
         let norm_sq: f64 = v.iter().map(|x| x * x).sum();
         let _sigma: f64 = v.iter().sum();
-        let _s: f64 = v.iter().enumerate().map(|(i, vi)| vi / (i as f64 + 1.0)).sum();
+        let _s: f64 = v
+            .iter()
+            .enumerate()
+            .map(|(i, vi)| vi / (i as f64 + 1.0))
+            .sum();
 
         eprint!("  N = {:5} ({} rows)...", n, size);
 
         // Parallel row computation
-        let results: Vec<(f64, f64, f64, f64, f64)> = (1..n).into_par_iter()
+        let results: Vec<(f64, f64, f64, f64, f64)> = (1..n)
+            .into_par_iter()
             .map(|j| compute_row(j, &v, n))
             .collect();
 
@@ -138,7 +156,7 @@ fn main() {
 
         // Sum diagonal separately
         for j in 1..n {
-            diag_total += v[j-1] * v[j-1] * gram_diag(j);
+            diag_total += v[j - 1] * v[j - 1] * gram_diag(j);
         }
 
         for (row_vtgv, rt1, rt2, rt3, rt4) in &results {

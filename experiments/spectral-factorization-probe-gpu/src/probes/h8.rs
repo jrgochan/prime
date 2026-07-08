@@ -24,7 +24,10 @@ pub fn h8_eigenvalue_interlacing(keys: &[SemiprimeKey], cache: &GramCache) -> Ve
         let p = key.p as usize;
 
         if p > 2000 {
-            println!("    N={}: p={} too large for interlacing scan, skipping", key.n, p);
+            println!(
+                "    N={}: p={} too large for interlacing scan, skipping",
+                key.n, p
+            );
             continue;
         }
 
@@ -63,35 +66,65 @@ pub fn h8_eigenvalue_interlacing(keys: &[SemiprimeKey], cache: &GramCache) -> Ve
         }
 
         // Compare Δλ at factor crossings vs non-factor crossings
-        let factor_deltas: Vec<f64> = interlacing_entries.iter()
+        let factor_deltas: Vec<f64> = interlacing_entries
+            .iter()
             .filter(|e| e.is_factor_crossing)
             .map(|e| e.delta_lambda.abs())
             .collect();
-        let nonfactor_deltas: Vec<f64> = interlacing_entries.iter()
+        let nonfactor_deltas: Vec<f64> = interlacing_entries
+            .iter()
             .filter(|e| !e.is_factor_crossing)
             .map(|e| e.delta_lambda.abs())
             .collect();
 
-        let mean_factor_delta = if factor_deltas.is_empty() { 0.0 }
-            else { factor_deltas.iter().sum::<f64>() / factor_deltas.len() as f64 };
-        let mean_nonfactor_delta = if nonfactor_deltas.is_empty() { 0.0 }
-            else { nonfactor_deltas.iter().sum::<f64>() / nonfactor_deltas.len() as f64 };
+        let mean_factor_delta = if factor_deltas.is_empty() {
+            0.0
+        } else {
+            factor_deltas.iter().sum::<f64>() / factor_deltas.len() as f64
+        };
+        let mean_nonfactor_delta = if nonfactor_deltas.is_empty() {
+            0.0
+        } else {
+            nonfactor_deltas.iter().sum::<f64>() / nonfactor_deltas.len() as f64
+        };
         let stutter_ratio = if mean_nonfactor_delta > 0.0 {
             mean_factor_delta / mean_nonfactor_delta
-        } else { 1.0 };
+        } else {
+            1.0
+        };
 
         println!("    N={} = {}×{}", key.n, key.p, key.q);
         println!("      Interlacing scan M ∈ [{}, {}]:", lo, hi);
         for e in &interlacing_entries {
-            println!("        M={:4}→{:4}: Δλ_min={:+.6e} {}",
-                e.m_from, e.m_to, e.delta_lambda,
-                if e.is_factor_crossing { "← FACTOR CROSSING" } else { "" });
+            println!(
+                "        M={:4}→{:4}: Δλ_min={:+.6e} {}",
+                e.m_from,
+                e.m_to,
+                e.delta_lambda,
+                if e.is_factor_crossing {
+                    "← FACTOR CROSSING"
+                } else {
+                    ""
+                }
+            );
         }
-        println!("      Mean |Δλ| at factor crossings: {:.4e}", mean_factor_delta);
-        println!("      Mean |Δλ| at non-factor:       {:.4e}", mean_nonfactor_delta);
+        println!(
+            "      Mean |Δλ| at factor crossings: {:.4e}",
+            mean_factor_delta
+        );
+        println!(
+            "      Mean |Δλ| at non-factor:       {:.4e}",
+            mean_nonfactor_delta
+        );
         println!("      Stutter ratio: {:.4}", stutter_ratio);
-        println!("      Signal: {}\n",
-            if (stutter_ratio - 1.0).abs() > 1.0 { "weak 〜" } else { "null ∅" });
+        println!(
+            "      Signal: {}\n",
+            if (stutter_ratio - 1.0).abs() > 1.0 {
+                "weak 〜"
+            } else {
+                "null ∅"
+            }
+        );
 
         results.push(H8Result {
             n: key.n,

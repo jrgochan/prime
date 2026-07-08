@@ -1,21 +1,6 @@
 #![allow(clippy::needless_range_loop, clippy::let_and_return)]
 
-fn mobius_sieve(n: usize) -> Vec<i32> {
-    let mut mu = vec![0i32; n + 1];
-    mu[1] = 1;
-    let mut is_prime = vec![true; n + 1];
-    let mut primes = Vec::new();
-    for i in 2..=n {
-        if is_prime[i] { primes.push(i); mu[i] = -1; }
-        for &p in &primes {
-            if i * p > n { break; }
-            is_prime[i * p] = false;
-            if i % p == 0 { mu[i * p] = 0; break; }
-            else { mu[i * p] = -mu[i]; }
-        }
-    }
-    mu
-}
+use cathedral_utils::arith::mobius_table;
 
 /// ζ(σ+it) via partial sums + Euler-Maclaurin
 fn zeta_at(sigma: f64, t: f64, n_terms: usize) -> (f64, f64) {
@@ -49,13 +34,15 @@ fn zeta_at(sigma: f64, t: f64, n_terms: usize) -> (f64, f64) {
 }
 
 fn cmul(a: f64, b: f64, c: f64, d: f64) -> (f64, f64) {
-    (a*c - b*d, a*d + b*c)
+    (a * c - b * d, a * d + b * c)
 }
-fn cabs2(a: f64, b: f64) -> f64 { a*a + b*b }
+fn cabs2(a: f64, b: f64) -> f64 {
+    a * a + b * b
+}
 
 fn main() {
     let n_max = 20_000;
-    let mu = mobius_sieve(n_max);
+    let mu = mobius_table(n_max);
 
     println!("═══════════════════════════════════════════════════════════════");
     println!("CONTOUR HEIGHT PROBE — Spectral Error vs Re(s)");
@@ -66,22 +53,31 @@ fn main() {
     println!("═══ §1: |E_N(σ+it)|² at t=5.0 for various σ and N ═══");
     println!("  E_N(s) = ζ(s)·D_N(s) + 1/s");
     println!();
-    println!("{:>6} {:>10} {:>10} {:>10} {:>10} {:>10}",
-             "σ", "N=100", "N=500", "N=2000", "N=10000", "N=20000");
+    println!(
+        "{:>6} {:>10} {:>10} {:>10} {:>10} {:>10}",
+        "σ", "N=100", "N=500", "N=2000", "N=10000", "N=20000"
+    );
     println!("{}", "-".repeat(62));
 
     let t_fixed = 5.0;
-    for &sigma in &[0.50, 0.55, 0.60, 0.65, 0.70, 0.75, 0.80, 0.85,
-                     0.90, 0.95, 1.00, 1.05, 1.10, 1.20, 1.50, 2.00] {
+    for &sigma in &[
+        0.50, 0.55, 0.60, 0.65, 0.70, 0.75, 0.80, 0.85, 0.90, 0.95, 1.00, 1.05, 1.10, 1.20, 1.50,
+        2.00,
+    ] {
         print!("{:>6.2}", sigma);
         for &n in &[100, 500, 2000, 10000, 20000] {
-            if n > n_max { print!("{:>10}", "---"); continue; }
+            if n > n_max {
+                print!("{:>10}", "---");
+                continue;
+            }
             let ln_n = (n as f64).ln();
             let mut dn_re = 0.0;
             let mut dn_im = 0.0;
             for k in 1..n {
                 let mu_k = mu[k] as f64;
-                if mu_k == 0.0 { continue; }
+                if mu_k == 0.0 {
+                    continue;
+                }
                 let w = 1.0 - (k as f64).ln() / ln_n;
                 let v_k = -mu_k * w;
                 let mag = v_k * (k as f64).powf(-sigma);
@@ -105,8 +101,10 @@ fn main() {
     println!("═══ §2: Integrated Error ∫|E_N(σ+it)|²/(σ²+t²) dt ═══");
     println!("  This is the 'Parseval d²' at height σ");
     println!();
-    println!("{:>6} {:>12} {:>12} {:>12} {:>12} {:>12}",
-             "σ", "N=100", "N=500", "N=2000", "N=5000", "N=10000");
+    println!(
+        "{:>6} {:>12} {:>12} {:>12} {:>12} {:>12}",
+        "σ", "N=100", "N=500", "N=2000", "N=5000", "N=10000"
+    );
     println!("{}", "-".repeat(72));
 
     for &sigma in &[0.50, 0.55, 0.60, 0.70, 0.80, 0.90, 0.95, 1.00, 1.10, 1.50] {
@@ -120,7 +118,9 @@ fn main() {
             let mut weights: Vec<(usize, f64)> = Vec::new();
             for k in 1..n {
                 let mu_k = mu[k] as f64;
-                if mu_k == 0.0 { continue; }
+                if mu_k == 0.0 {
+                    continue;
+                }
                 let w = 1.0 - (k as f64).ln() / ln_n;
                 weights.push((k, -mu_k * w));
             }
@@ -161,12 +161,16 @@ fn main() {
     println!();
 
     for &n in &[100, 500, 1000, 5000, 10000] {
-        if n > n_max { continue; }
+        if n > n_max {
+            continue;
+        }
         let ln_n = (n as f64).ln();
         let mut weights: Vec<(usize, f64)> = Vec::new();
         for k in 1..n {
             let mu_k = mu[k] as f64;
-            if mu_k == 0.0 { continue; }
+            if mu_k == 0.0 {
+                continue;
+            }
             let w = 1.0 - (k as f64).ln() / ln_n;
             weights.push((k, -mu_k * w));
         }
@@ -218,8 +222,10 @@ fn main() {
     println!();
 
     let t_test = 5.0;
-    println!("{:>6} {:>14} {:>14} {:>14}",
-             "σ", "|E|²·logN @1k", "|E|²·logN @5k", "|E|²·logN @20k");
+    println!(
+        "{:>6} {:>14} {:>14} {:>14}",
+        "σ", "|E|²·logN @1k", "|E|²·logN @5k", "|E|²·logN @20k"
+    );
     println!("{}", "-".repeat(52));
 
     for &sigma in &[0.50, 0.60, 0.70, 0.80, 0.90, 0.95, 1.00, 1.10, 1.50] {
@@ -230,7 +236,9 @@ fn main() {
             let mut dn_im = 0.0;
             for k in 1..n {
                 let mu_k = mu[k] as f64;
-                if mu_k == 0.0 { continue; }
+                if mu_k == 0.0 {
+                    continue;
+                }
                 let w = 1.0 - (k as f64).ln() / ln_n;
                 let v_k = -mu_k * w;
                 let mag = v_k * (k as f64).powf(-sigma);

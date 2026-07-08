@@ -1,21 +1,6 @@
 #![allow(clippy::needless_range_loop)]
 
-fn mobius_sieve(n: usize) -> Vec<i32> {
-    let mut mu = vec![0i32; n + 1];
-    mu[1] = 1;
-    let mut is_prime = vec![true; n + 1];
-    let mut primes = Vec::new();
-    for i in 2..=n {
-        if is_prime[i] { primes.push(i); mu[i] = -1; }
-        for &p in &primes {
-            if i * p > n { break; }
-            is_prime[i * p] = false;
-            if i % p == 0 { mu[i * p] = 0; break; }
-            else { mu[i * p] = -mu[i]; }
-        }
-    }
-    mu
-}
+use cathedral_utils::arith::mobius_table;
 
 /// Approximate ζ(1/2 + it) via Euler-Maclaurin partial sums
 /// (good enough for |t| < 100 with enough terms)
@@ -65,15 +50,17 @@ fn zeta_half_it(t: f64, n_terms: usize) -> (f64, f64) {
 
 /// Complex multiply (a+bi)(c+di)
 fn cmul(a: f64, b: f64, c: f64, d: f64) -> (f64, f64) {
-    (a*c - b*d, a*d + b*c)
+    (a * c - b * d, a * d + b * c)
 }
 
 /// Complex |a+bi|²
-fn cabs2(a: f64, b: f64) -> f64 { a*a + b*b }
+fn cabs2(a: f64, b: f64) -> f64 {
+    a * a + b * b
+}
 
 fn main() {
     let n_max = 20_000;
-    let mu = mobius_sieve(n_max);
+    let mu = mobius_table(n_max);
 
     println!("═══════════════════════════════════════════════════════════════");
     println!("MELLIN-PARSEVAL SPECTRAL PROBE — ζ(s) on Critical Line");
@@ -86,21 +73,29 @@ fn main() {
     println!();
 
     for &n in &[100, 1000, 5000, 10000, 20000] {
-        if n > n_max { break; }
+        if n > n_max {
+            break;
+        }
         let ln_n = (n as f64).ln();
 
         println!("--- N = {} ---", n);
-        println!("{:>8} {:>14} {:>14} {:>14} {:>14}",
-                 "t", "|D_N|²", "|ζ|²", "ζ·D_N (re)", "|ζ·D_N+1/s|²");
+        println!(
+            "{:>8} {:>14} {:>14} {:>14} {:>14}",
+            "t", "|D_N|²", "|ζ|²", "ζ·D_N (re)", "|ζ·D_N+1/s|²"
+        );
         println!("{}", "-".repeat(68));
 
-        for &t in &[0.0, 1.0, 2.0, 5.0, 10.0, 14.13, 21.02, 25.01, 30.42, 50.0, 100.0] {
+        for &t in &[
+            0.0, 1.0, 2.0, 5.0, 10.0, 14.13, 21.02, 25.01, 30.42, 50.0, 100.0,
+        ] {
             // D_N(1/2+it) = Σ v_k / k^{1/2+it}
             let mut dn_re = 0.0_f64;
             let mut dn_im = 0.0_f64;
             for k in 1..n {
                 let mu_k = mu[k] as f64;
-                if mu_k == 0.0 { continue; }
+                if mu_k == 0.0 {
+                    continue;
+                }
                 let w = 1.0 - (k as f64).ln() / ln_n;
                 let v_k = -mu_k * w;
                 let mag = v_k * (k as f64).powf(-0.5);
@@ -124,9 +119,14 @@ fn main() {
             let err_re = zd_re + inv_s_re;
             let err_im = zd_im + inv_s_im;
 
-            println!("{:>8.2} {:>14.6} {:>14.6} {:>14.6} {:>14.6e}",
-                     t, cabs2(dn_re, dn_im), cabs2(z_re, z_im),
-                     zd_re, cabs2(err_re, err_im));
+            println!(
+                "{:>8.2} {:>14.6} {:>14.6} {:>14.6} {:>14.6e}",
+                t,
+                cabs2(dn_re, dn_im),
+                cabs2(z_re, z_im),
+                zd_re,
+                cabs2(err_re, err_im)
+            );
         }
         println!();
     }
@@ -137,14 +137,18 @@ fn main() {
     println!();
 
     for &n in &[100, 500, 1000, 5000, 10000] {
-        if n > n_max { break; }
+        if n > n_max {
+            break;
+        }
         let ln_n = (n as f64).ln();
 
         // Build weights
         let mut weights: Vec<(usize, f64)> = Vec::new();
         for k in 1..n {
             let mu_k = mu[k] as f64;
-            if mu_k == 0.0 { continue; }
+            if mu_k == 0.0 {
+                continue;
+            }
             let w = 1.0 - (k as f64).ln() / ln_n;
             weights.push((k, -mu_k * w));
         }
@@ -178,7 +182,7 @@ fn main() {
 
             // Weight by 1/|s(1-s)|² for the Parseval measure
             // |s|² = 1/4 + t², |1-s|² = 1/4 + t²
-            // So |s(1-s)|² = (1/4+t²)² 
+            // So |s(1-s)|² = (1/4+t²)²
             // The Parseval weight is 1/|s|² = 1/(1/4+t²)
             let parseval_weight = 1.0 / (0.25 + t * t);
             cumul += err2 * parseval_weight * dt;
@@ -208,17 +212,23 @@ fn main() {
     let mut weights: Vec<(usize, f64)> = Vec::new();
     for k in 1..n {
         let mu_k = mu[k] as f64;
-        if mu_k == 0.0 { continue; }
+        if mu_k == 0.0 {
+            continue;
+        }
         let w = 1.0 - (k as f64).ln() / ln_n;
         weights.push((k, -mu_k * w));
     }
 
-    println!("{:>8} {:>12} {:>12} {:>12} {:>12} {:>12}",
-             "t", "ζ·D_N re", "ζ·D_N im", "-1/s re", "-1/s im", "|err|²");
+    println!(
+        "{:>8} {:>12} {:>12} {:>12} {:>12} {:>12}",
+        "t", "ζ·D_N re", "ζ·D_N im", "-1/s re", "-1/s im", "|err|²"
+    );
     println!("{}", "-".repeat(72));
 
-    for &t in &[0.5, 1.0, 2.0, 3.0, 5.0, 7.0, 10.0, 14.13, 21.02,
-                25.01, 30.42, 37.59, 40.92, 50.0, 75.0, 100.0] {
+    for &t in &[
+        0.5, 1.0, 2.0, 3.0, 5.0, 7.0, 10.0, 14.13, 21.02, 25.01, 30.42, 37.59, 40.92, 50.0, 75.0,
+        100.0,
+    ] {
         let mut dn_re = 0.0;
         let mut dn_im = 0.0;
         for &(k, v_k) in &weights {
@@ -237,8 +247,10 @@ fn main() {
 
         let err2 = cabs2(zd_re - target_re, zd_im - target_im);
 
-        println!("{:>8.2} {:>12.6} {:>12.6} {:>12.6} {:>12.6} {:>12.4e}",
-                 t, zd_re, zd_im, target_re, target_im, err2);
+        println!(
+            "{:>8.2} {:>12.6} {:>12.6} {:>12.6} {:>12.6} {:>12.4e}",
+            t, zd_re, zd_im, target_re, target_im, err2
+        );
     }
 
     // ═══ §4: Connection to zeta zeros ═══
@@ -249,8 +261,10 @@ fn main() {
     println!();
 
     // Fine scan around first zero
-    println!("{:>8} {:>12} {:>14} {:>14}",
-             "t", "|ζ(1/2+it)|", "|ζ·D_N+1/s|²", "spect_err");
+    println!(
+        "{:>8} {:>12} {:>14} {:>14}",
+        "t", "|ζ(1/2+it)|", "|ζ·D_N+1/s|²", "spect_err"
+    );
     println!("{}", "-".repeat(52));
 
     let mut t = 13.0;
@@ -273,8 +287,13 @@ fn main() {
         let err2 = cabs2(zd_re + inv_s_re, zd_im + inv_s_im);
         let z_abs = cabs2(z_re, z_im).sqrt();
 
-        println!("{:>8.3} {:>12.6} {:>14.6e} {:>14.6e}",
-                 t, z_abs, err2, err2 / (0.25 + t*t));
+        println!(
+            "{:>8.3} {:>12.6} {:>14.6e} {:>14.6e}",
+            t,
+            z_abs,
+            err2,
+            err2 / (0.25 + t * t)
+        );
         t += 0.1;
     }
 

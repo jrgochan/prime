@@ -1,8 +1,8 @@
 //! Fine scan mode — high-resolution analysis around a specific height.
 
+use crate::display;
 use cathedral_utils::harmonics::{golden_section_min, PrimeOscillatorBank};
 use cathedral_utils::zeta_zeros;
-use crate::display;
 
 pub fn run(bank: &PrimeOscillatorBank, center: f64, window: f64, steps: usize) {
     println!("🌀 FINE SCAN around t = {:.6} ± {:.4}", center, window);
@@ -36,7 +36,11 @@ pub fn run(bank: &PrimeOscillatorBank, center: f64, window: f64, steps: usize) {
             continue;
         }
         let bar = display::render_bar(n, max_norm, 50);
-        let marker = if (t - min_t).abs() < dt { " ← MIN" } else { "" };
+        let marker = if (t - min_t).abs() < dt {
+            " ← MIN"
+        } else {
+            ""
+        };
         println!("  t={:>12.8} |{bar}| {:>8.5}{marker}", t, n);
     }
 

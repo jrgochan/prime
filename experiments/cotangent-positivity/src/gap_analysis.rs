@@ -10,6 +10,7 @@
 //!
 //! Cathedral — Climbing the Wall 🧗 — June 1, 2026
 
+use cathedral_utils::arith::gcd;
 use rayon::prelude::*;
 use std::collections::HashMap;
 use std::f64::consts::PI;
@@ -29,32 +30,39 @@ fn sieve_mobius(n: usize) -> Vec<i8> {
             mu[i] = -1;
         }
         for &p in &primes {
-            if i * p > n { break; }
+            if i * p > n {
+                break;
+            }
             is_prime[i * p] = false;
-            if i % p == 0 { mu[i * p] = 0; break; }
-            else { mu[i * p] = -mu[i]; }
+            if i % p == 0 {
+                mu[i * p] = 0;
+                break;
+            } else {
+                mu[i * p] = -mu[i];
+            }
         }
     }
     mu
 }
 
-fn gcd(mut a: usize, mut b: usize) -> usize {
-    while b != 0 { let t = b; b = a % b; a = t; }
-    a
-}
-
 fn vasyunin_sum(a: usize, b: usize) -> f64 {
-    if a <= 1 { return 0.0; }
+    if a <= 1 {
+        return 0.0;
+    }
     let af = a as f64;
     let bf = b as f64;
     let mut total = 0.0;
     for m in 1..a {
         let mf = m as f64;
         let mut frac_part = (mf * bf / af).fract();
-        if frac_part < 0.0 { frac_part += 1.0; }
+        if frac_part < 0.0 {
+            frac_part += 1.0;
+        }
         let angle = PI * mf / af;
         let sin_val = angle.sin();
-        if sin_val.abs() < 1e-15 { continue; }
+        if sin_val.abs() < 1e-15 {
+            continue;
+        }
         total += frac_part * angle.cos() / sin_val;
     }
     total
@@ -93,8 +101,11 @@ fn bd_weights(n: usize, mu: &[i8]) -> Vec<f64> {
     (0..n - 1)
         .map(|i| {
             let j = i + 1;
-            if mu[j] == 0 { 0.0 }
-            else { -(mu[j] as f64) * (1.0 - (j as f64).ln() / log_n) }
+            if mu[j] == 0 {
+                0.0
+            } else {
+                -(mu[j] as f64) * (1.0 - (j as f64).ln() / log_n)
+            }
         })
         .collect()
 }
@@ -103,16 +114,24 @@ fn precompute_pair_sums(n: usize, mu: &[i8]) -> HashMap<(usize, usize), f64> {
     let mut needed: Vec<(usize, usize)> = Vec::new();
     let mut seen = std::collections::HashSet::new();
     for j in 1..n {
-        if mu[j] == 0 { continue; }
+        if mu[j] == 0 {
+            continue;
+        }
         for k in 1..n {
-            if j == k || mu[k] == 0 { continue; }
+            if j == k || mu[k] == 0 {
+                continue;
+            }
             let d = gcd(j, k);
-            let a = j / d; let b = k / d;
+            let a = j / d;
+            let b = k / d;
             let key = if a <= b { (a, b) } else { (b, a) };
-            if seen.insert(key) { needed.push(key); }
+            if seen.insert(key) {
+                needed.push(key);
+            }
         }
     }
-    needed.par_iter()
+    needed
+        .par_iter()
         .map(|&(a, b)| ((a, b), vasyunin_sum(a, b) + vasyunin_sum(b, a)))
         .collect()
 }
@@ -136,9 +155,7 @@ fn analyze_gaps(n: usize) -> GapResult {
     let dim = v.len();
 
     // Diagonal: Σ v_j² · G(j,j)
-    let diag: f64 = (0..dim)
-        .map(|i| v[i] * v[i] * gram_diagonal(i + 1))
-        .sum();
+    let diag: f64 = (0..dim).map(|i| v[i] * v[i] * gram_diagonal(i + 1)).sum();
 
     // Pre-compute pair sums
     let pair_sums = precompute_pair_sums(n, &mu);
@@ -154,7 +171,9 @@ fn analyze_gaps(n: usize) -> GapResult {
             let mut row_strata: HashMap<usize, f64> = HashMap::new();
 
             for k_idx in 0..dim {
-                if k_idx == i || v[k_idx] == 0.0 { continue; }
+                if k_idx == i || v[k_idx] == 0.0 {
+                    continue;
+                }
                 let k = k_idx + 1;
 
                 // Non-cot part
@@ -192,14 +211,21 @@ fn analyze_gaps(n: usize) -> GapResult {
     let vtgv = noncot - off_cot;
 
     let d1 = gcd_strata.get(&1).copied().unwrap_or(0.0);
-    let d_ge2: f64 = gcd_strata.iter()
+    let d_ge2: f64 = gcd_strata
+        .iter()
         .filter(|(&d, _)| d >= 2)
         .map(|(_, &v)| v)
         .sum();
 
     GapResult {
-        n, diag, off_noncot, off_cot, noncot, vtgv,
-        d1, d_ge2,
+        n,
+        diag,
+        off_noncot,
+        off_cot,
+        noncot,
+        vtgv,
+        d1,
+        d_ge2,
         elapsed: t0.elapsed().as_secs_f64(),
     }
 }
@@ -234,8 +260,12 @@ fn main() {
     for &n in &ns {
         let r = analyze_gaps(n);
         let gap = 1.0 - r.noncot;
-        if r.noncot >= 1.0 { all_noncot_lt1 = false; }
-        if r.off_cot <= 0.0 { all_scot_pos = false; }
+        if r.noncot >= 1.0 {
+            all_noncot_lt1 = false;
+        }
+        if r.off_cot <= 0.0 {
+            all_scot_pos = false;
+        }
 
         println!(
             "{:6} │ {:+10.6} │ {:+10.6} │ {:+10.6} │ {:+10.6} │ {:+10.6} │ {:+10.6} │ {:5.1}s",
@@ -250,7 +280,11 @@ fn main() {
     println!("──────────────────────────────────────────────────────────────────────────────────────────");
     for r in &results {
         if r.n <= 5040 {
-            let margin = if r.d_ge2.abs() > 1e-15 { r.off_cot / r.d_ge2 * 100.0 } else { 0.0 };
+            let margin = if r.d_ge2.abs() > 1e-15 {
+                r.off_cot / r.d_ge2 * 100.0
+            } else {
+                0.0
+            };
             println!(
                 "N={:>5}: S_cot={:+.6}  d=1={:+.6}  d≥2={:+.6}  margin={:.1}%",
                 r.n, r.off_cot, r.d1, r.d_ge2, margin
@@ -266,7 +300,11 @@ fn main() {
         let log_n = (r.n as f64).ln();
         println!(
             "N={:>5}: nonCot·lnN={:+8.4}  S_cot·lnN={:+8.4}  vtGv·lnN={:+8.4}  diag·lnN={:+8.4}",
-            r.n, r.noncot * log_n, r.off_cot * log_n, r.vtgv * log_n, r.diag * log_n
+            r.n,
+            r.noncot * log_n,
+            r.off_cot * log_n,
+            r.vtgv * log_n,
+            r.diag * log_n
         );
     }
 
@@ -288,19 +326,40 @@ fn main() {
     // Verdict
     println!();
     println!("═══════════════════════════════════════════════════════════════════════════════");
-    let max_noncot = results.iter().map(|r| r.noncot).fold(f64::NEG_INFINITY, f64::max);
-    let min_scot = results.iter().map(|r| r.off_cot).fold(f64::INFINITY, f64::min);
+    let max_noncot = results
+        .iter()
+        .map(|r| r.noncot)
+        .fold(f64::NEG_INFINITY, f64::max);
+    let min_scot = results
+        .iter()
+        .map(|r| r.off_cot)
+        .fold(f64::INFINITY, f64::min);
 
-    println!("  Gap 1: max nonCot = {:.6}  → {}",
+    println!(
+        "  Gap 1: max nonCot = {:.6}  → {}",
         max_noncot,
-        if all_noncot_lt1 { "✅ nonCot < 1 for ALL N!" } else { "⚠️  nonCot ≥ 1 at some N" });
-    println!("  Gap 2: min S_cot  = {:.6}  → {}",
+        if all_noncot_lt1 {
+            "✅ nonCot < 1 for ALL N!"
+        } else {
+            "⚠️  nonCot ≥ 1 at some N"
+        }
+    );
+    println!(
+        "  Gap 2: min S_cot  = {:.6}  → {}",
         min_scot,
-        if all_scot_pos { "✅ S_cot > 0 for ALL N!" } else { "⚠️  S_cot ≤ 0 at some N" });
+        if all_scot_pos {
+            "✅ S_cot > 0 for ALL N!"
+        } else {
+            "⚠️  S_cot ≤ 0 at some N"
+        }
+    );
 
     if all_noncot_lt1 && all_scot_pos {
         println!();
-        println!("  🏆 BOTH GAPS HOLD for all tested N ≤ {}!", results.last().unwrap().n);
+        println!(
+            "  🏆 BOTH GAPS HOLD for all tested N ≤ {}!",
+            results.last().unwrap().n
+        );
         println!("  The wall has handholds. The top is in sight! 🧗");
     } else if all_scot_pos {
         println!();

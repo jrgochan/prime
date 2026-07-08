@@ -11,11 +11,11 @@
 //!
 //! Created: May 30, 2026 — The Scaling Law Hunt
 
+use nalgebra::{DMatrix, DVector};
+use rayon::prelude::*;
 use std::path::Path;
 use std::sync::Arc;
 use std::time::Instant;
-use nalgebra::{DMatrix, DVector};
-use rayon::prelude::*;
 
 pub fn run(h5_dir: &str, max_n: usize) {
     eprintln!();
@@ -38,16 +38,20 @@ pub fn run(h5_dir: &str, max_n: usize) {
             let name = e.file_name();
             let name = name.to_string_lossy().to_string();
             let n: usize = name
-                .strip_prefix("gram_N").unwrap()
-                .strip_suffix(".h5").unwrap()
-                .parse().unwrap_or(0);
+                .strip_prefix("gram_N")
+                .unwrap()
+                .strip_suffix(".h5")
+                .unwrap()
+                .parse()
+                .unwrap_or(0);
             (n, e.path())
         })
         .collect();
     files.sort_by_key(|(n, _)| *n);
 
     // Pick the smallest file >= max_n, or the largest available
-    let (file_n, file_path) = files.iter()
+    let (file_n, file_path) = files
+        .iter()
         .find(|(n, _)| *n >= max_n)
         .or_else(|| files.last())
         .expect("No HPDF files found!");
@@ -63,11 +67,17 @@ pub fn run(h5_dir: &str, max_n: usize) {
     let t_load = Instant::now();
 
     let h5_file = hdf5::File::open(file_path).expect("Failed to open H5 file");
-    let file_dim: u64 = h5_file.attr("dim").expect("no dim attr").read_scalar().expect("read dim");
+    let file_dim: u64 = h5_file
+        .attr("dim")
+        .expect("no dim attr")
+        .read_scalar()
+        .expect("read dim");
     let file_dim = file_dim as usize;
 
     // Read upper triangle into Arc for sharing across threads
-    let ds = h5_file.dataset("gram/upper_triangle").expect("No upper_triangle");
+    let ds = h5_file
+        .dataset("gram/upper_triangle")
+        .expect("No upper_triangle");
     let tri_arr: ndarray::Array1<f64> = ds.read_1d().expect("Failed to read triangle");
     let tri: Arc<Vec<f64>> = Arc::new(tri_arr.to_vec());
 
@@ -77,8 +87,11 @@ pub fn run(h5_dir: &str, max_n: usize) {
     let b_full: Arc<Vec<f64>> = Arc::new(b_arr.to_vec());
 
     let load_time = t_load.elapsed().as_secs_f64();
-    eprintln!("Loaded: dim={file_dim}, triangle={} entries, b={} entries ({load_time:.1}s)",
-        tri.len(), b_full.len());
+    eprintln!(
+        "Loaded: dim={file_dim}, triangle={} entries, b={} entries ({load_time:.1}s)",
+        tri.len(),
+        b_full.len()
+    );
 
     // ═══ Precompute number theory ═══
     let t_nt = Instant::now();
@@ -86,7 +99,9 @@ pub fn run(h5_dir: &str, max_n: usize) {
     // Sieve of Eratosthenes
     let mut is_prime = vec![true; effective_max + 1];
     is_prime[0] = false;
-    if effective_max >= 1 { is_prime[1] = false; }
+    if effective_max >= 1 {
+        is_prime[1] = false;
+    }
     for i in 2..=effective_max {
         if is_prime[i] {
             let mut j = i * i;
@@ -159,21 +174,26 @@ pub fn run(h5_dir: &str, max_n: usize) {
                     let v = chol.solve(&b_sub);
                     1.0 - b_sub.dot(&v)
                 }
-                None => {
-                    match g_sub.lu().solve(&b_sub) {
-                        Some(v) => 1.0 - b_sub.dot(&v),
-                        None => f64::NAN,
-                    }
-                }
+                None => match g_sub.lu().solve(&b_sub) {
+                    Some(v) => 1.0 - b_sub.dot(&v),
+                    None => f64::NAN,
+                },
             };
 
-            ScalingResult { n, d2, ln_n: (n as f64).ln() }
+            ScalingResult {
+                n,
+                d2,
+                ln_n: (n as f64).ln(),
+            }
         })
         .collect();
 
     let sweep_time = t_sweep.elapsed().as_secs_f64();
     let rate = results.len() as f64 / sweep_time;
-    eprintln!("Done: {} values in {sweep_time:.1}s ({rate:.0} N/s)", results.len());
+    eprintln!(
+        "Done: {} values in {sweep_time:.1}s ({rate:.0} N/s)",
+        results.len()
+    );
     eprintln!();
 
     // ═══ Output ═══
@@ -190,9 +210,13 @@ pub fn run(h5_dir: &str, max_n: usize) {
         let p = if is_prime[n] { 1 } else { 0 };
         let h = if is_hcn[n] { 1 } else { 0 };
         let t = tau[n];
-        let class = if is_hcn[n] { "HCN" }
-            else if is_prime[n] { "prime" }
-            else { "comp" };
+        let class = if is_hcn[n] {
+            "HCN"
+        } else if is_prime[n] {
+            "prime"
+        } else {
+            "comp"
+        };
 
         println!("{n}\t{d2:.12e}\t{ln_n:.6}\t{d2_ln:.10}\t{d2_ln2:.10}\t{p}\t{h}\t{t}\t{class}");
     }

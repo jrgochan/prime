@@ -15,8 +15,8 @@ pub struct GenerationResult {
     pub abs_energy: f64,
     pub count: usize,
     pub partial_sum: f64,
-    pub hr_predicted: f64,    // Hardy-Ramanujan predicted |E_ω|
-    pub mass_ratio: f64,      // |E_ω| / |E_1|
+    pub hr_predicted: f64, // Hardy-Ramanujan predicted |E_ω|
+    pub mass_ratio: f64,   // |E_ω| / |E_1|
 }
 
 /// Full generation scan across ω-classes.
@@ -24,9 +24,9 @@ pub struct GenerationResult {
 pub struct GenerationScan {
     pub generations: Vec<GenerationResult>,
     pub total_energy: f64,
-    pub hr_amplitude: f64,    // Fitted A in |E_ω| = A·λ^(ω-1)/(ω-1)!
+    pub hr_amplitude: f64, // Fitted A in |E_ω| = A·λ^(ω-1)/(ω-1)!
     pub hr_r_squared: f64,
-    pub lambda: f64,          // ln(ln(N))
+    pub lambda: f64, // ln(ln(N))
 }
 
 impl GenerationScan {
@@ -35,7 +35,8 @@ impl GenerationScan {
         let omega_table = arith::small_omega_table(n_max);
         let lambda = (n_max as f64).ln().ln();
 
-        let max_omega = coeffs.iter()
+        let max_omega = coeffs
+            .iter()
             .map(|(n, _)| omega_table[*n] as usize)
             .max()
             .unwrap_or(0);
@@ -59,7 +60,9 @@ impl GenerationScan {
         let e1_abs = e_omega.get(1).map(|e| e.abs()).unwrap_or(1.0);
 
         for w in 1..=max_omega {
-            if count_omega[w] == 0 { continue; }
+            if count_omega[w] == 0 {
+                continue;
+            }
             partial += e_omega[w];
             let abs_e = e_omega[w].abs();
             let hr = lambda.powi((w as i32) - 1) / factorial(w - 1) as f64;
@@ -104,20 +107,29 @@ impl GenerationScan {
             let sign = if g.energy > 0.0 { "+" } else { "-" };
             println!(
                 "  │ {} │ {}{:11.6} │ {:10.6} │ {:6} │ {:12.6} │ {:>8} │",
-                g.omega, sign, g.energy.abs(), g.abs_energy, g.count,
-                g.mass_ratio, gen_name
+                g.omega,
+                sign,
+                g.energy.abs(),
+                g.abs_energy,
+                g.count,
+                g.mass_ratio,
+                gen_name
             );
         }
         println!("  └───┴──────────────┴────────────┴────────┴──────────────┴──────────┘");
         println!();
-        println!("  Hardy-Ramanujan fit: A = {:.4}, R² = {:.6}, λ = ln(ln N) = {:.4}",
-                 self.hr_amplitude, self.hr_r_squared, self.lambda);
+        println!(
+            "  Hardy-Ramanujan fit: A = {:.4}, R² = {:.6}, λ = ln(ln N) = {:.4}",
+            self.hr_amplitude, self.hr_r_squared, self.lambda
+        );
         println!("  Total energy E = bᵀa* = {:.10}", self.total_energy);
     }
 }
 
 fn fit_hr_amplitude(gens: &[GenerationResult], lambda: f64) -> (f64, f64) {
-    if gens.is_empty() { return (0.0, 0.0); }
+    if gens.is_empty() {
+        return (0.0, 0.0);
+    }
 
     let mut num = 0.0;
     let mut den = 0.0;
@@ -135,12 +147,20 @@ fn fit_hr_amplitude(gens: &[GenerationResult], lambda: f64) -> (f64, f64) {
     // R²
     let mean = magnitudes.iter().sum::<f64>() / magnitudes.len() as f64;
     let ss_tot: f64 = magnitudes.iter().map(|m| (m - mean).powi(2)).sum();
-    let ss_res: f64 = gens.iter().enumerate().map(|(i, g)| {
-        let w = g.omega as i32;
-        let hr = a * lambda.powi(w - 1) / factorial((w - 1) as usize) as f64;
-        (magnitudes[i] - hr).powi(2)
-    }).sum();
-    let r2 = if ss_tot > 1e-30 { 1.0 - ss_res / ss_tot } else { 0.0 };
+    let ss_res: f64 = gens
+        .iter()
+        .enumerate()
+        .map(|(i, g)| {
+            let w = g.omega as i32;
+            let hr = a * lambda.powi(w - 1) / factorial((w - 1) as usize) as f64;
+            (magnitudes[i] - hr).powi(2)
+        })
+        .sum();
+    let r2 = if ss_tot > 1e-30 {
+        1.0 - ss_res / ss_tot
+    } else {
+        0.0
+    };
 
     (a, r2)
 }

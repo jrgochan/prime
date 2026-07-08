@@ -27,7 +27,7 @@ use serde::Serialize;
 
 #[derive(Debug, Clone, Serialize)]
 pub struct SshProbeResult {
-    pub key_type: String,  // "RSA-64", "RSA-2048", "ECDSA-P256", etc.
+    pub key_type: String, // "RSA-64", "RSA-2048", "ECDSA-P256", etc.
     pub key_bits: u32,
     /// Full probe results for tractable RSA keys
     pub class_result: Option<ClassResult>,
@@ -55,8 +55,8 @@ pub struct LargeVasyuninEntry {
     pub m: u64,
     pub n_mod_m: u64,
     pub v_abs: f64,
-    pub is_factor: bool,  // true if m divides N (which it won't for large primes)
-    pub is_small_factor_of_p: bool,  // true if m divides p or q
+    pub is_factor: bool, // true if m divides N (which it won't for large primes)
+    pub is_small_factor_of_p: bool, // true if m divides p or q
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -84,17 +84,17 @@ pub struct ScalarVasyuninEntry {
 // ═══════════════════════════════════════════════════════════════
 
 /// Run all applicable probes against the SSH key suite.
-pub fn run_ssh_probes(
-    key_set: &SshKeySet,
-    cache: &GramCache,
-) -> Vec<SshProbeResult> {
+pub fn run_ssh_probes(key_set: &SshKeySet, cache: &GramCache) -> Vec<SshProbeResult> {
     let mut results = Vec::new();
 
     // ── Phase 1: Tractable RSA keys (full H1–H6 probes) ──
     if !key_set.tractable_semiprimes.is_empty() {
         println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
         println!("  SSH RSA KEYS — FULL SPECTRAL ANALYSIS (tractable)");
-        println!("  {} keys with N fitting in u64", key_set.tractable_semiprimes.len());
+        println!(
+            "  {} keys with N fitting in u64",
+            key_set.tractable_semiprimes.len()
+        );
         println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
 
         let t0 = std::time::Instant::now();
@@ -130,7 +130,10 @@ pub fn run_ssh_probes(
         for key in keys {
             let bits = key.bits;
             // Check if we already have a result for this bit width
-            if !results.iter().any(|r: &SshProbeResult| r.key_type == format!("RSA-{}", bits)) {
+            if !results
+                .iter()
+                .any(|r: &SshProbeResult| r.key_type == format!("RSA-{}", bits))
+            {
                 results.push(SshProbeResult {
                     key_type: format!("RSA-{}", bits),
                     key_bits: bits,
@@ -156,8 +159,12 @@ pub fn run_ssh_probes(
 
     // ── Phase 2: Large RSA keys (mod-reduced Vasyunin) ──
     for rsa_key in &key_set.rsa_keys {
-        if rsa_key.semiprime.is_some() { continue; } // Already handled above
-        if rsa_key.modulus_bytes.is_empty() { continue; }
+        if rsa_key.semiprime.is_some() {
+            continue;
+        } // Already handled above
+        if rsa_key.modulus_bytes.is_empty() {
+            continue;
+        }
 
         println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
         println!("  SSH RSA-{} — LARGE KEY ANALYSIS", rsa_key.bits);
@@ -248,10 +255,21 @@ fn probe_large_rsa(rsa_key: &RsaKeyInfo) -> LargeKeyVasyuninResult {
     // Report top-10 smallest V-values (potential factor signals)
     println!("    Top-10 smallest |V(m, N mod m)| (potential factor signals):");
     for (i, entry) in vasyunin_entries.iter().take(10).enumerate() {
-        let flag = if entry.is_factor { " ← DIVISOR" }
-            else if entry.is_small_factor_of_p { " ← DIVIDES p or q" }
-            else { "" };
-        println!("      #{}: m={:6} |V|={:.6e} (N mod m = {}){}", i+1, entry.m, entry.v_abs, entry.n_mod_m, flag);
+        let flag = if entry.is_factor {
+            " ← DIVISOR"
+        } else if entry.is_small_factor_of_p {
+            " ← DIVIDES p or q"
+        } else {
+            ""
+        };
+        println!(
+            "      #{}: m={:6} |V|={:.6e} (N mod m = {}){}",
+            i + 1,
+            entry.m,
+            entry.v_abs,
+            entry.n_mod_m,
+            flag
+        );
     }
 
     // Check if factor-related m values cluster near zero.
@@ -266,35 +284,45 @@ fn probe_large_rsa(rsa_key: &RsaKeyInfo) -> LargeKeyVasyuninResult {
     let median_nf = if !non_factor_v_values.is_empty() {
         non_factor_v_values.sort_by(|a, b| a.partial_cmp(b).unwrap());
         non_factor_v_values[non_factor_v_values.len() / 2]
-    } else { 0.0 };
+    } else {
+        0.0
+    };
 
     // Count nontrivial factor-related m (divide p or q but NOT N).
     // For prime p,q > scan_limit, this should always be 0.
-    let nontrivial_count = vasyunin_entries.iter()
+    let nontrivial_count = vasyunin_entries
+        .iter()
         .filter(|e| !e.is_factor && e.is_small_factor_of_p)
         .count();
 
-    let trivial_divisor_count = vasyunin_entries.iter()
-        .filter(|e| e.is_factor)
-        .count();
+    let trivial_divisor_count = vasyunin_entries.iter().filter(|e| e.is_factor).count();
 
     // A signal requires nontrivial factor leakage — trivial divisors don't count
     let factor_detected = nontrivial_count >= 3;
 
     let signal_desc = if factor_detected {
-        format!("SIGNAL: {} nontrivial factor-related m values detected! \
-                 This would indicate true factor leakage (verify carefully).", nontrivial_count)
+        format!(
+            "SIGNAL: {} nontrivial factor-related m values detected! \
+                 This would indicate true factor leakage (verify carefully).",
+            nontrivial_count
+        )
     } else {
-        format!("NULL: {} trivial divisors (V(m,0)=0 by construction), \
+        format!(
+            "NULL: {} trivial divisors (V(m,0)=0 by construction), \
                  {} nontrivial factor leaks (expected 0 for prime p,q > {}). \
                  Median non-factor |V|={:.4e}",
-                trivial_divisor_count, nontrivial_count, scan_limit, median_nf)
+            trivial_divisor_count, nontrivial_count, scan_limit, median_nf
+        )
     };
 
     println!("    {}\n", signal_desc);
 
     let mod_prefix = |hex: &str| -> String {
-        if hex.len() > 32 { format!("{}...", &hex[..32]) } else { hex.to_string() }
+        if hex.len() > 32 {
+            format!("{}...", &hex[..32])
+        } else {
+            hex.to_string()
+        }
     };
 
     // Only keep top-20 for JSON output
@@ -326,8 +354,10 @@ fn probe_ecdsa(ec_key: &EcdsaKeyInfo) -> EcdsaAnalysisResult {
 
     let hamming_deviation = (props.hamming_ratio - 0.5).abs();
     println!("    Private key scalar properties:");
-    println!("      Hamming weight: {}/{} bits (ratio={:.4}, deviation from 0.5: {:.4})",
-        props.hamming_weight, props.total_bits, props.hamming_ratio, hamming_deviation);
+    println!(
+        "      Hamming weight: {}/{} bits (ratio={:.4}, deviation from 0.5: {:.4})",
+        props.hamming_weight, props.total_bits, props.hamming_ratio, hamming_deviation
+    );
     println!("      Trailing zero bits: {}", props.trailing_zero_bits);
 
     // Vasyunin scan on d mod m
@@ -352,11 +382,23 @@ fn probe_ecdsa(ec_key: &EcdsaKeyInfo) -> EcdsaAnalysisResult {
     let zeros = scalar_vasyunin.iter().filter(|e| e.v_abs < 1e-10).count();
     let near_zeros = scalar_vasyunin.iter().filter(|e| e.v_abs < 1e-6).count();
 
-    println!("\n    Vasyunin scan V(m, d mod m) for m ∈ [2, {}]:", scan_limit);
-    println!("      Exact zeros: {}, near-zeros (<1e-6): {}", zeros, near_zeros);
+    println!(
+        "\n    Vasyunin scan V(m, d mod m) for m ∈ [2, {}]:",
+        scan_limit
+    );
+    println!(
+        "      Exact zeros: {}, near-zeros (<1e-6): {}",
+        zeros, near_zeros
+    );
     println!("      Top-5 smallest |V(m, d mod m)|:");
     for (i, entry) in scalar_vasyunin.iter().take(5).enumerate() {
-        println!("        #{}: m={:5} |V|={:.6e} (d mod m = {})", i+1, entry.m, entry.v_abs, entry.d_mod_m);
+        println!(
+            "        #{}: m={:5} |V|={:.6e} (d mod m = {})",
+            i + 1,
+            entry.m,
+            entry.v_abs,
+            entry.d_mod_m
+        );
     }
 
     // A uniform random scalar will have V(m, 0) = 0 for every m that
@@ -366,12 +408,17 @@ fn probe_ecdsa(ec_key: &EcdsaKeyInfo) -> EcdsaAnalysisResult {
     // deviates far from the expected 0.5 ratio (>0.15).
     let anomaly = zeros > 50 || hamming_deviation > 0.15;
     let description = if anomaly {
-        format!("ANOMALY: {} Vasyunin zeros, Hamming deviation {:.4}. \
-                 Private key scalar shows unexpected arithmetic structure.", zeros, hamming_deviation)
+        format!(
+            "ANOMALY: {} Vasyunin zeros, Hamming deviation {:.4}. \
+                 Private key scalar shows unexpected arithmetic structure.",
+            zeros, hamming_deviation
+        )
     } else {
-        format!("NORMAL: {} zeros, {} near-zeros. Hamming ratio {:.4}. \
+        format!(
+            "NORMAL: {} zeros, {} near-zeros. Hamming ratio {:.4}. \
                  Scalar appears consistent with uniform random selection.",
-                zeros, near_zeros, props.hamming_ratio)
+            zeros, near_zeros, props.hamming_ratio
+        )
     };
     println!("    {}\n", description);
 
@@ -425,12 +472,20 @@ pub fn print_ssh_summary(results: &[SshProbeResult]) {
             } else {
                 println!("∅ Normal scalar distribution");
             }
-            println!("       Hamming ratio={:.4}, Vasyunin zeros={}",
+            println!(
+                "       Hamming ratio={:.4}, Vasyunin zeros={}",
                 ecdsa.scalar_props.hamming_ratio,
-                ecdsa.scalar_vasyunin.iter().filter(|e| e.v_abs < 1e-10).count());
+                ecdsa
+                    .scalar_vasyunin
+                    .iter()
+                    .filter(|e| e.v_abs < 1e-10)
+                    .count()
+            );
         } else if let Some(ref cr) = result.class_result {
-            let h1_signal = !cr.h1_results.is_empty() &&
-                cr.h1_results.iter().map(|r| r.density_ratio).sum::<f64>() / cr.h1_results.len() as f64 > 1.5;
+            let h1_signal = !cr.h1_results.is_empty()
+                && cr.h1_results.iter().map(|r| r.density_ratio).sum::<f64>()
+                    / cr.h1_results.len() as f64
+                    > 1.5;
             if h1_signal {
                 println!("⚡ H1 signal in SSH-derived semiprimes");
             } else {
@@ -445,7 +500,10 @@ pub fn print_ssh_summary(results: &[SshProbeResult]) {
     println!("  ╚═══════════════════════════════════════════════════════════╝");
 
     let any_signal = results.iter().any(|r| {
-        r.large_key_vasyunin.as_ref().map(|v| v.factor_signal_detected).unwrap_or(false)
+        r.large_key_vasyunin
+            .as_ref()
+            .map(|v| v.factor_signal_detected)
+            .unwrap_or(false)
     });
 
     if any_signal {
@@ -466,10 +524,14 @@ pub fn print_ssh_summary(results: &[SshProbeResult]) {
 /// Convert hex string to bytes (public wrapper for cross-module use).
 fn hex_to_bytes_pub(hex: &str) -> Vec<u8> {
     let hex = hex.replace([':', ' '], "");
-    let hex = if hex.len() % 2 == 1 { format!("0{}", hex) } else { hex };
+    let hex = if hex.len() % 2 == 1 {
+        format!("0{}", hex)
+    } else {
+        hex
+    };
     (0..hex.len())
         .step_by(2)
-        .filter_map(|i| u8::from_str_radix(&hex[i..i+2], 16).ok())
+        .filter_map(|i| u8::from_str_radix(&hex[i..i + 2], 16).ok())
         .collect()
 }
 

@@ -13,10 +13,10 @@
 // ╚═══════════════════════════════════════════════════════════════════╝
 
 use cathedral_utils::arith;
+use clap::Parser;
 use rayon::prelude::*;
 use std::f64::consts::PI;
 use std::io::Write;
-use clap::Parser;
 
 const EULER_GAMMA: f64 = 0.5772156649015329;
 
@@ -46,16 +46,16 @@ struct Args {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum ParticleType {
-    Vacuum,       // n=1: μ=+1, ω=0
-    Higgs,        // n=2: the Z₂ parity flipper
-    PrimeQuark,   // p prime, p≥3: confined, μ=-1, ω=1
-    Meson,        // pq (2 distinct primes): μ=+1, ω=2
-    Baryon,       // pqr (3 distinct primes): μ=-1, ω=3
-    Tetraquark,   // pqrs: μ=+1, ω=4
-    Pentaquark,   // 5 distinct primes: μ=-1, ω=5
-    Hexaquark,    // 6 distinct primes: μ=+1, ω=6
-    Exotic(u32),  // ω≥7 squarefree
-    Excluded,     // non-squarefree: μ=0, Pauli exclusion
+    Vacuum,      // n=1: μ=+1, ω=0
+    Higgs,       // n=2: the Z₂ parity flipper
+    PrimeQuark,  // p prime, p≥3: confined, μ=-1, ω=1
+    Meson,       // pq (2 distinct primes): μ=+1, ω=2
+    Baryon,      // pqr (3 distinct primes): μ=-1, ω=3
+    Tetraquark,  // pqrs: μ=+1, ω=4
+    Pentaquark,  // 5 distinct primes: μ=-1, ω=5
+    Hexaquark,   // 6 distinct primes: μ=+1, ω=6
+    Exotic(u32), // ω≥7 squarefree
+    Excluded,    // non-squarefree: μ=0, Pauli exclusion
 }
 
 impl ParticleType {
@@ -107,9 +107,15 @@ impl ParticleType {
 }
 
 fn classify(n: usize, mu: i8, omega: u32) -> ParticleType {
-    if n == 1 { return ParticleType::Vacuum; }
-    if mu == 0 { return ParticleType::Excluded; }
-    if n == 2 { return ParticleType::Higgs; }
+    if n == 1 {
+        return ParticleType::Vacuum;
+    }
+    if mu == 0 {
+        return ParticleType::Excluded;
+    }
+    if n == 2 {
+        return ParticleType::Higgs;
+    }
     match omega {
         1 => ParticleType::PrimeQuark,
         2 => ParticleType::Meson,
@@ -130,7 +136,9 @@ fn vasyunin_const() -> f64 {
 }
 
 fn vasyunin_sum(a: usize, b: usize) -> f64 {
-    if a <= 1 { return 0.0; }
+    if a <= 1 {
+        return 0.0;
+    }
     let af = a as f64;
     let mut s = 0.0;
     for m in 1..a {
@@ -166,7 +174,7 @@ fn gram_entry(j: usize, k: usize) -> f64 {
 
 #[derive(Debug, Clone)]
 struct RowResult {
-    n: usize,          // integer index (1-based)
+    n: usize, // integer index (1-based)
     ptype: ParticleType,
     mu: i8,
     lambda: i8,
@@ -179,12 +187,21 @@ struct RowResult {
 }
 
 impl RowResult {
-    fn total(&self) -> f64 { self.diag + self.bosonic_off + self.fermionic_off }
+    fn total(&self) -> f64 {
+        self.diag + self.bosonic_off + self.fermionic_off
+    }
 }
 
-fn compute_row(j: usize, v: &[f64], dim: usize,
-               big_omega: &[u32], mu: &[i8], lambda: &[i8],
-               small_omega: &[u32], _n_total: usize) -> RowResult {
+fn compute_row(
+    j: usize,
+    v: &[f64],
+    dim: usize,
+    big_omega: &[u32],
+    mu: &[i8],
+    lambda: &[i8],
+    small_omega: &[u32],
+    _n_total: usize,
+) -> RowResult {
     let vj = v[j - 1];
     let mut diag = 0.0f64;
     let mut bosonic_off = 0.0f64;
@@ -236,7 +253,9 @@ struct TypeStats {
 }
 
 impl TypeStats {
-    fn total(&self) -> f64 { self.diag + self.bosonic + self.fermionic }
+    fn total(&self) -> f64 {
+        self.diag + self.bosonic + self.fermionic
+    }
 }
 
 fn aggregate(rows: &[RowResult]) -> Vec<TypeStats> {
@@ -244,8 +263,12 @@ fn aggregate(rows: &[RowResult]) -> Vec<TypeStats> {
     for r in rows {
         let label = r.ptype.label();
         let entry = map.entry(label.clone()).or_insert(TypeStats {
-            label, order: r.ptype.order(), count: 0,
-            diag: 0.0, bosonic: 0.0, fermionic: 0.0,
+            label,
+            order: r.ptype.order(),
+            count: 0,
+            diag: 0.0,
+            bosonic: 0.0,
+            fermionic: 0.0,
         });
         entry.count += 1;
         entry.diag += r.diag;
@@ -264,12 +287,24 @@ fn aggregate(rows: &[RowResult]) -> Vec<TypeStats> {
 fn print_census(n: usize, stats: &[TypeStats], vtgv: f64) {
     let ln_n = (n as f64).ln();
     println!();
-    println!("╔══════════════════════════════════════════════════════════════════════════════════╗");
-    println!("║  PARTICLE ZOO CENSUS   N = {:>6}   dim = {:>6}                                ║", n, n - 1);
-    println!("╠══════════════════════════════════════════════════════════════════════════════════╣");
-    println!("║ {:<14} {:>6} {:>12} {:>12} {:>12} {:>12} {:>8} ║",
-        "Type", "Count", "Diagonal", "Bosonic", "Fermionic", "Total", "Frac%");
-    println!("╠══════════════════════════════════════════════════════════════════════════════════╣");
+    println!(
+        "╔══════════════════════════════════════════════════════════════════════════════════╗"
+    );
+    println!(
+        "║  PARTICLE ZOO CENSUS   N = {:>6}   dim = {:>6}                                ║",
+        n,
+        n - 1
+    );
+    println!(
+        "╠══════════════════════════════════════════════════════════════════════════════════╣"
+    );
+    println!(
+        "║ {:<14} {:>6} {:>12} {:>12} {:>12} {:>12} {:>8} ║",
+        "Type", "Count", "Diagonal", "Bosonic", "Fermionic", "Total", "Frac%"
+    );
+    println!(
+        "╠══════════════════════════════════════════════════════════════════════════════════╣"
+    );
 
     let mut sum_count = 0usize;
     let mut sum_d = 0.0f64;
@@ -277,55 +312,118 @@ fn print_census(n: usize, stats: &[TypeStats], vtgv: f64) {
     let mut sum_f = 0.0f64;
 
     for s in stats {
-        let frac = if vtgv.abs() > 1e-15 { s.total() / vtgv * 100.0 } else { 0.0 };
-        println!("║ {:<14} {:>6} {:>+12.4} {:>+12.4} {:>+12.4} {:>+12.4} {:>+7.1}% ║",
-            s.label, s.count, s.diag, s.bosonic, s.fermionic, s.total(), frac);
+        let frac = if vtgv.abs() > 1e-15 {
+            s.total() / vtgv * 100.0
+        } else {
+            0.0
+        };
+        println!(
+            "║ {:<14} {:>6} {:>+12.4} {:>+12.4} {:>+12.4} {:>+12.4} {:>+7.1}% ║",
+            s.label,
+            s.count,
+            s.diag,
+            s.bosonic,
+            s.fermionic,
+            s.total(),
+            frac
+        );
         sum_count += s.count;
         sum_d += s.diag;
         sum_b += s.bosonic;
         sum_f += s.fermionic;
     }
 
-    println!("╠══════════════════════════════════════════════════════════════════════════════════╣");
-    println!("║ {:<14} {:>6} {:>+12.4} {:>+12.4} {:>+12.4} {:>+12.4} {:>7}  ║",
-        "TOTAL", sum_count, sum_d, sum_b, sum_f, vtgv, "100.0%");
-    println!("╠══════════════════════════════════════════════════════════════════════════════════╣");
-    println!("║  vᵀGv      = {:>+16.10}                                               ║", vtgv);
-    println!("║  1 - vᵀGv  = {:>+16.10}                                               ║", 1.0 - vtgv);
-    println!("║  gap·ln(N) = {:>16.10}   (stable if K/lnN form)                  ║", (1.0 - vtgv) * ln_n);
+    println!(
+        "╠══════════════════════════════════════════════════════════════════════════════════╣"
+    );
+    println!(
+        "║ {:<14} {:>6} {:>+12.4} {:>+12.4} {:>+12.4} {:>+12.4} {:>7}  ║",
+        "TOTAL", sum_count, sum_d, sum_b, sum_f, vtgv, "100.0%"
+    );
+    println!(
+        "╠══════════════════════════════════════════════════════════════════════════════════╣"
+    );
+    println!(
+        "║  vᵀGv      = {:>+16.10}                                               ║",
+        vtgv
+    );
+    println!(
+        "║  1 - vᵀGv  = {:>+16.10}                                               ║",
+        1.0 - vtgv
+    );
+    println!(
+        "║  gap·ln(N) = {:>16.10}   (stable if K/lnN form)                  ║",
+        (1.0 - vtgv) * ln_n
+    );
 
     // SUSY cancellation
     let cancel = if sum_b.abs() > 1e-15 {
         (1.0 - (sum_b + sum_f).abs() / sum_b.abs().max(sum_f.abs())) * 100.0
-    } else { 0.0 };
-    println!("║  B_off     = {:>+16.10}                                               ║", sum_b);
-    println!("║  F_off     = {:>+16.10}                                               ║", sum_f);
-    println!("║  |B+F|/max = {:>16.10}   ({:.2}% SUSY cancellation)            ║",
-        (sum_b + sum_f).abs() / sum_b.abs().max(sum_f.abs()), cancel);
+    } else {
+        0.0
+    };
+    println!(
+        "║  B_off     = {:>+16.10}                                               ║",
+        sum_b
+    );
+    println!(
+        "║  F_off     = {:>+16.10}                                               ║",
+        sum_f
+    );
+    println!(
+        "║  |B+F|/max = {:>16.10}   ({:.2}% SUSY cancellation)            ║",
+        (sum_b + sum_f).abs() / sum_b.abs().max(sum_f.abs()),
+        cancel
+    );
 
     if vtgv < 1.0 {
-        println!("║  STATUS: ✅ vᵀGv < 1  (Nyman-Beurling margin = {:.6})                      ║", 1.0 - vtgv);
+        println!(
+            "║  STATUS: ✅ vᵀGv < 1  (Nyman-Beurling margin = {:.6})                      ║",
+            1.0 - vtgv
+        );
     } else {
-        println!("║  STATUS: ⚠️  vᵀGv ≥ 1  (margin = {:.6})                                    ║", 1.0 - vtgv);
+        println!(
+            "║  STATUS: ⚠️  vᵀGv ≥ 1  (margin = {:.6})                                    ║",
+            1.0 - vtgv
+        );
     }
-    println!("╚══════════════════════════════════════════════════════════════════════════════════╝");
+    println!(
+        "╚══════════════════════════════════════════════════════════════════════════════════╝"
+    );
 }
 
 fn write_tsv(rows: &[RowResult], n: usize, path: &str) -> std::io::Result<()> {
     let mut f = std::fs::File::create(path)?;
     writeln!(f, "# Particle Zoo Census N={}", n)?;
-    writeln!(f, "n\tmu\tlambda\tOmega\tomega\ttype\tv_n\tdiag\tbos_off\tfer_off\ttotal")?;
+    writeln!(
+        f,
+        "n\tmu\tlambda\tOmega\tomega\ttype\tv_n\tdiag\tbos_off\tfer_off\ttotal"
+    )?;
     for r in rows {
-        writeln!(f, "{}\t{}\t{}\t{}\t{}\t{}\t{:.10}\t{:.10}\t{:.10}\t{:.10}\t{:.10}",
-            r.n, r.mu, r.lambda, r.big_omega, r.small_omega,
-            r.ptype.label(), r.witness_val,
-            r.diag, r.bosonic_off, r.fermionic_off, r.total())?;
+        writeln!(
+            f,
+            "{}\t{}\t{}\t{}\t{}\t{}\t{:.10}\t{:.10}\t{:.10}\t{:.10}\t{:.10}",
+            r.n,
+            r.mu,
+            r.lambda,
+            r.big_omega,
+            r.small_omega,
+            r.ptype.label(),
+            r.witness_val,
+            r.diag,
+            r.bosonic_off,
+            r.fermionic_off,
+            r.total()
+        )?;
     }
     Ok(())
 }
 
 fn write_summary_tsv(stats: &[TypeStats], n: usize, vtgv: f64, path: &str) -> std::io::Result<()> {
-    let mut f = std::fs::OpenOptions::new().create(true).append(true).open(path)?;
+    let mut f = std::fs::OpenOptions::new()
+        .create(true)
+        .append(true)
+        .open(path)?;
     // Write header if file is new/empty
     let metadata = std::fs::metadata(path)?;
     if metadata.len() < 10 {
@@ -333,7 +431,11 @@ fn write_summary_tsv(stats: &[TypeStats], n: usize, vtgv: f64, path: &str) -> st
     }
 
     let get = |label: &str| -> f64 {
-        stats.iter().find(|s| s.label == label).map(|s| s.total()).unwrap_or(0.0)
+        stats
+            .iter()
+            .find(|s| s.label == label)
+            .map(|s| s.total())
+            .unwrap_or(0.0)
     };
 
     let ln_n = (n as f64).ln();
@@ -362,8 +464,8 @@ fn main() {
 
     // HC (highly composite) subsequence for scaling studies
     let hc_seq: Vec<usize> = vec![
-        6, 12, 24, 36, 48, 60, 120, 180, 240, 360, 720, 840,
-        1260, 1680, 2520, 5040, 7560, 10080, 15120, 20160, 27720,
+        6, 12, 24, 36, 48, 60, 120, 180, 240, 360, 720, 840, 1260, 1680, 2520, 5040, 7560, 10080,
+        15120, 20160, 27720,
     ];
 
     let ns: Vec<usize> = if args.hc {
@@ -394,13 +496,17 @@ fn main() {
         {
             let is_prime = arith::sieve_primes(n + 1);
             for p in 2..=n {
-                if !is_prime[p] { continue; }
+                if !is_prime[p] {
+                    continue;
+                }
                 let mut pk = p;
                 while pk <= n {
                     for m in (pk..=n).step_by(pk) {
                         big_omega[m] += 1;
                     }
-                    if pk > n / p { break; }
+                    if pk > n / p {
+                        break;
+                    }
                     pk *= p;
                 }
             }
@@ -408,12 +514,13 @@ fn main() {
 
         // Build witness vector: v(k) = -μ(k) · (1 - ln(k)/ln(N))
         let ln_n = (n as f64).ln();
-        let v: Vec<f64> = (1..n).map(|k| {
-            -(mu[k] as f64) * (1.0 - (k as f64).ln() / ln_n)
-        }).collect();
+        let v: Vec<f64> = (1..n)
+            .map(|k| -(mu[k] as f64) * (1.0 - (k as f64).ln() / ln_n))
+            .collect();
 
         // Parallel row computation
-        let rows: Vec<RowResult> = (1..n).into_par_iter()
+        let rows: Vec<RowResult> = (1..n)
+            .into_par_iter()
             .map(|j| compute_row(j, &v, dim, &big_omega, &mu, &lambda, &omega_small, n))
             .collect();
 

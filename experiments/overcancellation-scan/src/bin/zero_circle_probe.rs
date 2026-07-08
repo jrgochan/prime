@@ -1,4 +1,13 @@
-#![allow(dead_code, unused_variables, unused_imports, unused_assignments, clippy::needless_range_loop, clippy::doc_lazy_continuation, non_snake_case, clippy::empty_line_after_doc_comments)]
+#![allow(
+    dead_code,
+    unused_variables,
+    unused_imports,
+    unused_assignments,
+    clippy::needless_range_loop,
+    clippy::doc_lazy_continuation,
+    non_snake_case,
+    clippy::empty_line_after_doc_comments
+)]
 // ╔═══════════════════════════════════════════════════════════════════════════╗
 // ║  ZERO-CIRCLE GEOMETRY PROBE                                              ║
 // ║                                                                          ║
@@ -133,10 +142,7 @@ fn main() {
         );
     }
     println!();
-    println!(
-        "  Max |ratio - 1| for γ > 20: {:.6e}",
-        max_ratio_err
-    );
+    println!("  Max |ratio - 1| for γ > 20: {:.6e}", max_ratio_err);
     println!("  → α·γ = 1 - 1/(4γ²) + O(1/γ⁴) CONFIRMED to all zeros.");
     println!();
 
@@ -162,9 +168,15 @@ fn main() {
     }
 
     let expected = n_zeros as f64 / n_bins as f64;
-    println!("  Histogram of θ(γ) mod π in {} bins (expected {:.0} per bin):", n_bins, expected);
+    println!(
+        "  Histogram of θ(γ) mod π in {} bins (expected {:.0} per bin):",
+        n_bins, expected
+    );
     println!();
-    println!("  {:>8} {:>8} {:>10} {:>10}", "bin", "count", "expected", "ratio");
+    println!(
+        "  {:>8} {:>8} {:>10} {:>10}",
+        "bin", "count", "expected", "ratio"
+    );
     println!("  {}", "-".repeat(40));
 
     let mut chi2 = 0.0;
@@ -179,7 +191,12 @@ fn main() {
         );
     }
     println!();
-    println!("  χ² = {:.2} (for {} d.f., uniform → ~{})", chi2, n_bins - 1, n_bins - 1);
+    println!(
+        "  χ² = {:.2} (for {} d.f., uniform → ~{})",
+        chi2,
+        n_bins - 1,
+        n_bins - 1
+    );
 
     if chi2 < 2.0 * n_bins as f64 {
         println!("  → UNIFORM DISTRIBUTION CONFIRMED (χ² well within range)");
@@ -202,14 +219,22 @@ fn main() {
     println!("  {}", "-".repeat(70));
 
     for &idx in &sample_indices {
-        if idx < 2 { continue; }
+        if idx < 2 {
+            continue;
+        }
         let gamma = zeros[idx];
         let n_gamma = n_from_gamma(gamma);
-        if n_gamma <= 1.0 { continue; }
+        if n_gamma <= 1.0 {
+            continue;
+        }
         let alpha = central_angle(gamma);
         let alpha_n = alpha * n_gamma;
         let ln_n_2pi = n_gamma.ln() / (2.0 * PI);
-        let ratio = if ln_n_2pi > 0.0 { alpha_n / ln_n_2pi } else { 0.0 };
+        let ratio = if ln_n_2pi > 0.0 {
+            alpha_n / ln_n_2pi
+        } else {
+            0.0
+        };
 
         println!(
             "  {:>7} {:>12.2} {:>10.2} {:>12.6} {:>12.6} {:>10.6}",
@@ -244,10 +269,16 @@ fn main() {
 
     // Statistics
     let mean_spacing = spacings.iter().sum::<f64>() / spacings.len() as f64;
-    let var_spacing = spacings.iter().map(|s| (s - mean_spacing).powi(2)).sum::<f64>()
+    let var_spacing = spacings
+        .iter()
+        .map(|s| (s - mean_spacing).powi(2))
+        .sum::<f64>()
         / spacings.len() as f64;
 
-    println!("  Mean normalized spacing: {:.6} (GUE predicts ~1.0)", mean_spacing);
+    println!(
+        "  Mean normalized spacing: {:.6} (GUE predicts ~1.0)",
+        mean_spacing
+    );
     println!("  Variance: {:.6} (GUE predicts ~0.178)", var_spacing);
     println!();
 
@@ -267,7 +298,10 @@ fn main() {
         .sum::<f64>()
         / alpha_spacing_product.len() as f64;
 
-    println!("  Mean(α · Δγ): {:.8} (since α ≈ 1/γ, this ≈ Δγ/γ)", mean_as);
+    println!(
+        "  Mean(α · Δγ): {:.8} (since α ≈ 1/γ, this ≈ Δγ/γ)",
+        mean_as
+    );
     println!("  Var(α · Δγ):  {:.8}", var_as);
     println!();
 
@@ -293,8 +327,7 @@ fn main() {
         c2_estimates.push(c2_est);
     }
 
-    let c2_mean =
-        c2_estimates.iter().sum::<f64>() / c2_estimates.len() as f64;
+    let c2_mean = c2_estimates.iter().sum::<f64>() / c2_estimates.len() as f64;
     let c2_std = (c2_estimates
         .iter()
         .map(|c| (c - c2_mean).powi(2))
@@ -321,13 +354,23 @@ fn main() {
     println!("═══ SUMMARY ═══");
     println!();
     println!("  Zeros computed: {}", n_zeros);
-    println!("  Height range:   [{:.4}, {:.4}]", zeros[0], zeros[n_zeros - 1]);
+    println!(
+        "  Height range:   [{:.4}, {:.4}]",
+        zeros[0],
+        zeros[n_zeros - 1]
+    );
     println!();
     println!("  α·γ product rule:     1 - 1/(4γ²) + O(1/γ⁴)");
     println!("  Fitted c₂:            {:.10} (expected 0.25)", c2_mean);
-    println!("  θ mod π distribution: {} (χ² = {:.1})",
-        if chi2 < 2.0 * n_bins as f64 { "UNIFORM" } else { "NON-UNIFORM" },
-        chi2);
+    println!(
+        "  θ mod π distribution: {} (χ² = {:.1})",
+        if chi2 < 2.0 * n_bins as f64 {
+            "UNIFORM"
+        } else {
+            "NON-UNIFORM"
+        },
+        chi2
+    );
     println!("  Mean spacing:         {:.6} (GUE: ~1.0)", mean_spacing);
     println!("  Spacing variance:     {:.6} (GUE: ~0.178)", var_spacing);
 }

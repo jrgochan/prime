@@ -368,7 +368,13 @@ impl ResultsWriter {
     }
 
     /// Write the run manifest.
-    pub fn write_manifest(&self, gpu_name: &str, gpu_vram_mb: usize, classes: &[u32], total: usize) {
+    pub fn write_manifest(
+        &self,
+        gpu_name: &str,
+        gpu_vram_mb: usize,
+        classes: &[u32],
+        total: usize,
+    ) {
         let manifest = RunManifest {
             experiment: "spectral-factorization-probe-gpu".to_string(),
             version: "0.4.0".to_string(),
@@ -407,9 +413,17 @@ impl ResultsWriter {
         let path = self.output_dir.join(filename);
         let json = serde_json::to_string_pretty(data).expect("JSON serialization failed");
         fs::write(&path, &json).unwrap_or_else(|e| {
-            eprintln!("  [Results] WARNING: Failed to write {}: {}", path.display(), e);
+            eprintln!(
+                "  [Results] WARNING: Failed to write {}: {}",
+                path.display(),
+                e
+            );
         });
-        eprintln!("  [Results] Wrote {} ({} bytes)", path.display(), json.len());
+        eprintln!(
+            "  [Results] Wrote {} ({} bytes)",
+            path.display(),
+            json.len()
+        );
     }
 }
 
@@ -431,13 +445,21 @@ pub fn compute_analysis(
     {
         let all_h1: Vec<&H1Result> = classes.iter().flat_map(|c| c.h1_results.iter()).collect();
         let ratios: Vec<f64> = all_h1.iter().map(|r| r.density_ratio).collect();
-        let mean_ratio = if ratios.is_empty() { 0.0 } else { ratios.iter().sum::<f64>() / ratios.len() as f64 };
+        let mean_ratio = if ratios.is_empty() {
+            0.0
+        } else {
+            ratios.iter().sum::<f64>() / ratios.len() as f64
+        };
         let above_1: usize = ratios.iter().filter(|&&r| r > 1.0).count();
         let above_10: usize = ratios.iter().filter(|&&r| r > 10.0).count();
 
-        let signal = if mean_ratio > 5.0 { "STRONG" }
-            else if mean_ratio > 1.5 { "weak" }
-            else { "null" };
+        let signal = if mean_ratio > 5.0 {
+            "STRONG"
+        } else if mean_ratio > 1.5 {
+            "weak"
+        } else {
+            "null"
+        };
 
         verdicts.push(HypothesisVerdict {
             hypothesis: "H1".to_string(),
@@ -445,9 +467,16 @@ pub fn compute_analysis(
             signal_strength: signal.to_string(),
             verdict: format!(
                 "Mean density ratio = {:.3}. {}/{} samples > 1.0, {}/{} > 10.0. {}.",
-                mean_ratio, above_1, ratios.len(), above_10, ratios.len(),
-                if mean_ratio > 1.5 { "Factor lattice shows elevated ground-state density" }
-                else { "No consistent factor signal in ground state" }
+                mean_ratio,
+                above_1,
+                ratios.len(),
+                above_10,
+                ratios.len(),
+                if mean_ratio > 1.5 {
+                    "Factor lattice shows elevated ground-state density"
+                } else {
+                    "No consistent factor signal in ground state"
+                }
             ),
             supporting_stats: serde_json::json!({
                 "mean_ratio": mean_ratio,
@@ -463,16 +492,31 @@ pub fn compute_analysis(
     {
         let all_h2: Vec<&H2Result> = classes.iter().flat_map(|c| c.h2_results.iter()).collect();
         let ratios: Vec<f64> = all_h2.iter().map(|r| r.weight_ratio).collect();
-        let mean = if ratios.is_empty() { 0.0 } else { ratios.iter().sum::<f64>() / ratios.len() as f64 };
-        let percentile_ranks: Vec<f64> = all_h2.iter()
-            .filter_map(|r| r.p_rank.map(|rank| (rank + 1) as f64 / r.total_weights as f64))
+        let mean = if ratios.is_empty() {
+            0.0
+        } else {
+            ratios.iter().sum::<f64>() / ratios.len() as f64
+        };
+        let percentile_ranks: Vec<f64> = all_h2
+            .iter()
+            .filter_map(|r| {
+                r.p_rank
+                    .map(|rank| (rank + 1) as f64 / r.total_weights as f64)
+            })
             .collect();
-        let mean_pct = if percentile_ranks.is_empty() { 0.0 }
-            else { percentile_ranks.iter().sum::<f64>() / percentile_ranks.len() as f64 };
+        let mean_pct = if percentile_ranks.is_empty() {
+            0.0
+        } else {
+            percentile_ranks.iter().sum::<f64>() / percentile_ranks.len() as f64
+        };
 
-        let signal = if mean > 2.0 { "STRONG" }
-            else if mean > 1.1 { "weak" }
-            else { "null" };
+        let signal = if mean > 2.0 {
+            "STRONG"
+        } else if mean > 1.1 {
+            "weak"
+        } else {
+            "null"
+        };
 
         verdicts.push(HypothesisVerdict {
             hypothesis: "H2".to_string(),
@@ -499,9 +543,13 @@ pub fn compute_analysis(
         let total_fp: usize = all_h3.iter().map(|r| r.false_positive_count).sum();
         let total_nf: usize = all_h3.iter().map(|r| r.total_nonfactors).sum();
 
-        let signal = if perfect_count == all_h3.len() && !all_h3.is_empty() { "STRONG" }
-            else if perfect_count as f64 / all_h3.len().max(1) as f64 > 0.9 { "weak" }
-            else { "null" };
+        let signal = if perfect_count == all_h3.len() && !all_h3.is_empty() {
+            "STRONG"
+        } else if perfect_count as f64 / all_h3.len().max(1) as f64 > 0.9 {
+            "weak"
+        } else {
+            "null"
+        };
 
         verdicts.push(HypothesisVerdict {
             hypothesis: "H3".to_string(),
@@ -509,9 +557,15 @@ pub fn compute_analysis(
             signal_strength: signal.to_string(),
             verdict: format!(
                 "Perfect separation in {}/{} samples. Total false positives: {}/{}. {}.",
-                perfect_count, all_h3.len(), total_fp, total_nf,
-                if perfect_count == all_h3.len() { "V(p,N)=0 is an exact identity for divisors, not a statistical signal" }
-                else { "Near-perfect separation with rare edge cases" }
+                perfect_count,
+                all_h3.len(),
+                total_fp,
+                total_nf,
+                if perfect_count == all_h3.len() {
+                    "V(p,N)=0 is an exact identity for divisors, not a statistical signal"
+                } else {
+                    "Near-perfect separation with rare edge cases"
+                }
             ),
             supporting_stats: serde_json::json!({
                 "perfect_separation_count": perfect_count,
@@ -526,8 +580,11 @@ pub fn compute_analysis(
     {
         let all_h4: Vec<&H4Result> = classes.iter().flat_map(|c| c.h4_results.iter()).collect();
         let sqfree_ratios: Vec<f64> = all_h4.iter().map(|r| r.sqfree_ratio).collect();
-        let mean_sqfree = if sqfree_ratios.is_empty() { 0.0 }
-            else { sqfree_ratios.iter().sum::<f64>() / sqfree_ratios.len() as f64 };
+        let mean_sqfree = if sqfree_ratios.is_empty() {
+            0.0
+        } else {
+            sqfree_ratios.iter().sum::<f64>() / sqfree_ratios.len() as f64
+        };
 
         verdicts.push(HypothesisVerdict {
             hypothesis: "H4".to_string(),
@@ -547,15 +604,26 @@ pub fn compute_analysis(
     // ── H5 Analysis: Composite Anchoring ──
     {
         let all_h5: Vec<&H5Result> = classes.iter().flat_map(|c| c.h5_results.iter()).collect();
-        let pct_ranks: Vec<f64> = all_h5.iter()
-            .filter_map(|r| r.factor_p_rank.map(|rank| (rank + 1) as f64 / r.total_primes as f64))
+        let pct_ranks: Vec<f64> = all_h5
+            .iter()
+            .filter_map(|r| {
+                r.factor_p_rank
+                    .map(|rank| (rank + 1) as f64 / r.total_primes as f64)
+            })
             .collect();
-        let mean_pct = if pct_ranks.is_empty() { 0.0 }
-            else { pct_ranks.iter().sum::<f64>() / pct_ranks.len() as f64 };
+        let mean_pct = if pct_ranks.is_empty() {
+            0.0
+        } else {
+            pct_ranks.iter().sum::<f64>() / pct_ranks.len() as f64
+        };
 
-        let signal = if mean_pct < 0.2 { "STRONG" }
-            else if mean_pct < 0.4 { "weak" }
-            else { "null" };
+        let signal = if mean_pct < 0.2 {
+            "STRONG"
+        } else if mean_pct < 0.4 {
+            "weak"
+        } else {
+            "null"
+        };
 
         verdicts.push(HypothesisVerdict {
             hypothesis: "H5".to_string(),
@@ -564,9 +632,13 @@ pub fn compute_analysis(
             verdict: format!(
                 "Factor p at mean percentile rank {:.1}% (low = strongly avoided). {}.",
                 mean_pct * 100.0,
-                if mean_pct > 0.8 { "Factor is among the LEAST avoided — counter-signal" }
-                else if mean_pct > 0.5 { "No special avoidance pattern" }
-                else { "Factor shows avoidance in ground state" }
+                if mean_pct > 0.8 {
+                    "Factor is among the LEAST avoided — counter-signal"
+                } else if mean_pct > 0.5 {
+                    "No special avoidance pattern"
+                } else {
+                    "Factor shows avoidance in ground state"
+                }
             ),
             supporting_stats: serde_json::json!({
                 "mean_percentile_rank": mean_pct,
@@ -578,15 +650,26 @@ pub fn compute_analysis(
     // ── H6 Analysis: Quadratic Form ──
     {
         let all_h6: Vec<&H6Result> = classes.iter().flat_map(|c| c.h6_results.iter()).collect();
-        let pct_ranks: Vec<f64> = all_h6.iter()
-            .filter_map(|r| r.factor_p_rank.map(|rank| (rank + 1) as f64 / r.total_primes as f64))
+        let pct_ranks: Vec<f64> = all_h6
+            .iter()
+            .filter_map(|r| {
+                r.factor_p_rank
+                    .map(|rank| (rank + 1) as f64 / r.total_primes as f64)
+            })
             .collect();
-        let mean_pct = if pct_ranks.is_empty() { 0.0 }
-            else { pct_ranks.iter().sum::<f64>() / pct_ranks.len() as f64 };
+        let mean_pct = if pct_ranks.is_empty() {
+            0.0
+        } else {
+            pct_ranks.iter().sum::<f64>() / pct_ranks.len() as f64
+        };
 
-        let signal = if mean_pct < 0.2 { "STRONG" }
-            else if mean_pct < 0.4 { "weak" }
-            else { "null" };
+        let signal = if mean_pct < 0.2 {
+            "STRONG"
+        } else if mean_pct < 0.4 {
+            "weak"
+        } else {
+            "null"
+        };
 
         verdicts.push(HypothesisVerdict {
             hypothesis: "H6".to_string(),
@@ -595,8 +678,11 @@ pub fn compute_analysis(
             verdict: format!(
                 "Factor p at mean |Δd²| percentile rank {:.1}%. {}.",
                 mean_pct * 100.0,
-                if mean_pct < 0.4 { "Factor masking produces above-median d² perturbation" }
-                else { "No special d² perturbation from factor masking" }
+                if mean_pct < 0.4 {
+                    "Factor masking produces above-median d² perturbation"
+                } else {
+                    "No special d² perturbation from factor masking"
+                }
             ),
             supporting_stats: serde_json::json!({
                 "mean_percentile_rank": mean_pct,
@@ -609,11 +695,17 @@ pub fn compute_analysis(
     {
         let all_h7: Vec<&H7Result> = classes.iter().flat_map(|c| c.h7_results.iter()).collect();
         let ratios: Vec<f64> = all_h7.iter().map(|r| r.kappa_ratio).collect();
-        let mean_ratio = if ratios.is_empty() { 1.0 }
-            else { ratios.iter().sum::<f64>() / ratios.len() as f64 };
+        let mean_ratio = if ratios.is_empty() {
+            1.0
+        } else {
+            ratios.iter().sum::<f64>() / ratios.len() as f64
+        };
 
-        let signal = if (mean_ratio - 1.0).abs() > 0.5 { "weak" }
-            else { "null" };
+        let signal = if (mean_ratio - 1.0).abs() > 0.5 {
+            "weak"
+        } else {
+            "null"
+        };
 
         verdicts.push(HypothesisVerdict {
             hypothesis: "H7".to_string(),
@@ -636,11 +728,17 @@ pub fn compute_analysis(
     {
         let all_h8: Vec<&H8Result> = classes.iter().flat_map(|c| c.h8_results.iter()).collect();
         let ratios: Vec<f64> = all_h8.iter().map(|r| r.stutter_ratio).collect();
-        let mean_ratio = if ratios.is_empty() { 1.0 }
-            else { ratios.iter().sum::<f64>() / ratios.len() as f64 };
+        let mean_ratio = if ratios.is_empty() {
+            1.0
+        } else {
+            ratios.iter().sum::<f64>() / ratios.len() as f64
+        };
 
-        let signal = if (mean_ratio - 1.0).abs() > 1.0 { "weak" }
-            else { "null" };
+        let signal = if (mean_ratio - 1.0).abs() > 1.0 {
+            "weak"
+        } else {
+            "null"
+        };
 
         verdicts.push(HypothesisVerdict {
             hypothesis: "H8".to_string(),
@@ -649,8 +747,11 @@ pub fn compute_analysis(
             verdict: format!(
                 "Mean stutter ratio = {:.4}. {}.",
                 mean_ratio,
-                if (mean_ratio - 1.0).abs() > 1.0 { "Interlacing shows anomalous step sizes near factors" }
-                else { "No interlacing anomaly — Cauchy universality holds across factor boundaries" }
+                if (mean_ratio - 1.0).abs() > 1.0 {
+                    "Interlacing shows anomalous step sizes near factors"
+                } else {
+                    "No interlacing anomaly — Cauchy universality holds across factor boundaries"
+                }
             ),
             supporting_stats: serde_json::json!({
                 "mean_stutter_ratio": mean_ratio,
@@ -663,11 +764,13 @@ pub fn compute_analysis(
     {
         let all_h9: Vec<&H9Result> = classes.iter().flat_map(|c| c.h9_results.iter()).collect();
         let deviations: Vec<f64> = all_h9.iter().map(|r| r.alpha_deviation).collect();
-        let mean_dev = if deviations.is_empty() { 0.0 }
-            else { deviations.iter().sum::<f64>() / deviations.len() as f64 };
+        let mean_dev = if deviations.is_empty() {
+            0.0
+        } else {
+            deviations.iter().sum::<f64>() / deviations.len() as f64
+        };
 
-        let signal = if mean_dev > 0.10 { "weak" }
-            else { "null" };
+        let signal = if mean_dev > 0.10 { "weak" } else { "null" };
 
         verdicts.push(HypothesisVerdict {
             hypothesis: "H9".to_string(),
@@ -690,11 +793,17 @@ pub fn compute_analysis(
     {
         let all_h10: Vec<&H10Result> = classes.iter().flat_map(|c| c.h10_results.iter()).collect();
         let shifts: Vec<f64> = all_h10.iter().filter_map(|r| r.crossover_shift).collect();
-        let mean_shift = if shifts.is_empty() { 1.0 }
-            else { shifts.iter().sum::<f64>() / shifts.len() as f64 };
+        let mean_shift = if shifts.is_empty() {
+            1.0
+        } else {
+            shifts.iter().sum::<f64>() / shifts.len() as f64
+        };
 
-        let signal = if !shifts.is_empty() && (mean_shift - 1.0).abs() > 0.3 { "weak" }
-            else { "null" };
+        let signal = if !shifts.is_empty() && (mean_shift - 1.0).abs() > 0.3 {
+            "weak"
+        } else {
+            "null"
+        };
 
         verdicts.push(HypothesisVerdict {
             hypothesis: "H10".to_string(),
@@ -718,17 +827,31 @@ pub fn compute_analysis(
     {
         let all_h11: Vec<&H11Result> = classes.iter().flat_map(|c| c.h11_results.iter()).collect();
         let ratios: Vec<f64> = all_h11.iter().map(|r| r.sensitivity_ratio).collect();
-        let mean_ratio = if ratios.is_empty() { 1.0 }
-            else { ratios.iter().sum::<f64>() / ratios.len() as f64 };
-        let pct_ranks: Vec<f64> = all_h11.iter()
-            .filter_map(|r| r.factor_p_rank.map(|rank| (rank + 1) as f64 / r.total_probes as f64))
+        let mean_ratio = if ratios.is_empty() {
+            1.0
+        } else {
+            ratios.iter().sum::<f64>() / ratios.len() as f64
+        };
+        let pct_ranks: Vec<f64> = all_h11
+            .iter()
+            .filter_map(|r| {
+                r.factor_p_rank
+                    .map(|rank| (rank + 1) as f64 / r.total_probes as f64)
+            })
             .collect();
-        let mean_pct = if pct_ranks.is_empty() { 0.5 }
-            else { pct_ranks.iter().sum::<f64>() / pct_ranks.len() as f64 };
+        let mean_pct = if pct_ranks.is_empty() {
+            0.5
+        } else {
+            pct_ranks.iter().sum::<f64>() / pct_ranks.len() as f64
+        };
 
-        let signal = if mean_ratio > 2.0 { "STRONG" }
-            else if mean_ratio > 1.3 { "weak" }
-            else { "null" };
+        let signal = if mean_ratio > 2.0 {
+            "STRONG"
+        } else if mean_ratio > 1.3 {
+            "weak"
+        } else {
+            "null"
+        };
 
         verdicts.push(HypothesisVerdict {
             hypothesis: "H11".to_string(),
@@ -736,9 +859,13 @@ pub fn compute_analysis(
             signal_strength: signal.to_string(),
             verdict: format!(
                 "Mean sensitivity ratio = {:.4}, factor at percentile {:.1}%. {}.",
-                mean_ratio, mean_pct * 100.0,
-                if mean_ratio > 1.3 { "Factor positions are more sensitive to b-vector perturbation" }
-                else { "No differential sensitivity — d² perturbation is uniform across positions" }
+                mean_ratio,
+                mean_pct * 100.0,
+                if mean_ratio > 1.3 {
+                    "Factor positions are more sensitive to b-vector perturbation"
+                } else {
+                    "No differential sensitivity — d² perturbation is uniform across positions"
+                }
             ),
             supporting_stats: serde_json::json!({
                 "mean_sensitivity_ratio": mean_ratio,
@@ -753,14 +880,23 @@ pub fn compute_analysis(
         let all_h12: Vec<&H12Result> = classes.iter().flat_map(|c| c.h12_results.iter()).collect();
         let fractions: Vec<f64> = all_h12.iter().map(|r| r.resonance_fraction).collect();
         let expected: Vec<f64> = all_h12.iter().map(|r| r.expected_null_fraction).collect();
-        let mean_frac = if fractions.is_empty() { 0.0 }
-            else { fractions.iter().sum::<f64>() / fractions.len() as f64 };
-        let mean_expected = if expected.is_empty() { 0.0 }
-            else { expected.iter().sum::<f64>() / expected.len() as f64 };
-        let enrichment = if mean_expected > 0.0 { mean_frac / mean_expected } else { 1.0 };
+        let mean_frac = if fractions.is_empty() {
+            0.0
+        } else {
+            fractions.iter().sum::<f64>() / fractions.len() as f64
+        };
+        let mean_expected = if expected.is_empty() {
+            0.0
+        } else {
+            expected.iter().sum::<f64>() / expected.len() as f64
+        };
+        let enrichment = if mean_expected > 0.0 {
+            mean_frac / mean_expected
+        } else {
+            1.0
+        };
 
-        let signal = if enrichment > 3.0 { "weak" }
-            else { "null" };
+        let signal = if enrichment > 3.0 { "weak" } else { "null" };
 
         verdicts.push(HypothesisVerdict {
             hypothesis: "H12".to_string(),
@@ -782,21 +918,31 @@ pub fn compute_analysis(
     }
 
     // Overall conclusion
-    let strong_count = verdicts.iter().filter(|v| v.signal_strength == "STRONG").count();
-    let weak_count = verdicts.iter().filter(|v| v.signal_strength == "weak").count();
+    let strong_count = verdicts
+        .iter()
+        .filter(|v| v.signal_strength == "STRONG")
+        .count();
+    let weak_count = verdicts
+        .iter()
+        .filter(|v| v.signal_strength == "weak")
+        .count();
 
     let conclusion = if strong_count >= 2 {
         format!(
             "PROMISING: {}/{} hypotheses show strong signal. \
              Factor information IS embedded in Cathedral spectral data, \
              but exploitability for factoring remains undemonstrated.",
-            strong_count, verdicts.len()
+            strong_count,
+            verdicts.len()
         )
     } else if strong_count + weak_count >= 3 {
         format!(
             "INCONCLUSIVE: {}/{} hypotheses show signal ({} strong, {} weak). \
              Some spectral fingerprint of factors exists but is not reliably extractable.",
-            strong_count + weak_count, verdicts.len(), strong_count, weak_count
+            strong_count + weak_count,
+            verdicts.len(),
+            strong_count,
+            weak_count
         )
     } else {
         format!(
@@ -804,7 +950,8 @@ pub fn compute_analysis(
              Cathedral spectral structure does not preferentially encode factor information. \
              This is consistent with the Nyman-Beurling framework being about COLLECTIVE prime \
              distribution, not individual factorization.",
-            strong_count + weak_count, verdicts.len()
+            strong_count + weak_count,
+            verdicts.len()
         )
     };
 
@@ -850,7 +997,10 @@ fn iso_timestamp() -> String {
 
     // Days since 1970-01-01
     let (y, m, d) = days_to_ymd(days);
-    format!("{:04}-{:02}-{:02}T{:02}:{:02}:{:02}Z", y, m, d, hours, minutes, seconds)
+    format!(
+        "{:04}-{:02}-{:02}T{:02}:{:02}:{:02}Z",
+        y, m, d, hours, minutes, seconds
+    )
 }
 
 fn days_to_ymd(total_days: u64) -> (u64, u64, u64) {
@@ -865,7 +1015,20 @@ fn days_to_ymd(total_days: u64) -> (u64, u64, u64) {
         remaining -= days_in_year;
         y += 1;
     }
-    let months = [31, if is_leap(y) { 29 } else { 28 }, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+    let months = [
+        31,
+        if is_leap(y) { 29 } else { 28 },
+        31,
+        30,
+        31,
+        30,
+        31,
+        31,
+        30,
+        31,
+        30,
+        31,
+    ];
     let mut m = 1u64;
     for &ml in &months {
         if remaining < ml {
@@ -882,7 +1045,9 @@ fn is_leap(y: u64) -> bool {
 }
 
 fn percentile_f64(data: &[f64], pct: f64) -> f64 {
-    if data.is_empty() { return 0.0; }
+    if data.is_empty() {
+        return 0.0;
+    }
     let mut sorted = data.to_vec();
     sorted.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
     let idx = ((pct / 100.0) * (sorted.len() - 1) as f64) as usize;

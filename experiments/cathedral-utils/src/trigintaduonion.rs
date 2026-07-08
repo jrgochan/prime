@@ -28,7 +28,7 @@
 //! ═══════════════════════════════════════════════════════════════════════════
 
 use std::fmt;
-use std::ops::{Add, Sub, Mul, Neg};
+use std::ops::{Add, Mul, Neg, Sub};
 
 /// A trigintaduonion: 32-dimensional hypercomplex number.
 ///
@@ -148,8 +148,8 @@ impl Trig {
     pub fn flexibility_defect(&self, y: &Self) -> f64 {
         let xy = self.mul(y);
         let yx = y.mul(self);
-        let lhs = xy.mul(self);      // (xy)x
-        let rhs = self.mul(&yx);     // x(yx)
+        let lhs = xy.mul(self); // (xy)x
+        let rhs = self.mul(&yx); // x(yx)
         lhs.sub(&rhs).norm()
     }
 
@@ -186,22 +186,30 @@ impl fmt::Display for Trig {
 
 impl Add for &Trig {
     type Output = Trig;
-    fn add(self, rhs: Self) -> Trig { Trig::add(self, rhs) }
+    fn add(self, rhs: Self) -> Trig {
+        Trig::add(self, rhs)
+    }
 }
 
 impl Sub for &Trig {
     type Output = Trig;
-    fn sub(self, rhs: Self) -> Trig { Trig::sub(self, rhs) }
+    fn sub(self, rhs: Self) -> Trig {
+        Trig::sub(self, rhs)
+    }
 }
 
 impl Mul for &Trig {
     type Output = Trig;
-    fn mul(self, rhs: Self) -> Trig { Trig::mul(self, rhs) }
+    fn mul(self, rhs: Self) -> Trig {
+        Trig::mul(self, rhs)
+    }
 }
 
 impl Neg for &Trig {
     type Output = Trig;
-    fn neg(self) -> Trig { self.scale(-1.0) }
+    fn neg(self) -> Trig {
+        self.scale(-1.0)
+    }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -264,9 +272,9 @@ fn cd_mul(x: &[f64], y: &[f64], result: &mut [f64], dim: usize) {
     let mut c_star = vec![0.0; half];
     cd_conj(c, &mut c_star, half);
 
-    cd_mul(a, c, &mut ac, half);           // ac
+    cd_mul(a, c, &mut ac, half); // ac
     cd_mul(&d_star, b, &mut d_star_b, half); // d̄ · b
-    cd_mul(d, a, &mut da, half);           // da
+    cd_mul(d, a, &mut da, half); // da
     cd_mul(b, &c_star, &mut b_c_star, half); // b · c̄
 
     // Result = (ac - d̄b, da + bc̄)
@@ -282,10 +290,8 @@ fn cd_mul(x: &[f64], y: &[f64], result: &mut [f64], dim: usize) {
 
 /// The first 31 primes, mapped to imaginary basis directions e₁..e₃₁.
 const PRIMES_31: [u64; 31] = [
-    2, 3, 5, 7, 11, 13, 17, 19, 23, 29,
-    31, 37, 41, 43, 47, 53, 59, 61, 67, 71,
-    73, 79, 83, 89, 97, 101, 103, 107, 109, 113,
-    127,
+    2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97,
+    101, 103, 107, 109, 113, 127,
 ];
 
 /// Map a prime to its trigintaduonion basis index (1..31).
@@ -294,7 +300,9 @@ const PRIMES_31: [u64; 31] = [
 /// Larger primes wrap modulo 31 (but always stay in 1..31).
 pub fn prime_to_trig_basis(p: u64) -> usize {
     for (i, &q) in PRIMES_31.iter().enumerate() {
-        if p == q { return i + 1; }
+        if p == q {
+            return i + 1;
+        }
     }
     // Larger primes: hash into 1..31
     ((p % 31) as usize) + 1
@@ -311,7 +319,9 @@ pub fn prime_factors_u64(mut n: u64) -> Vec<u64> {
         }
         p += 1;
     }
-    if n > 1 { f.push(n); }
+    if n > 1 {
+        f.push(n);
+    }
     f
 }
 
@@ -375,7 +385,11 @@ pub fn zero_to_trig(t: f64) -> Trig {
 pub fn check_flexibility(x: &Trig, y: &Trig) -> (f64, f64) {
     let defect = x.flexibility_defect(y);
     let xy_norm = x.mul(y).norm();
-    let relative = if xy_norm > 1e-15 { defect / xy_norm } else { 0.0 };
+    let relative = if xy_norm > 1e-15 {
+        defect / xy_norm
+    } else {
+        0.0
+    };
     (defect, relative)
 }
 
@@ -385,9 +399,9 @@ pub fn moufang_defect(x: &Trig, y: &Trig, z: &Trig) -> f64 {
     let xy = x.mul(y);
     let zx = z.mul(x);
     let yz = y.mul(z);
-    let lhs = xy.mul(&zx);           // (xy)(zx)
+    let lhs = xy.mul(&zx); // (xy)(zx)
     let x_yz = x.mul(&yz);
-    let rhs = x_yz.mul(x);           // x((yz)x)  -- note: not x(yz)x due to non-assoc
+    let rhs = x_yz.mul(x); // x((yz)x)  -- note: not x(yz)x due to non-assoc
     lhs.sub(&rhs).norm()
 }
 
@@ -406,8 +420,12 @@ mod tests {
     fn test_trig_basis_unit_norm() {
         for i in 0..32 {
             let e = Trig::basis(i);
-            assert!((e.norm() - 1.0).abs() < 1e-15,
-                    "basis({}) has norm {}", i, e.norm());
+            assert!(
+                (e.norm() - 1.0).abs() < 1e-15,
+                "basis({}) has norm {}",
+                i,
+                e.norm()
+            );
         }
     }
 
@@ -425,11 +443,19 @@ mod tests {
         for i in 1..32 {
             let e = Trig::basis(i);
             let e_sq = e.mul(&e);
-            assert!((e_sq.re() + 1.0).abs() < 1e-12,
-                    "e{}² = {} (expected -1)", i, e_sq.re());
+            assert!(
+                (e_sq.re() + 1.0).abs() < 1e-12,
+                "e{}² = {} (expected -1)",
+                i,
+                e_sq.re()
+            );
             for j in 1..32 {
-                assert!(e_sq.c[j].abs() < 1e-12,
-                        "e{}² has non-zero component {}", i, j);
+                assert!(
+                    e_sq.c[j].abs() < 1e-12,
+                    "e{}² has non-zero component {}",
+                    i,
+                    j
+                );
             }
         }
     }
@@ -437,11 +463,14 @@ mod tests {
     #[test]
     fn test_flexibility() {
         // The flexibility identity (xy)x = x(yx) should hold
-        let x = int_to_trig(6);   // 2·3
-        let y = int_to_trig(10);  // 2·5
+        let x = int_to_trig(6); // 2·3
+        let y = int_to_trig(10); // 2·5
         let defect = x.flexibility_defect(&y);
-        assert!(defect < 1e-10,
-                "Flexibility defect = {} (should be ~0)", defect);
+        assert!(
+            defect < 1e-10,
+            "Flexibility defect = {} (should be ~0)",
+            defect
+        );
     }
 
     #[test]
@@ -449,7 +478,7 @@ mod tests {
         // Trigintaduonions are NOT associative
         let x = Trig::basis(1);
         let y = Trig::basis(2);
-        let z = Trig::basis(4);  // Different from xy direction
+        let z = Trig::basis(4); // Different from xy direction
         let assoc = x.associator(&y, &z);
         // The associator should be non-zero for general elements
         // (but it could be zero for specific triples)
@@ -461,14 +490,18 @@ mod tests {
     fn test_int_to_trig_unit_norm() {
         for k in 1..=50 {
             let t = int_to_trig(k);
-            assert!((t.norm() - 1.0).abs() < 1e-10,
-                    "int_to_trig({}) has norm {}", k, t.norm());
+            assert!(
+                (t.norm() - 1.0).abs() < 1e-10,
+                "int_to_trig({}) has norm {}",
+                k,
+                t.norm()
+            );
         }
     }
 
     #[test]
     fn test_zero_encoding() {
-        let z1 = zero_to_trig(14.134725);  // First zeta zero
+        let z1 = zero_to_trig(14.134725); // First zeta zero
         assert!((z1.norm() - 1.0).abs() < 1e-10);
     }
 
@@ -479,8 +512,12 @@ mod tests {
         for &p in PRIMES_31.iter() {
             let idx = prime_to_trig_basis(p);
             assert!((1..=31).contains(&idx));
-            assert!(indices.insert(idx),
-                    "Prime {} collides at basis index {}", p, idx);
+            assert!(
+                indices.insert(idx),
+                "Prime {} collides at basis index {}",
+                p,
+                idx
+            );
         }
     }
 }

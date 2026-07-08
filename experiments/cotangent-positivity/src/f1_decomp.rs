@@ -1,3 +1,4 @@
+use cathedral_utils::arith::gcd;
 use rayon::prelude::*;
 use std::collections::HashMap;
 use std::f64::consts::PI;
@@ -20,34 +21,41 @@ fn sieve_mobius(n: usize) -> Vec<i8> {
             mu[i] = -1;
         }
         for &p in &primes {
-            if i * p > n { break; }
+            if i * p > n {
+                break;
+            }
             is_prime[i * p] = false;
-            if i % p == 0 { mu[i * p] = 0; break; }
-            else { mu[i * p] = -mu[i]; }
+            if i % p == 0 {
+                mu[i * p] = 0;
+                break;
+            } else {
+                mu[i * p] = -mu[i];
+            }
         }
     }
     mu
 }
 
-fn gcd(mut a: usize, mut b: usize) -> usize {
-    while b != 0 { let t = b; b = a % b; a = t; }
-    a
-}
-
 /// Vasyunin sum V(a,b) — MATCHES gap_analysis.rs exactly
 /// V(a,b) = Σ_{m=1}^{a-1} {m·b/a} · cot(π·m/a)
 fn vasyunin_sum(a: usize, b: usize) -> f64 {
-    if a <= 1 { return 0.0; }
+    if a <= 1 {
+        return 0.0;
+    }
     let af = a as f64;
     let bf = b as f64;
     let mut total = 0.0;
     for m in 1..a {
         let mf = m as f64;
         let mut frac_part = (mf * bf / af).fract();
-        if frac_part < 0.0 { frac_part += 1.0; }
+        if frac_part < 0.0 {
+            frac_part += 1.0;
+        }
         let angle = PI * mf / af;
         let sin_val = angle.sin();
-        if sin_val.abs() < 1e-15 { continue; }
+        if sin_val.abs() < 1e-15 {
+            continue;
+        }
         total += frac_part * angle.cos() / sin_val;
     }
     total
@@ -59,8 +67,11 @@ fn bd_weights(n: usize, mu: &[i8]) -> Vec<f64> {
     (0..n - 1)
         .map(|i| {
             let j = i + 1;
-            if mu[j] == 0 { 0.0 }
-            else { -(mu[j] as f64) * (1.0 - (j as f64).ln() / log_n) }
+            if mu[j] == 0 {
+                0.0
+            } else {
+                -(mu[j] as f64) * (1.0 - (j as f64).ln() / log_n)
+            }
         })
         .collect()
 }
@@ -96,16 +107,24 @@ fn precompute_pair_sums(n: usize, mu: &[i8]) -> HashMap<(usize, usize), f64> {
     let mut needed: Vec<(usize, usize)> = Vec::new();
     let mut seen = std::collections::HashSet::new();
     for j in 1..n {
-        if mu[j] == 0 { continue; }
+        if mu[j] == 0 {
+            continue;
+        }
         for k in 1..n {
-            if j == k || mu[k] == 0 { continue; }
+            if j == k || mu[k] == 0 {
+                continue;
+            }
             let d = gcd(j, k);
-            let a = j / d; let b = k / d;
+            let a = j / d;
+            let b = k / d;
             let key = if a <= b { (a, b) } else { (b, a) };
-            if seen.insert(key) { needed.push(key); }
+            if seen.insert(key) {
+                needed.push(key);
+            }
         }
     }
-    needed.par_iter()
+    needed
+        .par_iter()
         .map(|&(a, b)| ((a, b), vasyunin_sum(a, b) + vasyunin_sum(b, a)))
         .collect()
 }
@@ -125,7 +144,9 @@ fn cholesky(mat: &[f64], n: usize) -> Option<Vec<f64>> {
             s += l[j * n + k] * l[j * n + k];
         }
         let diag = mat[j * n + j] - s;
-        if diag <= 1e-15 { return None; } // Not PD
+        if diag <= 1e-15 {
+            return None;
+        } // Not PD
         l[j * n + j] = diag.sqrt();
         for i in (j + 1)..n {
             let mut s = 0.0;
@@ -143,7 +164,9 @@ fn forward_solve(l: &[f64], b: &[f64], n: usize) -> Vec<f64> {
     let mut x = vec![0.0; n];
     for i in 0..n {
         let mut s = 0.0;
-        for j in 0..i { s += l[i * n + j] * x[j]; }
+        for j in 0..i {
+            s += l[i * n + j] * x[j];
+        }
         x[i] = (b[i] - s) / l[i * n + i];
     }
     x
@@ -154,7 +177,9 @@ fn backward_solve(l: &[f64], b: &[f64], n: usize) -> Vec<f64> {
     let mut x = vec![0.0; n];
     for i in (0..n).rev() {
         let mut s = 0.0;
-        for j in (i + 1)..n { s += l[j * n + i] * x[j]; }
+        for j in (i + 1)..n {
+            s += l[j * n + i] * x[j];
+        }
         x[i] = (b[i] - s) / l[i * n + i];
     }
     x
@@ -194,7 +219,9 @@ fn analyze_f1(n: usize) -> F1Result {
             let mut row_b1 = 0.0;
 
             for k_idx in 0..dim {
-                if k_idx == i || v[k_idx] == 0.0 { continue; }
+                if k_idx == i || v[k_idx] == 0.0 {
+                    continue;
+                }
                 let k = k_idx + 1;
 
                 row_noncot += v[i] * v[k_idx] * gram_offdiag_noncot(j, k);
@@ -239,9 +266,9 @@ fn analyze_f1(n: usize) -> F1Result {
         }
 
         // Mean vector: b_j = (1 + ln(2π) - γ) / (2j)
-        let b_vec: Vec<f64> = (1..n).map(|j| {
-            (1.0 + LN_2PI - EULER_GAMMA) / (2.0 * j as f64)
-        }).collect();
+        let b_vec: Vec<f64> = (1..n)
+            .map(|j| (1.0 + LN_2PI - EULER_GAMMA) / (2.0 * j as f64))
+            .collect();
 
         match cholesky(&g_mat, dim) {
             Some(l) => {
@@ -250,14 +277,23 @@ fn analyze_f1(n: usize) -> F1Result {
                 let btginvb: f64 = (0..dim).map(|i| b_vec[i] * x[i]).sum();
                 (btginvb, 1.0 - btginvb)
             }
-            None => (-1.0, -1.0) // Cholesky failed
+            None => (-1.0, -1.0), // Cholesky failed
         }
     } else {
         (-1.0, -1.0)
     };
 
     let elapsed = start.elapsed().as_secs_f64();
-    F1Result { n, dim, vtgv, vt_b1_v, vt_l1_v, bt_ginv_b, d2_opt, elapsed }
+    F1Result {
+        n,
+        dim,
+        vtgv,
+        vt_b1_v,
+        vt_l1_v,
+        bt_ginv_b,
+        d2_opt,
+        elapsed,
+    }
 }
 
 fn main() {
@@ -268,26 +304,44 @@ fn main() {
     println!("  Cores: {}", rayon::current_num_threads());
     println!("═══════════════════════════════════════════════════════════════════════════════");
     println!();
-    println!("{:>6} │ {:>10} │ {:>10} │ {:>10} │ {:>10} │ {:>10} │ {:>10} │ {:>6}",
-        "N", "vtGv", "vt_B1_v", "vt_L1_v", "L1/B1", "b^TG⁻¹b", "d²_opt", "time");
-    println!("──────────────────────────────────────────────────────────────────────────────────────");
+    println!(
+        "{:>6} │ {:>10} │ {:>10} │ {:>10} │ {:>10} │ {:>10} │ {:>10} │ {:>6}",
+        "N", "vtGv", "vt_B1_v", "vt_L1_v", "L1/B1", "b^TG⁻¹b", "d²_opt", "time"
+    );
+    println!(
+        "──────────────────────────────────────────────────────────────────────────────────────"
+    );
 
-    let ns: Vec<usize> = vec![
-        60, 120, 180, 240, 360, 480, 720, 840, 1000, 1260, 2520,
-    ];
+    let ns: Vec<usize> = vec![60, 120, 180, 240, 360, 480, 720, 840, 1000, 1260, 2520];
 
     let mut results: Vec<F1Result> = Vec::new();
 
     for &n in &ns {
         let r = analyze_f1(n);
 
-        let l1_b1_ratio = if r.vt_b1_v.abs() > 1e-15 { r.vt_l1_v / r.vt_b1_v } else { 0.0 };
+        let l1_b1_ratio = if r.vt_b1_v.abs() > 1e-15 {
+            r.vt_l1_v / r.vt_b1_v
+        } else {
+            0.0
+        };
 
         println!(
             "{:6} │ {:+10.6} │ {:+10.6} │ {:+10.6} │ {:+10.4} │ {:>10} │ {:>10} │ {:5.1}s",
-            r.n, r.vtgv, r.vt_b1_v, r.vt_l1_v, l1_b1_ratio,
-            if r.bt_ginv_b >= 0.0 { format!("{:+.6}", r.bt_ginv_b) } else { "FAIL".to_string() },
-            if r.d2_opt >= 0.0 { format!("{:+.6}", r.d2_opt) } else { "FAIL".to_string() },
+            r.n,
+            r.vtgv,
+            r.vt_b1_v,
+            r.vt_l1_v,
+            l1_b1_ratio,
+            if r.bt_ginv_b >= 0.0 {
+                format!("{:+.6}", r.bt_ginv_b)
+            } else {
+                "FAIL".to_string()
+            },
+            if r.d2_opt >= 0.0 {
+                format!("{:+.6}", r.d2_opt)
+            } else {
+                "FAIL".to_string()
+            },
             r.elapsed
         );
         results.push(r);
@@ -299,15 +353,35 @@ fn main() {
 
     let tsv_path = format!("{}/f1_decomposition.tsv", results_dir);
     let mut f = fs::File::create(&tsv_path).unwrap();
-    writeln!(f, "N\tdim\tvtGv\tvt_B1_v\tvt_L1_v\tL1_B1_ratio\tbt_Ginv_b\td2_opt\tmargin").unwrap();
+    writeln!(
+        f,
+        "N\tdim\tvtGv\tvt_B1_v\tvt_L1_v\tL1_B1_ratio\tbt_Ginv_b\td2_opt\tmargin"
+    )
+    .unwrap();
     for r in &results {
-        let l1_b1_ratio = if r.vt_b1_v.abs() > 1e-15 { r.vt_l1_v / r.vt_b1_v } else { 0.0 };
-        writeln!(f, "{}\t{}\t{:.10}\t{:.10}\t{:.10}\t{:.6}\t{:.10}\t{:.10}\t{:.10}",
-            r.n, r.dim, r.vtgv, r.vt_b1_v, r.vt_l1_v, l1_b1_ratio,
-            if r.bt_ginv_b >= 0.0 { r.bt_ginv_b } else { f64::NAN },
+        let l1_b1_ratio = if r.vt_b1_v.abs() > 1e-15 {
+            r.vt_l1_v / r.vt_b1_v
+        } else {
+            0.0
+        };
+        writeln!(
+            f,
+            "{}\t{}\t{:.10}\t{:.10}\t{:.10}\t{:.6}\t{:.10}\t{:.10}\t{:.10}",
+            r.n,
+            r.dim,
+            r.vtgv,
+            r.vt_b1_v,
+            r.vt_l1_v,
+            l1_b1_ratio,
+            if r.bt_ginv_b >= 0.0 {
+                r.bt_ginv_b
+            } else {
+                f64::NAN
+            },
             if r.d2_opt >= 0.0 { r.d2_opt } else { f64::NAN },
             1.0 - r.vtgv
-        ).unwrap();
+        )
+        .unwrap();
     }
     println!();
     println!("TSV written to: {}", tsv_path);

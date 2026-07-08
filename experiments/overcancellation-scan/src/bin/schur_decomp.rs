@@ -1,4 +1,13 @@
-#![allow(dead_code, unused_variables, unused_imports, unused_assignments, clippy::needless_range_loop, clippy::doc_lazy_continuation, non_snake_case, clippy::empty_line_after_doc_comments)]
+#![allow(
+    dead_code,
+    unused_variables,
+    unused_imports,
+    unused_assignments,
+    clippy::needless_range_loop,
+    clippy::doc_lazy_continuation,
+    non_snake_case,
+    clippy::empty_line_after_doc_comments
+)]
 //! SCHUR DECOMPOSITION PROBE — Eigenvalue Drop Anatomy
 //!
 //! For each N, when we extend G_{N-1} to G_N by adding the N-th basis function:
@@ -46,7 +55,9 @@ fn num_divisors(n: usize) -> usize {
     while d * d <= n {
         if n.is_multiple_of(d) {
             count += 1;
-            if d != n / d { count += 1; }
+            if d != n / d {
+                count += 1;
+            }
         }
         d += 1;
     }
@@ -54,12 +65,20 @@ fn num_divisors(n: usize) -> usize {
 }
 
 fn is_prime(n: usize) -> bool {
-    if n < 2 { return false; }
-    if n < 4 { return true; }
-    if n.is_multiple_of(2) || n.is_multiple_of(3) { return false; }
+    if n < 2 {
+        return false;
+    }
+    if n < 4 {
+        return true;
+    }
+    if n.is_multiple_of(2) || n.is_multiple_of(3) {
+        return false;
+    }
     let mut i = 5;
     while i * i <= n {
-        if n.is_multiple_of(i) || n.is_multiple_of(i + 2) { return false; }
+        if n.is_multiple_of(i) || n.is_multiple_of(i + 2) {
+            return false;
+        }
         i += 6;
     }
     true
@@ -82,7 +101,12 @@ fn main() {
     let t0 = Instant::now();
     let full_dim = max_n - 1;
     let full_gram = build_gram(max_n);
-    println!("  [Built {}×{} Gram matrix in {:.1}s]", full_dim, full_dim, t0.elapsed().as_secs_f64());
+    println!(
+        "  [Built {}×{} Gram matrix in {:.1}s]",
+        full_dim,
+        full_dim,
+        t0.elapsed().as_secs_f64()
+    );
     println!();
 
     // ══════════════════════════════════════════════════
@@ -90,8 +114,10 @@ fn main() {
     // ══════════════════════════════════════════════════
 
     println!("  PART 1: Schur Complement Decomposition");
-    println!("  {:>5} {:>10} {:>10} {:>10} {:>10} {:>10} {:>10} {:>5}",
-        "N", "δ_N", "S_N", "|gᵀvmin|²", "d(N)", "δ·N³", "δ·N³/d²", "type");
+    println!(
+        "  {:>5} {:>10} {:>10} {:>10} {:>10} {:>10} {:>10} {:>5}",
+        "N", "δ_N", "S_N", "|gᵀvmin|²", "d(N)", "δ·N³", "δ·N³/d²", "type"
+    );
     println!("  {}", "─".repeat(80));
 
     struct DropRecord {
@@ -177,8 +203,7 @@ fn main() {
             // project onto the min eigenvector of G_{N-1}?
             // |⟨v_min(G_{N-1}), g⟩|² where v_min(G_{N-1}) is the prev min eigenvector
             let g_vmin_sq = if prev_vmin.len() == dim_prev {
-                let dot: f64 = prev_vmin.iter().zip(g_vec.iter())
-                    .map(|(v, g)| v * g).sum();
+                let dot: f64 = prev_vmin.iter().zip(g_vec.iter()).map(|(v, g)| v * g).sum();
                 dot * dot
             } else {
                 f64::NAN
@@ -187,24 +212,38 @@ fn main() {
             let n_cubed_drop = (n as f64).powi(3) * drop;
             let normalized = if d_n > 0 {
                 n_cubed_drop / (d_n as f64 * d_n as f64)
-            } else { f64::NAN };
+            } else {
+                f64::NAN
+            };
 
-            let ntype = if d_n >= 16 { "HC" }
-                else if d_n >= 8 { "hc" }
-                else if is_prime(n) { "P" }
-                else { "" };
+            let ntype = if d_n >= 16 {
+                "HC"
+            } else if d_n >= 8 {
+                "hc"
+            } else if is_prime(n) {
+                "P"
+            } else {
+                ""
+            };
 
             // Print significant rows
-            let show = n <= 30 || n % 50 == 0 || n == max_n
-                || drop > 5e-6 || d_n >= 12;
+            let show = n <= 30 || n % 50 == 0 || n == max_n || drop > 5e-6 || d_n >= 12;
 
             if show {
-                println!("  {:5} {:10.2e} {:10.2e} {:10.2e} {:10} {:10.4} {:10.4} {:>5}",
-                    n, drop, schur, g_vmin_sq, d_n, n_cubed_drop, normalized, ntype);
+                println!(
+                    "  {:5} {:10.2e} {:10.2e} {:10.2e} {:10} {:10.4} {:10.4} {:>5}",
+                    n, drop, schur, g_vmin_sq, d_n, n_cubed_drop, normalized, ntype
+                );
             }
 
             records.push(DropRecord {
-                n, drop, schur, g_vmin_sq, d_n, n_cubed_drop, normalized,
+                n,
+                drop,
+                schur,
+                g_vmin_sq,
+                d_n,
+                n_cubed_drop,
+                normalized,
             });
         }
 
@@ -226,7 +265,8 @@ fn main() {
     println!("══════════════════════════════════════════════════════════════");
 
     // Test if δ·N³/d(N)² is bounded
-    let valid: Vec<&DropRecord> = records.iter()
+    let valid: Vec<&DropRecord> = records
+        .iter()
         .filter(|r| r.n >= 10 && r.drop > 1e-15 && r.normalized.is_finite())
         .collect();
 
@@ -257,7 +297,8 @@ fn main() {
     // Schur complement scaling: S_N ~ 1/N ?
     println!();
     println!("  Schur complement S_N scaling:");
-    let schur_data: Vec<(f64, f64)> = records.iter()
+    let schur_data: Vec<(f64, f64)> = records
+        .iter()
         .filter(|r| r.n >= 10 && r.schur > 1e-15)
         .map(|r| ((r.n as f64).ln(), r.schur.ln()))
         .collect();
@@ -272,16 +313,24 @@ fn main() {
         let log_c = (sy - alpha * sx) / n_pts;
         let mean_y = sy / n_pts;
         let ss_tot: f64 = schur_data.iter().map(|(_, y)| (y - mean_y).powi(2)).sum();
-        let ss_res: f64 = schur_data.iter()
-            .map(|(x, y)| (y - (alpha * x + log_c)).powi(2)).sum();
+        let ss_res: f64 = schur_data
+            .iter()
+            .map(|(x, y)| (y - (alpha * x + log_c)).powi(2))
+            .sum();
         let r2 = 1.0 - ss_res / ss_tot;
-        println!("    S_N ≈ {:.4} · N^({:.4})    R² = {:.6}", log_c.exp(), alpha, r2);
+        println!(
+            "    S_N ≈ {:.4} · N^({:.4})    R² = {:.6}",
+            log_c.exp(),
+            alpha,
+            r2
+        );
     }
 
     // |gᵀv_min|² scaling
     println!();
     println!("  Projection |gᵀv_min|² scaling:");
-    let proj_data: Vec<(f64, f64)> = records.iter()
+    let proj_data: Vec<(f64, f64)> = records
+        .iter()
         .filter(|r| r.n >= 10 && r.g_vmin_sq > 1e-30 && r.g_vmin_sq.is_finite())
         .map(|r| ((r.n as f64).ln(), r.g_vmin_sq.ln()))
         .collect();
@@ -296,10 +345,17 @@ fn main() {
         let log_c = (sy - alpha * sx) / n_pts;
         let mean_y = sy / n_pts;
         let ss_tot: f64 = proj_data.iter().map(|(_, y)| (y - mean_y).powi(2)).sum();
-        let ss_res: f64 = proj_data.iter()
-            .map(|(x, y)| (y - (alpha * x + log_c)).powi(2)).sum();
+        let ss_res: f64 = proj_data
+            .iter()
+            .map(|(x, y)| (y - (alpha * x + log_c)).powi(2))
+            .sum();
         let r2 = 1.0 - ss_res / ss_tot;
-        println!("    |gᵀv_min|² ≈ {:.4} · N^({:.4})    R² = {:.6}", log_c.exp(), alpha, r2);
+        println!(
+            "    |gᵀv_min|² ≈ {:.4} · N^({:.4})    R² = {:.6}",
+            log_c.exp(),
+            alpha,
+            r2
+        );
     }
 
     // ══════════════════════════════════════════════════
@@ -311,37 +367,56 @@ fn main() {
     println!("  PART 3: Divisor-Normalized Drops by Window");
     println!("══════════════════════════════════════════════════════════════");
     println!();
-    println!("  {:>10} {:>12} {:>12} {:>12} {:>12}",
-        "window", "avg δ·N³", "avg δN³/d²", "max δN³/d²", "Σd²/N³");
+    println!(
+        "  {:>10} {:>12} {:>12} {:>12} {:>12}",
+        "window", "avg δ·N³", "avg δN³/d²", "max δN³/d²", "Σd²/N³"
+    );
 
     let windows: Vec<(usize, usize)> = vec![
-        (10, 50), (50, 100), (100, 200), (200, 300), (300, 400), (400, 500),
+        (10, 50),
+        (50, 100),
+        (100, 200),
+        (200, 300),
+        (300, 400),
+        (400, 500),
     ];
     for (lo, hi) in &windows {
-        let in_w: Vec<&DropRecord> = records.iter()
+        let in_w: Vec<&DropRecord> = records
+            .iter()
             .filter(|r| r.n >= *lo && r.n < *hi && r.drop > 1e-15)
             .collect();
-        if in_w.is_empty() { continue; }
+        if in_w.is_empty() {
+            continue;
+        }
 
         let avg_n3d = in_w.iter().map(|r| r.n_cubed_drop).sum::<f64>() / in_w.len() as f64;
         let avg_norm = in_w.iter().map(|r| r.normalized).sum::<f64>() / in_w.len() as f64;
-        let max_norm = in_w.iter().map(|r| r.normalized).fold(f64::NEG_INFINITY, f64::max);
+        let max_norm = in_w
+            .iter()
+            .map(|r| r.normalized)
+            .fold(f64::NEG_INFINITY, f64::max);
 
         // Also compute Σ d(N)²/N³ for this window (the convergent series bound)
-        let sum_d2_n3: f64 = (*lo..*hi).map(|n| {
-            let d = num_divisors(n) as f64;
-            d * d / (n as f64).powi(3)
-        }).sum();
+        let sum_d2_n3: f64 = (*lo..*hi)
+            .map(|n| {
+                let d = num_divisors(n) as f64;
+                d * d / (n as f64).powi(3)
+            })
+            .sum();
 
-        println!("  {:>4}-{:<4} {:12.4} {:12.4} {:12.4} {:12.6}",
-            lo, hi, avg_n3d, avg_norm, max_norm, sum_d2_n3);
+        println!(
+            "  {:>4}-{:<4} {:12.4} {:12.4} {:12.4} {:12.6}",
+            lo, hi, avg_n3d, avg_norm, max_norm, sum_d2_n3
+        );
     }
 
     // Compute the full partial sum Σ d(N)²/N³ for N=4..max_n
-    let full_sum: f64 = (4..=max_n).map(|n| {
-        let d = num_divisors(n) as f64;
-        d * d / (n as f64).powi(3)
-    }).sum();
+    let full_sum: f64 = (4..=max_n)
+        .map(|n| {
+            let d = num_divisors(n) as f64;
+            d * d / (n as f64).powi(3)
+        })
+        .sum();
     println!();
     println!("  Σ_{{N=4}}^{{{}}} d(N)²/N³ = {:.6}", max_n, full_sum);
     println!("  Known: Σ_{{N=1}}^∞ d(N)²/N³ = ζ(3)·(ζ(3/2))²/ζ(3) ... converges to ~2.5");

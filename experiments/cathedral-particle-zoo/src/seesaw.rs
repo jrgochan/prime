@@ -37,18 +37,21 @@ pub struct SeeSawAnalysis {
 
 impl SeeSawAnalysis {
     /// Compute see-saw analysis from eigenvalues and mean vector.
-    pub fn compute(
-        eigenvalues: &[f64],
-        b_vec: &[f64],
-        d2: f64,
-    ) -> Self {
+    pub fn compute(eigenvalues: &[f64], b_vec: &[f64], d2: f64) -> Self {
         let lambda_min = eigenvalues.iter().cloned().fold(f64::INFINITY, f64::min);
-        let lambda_max = eigenvalues.iter().cloned().fold(f64::NEG_INFINITY, f64::max);
+        let lambda_max = eigenvalues
+            .iter()
+            .cloned()
+            .fold(f64::NEG_INFINITY, f64::max);
         let b_norm_sq: f64 = b_vec.iter().map(|x| x * x).sum();
 
         // See-saw prediction: d² ~ ‖b‖⁴ / λ_max
         let seesaw_pred = b_norm_sq * b_norm_sq / lambda_max;
-        let ratio = if seesaw_pred > 1e-30 { d2 / seesaw_pred } else { 0.0 };
+        let ratio = if seesaw_pred > 1e-30 {
+            d2 / seesaw_pred
+        } else {
+            0.0
+        };
 
         SeeSawAnalysis {
             d2_n: d2,
@@ -66,14 +69,35 @@ impl SeeSawAnalysis {
         println!("  ┌─────────────────────────────────────────────────────────────────┐");
         println!("  │ SEE-SAW MECHANISM (Schur Complement = Neutrino Mass)            │");
         println!("  ├─────────────────────────────────────────────────────────────────┤");
-        println!("  │ Vacuum energy d²_N = {:.10}  (= Σ m_νᵢ analog)       │", self.d2_n);
-        println!("  │ ‖b‖² (Dirac mass²)  = {:.6}                                 │", self.b_norm_sq);
-        println!("  │ λ_max (M_R)          = {:.6}                                 │", self.lambda_max);
-        println!("  │ λ_min (mass gap)     = {:.6}                                 │", self.lambda_min);
-        println!("  │ κ (condition #)       = {:.2}                                │", self.condition_number);
+        println!(
+            "  │ Vacuum energy d²_N = {:.10}  (= Σ m_νᵢ analog)       │",
+            self.d2_n
+        );
+        println!(
+            "  │ ‖b‖² (Dirac mass²)  = {:.6}                                 │",
+            self.b_norm_sq
+        );
+        println!(
+            "  │ λ_max (M_R)          = {:.6}                                 │",
+            self.lambda_max
+        );
+        println!(
+            "  │ λ_min (mass gap)     = {:.6}                                 │",
+            self.lambda_min
+        );
+        println!(
+            "  │ κ (condition #)       = {:.2}                                │",
+            self.condition_number
+        );
         println!("  │                                                                 │");
-        println!("  │ See-Saw: d² ~ ‖b‖⁴/λ_max = {:.10}                    │", self.seesaw_prediction);
-        println!("  │ Ratio: actual/predicted   = {:.6}                            │", self.seesaw_ratio);
+        println!(
+            "  │ See-Saw: d² ~ ‖b‖⁴/λ_max = {:.10}                    │",
+            self.seesaw_prediction
+        );
+        println!(
+            "  │ Ratio: actual/predicted   = {:.6}                            │",
+            self.seesaw_ratio
+        );
         println!("  │                                                                 │");
         println!("  │ Physics: C = G - bbᵀ (Schur complement)                        │");
         println!("  │          d²_N = 1 - bᵀG⁻¹b (vacuum screening)                  │");

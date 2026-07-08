@@ -161,10 +161,7 @@ fn compute_gram_matrix(n: usize) -> Vec<Vec<f64>> {
 
 /// Compute all basis inner products b_k for k=2..=n (parallelized)
 fn compute_basis_prods(n: usize) -> Vec<f64> {
-    (2..=n)
-        .into_par_iter()
-        .map(basis_inner_prod)
-        .collect()
+    (2..=n).into_par_iter().map(basis_inner_prod).collect()
 }
 
 // ═══════════════════════════════════════════

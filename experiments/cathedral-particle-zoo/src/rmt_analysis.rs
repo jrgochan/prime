@@ -40,7 +40,8 @@ impl RmtAnalysis {
 
         // Unfolded NNSD for KS tests
         let unfolded = spectral_stats::unfold_local(eigenvalues, 0.05);
-        let spacings: Vec<f64> = unfolded.windows(2)
+        let spacings: Vec<f64> = unfolded
+            .windows(2)
             .map(|w| (w[1] - w[0]).max(0.0))
             .filter(|&s| s > 1e-15)
             .collect();
@@ -48,7 +49,9 @@ impl RmtAnalysis {
         // Normalize spacings to mean 1
         let mean_s = if !spacings.is_empty() {
             spacings.iter().sum::<f64>() / spacings.len() as f64
-        } else { 1.0 };
+        } else {
+            1.0
+        };
         let norm_spacings: Vec<f64> = spacings.iter().map(|s| s / mean_s).collect();
 
         let ks_gue = spectral_stats::ks_test(&norm_spacings, spectral_stats::cdf_gue);
@@ -75,19 +78,45 @@ impl RmtAnalysis {
         println!("  ┌─────────────────────────────────────────────────────────────────┐");
         println!("  │ UNIVERSALITY CLASS (Random Matrix Theory)                       │");
         println!("  ├─────────────────────────────────────────────────────────────────┤");
-        println!("  │ Eigenvalues: {}                                              │", self.n_eigenvalues);
-        println!("  │ λ_min (mass gap) = {:.8}                                   │", self.lambda_min);
-        println!("  │ λ_max            = {:.8}                                   │", self.lambda_max);
-        println!("  │ Range            = {:.8}                                   │", self.spectral_range);
+        println!(
+            "  │ Eigenvalues: {}                                              │",
+            self.n_eigenvalues
+        );
+        println!(
+            "  │ λ_min (mass gap) = {:.8}                                   │",
+            self.lambda_min
+        );
+        println!(
+            "  │ λ_max            = {:.8}                                   │",
+            self.lambda_max
+        );
+        println!(
+            "  │ Range            = {:.8}                                   │",
+            self.spectral_range
+        );
         println!("  │                                                                 │");
-        println!("  │ ⟨r⟩ = {:.6} → {} (distance = {:.6})         │",
-                 self.mean_ratio, self.ensemble_name, self.ensemble_distance);
-        println!("  │ β_Dyson = {:.4}                                               │", self.beta_dyson);
+        println!(
+            "  │ ⟨r⟩ = {:.6} → {} (distance = {:.6})         │",
+            self.mean_ratio, self.ensemble_name, self.ensemble_distance
+        );
+        println!(
+            "  │ β_Dyson = {:.4}                                               │",
+            self.beta_dyson
+        );
         println!("  │                                                                 │");
         println!("  │ KS Tests:                                                       │");
-        println!("  │   D_GUE     = {:.6}                                          │", self.ks_gue);
-        println!("  │   D_GOE     = {:.6}                                          │", self.ks_goe);
-        println!("  │   D_Poisson = {:.6}                                          │", self.ks_poisson);
+        println!(
+            "  │   D_GUE     = {:.6}                                          │",
+            self.ks_gue
+        );
+        println!(
+            "  │   D_GOE     = {:.6}                                          │",
+            self.ks_goe
+        );
+        println!(
+            "  │   D_Poisson = {:.6}                                          │",
+            self.ks_poisson
+        );
         let verdict = if self.ks_gue < self.ks_goe && self.ks_gue < self.ks_poisson {
             "✓ Montgomery-Dyson conjecture CONSISTENT"
         } else {

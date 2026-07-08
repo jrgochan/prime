@@ -48,8 +48,10 @@ fn main() {
         ns
     };
 
-    println!("{:>8} {:>14} {:>14} {:>14} {:>14} {:>14} {:>8}",
-             "N", "bᵀv", "vtGv", "δ", "K₂=δ·logN", "K₁=(1-b)·logN", "time");
+    println!(
+        "{:>8} {:>14} {:>14} {:>14} {:>14} {:>14} {:>8}",
+        "N", "bᵀv", "vtGv", "δ", "K₂=δ·logN", "K₁=(1-b)·logN", "time"
+    );
     println!("{}", "-".repeat(98));
 
     let mut results: Vec<(usize, f64, f64, f64, f64, f64)> = Vec::new();
@@ -60,14 +62,16 @@ fn main() {
         let weights = cathedral_utils::mertens::log_cutoff_weights(n, &mu);
 
         // Collect non-zero weight indices for sparse iteration
-        let active: Vec<(usize, f64)> = weights.iter()
+        let active: Vec<(usize, f64)> = weights
+            .iter()
             .enumerate()
             .filter(|(_, &w)| w != 0.0)
-            .map(|(i, &w)| (i + 1, w))  // (k, weight)
+            .map(|(i, &w)| (i + 1, w)) // (k, weight)
             .collect();
 
         // bᵀv
-        let btv: f64 = active.iter()
+        let btv: f64 = active
+            .iter()
             .map(|&(k, w)| {
                 let b_k = ((k as f64).ln() + 1.0 - EULER_GAMMA) / (k as f64);
                 w * b_k
@@ -75,11 +79,14 @@ fn main() {
             .sum();
 
         // vtGv — PARALLEL over rows j, f64 Gram entries
-        let vtgv: f64 = active.par_iter()
+        let vtgv: f64 = active
+            .par_iter()
             .map(|&(j, wj)| {
                 let mut row_sum = 0.0f64;
                 for &(k, wk) in &active {
-                    if k < j { continue; }
+                    if k < j {
+                        continue;
+                    }
                     let g_jk = cathedral_utils::gram::gram_entry_f64(j, k);
                     if k == j {
                         row_sum += wj * wk * g_jk;
@@ -98,8 +105,10 @@ fn main() {
 
         results.push((n, btv, vtgv, delta, k2, k1));
 
-        println!("{:>8} {:>14.8} {:>14.8} {:>14.10} {:>14.8} {:>14.8} {:>6.1}s",
-                 n, btv, vtgv, delta, k2, k1, elapsed);
+        println!(
+            "{:>8} {:>14.8} {:>14.8} {:>14.10} {:>14.8} {:>14.8} {:>6.1}s",
+            n, btv, vtgv, delta, k2, k1, elapsed
+        );
     }
 
     // ─── Course 2: Constant Identification ───
@@ -126,14 +135,29 @@ fn main() {
     println!("  K₂/K₁ = {:.10}", ratio);
     println!();
     println!("Candidate identities:");
-    println!("  K₁ = π/2          = {:.10}  (Δ = {:.2e}, {:.3}%)", pi_over_2,
-             (k1_mean - pi_over_2).abs(), 100.0 * (k1_mean - pi_over_2).abs() / k1_mean);
-    println!("  K₂ = γ²/(2π)      = {:.10}  (Δ = {:.2e}, {:.3}%)", gamma_sq_over_2pi,
-             (k2_mean - gamma_sq_over_2pi).abs(), 100.0 * (k2_mean - gamma_sq_over_2pi).abs() / k2_mean);
-    println!("  K₂ = 1/(6π)       = {:.10}  (Δ = {:.2e}, {:.3}%)", one_over_6pi,
-             (k2_mean - one_over_6pi).abs(), 100.0 * (k2_mean - one_over_6pi).abs() / k2_mean);
-    println!("  K₂/K₁ = γ²/π²     = {:.10}  (Δ = {:.2e})", gamma_sq_over_pi_sq,
-             (ratio - gamma_sq_over_pi_sq).abs());
+    println!(
+        "  K₁ = π/2          = {:.10}  (Δ = {:.2e}, {:.3}%)",
+        pi_over_2,
+        (k1_mean - pi_over_2).abs(),
+        100.0 * (k1_mean - pi_over_2).abs() / k1_mean
+    );
+    println!(
+        "  K₂ = γ²/(2π)      = {:.10}  (Δ = {:.2e}, {:.3}%)",
+        gamma_sq_over_2pi,
+        (k2_mean - gamma_sq_over_2pi).abs(),
+        100.0 * (k2_mean - gamma_sq_over_2pi).abs() / k2_mean
+    );
+    println!(
+        "  K₂ = 1/(6π)       = {:.10}  (Δ = {:.2e}, {:.3}%)",
+        one_over_6pi,
+        (k2_mean - one_over_6pi).abs(),
+        100.0 * (k2_mean - one_over_6pi).abs() / k2_mean
+    );
+    println!(
+        "  K₂/K₁ = γ²/π²     = {:.10}  (Δ = {:.2e})",
+        gamma_sq_over_pi_sq,
+        (ratio - gamma_sq_over_pi_sq).abs()
+    );
 
     // ─── Course 3: Convergence Analysis ───
     println!();
@@ -142,13 +166,22 @@ fn main() {
     println!("═══════════════════════════════════════════════════════════════");
     println!();
 
-    println!("{:>8} {:>14} {:>14} {:>14}", "N", "K₂", "K₂-γ²/(2π)", "(K₂-γ²/(2π))·logN");
+    println!(
+        "{:>8} {:>14} {:>14} {:>14}",
+        "N", "K₂", "K₂-γ²/(2π)", "(K₂-γ²/(2π))·logN"
+    );
     println!("{}", "-".repeat(56));
     for &(n, _, _, _, k2, _) in &results {
         if n >= 100 {
             let ln_n = (n as f64).ln();
             let residual = k2 - gamma_sq_over_2pi;
-            println!("{:>8} {:>14.8} {:>14.6e} {:>14.6e}", n, k2, residual, residual * ln_n);
+            println!(
+                "{:>8} {:>14.8} {:>14.6e} {:>14.6e}",
+                n,
+                k2,
+                residual,
+                residual * ln_n
+            );
         }
     }
 
@@ -160,14 +193,18 @@ fn main() {
     println!();
 
     for &n in &[100, 500, 1000, 2000, 5000, 10000] {
-        if n > n_max { continue; }
+        if n > n_max {
+            continue;
+        }
         let mut m0: f64 = 0.0;
         let mut m1: f64 = 0.0;
         let mut m2: f64 = 0.0;
         let mut m3: f64 = 0.0;
 
         for k in 1..n {
-            if mu[k] == 0 { continue; }
+            if mu[k] == 0 {
+                continue;
+            }
             let lnk = (k as f64).ln();
             let mk = mu[k] as f64 / k as f64;
             m0 += mk;
@@ -176,10 +213,15 @@ fn main() {
             m3 += mk * lnk * lnk * lnk;
         }
 
-        println!("N={:>6}:  M₀={:+.8}  M₁={:+.8}  M₂={:+.8}  M₃={:+.8}",
-                 n, m0, m1, m2, m3);
+        println!(
+            "N={:>6}:  M₀={:+.8}  M₁={:+.8}  M₂={:+.8}  M₃={:+.8}",
+            n, m0, m1, m2, m3
+        );
     }
-    println!("Theory:   M₀→0         M₁→-1         M₂→-2γ={:.6}  M₃→?", -2.0 * EULER_GAMMA);
+    println!(
+        "Theory:   M₀→0         M₁→-1         M₂→-2γ={:.6}  M₃→?",
+        -2.0 * EULER_GAMMA
+    );
 
     // ─── Course 5: Margin Scaling ───
     println!();
@@ -188,15 +230,24 @@ fn main() {
     println!("═══════════════════════════════════════════════════════════════");
     println!();
 
-    println!("{:>8} {:>14} {:>14} {:>10} {:>14}", "N", "δ", "gap", "margin", "logN·margin");
+    println!(
+        "{:>8} {:>14} {:>14} {:>10} {:>14}",
+        "N", "δ", "gap", "margin", "logN·margin"
+    );
     println!("{}", "-".repeat(64));
     for &(n, btv, _, delta, _, _) in &results {
         if n >= 50 {
             let gap = 1.0 - btv * btv;
             let margin = gap / delta;
             let ln_n = (n as f64).ln();
-            println!("{:>8} {:>14.10} {:>14.10} {:>8.1}x {:>14.4}",
-                     n, delta, gap, margin, margin * ln_n);
+            println!(
+                "{:>8} {:>14.10} {:>14.10} {:>8.1}x {:>14.4}",
+                n,
+                delta,
+                gap,
+                margin,
+                margin * ln_n
+            );
         }
     }
 
@@ -217,10 +268,15 @@ fn main() {
     let last = results.last().unwrap();
     let final_gap = 1.0 - last.1 * last.1;
     let final_margin = final_gap / last.3;
-    println!("  Final: N={}, δ={:.10}, gap={:.10}, margin={:.1}x",
-             last.0, last.3, final_gap, final_margin);
-    println!("  Total time: {:.1}s ({:.1}m)", t0_global.elapsed().as_secs_f64(),
-             t0_global.elapsed().as_secs_f64() / 60.0);
+    println!(
+        "  Final: N={}, δ={:.10}, gap={:.10}, margin={:.1}x",
+        last.0, last.3, final_gap, final_margin
+    );
+    println!(
+        "  Total time: {:.1}s ({:.1}m)",
+        t0_global.elapsed().as_secs_f64(),
+        t0_global.elapsed().as_secs_f64() / 60.0
+    );
     println!();
     println!("  Turbo Seed #52 says: bon appétit! 🌱⚡🏔️💜");
 }

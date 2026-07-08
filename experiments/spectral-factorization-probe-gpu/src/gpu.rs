@@ -168,7 +168,12 @@ pub fn gpu_eigen(gram_data: &[f64], n: usize) -> Result<GpuEigenResult, String> 
         }
 
         // Upload (symmetric → row-major = col-major)
-        cudaMemcpy(d_a, gram_data.as_ptr(), matrix_bytes, CUDA_MEMCPY_HOST_TO_DEVICE);
+        cudaMemcpy(
+            d_a,
+            gram_data.as_ptr(),
+            matrix_bytes,
+            CUDA_MEMCPY_HOST_TO_DEVICE,
+        );
 
         let mut lwork: c_int = 0;
         cusolverDnDsyevd_bufferSize(
@@ -218,8 +223,18 @@ pub fn gpu_eigen(gram_data: &[f64], n: usize) -> Result<GpuEigenResult, String> 
 
         let mut eigenvalues = vec![0.0f64; n];
         let mut eigenvectors = vec![0.0f64; n * n];
-        cudaMemcpy(eigenvalues.as_mut_ptr(), d_w, n * 8, CUDA_MEMCPY_DEVICE_TO_HOST);
-        cudaMemcpy(eigenvectors.as_mut_ptr(), d_a, matrix_bytes, CUDA_MEMCPY_DEVICE_TO_HOST);
+        cudaMemcpy(
+            eigenvalues.as_mut_ptr(),
+            d_w,
+            n * 8,
+            CUDA_MEMCPY_DEVICE_TO_HOST,
+        );
+        cudaMemcpy(
+            eigenvectors.as_mut_ptr(),
+            d_a,
+            matrix_bytes,
+            CUDA_MEMCPY_DEVICE_TO_HOST,
+        );
 
         let gpu_time = start.elapsed().as_secs_f64();
 
@@ -275,7 +290,12 @@ pub fn gpu_spectral_projections(
         cudaMalloc(&mut d_c, vec_bytes);
         cudaMalloc(&mut d_info as *mut *mut c_int as *mut *mut f64, 4);
 
-        cudaMemcpy(d_a, gram_data.as_ptr(), matrix_bytes, CUDA_MEMCPY_HOST_TO_DEVICE);
+        cudaMemcpy(
+            d_a,
+            gram_data.as_ptr(),
+            matrix_bytes,
+            CUDA_MEMCPY_HOST_TO_DEVICE,
+        );
         cudaMemcpy(d_b, b.as_ptr(), vec_bytes, CUDA_MEMCPY_HOST_TO_DEVICE);
 
         // Eigendecomposition
@@ -284,7 +304,11 @@ pub fn gpu_spectral_projections(
             solver,
             CusolverEigMode::Vec,
             CublasFillMode::Lower,
-            n_i32, d_a, n_i32, d_w, &mut lwork,
+            n_i32,
+            d_a,
+            n_i32,
+            d_w,
+            &mut lwork,
         );
 
         let mut d_work: *mut f64 = ptr::null_mut();
@@ -294,7 +318,13 @@ pub fn gpu_spectral_projections(
             solver,
             CusolverEigMode::Vec,
             CublasFillMode::Lower,
-            n_i32, d_a, n_i32, d_w, d_work, lwork, d_info,
+            n_i32,
+            d_a,
+            n_i32,
+            d_w,
+            d_work,
+            lwork,
+            d_info,
         );
         cudaDeviceSynchronize();
         cudaFree(d_work);
@@ -304,18 +334,25 @@ pub fn gpu_spectral_projections(
         let beta_val = 0.0f64;
         cublasDgemv_v2(
             blas, 1, // CUBLAS_OP_T
-            n_i32, n_i32,
-            &alpha, d_a, n_i32,
-            d_b, 1,
-            &beta_val, d_c, 1,
+            n_i32, n_i32, &alpha, d_a, n_i32, d_b, 1, &beta_val, d_c, 1,
         );
         cudaDeviceSynchronize();
 
         // Download only eigenvalues + projections (tiny)
         let mut eigenvalues = vec![0.0f64; n];
         let mut projections = vec![0.0f64; n];
-        cudaMemcpy(eigenvalues.as_mut_ptr(), d_w, vec_bytes, CUDA_MEMCPY_DEVICE_TO_HOST);
-        cudaMemcpy(projections.as_mut_ptr(), d_c, vec_bytes, CUDA_MEMCPY_DEVICE_TO_HOST);
+        cudaMemcpy(
+            eigenvalues.as_mut_ptr(),
+            d_w,
+            vec_bytes,
+            CUDA_MEMCPY_DEVICE_TO_HOST,
+        );
+        cudaMemcpy(
+            projections.as_mut_ptr(),
+            d_c,
+            vec_bytes,
+            CUDA_MEMCPY_DEVICE_TO_HOST,
+        );
 
         let gpu_time = start.elapsed().as_secs_f64();
 

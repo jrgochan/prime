@@ -1,4 +1,10 @@
-#![allow(dead_code, unused_imports, unused_variables, clippy::needless_range_loop, clippy::empty_line_after_doc_comments)]
+#![allow(
+    dead_code,
+    unused_imports,
+    unused_variables,
+    clippy::needless_range_loop,
+    clippy::empty_line_after_doc_comments
+)]
 //! # Overcancellation Scan v3: GCD Fourier Decomposition
 //!
 //! Computes the GCD Fourier decomposition of vᵀRv for multiple weight types:
@@ -14,7 +20,7 @@
 //!
 //! Discovery: f(p) = μ(p)/(φ(p)·logN) for prime p.
 
-use cathedral_utils::arith::{mobius_table, euler_totient};
+use cathedral_utils::arith::{euler_totient, mobius_table};
 use rayon::prelude::*;
 use std::time::Instant;
 
@@ -28,9 +34,13 @@ fn jordan2_sieve(n: usize) -> Vec<f64> {
     j2[0] = 0.0;
     let mut is_prime = vec![true; n + 1];
     is_prime[0] = false;
-    if n >= 1 { is_prime[1] = false; }
+    if n >= 1 {
+        is_prime[1] = false;
+    }
     for p in 2..=n {
-        if !is_prime[p] { continue; }
+        if !is_prime[p] {
+            continue;
+        }
         for m in (2 * p..=n).step_by(p) {
             is_prime[m] = false;
         }
@@ -44,14 +54,18 @@ fn jordan2_sieve(n: usize) -> Vec<f64> {
 
 /// Vasyunin cotangent sum
 fn vasyunin_sum(a: usize, b: usize) -> f64 {
-    if a <= 1 { return 0.0; }
+    if a <= 1 {
+        return 0.0;
+    }
     let af = a as f64;
     let mut total = 0.0;
     for m in 1..a {
         let frac = ((m * b) % a) as f64 / af;
         let angle = PI * m as f64 / af;
         let (sin_v, cos_v) = angle.sin_cos();
-        if sin_v.abs() < 1e-15 { continue; }
+        if sin_v.abs() < 1e-15 {
+            continue;
+        }
         total += frac * cos_v / sin_v;
     }
     total
@@ -81,14 +95,19 @@ fn ramanujan_entry(j: usize, k: usize) -> f64 {
 }
 
 /// Weight types
-enum WeightType { Simple, Fejer }
+enum WeightType {
+    Simple,
+    Fejer,
+}
 
 /// Build weights for a given type
 fn build_weights(mu: &[i8], n: usize, wtype: &WeightType) -> Vec<f64> {
     let log_n = (n as f64).ln();
     let mut w = vec![0.0f64; n + 1];
     for k in 1..=n {
-        if mu[k] == 0 { continue; }
+        if mu[k] == 0 {
+            continue;
+        }
         w[k] = match wtype {
             WeightType::Simple => mu[k] as f64 / log_n,
             WeightType::Fejer => -mu[k] as f64 * (1.0 - (k as f64).ln() / log_n),
@@ -149,8 +168,14 @@ fn scan(mu: &[i8], j2: &[f64], _phi: &[usize], n: usize, wtype: &WeightType) -> 
     let d_sq = 1.0 - 2.0 * bt_v + vt_gv;
 
     ScanResult {
-        vt_rv, sigma, rank1, vt_gv, bt_v, d_sq,
-        fourier: f, j2_contribs,
+        vt_rv,
+        sigma,
+        rank1,
+        vt_gv,
+        bt_v,
+        d_sq,
+        fourier: f,
+        j2_contribs,
     }
 }
 
@@ -162,9 +187,7 @@ fn main() {
     println!("║   f(d) = Σ_{{d|k}} v_k/k  — the GCD Fourier coefficients       ║");
     println!("╚══════════════════════════════════════════════════════════════════╝\n");
 
-    let test_points: Vec<usize> = vec![
-        100, 500, 1000, 5000, 10000, 20000, 50000, 100000,
-    ];
+    let test_points: Vec<usize> = vec![100, 500, 1000, 5000, 10000, 20000, 50000, 100000];
 
     let max_n = *test_points.iter().max().unwrap();
     println!("Sieving up to {}...", max_n);
@@ -183,8 +206,10 @@ fn main() {
         println!("  {}", label);
         println!("{}", "═".repeat(35));
 
-        println!("\n{:>8} {:>10} {:>10} {:>10} {:>10} {:>12} {:>8}",
-                 "N", "vᵀRv", "(σ/2)²", "vᵀGv", "d²", "vᵀRv/logN", "time");
+        println!(
+            "\n{:>8} {:>10} {:>10} {:>10} {:>10} {:>12} {:>8}",
+            "N", "vᵀRv", "(σ/2)²", "vᵀGv", "d²", "vᵀRv/logN", "time"
+        );
         println!("{}", "─".repeat(78));
 
         for &n in &test_points {
@@ -193,8 +218,16 @@ fn main() {
             let log_n = (n as f64).ln();
             let elapsed = t.elapsed().as_secs_f64();
 
-            println!("{:>8} {:>10.4} {:>10.4} {:>10.4} {:>10.6} {:>12.6} {:>7.2}s",
-                     n, r.vt_rv, r.rank1, r.vt_gv, r.d_sq, r.vt_rv / log_n, elapsed);
+            println!(
+                "{:>8} {:>10.4} {:>10.4} {:>10.4} {:>10.6} {:>12.6} {:>7.2}s",
+                n,
+                r.vt_rv,
+                r.rank1,
+                r.vt_gv,
+                r.d_sq,
+                r.vt_rv / log_n,
+                elapsed
+            );
         }
 
         // GCD Fourier pattern for the last (largest) N
@@ -203,25 +236,46 @@ fn main() {
         let log_n = (n as f64).ln();
 
         println!("\n  GCD Fourier coefficients at N={}:", n);
-        println!("  {:>5} {:>12} {:>12} {:>12}", "d", "f(d)·logN", "1/φ(d)", "ratio");
+        println!(
+            "  {:>5} {:>12} {:>12} {:>12}",
+            "d", "f(d)·logN", "1/φ(d)", "ratio"
+        );
         println!("  {}", "─".repeat(50));
         for &d in &[1, 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 30, 210] {
             if d <= n && phi[d] > 0 {
                 let f_scaled = r.fourier[d] * log_n;
                 let inv_phi = 1.0 / phi[d] as f64;
-                let ratio = if inv_phi.abs() > 1e-15 { f_scaled / inv_phi } else { 0.0 };
-                println!("  {:>5} {:>12.6} {:>12.6} {:>12.6}", d, f_scaled, inv_phi, ratio);
+                let ratio = if inv_phi.abs() > 1e-15 {
+                    f_scaled / inv_phi
+                } else {
+                    0.0
+                };
+                println!(
+                    "  {:>5} {:>12.6} {:>12.6} {:>12.6}",
+                    d, f_scaled, inv_phi, ratio
+                );
             }
         }
 
         // Contribution by d-range
         println!("\n  Contribution by d-range:");
-        let ranges = [(1,10), (10,100), (100,1000), (1000,10000), (10000, n+1)];
+        let ranges = [
+            (1, 10),
+            (10, 100),
+            (100, 1000),
+            (1000, 10000),
+            (10000, n + 1),
+        ];
         for (lo, hi) in ranges {
             if lo <= n {
-                let s: f64 = (lo..hi.min(n+1)).map(|d| r.j2_contribs[d]).sum();
-                println!("    d∈[{:>5},{:>6}): {:>10.4} ({:>5.1}%)",
-                         lo, hi.min(n+1), s, 100.0 * s / r.vt_rv);
+                let s: f64 = (lo..hi.min(n + 1)).map(|d| r.j2_contribs[d]).sum();
+                println!(
+                    "    d∈[{:>5},{:>6}): {:>10.4} ({:>5.1}%)",
+                    lo,
+                    hi.min(n + 1),
+                    s,
+                    100.0 * s / r.vt_rv
+                );
             }
         }
     }

@@ -69,6 +69,14 @@ pub fn sieve_primes(n: usize) -> Vec<bool> {
     is_prime
 }
 
+/// Collect all primes up to `n` as a `Vec<usize>`.
+///
+/// Convenience wrapper around [`sieve_primes`].
+pub fn primes_up_to(n: usize) -> Vec<usize> {
+    let sieve = sieve_primes(n);
+    (2..=n).filter(|&i| sieve[i]).collect()
+}
+
 /// Möbius function table: μ(n) for n = 0..=max_n.
 ///
 /// μ(1) = 1, μ(n) = 0 if n has a squared factor,
@@ -98,7 +106,11 @@ pub fn mobius_table(max_n: usize) -> Vec<i8> {
         if has_square[n] {
             mu[n] = 0;
         } else {
-            mu[n] = if prime_count[n].is_multiple_of(2) { 1 } else { -1 };
+            mu[n] = if prime_count[n].is_multiple_of(2) {
+                1
+            } else {
+                -1
+            };
         }
     }
     mu
@@ -126,7 +138,13 @@ pub fn liouville_table(max_n: usize) -> Vec<i8> {
         }
     }
     (0..=max_n)
-        .map(|n| if omega[n].is_multiple_of(2) { 1i8 } else { -1i8 })
+        .map(|n| {
+            if omega[n].is_multiple_of(2) {
+                1i8
+            } else {
+                -1i8
+            }
+        })
         .collect()
 }
 

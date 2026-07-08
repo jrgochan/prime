@@ -46,10 +46,15 @@ impl std::fmt::Display for Tier {
 }
 
 fn tier_for(err: f64) -> Tier {
-    if err < 0.01 { Tier::Star }
-    else if err < 0.1 { Tier::Lightning }
-    else if err < 0.5 { Tier::Dot }
-    else { Tier::None }
+    if err < 0.01 {
+        Tier::Star
+    } else if err < 0.1 {
+        Tier::Lightning
+    } else if err < 0.5 {
+        Tier::Dot
+    } else {
+        Tier::None
+    }
 }
 
 /// A correction that improves a near-miss.
@@ -67,11 +72,7 @@ pub struct Correction {
 }
 
 /// Run the main search.
-pub fn search(
-    formulas: &[Formula],
-    targets: &[PhysicalTarget],
-    max_error_pct: f64,
-) -> Vec<Match> {
+pub fn search(formulas: &[Formula], targets: &[PhysicalTarget], max_error_pct: f64) -> Vec<Match> {
     let mut matches = Vec::new();
 
     for target in targets {
@@ -112,20 +113,20 @@ pub fn auto_correct(
     let glass = c.glass;
 
     let correction_candidates: Vec<(&str, f64)> = vec![
-        ("α²/3",       alpha * alpha / 3.0),
-        ("α·ζ(2)",     alpha * zeta2),
-        ("α·ζ(4)",     alpha * zeta4),
-        ("α²·π",       alpha * alpha * PI),
-        ("α/π",        alpha / PI),
-        ("α²·ζ(2)",    alpha * alpha * zeta2),
-        ("α",          alpha),
-        ("2α",         2.0 * alpha),
-        ("α·π",        alpha * PI),
-        ("α²/π",       alpha * alpha / PI),
-        ("α·glass",    alpha * glass),
-        ("α·ζ(6)",     alpha * c.zetas[2].1),
-        ("3α/π",       3.0 * alpha / PI),
-        ("α²·ζ(4)",    alpha * alpha * zeta4),
+        ("α²/3", alpha * alpha / 3.0),
+        ("α·ζ(2)", alpha * zeta2),
+        ("α·ζ(4)", alpha * zeta4),
+        ("α²·π", alpha * alpha * PI),
+        ("α/π", alpha / PI),
+        ("α²·ζ(2)", alpha * alpha * zeta2),
+        ("α", alpha),
+        ("2α", 2.0 * alpha),
+        ("α·π", alpha * PI),
+        ("α²/π", alpha * alpha / PI),
+        ("α·glass", alpha * glass),
+        ("α·ζ(6)", alpha * c.zetas[2].1),
+        ("3α/π", 3.0 * alpha / PI),
+        ("α²·ζ(4)", alpha * alpha * zeta4),
     ];
 
     let mut corrections = Vec::new();
@@ -134,7 +135,9 @@ pub fn auto_correct(
         for formula in formulas {
             let base_err = ((formula.value / target.value) - 1.0).abs() * 100.0;
             // Only look at near-misses that could be improved
-            if base_err < 0.001 || base_err > search_window_pct { continue; }
+            if base_err < 0.001 || base_err > search_window_pct {
+                continue;
+            }
 
             for &(cname, cval) in &correction_candidates {
                 let corrected = formula.value * (1.0 + cval);

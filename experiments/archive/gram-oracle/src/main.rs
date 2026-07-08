@@ -52,7 +52,11 @@ fn mobius_sieve(n: usize) -> Vec<i32> {
         if !square_free[k] {
             mu[k] = 0;
         } else {
-            mu[k] = if prime_count[k].is_multiple_of(2) { 1 } else { -1 };
+            mu[k] = if prime_count[k].is_multiple_of(2) {
+                1
+            } else {
+                -1
+            };
         }
     }
 

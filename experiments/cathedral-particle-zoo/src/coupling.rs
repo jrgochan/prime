@@ -46,11 +46,16 @@ impl ArithmeticCouplings {
         // α_em: fraction of total |a*(n)|² carried by primes
         let is_prime = arith::sieve_primes(n);
         let total_sq: f64 = coeffs.iter().map(|(_, a)| a * a).sum();
-        let prime_sq: f64 = coeffs.iter()
+        let prime_sq: f64 = coeffs
+            .iter()
             .filter(|(k, _)| *k <= n && is_prime[*k])
             .map(|(_, a)| a * a)
             .sum();
-        let alpha_em = if total_sq > 1e-30 { prime_sq / total_sq } else { 0.0 };
+        let alpha_em = if total_sq > 1e-30 {
+            prime_sq / total_sq
+        } else {
+            0.0
+        };
 
         // sin²θ_W: empirical from the energy decomposition
         // The "weak" sector is the off-diagonal cotangent part
@@ -72,17 +77,37 @@ impl ArithmeticCouplings {
         println!("  ┌─────────────────────────────────────────────────────────────────┐");
         println!("  │ ARITHMETIC COUPLING CONSTANTS                                   │");
         println!("  ├─────────────────────────────────────────────────────────────────┤");
-        println!("  │ α_s (strong)    = {:.6}  (H_N/ζ₂_N)                         │", self.alpha_s);
-        println!("  │   H_N           = {:.6}  (harmonic sum ~ lnN + γ)            │", self.harmonic_sum);
-        println!("  │   ζ₂(N)         = {:.6}  (Basel partial → π²/6)              │", self.zeta_2);
+        println!(
+            "  │ α_s (strong)    = {:.6}  (H_N/ζ₂_N)                         │",
+            self.alpha_s
+        );
+        println!(
+            "  │   H_N           = {:.6}  (harmonic sum ~ lnN + γ)            │",
+            self.harmonic_sum
+        );
+        println!(
+            "  │   ζ₂(N)         = {:.6}  (Basel partial → π²/6)              │",
+            self.zeta_2
+        );
         println!("  │   NOTE: α_s grows with N → asymptotic freedom (Gemini)       │");
         println!("  │                                                                 │");
-        println!("  │ α_em (EM)       = {:.6}  (prime energy / total energy)        │", self.alpha_em);
-        println!("  │   SM α_em       = {:.6}  (1/137.036)                          │", 1.0 / 137.036);
-        println!("  │   ratio         = {:.4}×                                       │",
-                 self.alpha_em / (1.0 / 137.036));
+        println!(
+            "  │ α_em (EM)       = {:.6}  (prime energy / total energy)        │",
+            self.alpha_em
+        );
+        println!(
+            "  │   SM α_em       = {:.6}  (1/137.036)                          │",
+            1.0 / 137.036
+        );
+        println!(
+            "  │   ratio         = {:.4}×                                       │",
+            self.alpha_em / (1.0 / 137.036)
+        );
         println!("  │                                                                 │");
-        println!("  │ sin²θ_W         = {:.6}  (weak mixing angle)                  │", self.sin2_theta_w);
+        println!(
+            "  │ sin²θ_W         = {:.6}  (weak mixing angle)                  │",
+            self.sin2_theta_w
+        );
         println!("  │   SM sin²θ_W    = 0.23122  (PDG 2024)                          │");
         println!("  └─────────────────────────────────────────────────────────────────┘");
     }

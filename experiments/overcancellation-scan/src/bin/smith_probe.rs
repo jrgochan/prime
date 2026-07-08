@@ -1,4 +1,13 @@
-#![allow(dead_code, unused_variables, unused_imports, unused_assignments, clippy::needless_range_loop, clippy::doc_lazy_continuation, non_snake_case, clippy::empty_line_after_doc_comments)]
+#![allow(
+    dead_code,
+    unused_variables,
+    unused_imports,
+    unused_assignments,
+    clippy::needless_range_loop,
+    clippy::doc_lazy_continuation,
+    non_snake_case,
+    clippy::empty_line_after_doc_comments
+)]
 // overcancellation-scan/src/bin/smith_probe.rs
 //
 // ╔═══════════════════════════════════════════════════════════════════╗
@@ -149,12 +158,20 @@ fn main() {
     println!("═══════════════════════════════════════════════════════════");
     println!();
 
-    print!("{:>10} {:>14} {:>14} {:>14} {:>14} {:>14}",
-        "N", "y₁²", "Σ_{d≥2}", "Total", "vᵀRv", "vᵀGv_est");
+    print!(
+        "{:>10} {:>14} {:>14} {:>14} {:>14} {:>14}",
+        "N", "y₁²", "Σ_{d≥2}", "Total", "vᵀRv", "vᵀGv_est"
+    );
     println!();
-    print!("{:>10} {:>14} {:>14} {:>14} {:>14} {:>14}",
-        "----------", "--------------", "--------------", "--------------",
-        "--------------", "--------------");
+    print!(
+        "{:>10} {:>14} {:>14} {:>14} {:>14} {:>14}",
+        "----------",
+        "--------------",
+        "--------------",
+        "--------------",
+        "--------------",
+        "--------------"
+    );
     println!();
 
     for &n in &test_ns {
@@ -189,8 +206,10 @@ fn main() {
         let rank1 = 0.25 * sum_v * sum_v;
         let v_g_v_est = v_r_v + rank1;
 
-        println!("{:>10} {:>14.8} {:>14.8} {:>14.8} {:>14.8} {:>14.8}",
-            n, y1_sq, tail_sum, smith_sum, v_r_v, v_g_v_est);
+        println!(
+            "{:>10} {:>14.8} {:>14.8} {:>14.8} {:>14.8} {:>14.8}",
+            n, y1_sq, tail_sum, smith_sum, v_r_v, v_g_v_est
+        );
     }
 
     // ─── SECTION 4: Tail distribution ───
@@ -209,16 +228,22 @@ fn main() {
     println!("y₁ = {:.10}  (should be ≈ -1)", y1);
     println!();
 
-    print!("{:>8} {:>14} {:>14} {:>14} {:>14}",
-        "D_max", "cumul_tail", "% of budget", "max|y_d|*d", "d*");
+    print!(
+        "{:>8} {:>14} {:>14} {:>14} {:>14}",
+        "D_max", "cumul_tail", "% of budget", "max|y_d|*d", "d*"
+    );
     println!();
-    print!("{:>8} {:>14} {:>14} {:>14} {:>14}",
-        "--------", "--------------", "--------------", "--------------", "--------------");
+    print!(
+        "{:>8} {:>14} {:>14} {:>14} {:>14}",
+        "--------", "--------------", "--------------", "--------------", "--------------"
+    );
     println!();
 
-    let budget = 12.0 - y1 * y1;  // budget left for d ≥ 2
+    let budget = 12.0 - y1 * y1; // budget left for d ≥ 2
 
-    let checkpoints = [5, 10, 20, 50, 100, 200, 500, 1000, 5000, 10000, 50000, 100000];
+    let checkpoints = [
+        5, 10, 20, 50, 100, 200, 500, 1000, 5000, 10000, 50000, 100000,
+    ];
     let mut cumulative = 0.0f64;
     let mut max_yd_d = 0.0f64;
     let mut max_d_star = 1usize;
@@ -238,9 +263,15 @@ fn main() {
                 max_d_star = d;
             }
         }
-        let pct = if budget > 0.0 { 100.0 * cumulative / budget } else { 0.0 };
-        println!("{:>8} {:>14.8} {:>13.4}% {:>14.8} {:>14}",
-            checkpoint, cumulative, pct, max_yd_d, max_d_star);
+        let pct = if budget > 0.0 {
+            100.0 * cumulative / budget
+        } else {
+            0.0
+        };
+        println!(
+            "{:>8} {:>14.8} {:>13.4}% {:>14.8} {:>14}",
+            checkpoint, cumulative, pct, max_yd_d, max_d_star
+        );
         prev_checkpoint = checkpoint;
     }
 
@@ -269,7 +300,10 @@ fn main() {
         if d >= 2 && scaled > max_scaled {
             max_scaled = scaled;
         }
-        println!("  d={:>3}: y_d = {:>12.8}, |y_d|·d·logN = {:>10.4}", d, yd, scaled);
+        println!(
+            "  d={:>3}: y_d = {:>12.8}, |y_d|·d·logN = {:>10.4}",
+            d, yd, scaled
+        );
     }
 
     println!();
@@ -304,8 +338,13 @@ fn main() {
     println!("  vᵀRv = {:.8}", v_r_v);
     println!("  (Σv)² = {:.8}", sum_v * sum_v);
     println!("  vᵀGv = vᵀRv + ¼(Σv)² = {:.8}", v_g_v);
-    println!("  vᵀGv {} 1  →  {}", 
+    println!(
+        "  vᵀGv {} 1  →  {}",
         if v_g_v <= 1.0 { "≤" } else { ">" },
-        if v_g_v <= 1.0 { "OVERCANCELLATION ✅" } else { "no overcancellation ❌" }
+        if v_g_v <= 1.0 {
+            "OVERCANCELLATION ✅"
+        } else {
+            "no overcancellation ❌"
+        }
     );
 }

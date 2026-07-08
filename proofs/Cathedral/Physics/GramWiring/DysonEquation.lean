@@ -314,13 +314,24 @@ NUMERICAL FINDING (N=1000):
 
 The cancellation d²_free + scattering ≈ 0 is the physical content of RH. -/
 
-/-- **DISTANCE DECOMPOSITION** (parametric form):
-    If d²_opt = d²_free + scattering, and d²_free → 0,
-    and scattering → 0, then d²_opt → 0, hence RH.
+/-- **DISTANCE DECOMPOSITION LIMIT** — CONCEPTUAL STUB (open gap)
 
-    NOTE: The Smith witness gives d²_saw → 0 but NOT d²_free → 0.
-    The actual numerics show d²_free → -∞ and scattering → +∞,
-    with their SUM → 0. This deeper cancellation is the content of RH. -/
+    The Dyson equation gives: d²_opt(N) = d²_free(N) + scattering(N).
+
+    Numerically (N=1000): d²_free ≈ -10.536, scattering ≈ +10.577,
+    so d²_opt ≈ 0.041. Both terms individually diverge as N → ∞,
+    but their sum → 0.
+
+    STATUS: This cancellation IS the content of RH. The individual
+    terms d²_free → -∞ and scattering → +∞ (both O(log N)), and
+    proving their near-exact cancellation requires controlling the
+    spectral structure of Δ_true — which is equivalent to RH.
+
+    The Dyson decomposition itself is PROVED (§4 above). What remains
+    open is the LIMIT: d²_free + scattering → 0. See §6 below.
+
+    This stub is intentionally `True := trivial` — it marks the
+    architectural location of the open gap, not a claimed proof. -/
 theorem distance_decomposition_limit
     (_h_decomp : ∀ _N : ℕ, ∀ d2_opt d2_free scatt : ℝ,
       d2_opt = d2_free + scatt → d2_opt = d2_free + scatt) :

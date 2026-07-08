@@ -16,20 +16,41 @@
 //! Also tracks inter-prime cancellation: how composites between
 //! consecutive primes restore balance.
 
+use cathedral_utils::arith::sieve_primes;
 use std::time::Instant;
 
 /// First 30 nontrivial zeta zeros (imaginary parts).
 const ZEROS: [f64; 30] = [
-    14.134725141734693, 21.022039638771555, 25.010_857_580_145_69,
-    30.424876125859513, 32.935_061_587_739_19, 37.586_178_158_825_67,
-    40.918_719_012_147_5, 43.327_073_280_915, 48.005_150_881_167_16,
-    49.773_832_477_672_3, 52.970_321_477_714_46, 56.446_247_697_063_39,
-    59.347_044_002_602_35, 60.831_778_524_609_81, 65.112_544_048_081_6,
-    67.079_810_529_494_17, 69.546_401_711_696_55, 72.067_157_674_481_9,
-    75.704_690_699_083_93, 77.144_840_068_874_8, 79.337_375_020_249_37,
-    82.910_380_854_086_03, 84.735_492_980_517_05, 87.425_274_613_125_2,
-    88.809_111_207_634_46, 92.491_899_270_558_48, 94.651_344_040_519_83,
-    95.870_634_228_245_31, 98.831_194_218_193_69, 101.31785100573139,
+    14.134725141734693,
+    21.022039638771555,
+    25.010_857_580_145_69,
+    30.424876125859513,
+    32.935_061_587_739_19,
+    37.586_178_158_825_67,
+    40.918_719_012_147_5,
+    43.327_073_280_915,
+    48.005_150_881_167_16,
+    49.773_832_477_672_3,
+    52.970_321_477_714_46,
+    56.446_247_697_063_39,
+    59.347_044_002_602_35,
+    60.831_778_524_609_81,
+    65.112_544_048_081_6,
+    67.079_810_529_494_17,
+    69.546_401_711_696_55,
+    72.067_157_674_481_9,
+    75.704_690_699_083_93,
+    77.144_840_068_874_8,
+    79.337_375_020_249_37,
+    82.910_380_854_086_03,
+    84.735_492_980_517_05,
+    87.425_274_613_125_2,
+    88.809_111_207_634_46,
+    92.491_899_270_558_48,
+    94.651_344_040_519_83,
+    95.870_634_228_245_31,
+    98.831_194_218_193_69,
+    101.31785100573139,
 ];
 
 /// Sieve Möbius function for all n ≤ limit.
@@ -70,25 +91,6 @@ fn sieve_moebius(limit: usize) -> Vec<i8> {
     mu
 }
 
-/// Sieve primes up to limit.
-fn sieve_primes(limit: usize) -> Vec<bool> {
-    let mut is_prime = vec![true; limit + 1];
-    is_prime[0] = false;
-    if limit >= 1 { is_prime[1] = false; }
-    let mut i = 2;
-    while i * i <= limit {
-        if is_prime[i] {
-            let mut j = i * i;
-            while j <= limit {
-                is_prime[j] = false;
-                j += i;
-            }
-        }
-        i += 1;
-    }
-    is_prime
-}
-
 /// Number of distinct prime factors.
 fn omega(mut n: usize, _is_prime: &[bool]) -> u32 {
     let mut count = 0;
@@ -96,20 +98,32 @@ fn omega(mut n: usize, _is_prime: &[bool]) -> u32 {
     while d * d <= n {
         if n.is_multiple_of(d) {
             count += 1;
-            while n.is_multiple_of(d) { n /= d; }
+            while n.is_multiple_of(d) {
+                n /= d;
+            }
         }
         d += 1;
     }
-    if n > 1 { count += 1; }
+    if n > 1 {
+        count += 1;
+    }
     count
 }
 
 /// Arithmetic type label.
 fn arith_type(n: usize, mu: i8, is_prime: &[bool]) -> &'static str {
-    if n == 1 { return "unit"; }
-    if is_prime[n] { return "prime"; }
-    if mu == 0 { return "sq"; }
-    if mu == 1 { return "μ=+1"; }
+    if n == 1 {
+        return "unit";
+    }
+    if is_prime[n] {
+        return "prime";
+    }
+    if mu == 0 {
+        return "sq";
+    }
+    if mu == 1 {
+        return "μ=+1";
+    }
     "μ=-1"
 }
 
@@ -222,7 +236,9 @@ pub fn run(n_max: usize, num_zeros: usize, _verbose: bool) {
     println!("{}", "-".repeat(12 + 14 * (gamma_count.min(5) + 1)));
 
     for n in 1..=n_max {
-        if mu[n] == 0 { continue; }
+        if mu[n] == 0 {
+            continue;
+        }
         let amp = (mu[n] as f64) / (n as f64).sqrt();
         let ln_n = (n as f64).ln();
 
@@ -262,8 +278,10 @@ pub fn run(n_max: usize, num_zeros: usize, _verbose: bool) {
     let mut eta1_re = 0.0f64;
     let mut eta1_im = 0.0f64;
 
-    print!("{:>18} {:>10} {:>12} {:>12} {:>12} {:>12}", 
-           "Interval", "#comp", "|η| before", "|η| after", "Δ|η|", "Δ|η|/Δ|η|_p");
+    print!(
+        "{:>18} {:>10} {:>12} {:>12} {:>12} {:>12}",
+        "Interval", "#comp", "|η| before", "|η| after", "Δ|η|", "Δ|η|/Δ|η|_p"
+    );
     println!();
     println!("{}", "-".repeat(80));
 
@@ -274,9 +292,15 @@ pub fn run(n_max: usize, num_zeros: usize, _verbose: bool) {
 
     for (interval_count, pi) in (0..primes.len().min(n_max)).enumerate() {
         let p = primes[pi];
-        let p_next = if pi + 1 < primes.len() { primes[pi + 1] } else { break };
+        let p_next = if pi + 1 < primes.len() {
+            primes[pi + 1]
+        } else {
+            break;
+        };
 
-        if p_next > n_max { break; }
+        if p_next > n_max {
+            break;
+        }
 
         // Add all numbers from last position to p-1 (composites before prime)
         // ... actually, let's just track as we go
@@ -299,15 +323,29 @@ pub fn run(n_max: usize, num_zeros: usize, _verbose: bool) {
         let mag_after = (eta1_re * eta1_re + eta1_im * eta1_im).sqrt();
         let delta = mag_after - mag_before;
 
-        let n_composites = if pi == 0 { p_next - 2 } else { p_next - primes[pi - 1] - 1 };
+        let n_composites = if pi == 0 {
+            p_next - 2
+        } else {
+            p_next - primes[pi - 1] - 1
+        };
 
         // Only print first max_intervals
         if interval_count < max_intervals {
-                println!("  [{:>6}, {:>6}) {:>10} {:>12.6} {:>12.6} {:>+12.6} {:>12.4}",
-                         if pi == 0 { 2 } else { primes[pi-1] + 1 }, p_next,
-                         n_composites, mag_before, mag_after, delta,
-                         if mag_before > 0.001 { delta / mag_before } else { 0.0 });
-            }
+            println!(
+                "  [{:>6}, {:>6}) {:>10} {:>12.6} {:>12.6} {:>+12.6} {:>12.4}",
+                if pi == 0 { 2 } else { primes[pi - 1] + 1 },
+                p_next,
+                n_composites,
+                mag_before,
+                mag_after,
+                delta,
+                if mag_before > 0.001 {
+                    delta / mag_before
+                } else {
+                    0.0
+                }
+            );
+        }
     }
 
     println!();
@@ -333,8 +371,10 @@ pub fn run(n_max: usize, num_zeros: usize, _verbose: bool) {
         .filter(|&x| x <= n_max)
         .collect();
 
-    println!("{:>12} {:>14} {:>14} {:>14} {:>14}",
-             "N", "|η|", "|η|·√N", "max|η|·√N", "max at N");
+    println!(
+        "{:>12} {:>14} {:>14} {:>14} {:>14}",
+        "N", "|η|", "|η|·√N", "max|η|·√N", "max at N"
+    );
     println!("{}", "-".repeat(70));
 
     for n in 1..=n_max {
@@ -353,8 +393,10 @@ pub fn run(n_max: usize, num_zeros: usize, _verbose: bool) {
         }
 
         if log_milestones.contains(&n) || n == n_max {
-            println!("{:>12} {:>14.10} {:>14.6} {:>14.6} {:>14}",
-                     n, mag, scaled, max_scaled, max_scaled_at);
+            println!(
+                "{:>12} {:>14.10} {:>14.6} {:>14.6} {:>14}",
+                n, mag, scaled, max_scaled, max_scaled_at
+            );
         }
     }
 
@@ -376,13 +418,19 @@ pub fn run(n_max: usize, num_zeros: usize, _verbose: bool) {
     let final_scaled = final_mag * (n_max as f64).sqrt();
     println!("  |η(1/2+iγ₁, {})| = {:.10}", n_max, final_mag);
     println!("  |η| · √N          = {:.6}", final_scaled);
-    println!("  max |η| · √N      = {:.6}  (at N = {})", max_scaled, max_scaled_at);
+    println!(
+        "  max |η| · √N      = {:.6}  (at N = {})",
+        max_scaled, max_scaled_at
+    );
     println!();
 
     if final_scaled < 10.0 {
         println!("  ✅ |η|·√N is bounded — CONSISTENT WITH RH");
     } else {
-        println!("  ⚠️  |η|·√N = {:.2} — check if this stabilizes at larger N", final_scaled);
+        println!(
+            "  ⚠️  |η|·√N = {:.2} — check if this stabilizes at larger N",
+            final_scaled
+        );
     }
     println!();
 }

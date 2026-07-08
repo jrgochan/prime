@@ -150,13 +150,16 @@ impl MmapGram {
     /// Release page cache for rows we've already read.
     /// This prevents the mmap'd file from competing with L triangle for RAM.
     fn dontneed_rows(&self, start_row: usize, count: usize) {
-        if count == 0 { return; }
+        if count == 0 {
+            return;
+        }
         let page_size = 4096usize;
         let byte_offset = start_row * self.dim * 8;
         let byte_len = count * self.dim * 8;
         // Align to page boundary
         let aligned_start = byte_offset & !(page_size - 1);
-        let aligned_len = ((byte_offset + byte_len + page_size - 1) & !(page_size - 1)) - aligned_start;
+        let aligned_len =
+            ((byte_offset + byte_len + page_size - 1) & !(page_size - 1)) - aligned_start;
         unsafe {
             let base = (self.mmap_base as *const u8).add(OOC_HEADER_SIZE + aligned_start);
             libc::madvise(base as *mut libc::c_void, aligned_len, libc::MADV_DONTNEED);
@@ -277,9 +280,7 @@ pub fn run(ooc_path: &str, max_n: usize) {
 
     let path = PathBuf::from(ooc_path);
     if !path.exists() {
-        let alt = PathBuf::from(format!(
-            "/mnt/d/cathedral-cache/ooc_gram_N{max_n}_p256.bin"
-        ));
+        let alt = PathBuf::from(format!("/mnt/d/cathedral-cache/ooc_gram_N{max_n}_p256.bin"));
         if alt.exists() {
             eprintln!("  Found OOC file: {}", alt.display());
             return run_inner(&alt, max_n);
@@ -370,7 +371,10 @@ fn run_inner(path: &Path, max_n: usize) {
 
     println!("# Dense d²_opt — Blocked Parallel Cholesky v4 (OOC mmap)");
     println!("# Source: {}", path.display());
-    println!("# Block size: {BLOCK_SIZE}, threads: {}", rayon::current_num_threads());
+    println!(
+        "# Block size: {BLOCK_SIZE}, threads: {}",
+        rayon::current_num_threads()
+    );
     println!("# Monotonicity: d²(N) = d²(N-1) - y²_new");
     println!("N\td2_opt\tln_N\td2_lnN\td2_ln2N\ty2_new\tis_prime\tis_hcn\ttau\tclass");
 

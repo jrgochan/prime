@@ -44,12 +44,20 @@ fn moebius(n: u64) -> i64 {
 
 /// Check if n is prime.
 fn is_prime(n: u64) -> bool {
-    if n < 2 { return false; }
-    if n < 4 { return true; }
-    if n.is_multiple_of(2) || n.is_multiple_of(3) { return false; }
+    if n < 2 {
+        return false;
+    }
+    if n < 4 {
+        return true;
+    }
+    if n.is_multiple_of(2) || n.is_multiple_of(3) {
+        return false;
+    }
     let mut i = 5;
     while i * i <= n {
-        if n.is_multiple_of(i) || n.is_multiple_of(i + 2) { return false; }
+        if n.is_multiple_of(i) || n.is_multiple_of(i + 2) {
+            return false;
+        }
         i += 6;
     }
     true
@@ -126,7 +134,9 @@ fn positive_coupling(j: u64, n_max: u64) -> f64 {
 
 /// Jordan's totient J₄(n) = n⁴ · ∏_{p|n} (1 - 1/p⁴)
 fn jordan_totient4(n: u64) -> f64 {
-    if n == 0 { return 0.0; }
+    if n == 0 {
+        return 0.0;
+    }
     let n4 = (n as f64).powi(4);
     let mut product = 1.0;
     let mut m = n;
@@ -167,7 +177,10 @@ fn main() {
     println!("╔══════════════════════════════════════════════════════════════════╗");
     println!("║         S-DUALITY MASS INVERSION EXPERIMENT                    ║");
     println!("║         The Mirror Universe Energy Census                       ║");
-    println!("║         N = {}                                                ║", n_max);
+    println!(
+        "║         N = {}                                                ║",
+        n_max
+    );
     println!("╚══════════════════════════════════════════════════════════════════╝");
     println!();
 
@@ -186,8 +199,10 @@ fn main() {
     // SECTION 1: Individual energy profiles
     // ═══════════════════════════════════════════════════
     println!("═══ SECTION 1: Individual Energy Profiles ═══");
-    println!("{:>6} {:>10} {:>8} {:>12} {:>12} {:>12}",
-        "n", "class", "|μ(n)|²", "E_dark(n)", "J₄(n)", "μ-coupling");
+    println!(
+        "{:>6} {:>10} {:>8} {:>12} {:>12} {:>12}",
+        "n", "class", "|μ(n)|²", "E_dark(n)", "J₄(n)", "μ-coupling"
+    );
     println!("{}", "─".repeat(68));
 
     // Track aggregates
@@ -238,8 +253,10 @@ fn main() {
             _ => "  ",
         };
 
-        println!("{:>6} {:>10} {:>8.0} {:>12.4} {:>12.1} {:>10.4}  {}",
-            n, class, pos_e, dark_e, j4, pos_c, class_marker);
+        println!(
+            "{:>6} {:>10} {:>8.0} {:>12.4} {:>12.1} {:>10.4}  {}",
+            n, class, pos_e, dark_e, j4, pos_c, class_marker
+        );
     }
 
     // Compute aggregates for ALL numbers
@@ -275,50 +292,68 @@ fn main() {
     // ═══════════════════════════════════════════════════
     println!();
     println!("═══ SECTION 2: Aggregate Energy by Class ═══");
-    println!("{:>12} {:>6} {:>12} {:>12} {:>14} {:>12}",
-        "Class", "Count", "Σ|μ|²", "Σ E_dark", "Σ J₄", "Σ μ-couple");
+    println!(
+        "{:>12} {:>6} {:>12} {:>12} {:>14} {:>12}",
+        "Class", "Count", "Σ|μ|²", "Σ E_dark", "Σ J₄", "Σ μ-couple"
+    );
     println!("{}", "─".repeat(74));
-    println!("{:>12} {:>6} {:>12.1} {:>12.4} {:>14.1} {:>12.4}",
-        "PRIMES ⚡", prime_count, prime_pos_total, prime_dark_total,
-        prime_j4_total, prime_coupling_total);
-    println!("{:>12} {:>6} {:>12.1} {:>12.4} {:>14.1} {:>12.4}",
-        "HCNs 🌀", hcn_count, hcn_pos_total, hcn_dark_total,
-        hcn_j4_total, hcn_coupling_total);
-    println!("{:>12} {:>6} {:>12.1} {:>12.4} {:>14.1} {:>12.4}",
-        "Other", comp_count, comp_pos_total, comp_dark_total,
-        comp_j4_total, comp_coupling_total);
+    println!(
+        "{:>12} {:>6} {:>12.1} {:>12.4} {:>14.1} {:>12.4}",
+        "PRIMES ⚡",
+        prime_count,
+        prime_pos_total,
+        prime_dark_total,
+        prime_j4_total,
+        prime_coupling_total
+    );
+    println!(
+        "{:>12} {:>6} {:>12.1} {:>12.4} {:>14.1} {:>12.4}",
+        "HCNs 🌀", hcn_count, hcn_pos_total, hcn_dark_total, hcn_j4_total, hcn_coupling_total
+    );
+    println!(
+        "{:>12} {:>6} {:>12.1} {:>12.4} {:>14.1} {:>12.4}",
+        "Other", comp_count, comp_pos_total, comp_dark_total, comp_j4_total, comp_coupling_total
+    );
 
     // ═══════════════════════════════════════════════════
     // SECTION 3: Per-element averages (the key comparison)
     // ═══════════════════════════════════════════════════
     println!();
     println!("═══ SECTION 3: Per-Element Averages (The S-Duality Mirror) ═══");
-    println!("{:>12} {:>12} {:>12} {:>14} {:>12}",
-        "Class", "avg|μ|²", "avg E_dark", "avg J₄", "avg μ-cpl");
+    println!(
+        "{:>12} {:>12} {:>12} {:>14} {:>12}",
+        "Class", "avg|μ|²", "avg E_dark", "avg J₄", "avg μ-cpl"
+    );
     println!("{}", "─".repeat(66));
     if prime_count > 0 {
-        println!("{:>12} {:>12.4} {:>12.6} {:>14.2} {:>12.6}",
+        println!(
+            "{:>12} {:>12.4} {:>12.6} {:>14.2} {:>12.6}",
             "PRIMES ⚡",
             prime_pos_total / prime_count as f64,
             prime_dark_total / prime_count as f64,
             prime_j4_total / prime_count as f64,
-            prime_coupling_total / prime_count as f64);
+            prime_coupling_total / prime_count as f64
+        );
     }
     if hcn_count > 0 {
-        println!("{:>12} {:>12.4} {:>12.6} {:>14.2} {:>12.6}",
+        println!(
+            "{:>12} {:>12.4} {:>12.6} {:>14.2} {:>12.6}",
             "HCNs 🌀",
             hcn_pos_total / hcn_count as f64,
             hcn_dark_total / hcn_count as f64,
             hcn_j4_total / hcn_count as f64,
-            hcn_coupling_total / hcn_count as f64);
+            hcn_coupling_total / hcn_count as f64
+        );
     }
     if comp_count > 0 {
-        println!("{:>12} {:>12.4} {:>12.6} {:>14.2} {:>12.6}",
+        println!(
+            "{:>12} {:>12.4} {:>12.6} {:>14.2} {:>12.6}",
             "Other",
             comp_pos_total / comp_count as f64,
             comp_dark_total / comp_count as f64,
             comp_j4_total / comp_count as f64,
-            comp_coupling_total / comp_count as f64);
+            comp_coupling_total / comp_count as f64
+        );
     }
 
     // ═══════════════════════════════════════════════════
@@ -335,12 +370,18 @@ fn main() {
     let hcn_avg_coupling = hcn_coupling_total / hcn_count as f64;
 
     println!();
-    println!("  Dark sector:  HCN/Prime energy ratio = {:.4}",
-        hcn_avg_dark / prime_avg_dark);
-    println!("  Pos  sector:  Prime/HCN Möbius ratio = {:.4}",
-        prime_avg_pos / hcn_avg_pos);
-    println!("  Pos coupling: Prime/HCN coupling ratio = {:.4}",
-        prime_avg_coupling / hcn_avg_coupling);
+    println!(
+        "  Dark sector:  HCN/Prime energy ratio = {:.4}",
+        hcn_avg_dark / prime_avg_dark
+    );
+    println!(
+        "  Pos  sector:  Prime/HCN Möbius ratio = {:.4}",
+        prime_avg_pos / hcn_avg_pos
+    );
+    println!(
+        "  Pos coupling: Prime/HCN coupling ratio = {:.4}",
+        prime_avg_coupling / hcn_avg_coupling
+    );
     println!();
 
     if hcn_avg_dark > prime_avg_dark && prime_avg_pos >= hcn_avg_pos {
@@ -356,11 +397,13 @@ fn main() {
     // ═══════════════════════════════════════════════════
     println!();
     println!("═══ SECTION 5: Top-10 Dark Sector Gravity Wells ═══");
-    let mut dark_energies: Vec<(u64, f64)> = (2..=n_max)
-        .map(|n| (n, dark_energy(n, n_max)))
-        .collect();
+    let mut dark_energies: Vec<(u64, f64)> =
+        (2..=n_max).map(|n| (n, dark_energy(n, n_max))).collect();
     dark_energies.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap());
-    println!("{:>6} {:>12} {:>10} {:>8}", "n", "E_dark(n)", "class", "|μ(n)|");
+    println!(
+        "{:>6} {:>12} {:>10} {:>8}",
+        "n", "E_dark(n)", "class", "|μ(n)|"
+    );
     println!("{}", "─".repeat(40));
     for &(n, e) in dark_energies.iter().take(15) {
         let class = classify(n, &hcn_set);
@@ -374,7 +417,10 @@ fn main() {
         .map(|n| (n, positive_coupling(n, n_max)))
         .collect();
     pos_couplings.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap());
-    println!("{:>6} {:>12} {:>10} {:>8}", "n", "μ-coupling", "class", "μ(n)");
+    println!(
+        "{:>6} {:>12} {:>10} {:>8}",
+        "n", "μ-coupling", "class", "μ(n)"
+    );
     println!("{}", "─".repeat(40));
     for &(n, c) in pos_couplings.iter().take(15) {
         let class = classify(n, &hcn_set);

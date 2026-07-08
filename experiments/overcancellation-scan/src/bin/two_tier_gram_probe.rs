@@ -1,4 +1,13 @@
-#![allow(dead_code, unused_variables, unused_imports, unused_assignments, clippy::needless_range_loop, clippy::doc_lazy_continuation, non_snake_case, clippy::empty_line_after_doc_comments)]
+#![allow(
+    dead_code,
+    unused_variables,
+    unused_imports,
+    unused_assignments,
+    clippy::needless_range_loop,
+    clippy::doc_lazy_continuation,
+    non_snake_case,
+    clippy::empty_line_after_doc_comments
+)]
 // overcancellation-scan/src/bin/two_tier_gram_probe.rs
 //
 // ╔═══════════════════════════════════════════════════════════════╗
@@ -30,7 +39,9 @@ fn vasyunin_const() -> f64 {
 
 /// Vasyunin cotangent sum V(a,b) = Σ_{m=1}^{a-1} cot(πm/a) · {mb/a}
 fn vasyunin_sum(a: usize, b: usize) -> f64 {
-    if a <= 1 { return 0.0; }
+    if a <= 1 {
+        return 0.0;
+    }
     let af = a as f64;
     let mut s = 0.0;
     for m in 1..a {
@@ -66,7 +77,8 @@ fn main() {
     println!();
 
     let cache_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-        .parent().unwrap()
+        .parent()
+        .unwrap()
         .join("cache/hpdf");
 
     let hc_ns: Vec<usize> = vec![
@@ -101,7 +113,9 @@ fn main() {
 
         for k in 2..n {
             let i = k - 2;
-            if i >= dim { break; }
+            if i >= dim {
+                break;
+            }
             let mu_k = mu_raw[k] as f64;
             let cutoff = 1.0 - (k as f64).ln() / log_n;
             if cutoff > 0.0 {
@@ -111,17 +125,32 @@ fn main() {
 
         // Normalize
         let norm: f64 = v_full.iter().map(|x| x * x).sum::<f64>().sqrt();
-        if norm < 1e-15 { continue; }
-        for x in v_full.iter_mut() { *x /= norm; }
+        if norm < 1e-15 {
+            continue;
+        }
+        for x in v_full.iter_mut() {
+            *x /= norm;
+        }
 
         // ═══ Gram entry accessor ═══
         let gram_entry = |j: usize, k: usize| -> f64 {
             // j, k are 1-indexed
-            if j == 1 && k == 1 { return gram_entry_k1(1); }
-            if j == 1 { return gram_entry_k1(k); }
-            if k == 1 { return gram_entry_k1(j); }
-            let ii = j - 2; let ji = k - 2;
-            if ii < dim && ji < dim { gram_flat[ii * dim + ji] } else { 0.0 }
+            if j == 1 && k == 1 {
+                return gram_entry_k1(1);
+            }
+            if j == 1 {
+                return gram_entry_k1(k);
+            }
+            if k == 1 {
+                return gram_entry_k1(j);
+            }
+            let ii = j - 2;
+            let ji = k - 2;
+            if ii < dim && ji < dim {
+                gram_flat[ii * dim + ji]
+            } else {
+                0.0
+            }
         };
 
         // ═══════════════════════════════════════════════════════════
@@ -146,7 +175,8 @@ fn main() {
         eprint!("  N={:>6}: computing shells...", n);
 
         // Parallel over rows: compute shell[i] and max_entry_at[i]
-        let row_data: Vec<(f64, f64)> = (0..n).into_par_iter()
+        let row_data: Vec<(f64, f64)> = (0..n)
+            .into_par_iter()
             .map(|i| {
                 let j_1 = i + 1; // 1-indexed
                 let mut shell = 0.0f64;
@@ -194,13 +224,23 @@ fn main() {
 
         // ═══ Print table ═══
         println!();
-        println!("═══ N = {} (dim={}, vᵀGv = {:+.8}, 1/lnN = {:.6}) ═══", n, n, vtgv, 1.0/log_n);
-        println!("{:>6} {:>+14} {:>10} {:>14} {:>+14} {:>+10} {:>10}",
-            "J", "Head(J)", "M_tail", "TailBound", "BOUND", "Slack", "K_eff");
+        println!(
+            "═══ N = {} (dim={}, vᵀGv = {:+.8}, 1/lnN = {:.6}) ═══",
+            n,
+            n,
+            vtgv,
+            1.0 / log_n
+        );
+        println!(
+            "{:>6} {:>+14} {:>10} {:>14} {:>+14} {:>+10} {:>10}",
+            "J", "Head(J)", "M_tail", "TailBound", "BOUND", "Slack", "K_eff"
+        );
         println!("{}", "─".repeat(82));
 
         for &j in &j_values {
-            if j < 2 || j >= n { continue; }
+            if j < 2 || j >= n {
+                continue;
+            }
 
             // Head(J) = prefix_sum[J-2]  (all shells with 0-indexed i < J-1)
             let head = prefix_sum[j - 2];
@@ -216,10 +256,18 @@ fn main() {
             let slack = bound - vtgv;
             let k_eff = (bound - 1.0) * log_n;
 
-            let marker = if bound <= 1.0 { " ✓✓" } else if k_eff < 5.0 { " ✓" } else { "" };
+            let marker = if bound <= 1.0 {
+                " ✓✓"
+            } else if k_eff < 5.0 {
+                " ✓"
+            } else {
+                ""
+            };
 
-            println!("{:>6} {:>+14.8} {:>10.6} {:>14.8} {:>+14.8} {:>+10.6} {:>10.4}{}",
-                j, head, m_tail, tail_bound, bound, slack, k_eff, marker);
+            println!(
+                "{:>6} {:>+14.8} {:>10.6} {:>14.8} {:>+14.8} {:>+10.6} {:>10.4}{}",
+                j, head, m_tail, tail_bound, bound, slack, k_eff, marker
+            );
         }
 
         // ═══ Find optimal J ═══
@@ -237,7 +285,10 @@ fn main() {
         }
         let k_eff_best = (best_bound - 1.0) * log_n;
         println!("{}", "─".repeat(82));
-        println!("  OPTIMAL: J* = {}, Bound = {:+.8}, K_eff = {:.4}", best_j, best_bound, k_eff_best);
+        println!(
+            "  OPTIMAL: J* = {}, Bound = {:+.8}, K_eff = {:.4}",
+            best_j, best_bound, k_eff_best
+        );
         println!();
     }
 
@@ -246,14 +297,18 @@ fn main() {
     println!("╔═══════════════════════════════════════════════════════════════════════════════╗");
     println!("║  SUMMARY: Optimal J* and K_eff across N                                     ║");
     println!("╚═══════════════════════════════════════════════════════════════════════════════╝");
-    println!("{:>8} {:>+12} {:>6} {:>+12} {:>10} {:>10}",
-        "N", "vᵀGv", "J*", "Bound*", "K_eff", "1/lnN");
+    println!(
+        "{:>8} {:>+12} {:>6} {:>+12} {:>10} {:>10}",
+        "N", "vᵀGv", "J*", "Bound*", "K_eff", "1/lnN"
+    );
     println!("{}", "─".repeat(62));
 
     // Re-run optimal J search for summary
     for &n in &hc_ns {
         let path = cache_dir.join(format!("gram_N{}.h5", n));
-        if !path.exists() { continue; }
+        if !path.exists() {
+            continue;
+        }
 
         let reader = match HpdfReader::open(&path) {
             Ok(r) => r,
@@ -269,7 +324,9 @@ fn main() {
         v_full[0] = -1.0;
         for k in 2..n {
             let i = k - 2;
-            if i >= dim { break; }
+            if i >= dim {
+                break;
+            }
             let mu_k = mu_raw[k] as f64;
             let cutoff = 1.0 - (k as f64).ln() / log_n;
             if cutoff > 0.0 {
@@ -277,19 +334,35 @@ fn main() {
             }
         }
         let norm: f64 = v_full.iter().map(|x| x * x).sum::<f64>().sqrt();
-        if norm < 1e-15 { continue; }
-        for x in v_full.iter_mut() { *x /= norm; }
+        if norm < 1e-15 {
+            continue;
+        }
+        for x in v_full.iter_mut() {
+            *x /= norm;
+        }
 
         let gram_entry = |j: usize, k: usize| -> f64 {
-            if j == 1 && k == 1 { return gram_entry_k1(1); }
-            if j == 1 { return gram_entry_k1(k); }
-            if k == 1 { return gram_entry_k1(j); }
-            let ii = j - 2; let ji = k - 2;
-            if ii < dim && ji < dim { gram_flat[ii * dim + ji] } else { 0.0 }
+            if j == 1 && k == 1 {
+                return gram_entry_k1(1);
+            }
+            if j == 1 {
+                return gram_entry_k1(k);
+            }
+            if k == 1 {
+                return gram_entry_k1(j);
+            }
+            let ii = j - 2;
+            let ji = k - 2;
+            if ii < dim && ji < dim {
+                gram_flat[ii * dim + ji]
+            } else {
+                0.0
+            }
         };
 
         // Quick parallel shell computation
-        let row_data: Vec<(f64, f64)> = (0..n).into_par_iter()
+        let row_data: Vec<(f64, f64)> = (0..n)
+            .into_par_iter()
             .map(|i| {
                 let j_1 = i + 1;
                 let mut shell = 0.0f64;
@@ -306,30 +379,46 @@ fn main() {
 
         let mut prefix_sum = vec![0.0f64; n];
         prefix_sum[0] = row_data[0].0;
-        for i in 1..n { prefix_sum[i] = prefix_sum[i-1] + row_data[i].0; }
+        for i in 1..n {
+            prefix_sum[i] = prefix_sum[i - 1] + row_data[i].0;
+        }
 
         let mut suffix_max = vec![0.0f64; n];
-        suffix_max[n-1] = row_data[n-1].1;
-        for i in (0..n-1).rev() { suffix_max[i] = suffix_max[i+1].max(row_data[i].1); }
+        suffix_max[n - 1] = row_data[n - 1].1;
+        for i in (0..n - 1).rev() {
+            suffix_max[i] = suffix_max[i + 1].max(row_data[i].1);
+        }
 
-        let mut suffix_l1 = vec![0.0f64; n+1];
-        for i in (0..n).rev() { suffix_l1[i] = suffix_l1[i+1] + v_full[i].abs(); }
+        let mut suffix_l1 = vec![0.0f64; n + 1];
+        for i in (0..n).rev() {
+            suffix_l1[i] = suffix_l1[i + 1] + v_full[i].abs();
+        }
 
-        let vtgv = prefix_sum[n-1];
+        let vtgv = prefix_sum[n - 1];
 
         let mut best_j = 2usize;
         let mut best_bound = f64::INFINITY;
         for j in 2..n.min(200) {
-            let head = prefix_sum[j-2];
-            let m_tail = suffix_max[j-1];
-            let tl1 = suffix_l1[j-1];
+            let head = prefix_sum[j - 2];
+            let m_tail = suffix_max[j - 1];
+            let tl1 = suffix_l1[j - 1];
             let bound = head + m_tail * tl1 * tl1;
-            if bound < best_bound { best_bound = bound; best_j = j; }
+            if bound < best_bound {
+                best_bound = bound;
+                best_j = j;
+            }
         }
 
         let k_eff = (best_bound - 1.0) * log_n;
-        println!("{:>8} {:>+12.8} {:>6} {:>+12.8} {:>10.4} {:>10.6}",
-            n, vtgv, best_j, best_bound, k_eff, 1.0/log_n);
+        println!(
+            "{:>8} {:>+12.8} {:>6} {:>+12.8} {:>10.4} {:>10.6}",
+            n,
+            vtgv,
+            best_j,
+            best_bound,
+            k_eff,
+            1.0 / log_n
+        );
     }
 
     println!();

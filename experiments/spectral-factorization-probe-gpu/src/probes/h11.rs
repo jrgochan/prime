@@ -15,7 +15,10 @@ use cathedral_utils::arith;
 /// Perturbation magnitude for sensitivity analysis.
 const EPSILON: f64 = 1e-6;
 
-pub fn h11_sherman_morrison_sensitivity(keys: &[SemiprimeKey], cache: &GramCache) -> Vec<H11Result> {
+pub fn h11_sherman_morrison_sensitivity(
+    keys: &[SemiprimeKey],
+    cache: &GramCache,
+) -> Vec<H11Result> {
     println!("  [H11] Sherman-Morrison Factor Sensitivity (GPU)");
     println!("  ────────────────────────────────────────────────");
     let mut results = Vec::new();
@@ -40,13 +43,16 @@ pub fn h11_sherman_morrison_sensitivity(keys: &[SemiprimeKey], cache: &GramCache
 
         for &p_test in test_primes.iter().take(100) {
             let idx = p_test - 2; // b is indexed from k=2
-            if idx >= dim { continue; }
+            if idx >= dim {
+                continue;
+            }
 
             // Perturb b[idx] by ε
             let mut b_perturbed = b.clone();
             b_perturbed[idx] += EPSILON;
 
-            let d2_perturbed = cathedral_utils::mertens::quadratic_form(gram, &b_perturbed, &v, dim);
+            let d2_perturbed =
+                cathedral_utils::mertens::quadratic_form(gram, &b_perturbed, &v, dim);
             let delta_d2 = (d2_perturbed - d2_base).abs();
             let is_factor = key.n % p_test as u64 == 0;
 
@@ -62,42 +68,73 @@ pub fn h11_sherman_morrison_sensitivity(keys: &[SemiprimeKey], cache: &GramCache
         sensitivity_entries.sort_by(|a, b| b.sensitivity.partial_cmp(&a.sensitivity).unwrap());
 
         // Find factor rank
-        let factor_rank = sensitivity_entries.iter()
+        let factor_rank = sensitivity_entries
+            .iter()
             .position(|e| e.prime == key.p as usize);
 
         // Compute statistics
-        let factor_sensitivities: Vec<f64> = sensitivity_entries.iter()
+        let factor_sensitivities: Vec<f64> = sensitivity_entries
+            .iter()
             .filter(|e| e.is_factor)
             .map(|e| e.sensitivity)
             .collect();
-        let nonfactor_sensitivities: Vec<f64> = sensitivity_entries.iter()
+        let nonfactor_sensitivities: Vec<f64> = sensitivity_entries
+            .iter()
             .filter(|e| !e.is_factor)
             .map(|e| e.sensitivity)
             .collect();
 
-        let mean_factor = if factor_sensitivities.is_empty() { 0.0 }
-            else { factor_sensitivities.iter().sum::<f64>() / factor_sensitivities.len() as f64 };
-        let mean_nonfactor = if nonfactor_sensitivities.is_empty() { 0.0 }
-            else { nonfactor_sensitivities.iter().sum::<f64>() / nonfactor_sensitivities.len() as f64 };
-        let sensitivity_ratio = if mean_nonfactor > 0.0 { mean_factor / mean_nonfactor } else { 1.0 };
+        let mean_factor = if factor_sensitivities.is_empty() {
+            0.0
+        } else {
+            factor_sensitivities.iter().sum::<f64>() / factor_sensitivities.len() as f64
+        };
+        let mean_nonfactor = if nonfactor_sensitivities.is_empty() {
+            0.0
+        } else {
+            nonfactor_sensitivities.iter().sum::<f64>() / nonfactor_sensitivities.len() as f64
+        };
+        let sensitivity_ratio = if mean_nonfactor > 0.0 {
+            mean_factor / mean_nonfactor
+        } else {
+            1.0
+        };
 
-        println!("    N={} = {}×{}, M={}, d²_base={:.8}", key.n, key.p, key.q, m, d2_base);
+        println!(
+            "    N={} = {}×{}, M={}, d²_base={:.8}",
+            key.n, key.p, key.q, m, d2_base
+        );
         println!("      Top-10 most sensitive positions (ε={:.0e}):", EPSILON);
         for (i, e) in sensitivity_entries.iter().take(10).enumerate() {
-            println!("        #{}: p={:5} |Δd²/ε|={:.6e} {}",
-                i + 1, e.prime, e.sensitivity,
-                if e.is_factor { "← FACTOR" } else { "" });
+            println!(
+                "        #{}: p={:5} |Δd²/ε|={:.6e} {}",
+                i + 1,
+                e.prime,
+                e.sensitivity,
+                if e.is_factor { "← FACTOR" } else { "" }
+            );
         }
         if let Some(rank) = factor_rank {
-            println!("      Factor p={} sensitivity rank: {}/{}", key.p, rank + 1, sensitivity_entries.len());
+            println!(
+                "      Factor p={} sensitivity rank: {}/{}",
+                key.p,
+                rank + 1,
+                sensitivity_entries.len()
+            );
         }
         println!("      Mean factor sensitivity:     {:.6e}", mean_factor);
         println!("      Mean non-factor sensitivity: {:.6e}", mean_nonfactor);
         println!("      Sensitivity ratio: {:.4}", sensitivity_ratio);
-        println!("      Signal: {}\n",
-            if sensitivity_ratio > 2.0 { "STRONG ⚡" }
-            else if sensitivity_ratio > 1.3 { "weak 〜" }
-            else { "null ∅" });
+        println!(
+            "      Signal: {}\n",
+            if sensitivity_ratio > 2.0 {
+                "STRONG ⚡"
+            } else if sensitivity_ratio > 1.3 {
+                "weak 〜"
+            } else {
+                "null ∅"
+            }
+        );
 
         results.push(H11Result {
             n: key.n,

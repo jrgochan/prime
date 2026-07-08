@@ -1,4 +1,13 @@
-#![allow(dead_code, unused_variables, unused_imports, unused_assignments, clippy::needless_range_loop, clippy::doc_lazy_continuation, non_snake_case, clippy::empty_line_after_doc_comments)]
+#![allow(
+    dead_code,
+    unused_variables,
+    unused_imports,
+    unused_assignments,
+    clippy::needless_range_loop,
+    clippy::doc_lazy_continuation,
+    non_snake_case,
+    clippy::empty_line_after_doc_comments
+)]
 //! b-Projection Analysis — How the inner product vector b distributes
 //! across the eigenspaces of the Gram matrix.
 //!
@@ -35,17 +44,20 @@ fn compute_b_vector(dim: usize) -> Vec<f64> {
     // But let's compute via numerical quadrature for correctness.
 
     let npts = 500_000usize;
-    (0..dim).into_par_iter().map(|i| {
-        let k = (i + 1) as f64;
-        let mut sum = 0.0f64;
-        for n in 1..=npts {
-            let x = (n as f64 - 0.5) / npts as f64;
-            let arg = 1.0 / (k * x);
-            let frac = arg - arg.floor();
-            sum += frac;
-        }
-        sum / npts as f64
-    }).collect()
+    (0..dim)
+        .into_par_iter()
+        .map(|i| {
+            let k = (i + 1) as f64;
+            let mut sum = 0.0f64;
+            for n in 1..=npts {
+                let x = (n as f64 - 0.5) / npts as f64;
+                let arg = 1.0 / (k * x);
+                let frac = arg - arg.floor();
+                sum += frac;
+            }
+            sum / npts as f64
+        })
+        .collect()
 }
 
 fn main() {
@@ -55,16 +67,16 @@ fn main() {
     println!("╚══════════════════════════════════════════════════════════════╝");
     println!();
 
-    let test_ns: Vec<usize> = vec![
-        10, 20, 30, 50, 80, 100, 150, 200, 300, 500,
-    ];
+    let test_ns: Vec<usize> = vec![10, 20, 30, 50, 80, 100, 150, 200, 300, 500];
 
     // ══════════════════════════════════════════════════
     // PART 1: Summary table
     // ══════════════════════════════════════════════════
     println!("  PART 1: Summary");
-    println!("  {:>5} {:>10} {:>10} {:>10} {:>12} {:>12} {:>12}",
-        "N", "λ_min", "|b·v_min|²", "ratio", "d²", "bottom5%", "top5%");
+    println!(
+        "  {:>5} {:>10} {:>10} {:>10} {:>12} {:>12} {:>12}",
+        "N", "λ_min", "|b·v_min|²", "ratio", "d²", "bottom5%", "top5%"
+    );
     println!("  {}", "─".repeat(80));
 
     for &n in &test_ns {
@@ -90,11 +102,13 @@ fn main() {
         let eig = mat.symmetric_eigen();
 
         // Sort eigenvalues and get corresponding eigenvector columns
-        let mut eig_pairs: Vec<(f64, Vec<f64>)> = (0..dim).map(|i| {
-            let eigenval = eig.eigenvalues[i];
-            let eigvec: Vec<f64> = (0..dim).map(|r| eig.eigenvectors[(r, i)]).collect();
-            (eigenval, eigvec)
-        }).collect();
+        let mut eig_pairs: Vec<(f64, Vec<f64>)> = (0..dim)
+            .map(|i| {
+                let eigenval = eig.eigenvalues[i];
+                let eigvec: Vec<f64> = (0..dim).map(|r| eig.eigenvectors[(r, i)]).collect();
+                (eigenval, eigvec)
+            })
+            .collect();
         eig_pairs.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap());
 
         // Compute b vector
@@ -102,13 +116,18 @@ fn main() {
         let b_norm_sq: f64 = b.iter().map(|x| x * x).sum();
 
         // Compute projections |b·vᵢ|²
-        let projections: Vec<f64> = eig_pairs.iter().map(|(_, v)| {
-            let dot: f64 = b.iter().zip(v.iter()).map(|(bi, vi)| bi * vi).sum();
-            dot * dot
-        }).collect();
+        let projections: Vec<f64> = eig_pairs
+            .iter()
+            .map(|(_, v)| {
+                let dot: f64 = b.iter().zip(v.iter()).map(|(bi, vi)| bi * vi).sum();
+                dot * dot
+            })
+            .collect();
 
         // Compute d² = 1 - Σ |b·vᵢ|²/λᵢ
-        let b_ginv_b: f64 = eig_pairs.iter().zip(projections.iter())
+        let b_ginv_b: f64 = eig_pairs
+            .iter()
+            .zip(projections.iter())
             .map(|((lam, _), proj)| proj / lam)
             .sum();
         let d_sq = 1.0 - b_ginv_b;
@@ -127,9 +146,17 @@ fn main() {
         let ratio = b_vmin_sq / lam_min;
         let elapsed = t0.elapsed().as_secs_f64();
 
-        println!("  {:5} {:10.2e} {:10.2e} {:10.4e} {:12.6e} {:10.4}% {:10.4}%  ({:.1}s)",
-            n, lam_min, b_vmin_sq, ratio, d_sq,
-            bottom_frac * 100.0, top_frac * 100.0, elapsed);
+        println!(
+            "  {:5} {:10.2e} {:10.2e} {:10.4e} {:12.6e} {:10.4}% {:10.4}%  ({:.1}s)",
+            n,
+            lam_min,
+            b_vmin_sq,
+            ratio,
+            d_sq,
+            bottom_frac * 100.0,
+            top_frac * 100.0,
+            elapsed
+        );
     }
 
     // ══════════════════════════════════════════════════
@@ -157,26 +184,33 @@ fn main() {
         let mat = nalgebra::DMatrix::from_row_slice(dim, dim, &g_flat);
         let eig = mat.symmetric_eigen();
 
-        let mut eig_pairs: Vec<(f64, Vec<f64>)> = (0..dim).map(|i| {
-            let eigenval = eig.eigenvalues[i];
-            let eigvec: Vec<f64> = (0..dim).map(|r| eig.eigenvectors[(r, i)]).collect();
-            (eigenval, eigvec)
-        }).collect();
+        let mut eig_pairs: Vec<(f64, Vec<f64>)> = (0..dim)
+            .map(|i| {
+                let eigenval = eig.eigenvalues[i];
+                let eigvec: Vec<f64> = (0..dim).map(|r| eig.eigenvectors[(r, i)]).collect();
+                (eigenval, eigvec)
+            })
+            .collect();
         eig_pairs.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap());
 
         let b = compute_b_vector(dim);
         let b_norm_sq: f64 = b.iter().map(|x| x * x).sum();
 
-        let projections: Vec<f64> = eig_pairs.iter().map(|(_, v)| {
-            let dot: f64 = b.iter().zip(v.iter()).map(|(bi, vi)| bi * vi).sum();
-            dot * dot
-        }).collect();
+        let projections: Vec<f64> = eig_pairs
+            .iter()
+            .map(|(_, v)| {
+                let dot: f64 = b.iter().zip(v.iter()).map(|(bi, vi)| bi * vi).sum();
+                dot * dot
+            })
+            .collect();
 
         println!();
         println!("  ── N = {} (dim = {}) ──", n, dim);
         println!("  ‖b‖² = {:.6}", b_norm_sq);
-        println!("  {:>5} {:>12} {:>12} {:>12} {:>12} {:>12}",
-            "rank", "λᵢ", "|b·vᵢ|²", "|b·vᵢ|²/‖b‖²", "|b·vᵢ|²/λᵢ", "cum d² contrib");
+        println!(
+            "  {:>5} {:>12} {:>12} {:>12} {:>12} {:>12}",
+            "rank", "λᵢ", "|b·vᵢ|²", "|b·vᵢ|²/‖b‖²", "|b·vᵢ|²/λᵢ", "cum d² contrib"
+        );
 
         let mut cum_contrib = 0.0f64;
         // Show first 10, last 5, and any eigenvalue where projection > 1% of ‖b‖²
@@ -191,10 +225,20 @@ fn main() {
             cum_contrib += contrib;
 
             if i < show_first || i >= dim - show_last || frac > 0.01 {
-                println!("  {:5} {:12.4e} {:12.4e} {:12.6}% {:12.4e} {:12.6e}",
-                    i + 1, lam, proj, frac * 100.0, contrib, cum_contrib);
+                println!(
+                    "  {:5} {:12.4e} {:12.4e} {:12.6}% {:12.4e} {:12.6e}",
+                    i + 1,
+                    lam,
+                    proj,
+                    frac * 100.0,
+                    contrib,
+                    cum_contrib
+                );
             } else if i == show_first {
-                println!("  {:>5} {:>12} {:>12} {:>12} {:>12}", "...", "...", "...", "...", "...");
+                println!(
+                    "  {:>5} {:>12} {:>12} {:>12} {:>12}",
+                    "...", "...", "...", "...", "..."
+                );
             }
         }
 
@@ -202,8 +246,12 @@ fn main() {
         let b_vmin_sq = projections[0];
         let lam_min = eig_pairs[0].0;
         println!();
-        println!("  KEY RATIO: |b·v_min|²/λ_min = {:.6e} / {:.6e} = {:.6e}",
-            b_vmin_sq, lam_min, b_vmin_sq / lam_min);
+        println!(
+            "  KEY RATIO: |b·v_min|²/λ_min = {:.6e} / {:.6e} = {:.6e}",
+            b_vmin_sq,
+            lam_min,
+            b_vmin_sq / lam_min
+        );
         println!("  If this ratio → 0 as N → ∞, then the min-eigenvalue");
         println!("  contribution to bᵀG⁻¹b vanishes, enabling d² → 0.");
     }
@@ -216,8 +264,10 @@ fn main() {
     println!("  PART 3: Scaling of |b·v_min|² and |b·v_min|²/λ_min");
     println!("══════════════════════════════════════════════════════════════");
     println!();
-    println!("  {:>5} {:>12} {:>12} {:>12} {:>12} {:>12}",
-        "N", "λ_min", "|b·v_min|²", "ratio", "N²·|bv|²", "N²·ratio");
+    println!(
+        "  {:>5} {:>12} {:>12} {:>12} {:>12} {:>12}",
+        "N", "λ_min", "|b·v_min|²", "ratio", "N²·|bv|²", "N²·ratio"
+    );
     println!("  {}", "─".repeat(75));
 
     let scaling_ns: Vec<usize> = vec![10, 20, 30, 50, 80, 100, 150, 200, 300, 500];
@@ -240,8 +290,7 @@ fn main() {
         }
         let mat = nalgebra::DMatrix::from_row_slice(dim, dim, &g_flat);
         let eig = mat.symmetric_eigen();
-        let mut eig_pairs: Vec<(f64, usize)> = (0..dim)
-            .map(|i| (eig.eigenvalues[i], i)).collect();
+        let mut eig_pairs: Vec<(f64, usize)> = (0..dim).map(|i| (eig.eigenvalues[i], i)).collect();
         eig_pairs.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap());
 
         let b = compute_b_vector(dim);
@@ -252,10 +301,15 @@ fn main() {
         let b_vmin_sq = dot * dot;
         let ratio = b_vmin_sq / lam_min;
 
-        println!("  {:5} {:12.4e} {:12.4e} {:12.4e} {:12.4} {:12.4}",
-            n, lam_min, b_vmin_sq, ratio,
+        println!(
+            "  {:5} {:12.4e} {:12.4e} {:12.4e} {:12.4} {:12.4}",
+            n,
+            lam_min,
+            b_vmin_sq,
+            ratio,
             (n as f64).powi(2) * b_vmin_sq,
-            (n as f64).powi(2) * ratio);
+            (n as f64).powi(2) * ratio
+        );
 
         if n >= 10 {
             ratio_log_data.push(((n as f64).ln(), ratio.ln()));
@@ -265,7 +319,10 @@ fn main() {
 
     // Fit power laws
     println!();
-    for (label, data) in [("b·v_min|²", &proj_log_data), ("|b·v_min|²/λ_min", &ratio_log_data)] {
+    for (label, data) in [
+        ("b·v_min|²", &proj_log_data),
+        ("|b·v_min|²/λ_min", &ratio_log_data),
+    ] {
         if data.len() >= 3 {
             let n_pts = data.len() as f64;
             let sx: f64 = data.iter().map(|(x, _)| x).sum();
@@ -276,10 +333,17 @@ fn main() {
             let log_c = (sy - alpha * sx) / n_pts;
             let mean_y = sy / n_pts;
             let ss_tot: f64 = data.iter().map(|(_, y)| (y - mean_y).powi(2)).sum();
-            let ss_res: f64 = data.iter()
-                .map(|(x, y)| (y - (alpha * x + log_c)).powi(2)).sum();
+            let ss_res: f64 = data
+                .iter()
+                .map(|(x, y)| (y - (alpha * x + log_c)).powi(2))
+                .sum();
             let r2 = 1.0 - ss_res / ss_tot;
-            println!("  |{label}| ≈ {:.4} · N^({:.4})   R² = {:.6}", log_c.exp(), alpha, r2);
+            println!(
+                "  |{label}| ≈ {:.4} · N^({:.4})   R² = {:.6}",
+                log_c.exp(),
+                alpha,
+                r2
+            );
         }
     }
 

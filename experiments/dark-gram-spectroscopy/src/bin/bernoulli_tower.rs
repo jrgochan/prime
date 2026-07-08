@@ -75,7 +75,8 @@ fn main() {
 fn compute_eigenvalues(mat: &[f64], dim: usize) -> (f64, f64) {
     let faer_mat = faer::Mat::from_fn(dim, dim, |i, j| mat[i * dim + j]);
 
-    let mut eigenvalues = faer_mat.self_adjoint_eigenvalues(faer::Side::Lower)
+    let mut eigenvalues = faer_mat
+        .self_adjoint_eigenvalues(faer::Side::Lower)
         .expect("eigenvalue computation failed");
     eigenvalues.sort_by(|a, b| a.partial_cmp(b).unwrap());
 

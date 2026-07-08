@@ -1,4 +1,10 @@
-#![allow(clippy::needless_range_loop, clippy::manual_range_contains, dead_code, unused_variables, clippy::empty_line_after_doc_comments)]
+#![allow(
+    clippy::needless_range_loop,
+    clippy::manual_range_contains,
+    dead_code,
+    unused_variables,
+    clippy::empty_line_after_doc_comments
+)]
 //! # 🌀 Prime Harmonics Explorer
 //!
 //! **Computational implementation of Cathedral/Spectral/PrimeHarmonics.lean**
@@ -63,7 +69,12 @@ fn main() {
     }
 
     // Eta mode — complete winding analysis, no primes needed
-    if let cli::Mode::Eta { n_max, num_zeros, verbose } = config.mode {
+    if let cli::Mode::Eta {
+        n_max,
+        num_zeros,
+        verbose,
+    } = config.mode
+    {
         modes::eta::run(n_max, num_zeros, verbose);
         return;
     }
@@ -105,7 +116,11 @@ fn main() {
     }
 
     // Scaling v4 — Incremental Cholesky from OOC mmap'd Gram
-    if let cli::Mode::ScalingV4 { ref ooc_path, max_n } = config.mode {
+    if let cli::Mode::ScalingV4 {
+        ref ooc_path,
+        max_n,
+    } = config.mode
+    {
         modes::scaling_v4::run(ooc_path, max_n);
         return;
     }
@@ -133,10 +148,9 @@ fn main() {
             t_end,
             steps,
         } => modes::hunt::run(&bank, t_start, t_end, steps),
-        cli::Mode::Portrait {
-            height,
-            top_primes,
-        } => modes::portrait::run(&bank, height, top_primes),
+        cli::Mode::Portrait { height, top_primes } => {
+            modes::portrait::run(&bank, height, top_primes)
+        }
         cli::Mode::Sweep {
             t_start,
             t_end,

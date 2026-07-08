@@ -1,4 +1,13 @@
-#![allow(dead_code, unused_variables, unused_imports, unused_assignments, clippy::needless_range_loop, clippy::doc_lazy_continuation, non_snake_case, clippy::empty_line_after_doc_comments)]
+#![allow(
+    dead_code,
+    unused_variables,
+    unused_imports,
+    unused_assignments,
+    clippy::needless_range_loop,
+    clippy::doc_lazy_continuation,
+    non_snake_case,
+    clippy::empty_line_after_doc_comments
+)]
 // overcancellation-scan/src/bin/weight_family_explorer.rs
 //
 // ╔═══════════════════════════════════════════════════════════════════════╗
@@ -34,7 +43,9 @@ fn sieve_mobius(n: usize) -> Vec<i8> {
             mu[i] = -1;
         }
         for &p in &primes {
-            if i * p > n { break; }
+            if i * p > n {
+                break;
+            }
             is_prime[i * p] = false;
             if i % p == 0 {
                 mu[i * p] = 0;
@@ -49,13 +60,17 @@ fn sieve_mobius(n: usize) -> Vec<i8> {
 
 /// V(a,b) = Σ_{m=1}^{a-1} cot(πm/a) · {mb/a}
 fn vasyunin_sum(a: usize, b: usize) -> f64 {
-    if a <= 1 { return 0.0; }
+    if a <= 1 {
+        return 0.0;
+    }
     let af = a as f64;
     let mut s = 0.0;
     for m in 1..a {
         let angle = PI * m as f64 / af;
         let sin_v = angle.sin();
-        if sin_v.abs() < 1e-15 { continue; }
+        if sin_v.abs() < 1e-15 {
+            continue;
+        }
         let cot = angle.cos() / sin_v;
         let frac = ((m * b) as f64 / af).fract();
         s += cot * frac;
@@ -66,7 +81,9 @@ fn vasyunin_sum(a: usize, b: usize) -> f64 {
 /// Compute G(1,k) analytically
 fn gram_entry_k1(k: usize) -> f64 {
     let c = (2.0 * PI).ln() - EULER_GAMMA;
-    if k == 1 { return c - 1.0; }
+    if k == 1 {
+        return c - 1.0;
+    }
     let kf = k as f64;
     let t1 = c / 2.0 * (1.0 + 1.0 / kf);
     let t2 = (1.0 - kf) / (2.0 * kf) * kf.ln();
@@ -82,18 +99,24 @@ fn gram_entry_k1(k: usize) -> f64 {
 #[derive(Clone)]
 struct WeightFamily {
     name: String,
-    alpha: f64,  // power damping exponent
-    beta: f64,   // taper exponent
+    alpha: f64, // power damping exponent
+    beta: f64,  // taper exponent
 }
 
 impl WeightFamily {
     fn new(name: &str, alpha: f64, beta: f64) -> Self {
-        Self { name: name.to_string(), alpha, beta }
+        Self {
+            name: name.to_string(),
+            alpha,
+            beta,
+        }
     }
-    
+
     /// Compute weight for index k given N and μ(k).
     fn weight(&self, k: usize, n: usize, mu_k: i8) -> f64 {
-        if mu_k == 0 { return 0.0; }
+        if mu_k == 0 {
+            return 0.0;
+        }
         let kf = k as f64;
         let w = (1.0 - kf.ln() / (n as f64).ln()).max(0.0);
         -(mu_k as f64) * w.powf(self.beta) * kf.powf(-self.alpha)
@@ -123,84 +146,97 @@ fn test_weight_family(
     mu: &[i8],
 ) -> WeightResult {
     let log_n = (n as f64).ln();
-    
+
     // Build weight vector for k=2..N (HPDF sector)
     let mut v2 = vec![0.0f64; dim];
     for i in 0..dim {
         let k = i + 2;
-        if k >= n { break; }
+        if k >= n {
+            break;
+        }
         v2[i] = family.weight(k, n, mu[k]);
     }
-    
+
     // k=1 weight
     let v1 = family.weight(1, n, mu[1]);
-    
+
     // Compute Gv for k≥2 sector (parallel)
-    let gv2: Vec<f64> = (0..dim).into_par_iter().map(|i| {
-        let mut s = 0.0;
-        for j in 0..dim {
-            s += gram[i * dim + j] * v2[j];
-        }
-        s
-    }).collect();
-    
+    let gv2: Vec<f64> = (0..dim)
+        .into_par_iter()
+        .map(|i| {
+            let mut s = 0.0;
+            for j in 0..dim {
+                s += gram[i * dim + j] * v2[j];
+            }
+            s
+        })
+        .collect();
+
     // vtGv for k≥2 sector
     let vtgv_k2: f64 = (0..dim).map(|i| v2[i] * gv2[i]).sum();
-    
+
     // k=1 contributions
     let g11 = gram_entry_k1(1);
     let diag_k1 = v1 * v1 * g11;
-    
+
     // Cross terms and k=1 inner product
     let mut cross_vtgv = 0.0f64;
     let mut inner_k1 = v1 * g11; // G(1,1)*v1
-    
+
     for i in 0..dim {
         let k = i + 2;
-        if k >= n { break; }
+        if k >= n {
+            break;
+        }
         let g1k = gram_entry_k1(k);
         cross_vtgv += 2.0 * v1 * v2[i] * g1k;
         inner_k1 += v2[i] * g1k; // sum of v_j * G(j,1) for j>=2
     }
-    
+
     // Full vtGv
     let vtgv = vtgv_k2 + diag_k1 + cross_vtgv;
-    
+
     // Full inner products (Gv)_k for all k
     // For k>=2: (Gv)_k = gv2[k-2] + v1 * G(1,k)
     let mut max_inner = inner_k1.abs(); // k=1 row
     for i in 0..dim {
         let k = i + 2;
-        if k >= n { break; }
+        if k >= n {
+            break;
+        }
         let g1k = gram_entry_k1(k);
         let full_inner_k = gv2[i] + v1 * g1k;
         if full_inner_k.abs() > max_inner {
             max_inner = full_inner_k.abs();
         }
     }
-    
+
     // L1 norm, sigma, S
     let mut l1 = v1.abs();
     let mut sigma = v1;
     let mut s_val = v1; // v1/1
-    
+
     for i in 0..dim {
         let k = i + 2;
-        if k >= n { break; }
+        if k >= n {
+            break;
+        }
         l1 += v2[i].abs();
         sigma += v2[i];
         s_val += v2[i] / (k as f64);
     }
-    
+
     // d² = 1 - 2bᵀv + vtGv, where b_k ≈ 1/(2k)
     let mut btv = v1 * 0.5; // b_1 = 1/2
     for i in 0..dim {
         let k = i + 2;
-        if k >= n { break; }
+        if k >= n {
+            break;
+        }
         btv += v2[i] * 0.5 / (k as f64);
     }
     let d_sq = 1.0 - 2.0 * btv + vtgv;
-    
+
     WeightResult {
         name: family.name.clone(),
         n,
@@ -221,139 +257,199 @@ fn main() {
     println!("║  Cathedral — Finding the Weight That Closes the Gap                      ║");
     println!("╚═══════════════════════════════════════════════════════════════════════════╝");
     println!();
-    
+
     let cache_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-        .parent().unwrap()
+        .parent()
+        .unwrap()
         .join("cache/hpdf");
-    
+
     // Define weight families
     let families = vec![
         WeightFamily::new("Fejér(α=0,β=1)", 0.0, 1.0),
-        WeightFamily::new("Power(α=0.5)",   0.5, 1.0),
-        WeightFamily::new("Mertens(α=1)",   1.0, 1.0),
-        WeightFamily::new("α=1.25",         1.25, 1.0),
-        WeightFamily::new("α=1.5",          1.5, 1.0),
-        WeightFamily::new("α=1.75",         1.75, 1.0),
-        WeightFamily::new("Heavy(α=2)",     2.0, 1.0),
-        WeightFamily::new("Ultra(α=3)",     3.0, 1.0),
+        WeightFamily::new("Power(α=0.5)", 0.5, 1.0),
+        WeightFamily::new("Mertens(α=1)", 1.0, 1.0),
+        WeightFamily::new("α=1.25", 1.25, 1.0),
+        WeightFamily::new("α=1.5", 1.5, 1.0),
+        WeightFamily::new("α=1.75", 1.75, 1.0),
+        WeightFamily::new("Heavy(α=2)", 2.0, 1.0),
+        WeightFamily::new("Ultra(α=3)", 3.0, 1.0),
         // Beta variations (taper exponent)
-        WeightFamily::new("Selberg(β=2)",   0.0, 2.0),
-        WeightFamily::new("α=1,β=2",        1.0, 2.0),
-        WeightFamily::new("α=1.5,β=2",      1.5, 2.0),
-        WeightFamily::new("α=2,β=2",        2.0, 2.0),
+        WeightFamily::new("Selberg(β=2)", 0.0, 2.0),
+        WeightFamily::new("α=1,β=2", 1.0, 2.0),
+        WeightFamily::new("α=1.5,β=2", 1.5, 2.0),
+        WeightFamily::new("α=2,β=2", 2.0, 2.0),
         // Mixed
-        WeightFamily::new("α=0.5,β=2",      0.5, 2.0),
-        WeightFamily::new("α=1,β=0.5",      1.0, 0.5),
-        WeightFamily::new("α=0.75,β=1.5",   0.75, 1.5),
+        WeightFamily::new("α=0.5,β=2", 0.5, 2.0),
+        WeightFamily::new("α=1,β=0.5", 1.0, 0.5),
+        WeightFamily::new("α=0.75,β=1.5", 0.75, 1.5),
     ];
-    
+
     // HC numbers with HPDF files
     let hc_ns: Vec<usize> = vec![
-        60, 120, 240, 360, 840, 1260, 2520, 5040, 7560, 10080,
-        20160, 27720, 45360, 55440,
+        60, 120, 240, 360, 840, 1260, 2520, 5040, 7560, 10080, 20160, 27720, 45360, 55440,
     ];
-    
+
     // ═══ SECTION 1: Full family comparison ═══
     println!("═══ SECTION 1: All Weight Families ═══");
     println!();
-    
+
     for &n in &hc_ns {
         let path = cache_dir.join(format!("gram_N{}.h5", n));
-        if !path.exists() { continue; }
-        
+        if !path.exists() {
+            continue;
+        }
+
         let reader = match HpdfReader::open(&path) {
             Ok(r) => r,
-            Err(e) => { eprintln!("  [skip] N={}: {}", n, e); continue; }
+            Err(e) => {
+                eprintln!("  [skip] N={}: {}", n, e);
+                continue;
+            }
         };
-        
+
         let dim = reader.dim();
         let mu_raw = reader.read_mobius().unwrap_or_else(|_| sieve_mobius(n));
         let gram = match reader.read_gram_full() {
             Ok(g) => g,
-            Err(e) => { eprintln!("  [skip] N={}: read_gram_full failed: {}", n, e); continue; }
+            Err(e) => {
+                eprintln!("  [skip] N={}: read_gram_full failed: {}", n, e);
+                continue;
+            }
         };
-        
+
         println!("  N = {} (dim={})", n, dim);
-        println!("  {:<17} {:>10} {:>10} {:>8} {:>10} {:>10} {:>8} {:>8} {:>5}",
-            "Family", "vtGv", "d²", "Σ|v|", "max|in|", "bound", "σ", "S", "≤1?");
-        println!("  {} {} {} {} {} {} {} {} {}",
-            "-".repeat(17), "-".repeat(10), "-".repeat(10), "-".repeat(8),
-            "-".repeat(10), "-".repeat(10), "-".repeat(8), "-".repeat(8), "-".repeat(5));
-        
+        println!(
+            "  {:<17} {:>10} {:>10} {:>8} {:>10} {:>10} {:>8} {:>8} {:>5}",
+            "Family", "vtGv", "d²", "Σ|v|", "max|in|", "bound", "σ", "S", "≤1?"
+        );
+        println!(
+            "  {} {} {} {} {} {} {} {} {}",
+            "-".repeat(17),
+            "-".repeat(10),
+            "-".repeat(10),
+            "-".repeat(8),
+            "-".repeat(10),
+            "-".repeat(10),
+            "-".repeat(8),
+            "-".repeat(8),
+            "-".repeat(5)
+        );
+
         for family in &families {
             let r = test_weight_family(family, n, &gram, dim, &mu_raw);
-            let check = if r.bilinear_bound <= 1.0 { " ✅" } else { " ❌" };
-            println!("  {:<17} {:>10.4} {:>10.4} {:>8.2} {:>10.6} {:>10.4} {:>8.4} {:>8.4} {}",
-                r.name, r.vtgv, r.d_sq, r.l1, r.max_inner, r.bilinear_bound,
-                r.sigma, r.s_val, check);
+            let check = if r.bilinear_bound <= 1.0 {
+                " ✅"
+            } else {
+                " ❌"
+            };
+            println!(
+                "  {:<17} {:>10.4} {:>10.4} {:>8.2} {:>10.6} {:>10.4} {:>8.4} {:>8.4} {}",
+                r.name,
+                r.vtgv,
+                r.d_sq,
+                r.l1,
+                r.max_inner,
+                r.bilinear_bound,
+                r.sigma,
+                r.s_val,
+                check
+            );
         }
         println!();
     }
-    
+
     // ═══ SECTION 2: α sweep for β=1 ═══
     println!("═══ SECTION 2: α Sweep (β=1, varying damping power) ═══");
     println!();
-    
+
     let alphas: Vec<f64> = (0..=30).map(|i| i as f64 * 0.1).collect();
-    
+
     println!("  {:<8}", "α \\ N");
     print!("  {:>8}", "");
     for &n in &hc_ns {
-        if n > 10080 { continue; }
+        if n > 10080 {
+            continue;
+        }
         print!("  {:>12}", format!("N={}", n));
     }
     println!("  (bound=max|in|×Σ|v|)");
-    println!("  {}", "-".repeat(8 + hc_ns.iter().filter(|&&n| n <= 10080).count() * 14));
-    
+    println!(
+        "  {}",
+        "-".repeat(8 + hc_ns.iter().filter(|&&n| n <= 10080).count() * 14)
+    );
+
     for &alpha in &alphas {
         let family = WeightFamily::new(&format!("α={:.1}", alpha), alpha, 1.0);
         print!("  α={:<5.1}", alpha);
-        
+
         for &n in &hc_ns {
-            if n > 10080 { continue; }
+            if n > 10080 {
+                continue;
+            }
             let path = cache_dir.join(format!("gram_N{}.h5", n));
-            if !path.exists() { print!("  {:>12}", "---"); continue; }
-            
+            if !path.exists() {
+                print!("  {:>12}", "---");
+                continue;
+            }
+
             let reader = match HpdfReader::open(&path) {
                 Ok(r) => r,
-                Err(_) => { print!("  {:>12}", "err"); continue; }
+                Err(_) => {
+                    print!("  {:>12}", "err");
+                    continue;
+                }
             };
-            
+
             let dim = reader.dim();
             let mu_raw = reader.read_mobius().unwrap_or_else(|_| sieve_mobius(n));
             let gram = match reader.read_gram_full() {
                 Ok(g) => g,
-                Err(_) => { print!("  {:>12}", "err"); continue; }
+                Err(_) => {
+                    print!("  {:>12}", "err");
+                    continue;
+                }
             };
-            
+
             let r = test_weight_family(&family, n, &gram, dim, &mu_raw);
-            let marker = if r.bilinear_bound <= 1.0 { "✅" } else { "❌" };
+            let marker = if r.bilinear_bound <= 1.0 {
+                "✅"
+            } else {
+                "❌"
+            };
             print!("  {:>10.4}{}", r.bilinear_bound, marker);
         }
         println!();
     }
-    
+
     // ═══ SECTION 3: The sweet spot — 2D sweep (α,β) ═══
     println!();
     println!("═══ SECTION 3: 2D (α,β) Sweet Spot Search at N=2520 ═══");
     println!();
-    
+
     let path = cache_dir.join("gram_N2520.h5");
     if path.exists() {
         let reader = HpdfReader::open(&path).unwrap();
         let dim = reader.dim();
         let mu_raw = reader.read_mobius().unwrap_or_else(|_| sieve_mobius(2520));
         let gram = reader.read_gram_full().unwrap();
-        
-        println!("  {:<12} {:>8} {:>10} {:>10} {:>10} {:>8}", 
-            "(α, β)", "vtGv", "d²", "bound", "Σ|v|", "≤1?");
-        println!("  {} {} {} {} {} {}",
-            "-".repeat(12), "-".repeat(8), "-".repeat(10), "-".repeat(10),
-            "-".repeat(10), "-".repeat(8));
-        
+
+        println!(
+            "  {:<12} {:>8} {:>10} {:>10} {:>10} {:>8}",
+            "(α, β)", "vtGv", "d²", "bound", "Σ|v|", "≤1?"
+        );
+        println!(
+            "  {} {} {} {} {} {}",
+            "-".repeat(12),
+            "-".repeat(8),
+            "-".repeat(10),
+            "-".repeat(10),
+            "-".repeat(10),
+            "-".repeat(8)
+        );
+
         let alphas_2d: Vec<f64> = (0..=25).map(|i| i as f64 * 0.1).collect();
         let betas_2d: Vec<f64> = vec![0.5, 1.0, 1.5, 2.0, 3.0];
-        
+
         for &beta in &betas_2d {
             for &alpha in &alphas_2d {
                 let name = format!("({:.1},{:.1})", alpha, beta);
@@ -368,26 +464,28 @@ fn main() {
                 };
                 // Only print interesting ones (bound ≤ 2.0)
                 if r.bilinear_bound <= 2.0 {
-                    println!("  {:<12} {:>8.4} {:>10.4} {:>10.4} {:>10.2} {}",
-                        r.name, r.vtgv, r.d_sq, r.bilinear_bound, r.l1, check);
+                    println!(
+                        "  {:<12} {:>8.4} {:>10.4} {:>10.4} {:>10.2} {}",
+                        r.name, r.vtgv, r.d_sq, r.bilinear_bound, r.l1, check
+                    );
                 }
             }
         }
     }
-    
+
     // ═══ SECTION 4: Best candidates scaling ═══
     println!();
     println!("═══ SECTION 4: Best Candidate Scaling ═══");
     println!();
-    
+
     let best_candidates = vec![
         WeightFamily::new("Mertens(1,1)", 1.0, 1.0),
-        WeightFamily::new("(1.5,1)",      1.5, 1.0),
-        WeightFamily::new("Heavy(2,1)",   2.0, 1.0),
-        WeightFamily::new("(1,2)",        1.0, 2.0),
-        WeightFamily::new("(1.5,2)",      1.5, 2.0),
+        WeightFamily::new("(1.5,1)", 1.5, 1.0),
+        WeightFamily::new("Heavy(2,1)", 2.0, 1.0),
+        WeightFamily::new("(1,2)", 1.0, 2.0),
+        WeightFamily::new("(1.5,2)", 1.5, 2.0),
     ];
-    
+
     println!("  {:>6} │", "N");
     for fam in &best_candidates {
         print!(" {:>20} │", fam.name);
@@ -399,11 +497,13 @@ fn main() {
     }
     println!();
     println!("  {}", "-".repeat(6 + best_candidates.len() * 23));
-    
+
     for &n in &hc_ns {
         let path = cache_dir.join(format!("gram_N{}.h5", n));
-        if !path.exists() { continue; }
-        
+        if !path.exists() {
+            continue;
+        }
+
         let reader = match HpdfReader::open(&path) {
             Ok(r) => r,
             Err(_) => continue,
@@ -414,16 +514,20 @@ fn main() {
             Ok(g) => g,
             Err(_) => continue,
         };
-        
+
         print!("  {:>6} │", n);
         for fam in &best_candidates {
             let r = test_weight_family(fam, n, &gram, dim, &mu_raw);
-            let check = if r.bilinear_bound <= 1.0 { "✅" } else { "❌" };
+            let check = if r.bilinear_bound <= 1.0 {
+                "✅"
+            } else {
+                "❌"
+            };
             print!(" {:>8.4} {:>8.4} {} │", r.bilinear_bound, r.vtgv, check);
         }
         println!();
     }
-    
+
     println!();
     println!("═══════════════════════════════════════════════════════════════════════════");
     println!("  KEY: bound = max|inner_k| × Σ|v_k|");
