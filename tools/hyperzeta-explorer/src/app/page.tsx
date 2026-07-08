@@ -374,6 +374,9 @@ function detectJets(
     const pi = Math.floor(((phi + Math.PI) / (2 * Math.PI)) * JET_ANGULAR_BINS) % JET_ANGULAR_BINS;
     const ti = Math.min(Math.floor((theta / Math.PI) * JET_THETA_BINS), JET_THETA_BINS - 1);
 
+    // Guard against NaN indices from detached WASM buffers after engine recreation
+    if (pi < 0 || pi >= JET_ANGULAR_BINS || ti < 0 || ti >= JET_THETA_BINS || !Number.isFinite(pi) || !Number.isFinite(ti)) continue;
+
     bins[pi][ti].count++;
     bins[pi][ti].speed += spd;
     sampled++;
@@ -792,6 +795,7 @@ function ExplorerCloud({
   useFrame(() => {
     if (!meshRef.current) return;
 
+    try {
     // When inactive (non-particle modes like Spectrometer/Heptadecagon),
     // skip all physics and rendering to prevent stale state drift
     if (!active) {
@@ -865,8 +869,8 @@ function ExplorerCloud({
       prevPositions.current.set(memoryArray);
     }
 
-    // Initialize instance colors on first frame or mode change
-    const needsColorInit = !colorsInitialized.current || lastModeId.current !== mode.id;
+    // Initialize instance colors on first frame, mode change, or fresh mesh (particle count change)
+    const needsColorInit = !colorsInitialized.current || lastModeId.current !== mode.id || !meshRef.current.instanceColor;
     if (needsColorInit) {
       // Pre-initialize all instance colors so the buffer exists
       color.set(mode.coreColor);
@@ -878,6 +882,9 @@ function ExplorerCloud({
       }
       colorsInitialized.current = true;
       lastModeId.current = mode.id;
+      // Reset previous positions to avoid stale data from freed WASM buffers
+      // (detectJets would otherwise compute NaN velocities and crash)
+      prevPositions.current = null;
     }
 
     // Update material color to match mode
@@ -983,6 +990,7 @@ function ExplorerCloud({
       }
       meshRef.current.instanceColor.needsUpdate = true;
     }
+    } catch { /* engine freed during particle count change */ }
   });
 
   return (
