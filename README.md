@@ -2,6 +2,8 @@
 
 [![Cathedral Verification](https://github.com/jrgochan/prime/actions/workflows/cathedral.yml/badge.svg)](https://github.com/jrgochan/prime/actions/workflows/cathedral.yml)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20803093.svg)](https://doi.org/10.5281/zenodo.20803093)
+[![Buy Me a Watermelon](https://img.shields.io/badge/Buy_Me_A_Watermelon-🍉-FF3B30)](https://buymeacoffee.com/jrgochan)
+[![GitHub Sponsors](https://img.shields.io/badge/Sponsor-💜-ea4aaa)](https://github.com/sponsors/jrgochan)
 
 ### *Via the Nyman–Beurling–Báez-Duarte Equivalence in Lean 4*
 
@@ -336,6 +338,15 @@ prime/
 ├── ORIGIN-STORY.md  📖  How it all started
 └── REFERENCES.md    📚  Bibliography (45+ mathematicians, 167 years)
 ```
+
+## 💜 Support This Project
+
+The Cathedral is free and open-source. If it helps you and you're in a position to give back:
+
+- 🍉 [**Buy Me a Watermelon**](https://buymeacoffee.com/jrgochan)
+- 💜 [**GitHub Sponsors**](https://github.com/sponsors/jrgochan)
+
+No pressure. No paywalled features. Just gratitude.
 
 ## License
 
