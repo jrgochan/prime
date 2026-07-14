@@ -211,17 +211,44 @@ weakness seems unnatural. In the Arithmetic Standard Model,
 it's the most natural thing in the world: larger integers
 have smaller self-energy, period. -/
 
-/-- **HIERARCHY RATIO**: G(1,1)/G(k,k) ~ k for large k.
+/-- **HIERARCHY RATIO**: G(1,1)/G(k,k) ≤ k for all k ≥ 2.
 
     The ratio of "Planck mass" to mass at scale k grows
     linearly. For k ~ 10^{17}, the hierarchy is 10^{17}:1.
 
-    Proof strategy: G(1,1) = log(2π)-γ-1 ≈ 0.26,
-    G(k,k) ≈ (log(2π)-γ)/k for large k,
-    ratio ≈ k · (log(2π)-γ-1)/(log(2π)-γ) ≈ 0.206·k -/
-axiom hierarchy_ratio (k : ℕ) (hk : 2 ≤ k) :
+    Proof: G(1,1)/G(k,k) = (A-1) / (A/k - 1/k²)
+         = (A-1)·k² / (Ak-1).
+    Need: (A-1)·k² / (Ak-1) ≤ k
+    ⟺ (A-1)·k ≤ Ak-1  (dividing by k > 0, multiplying by Ak-1 > 0)
+    ⟺ Ak-k ≤ Ak-1
+    ⟺ k ≥ 1 ✓ -/
+theorem hierarchy_ratio (k : ℕ) (hk : 2 ≤ k) :
     Cathedral.Vasyunin.vasyuninGramEntry 1 1 /
-    Cathedral.Vasyunin.vasyuninGramEntry k k ≤ (k : ℝ)
+    Cathedral.Vasyunin.vasyuninGramEntry k k ≤ (k : ℝ) := by
+  rw [Cathedral.Vasyunin.vasyuninGramEntry_diag 1,
+      Cathedral.Vasyunin.vasyuninGramEntry_diag k]
+  have hk_pos : (k : ℝ) > 0 := Nat.cast_pos.mpr (by omega)
+  have hk_ne : (k : ℝ) ≠ 0 := ne_of_gt hk_pos
+  have h_const := Cathedral.Vasyunin.log_two_pi_sub_euler_gt_one
+  set A := Real.log (2 * Real.pi) - Real.eulerMascheroniConstant with hA_def
+  -- G(k,k) > 0
+  have hGk_pos : A / (k : ℝ) - 1 / (k : ℝ) ^ 2 > 0 := by
+    have := Cathedral.Vasyunin.vasyuninGramEntry_diag_pos k (by omega : k ≥ 1)
+    rwa [Cathedral.Vasyunin.vasyuninGramEntry_diag k] at this
+  -- Normalize ↑1 away
+  simp only [Nat.cast_one]
+  -- Simplify G(1,1) = A - 1
+  have h11 : A / (1 : ℝ) - 1 / (1 : ℝ) ^ 2 = A - 1 := by ring
+  rw [h11]
+  -- Goal: (A - 1) / (A / ↑k - 1 / ↑k ^ 2) ≤ ↑k
+  rw [div_le_iff₀ hGk_pos]
+  -- Goal: A - 1 ≤ ↑k * (A / ↑k - 1 / ↑k ^ 2)
+  have hk1 : (1 : ℝ) ≤ (k : ℝ) := by exact_mod_cast (by omega : 1 ≤ k)
+  -- k * (A/k - 1/k²) = A - 1/k, and A - 1 ≤ A - 1/k ⟺ 1/k ≤ 1 ⟺ k ≥ 1
+  have hk_sq_ne : (k : ℝ) ^ 2 ≠ 0 := ne_of_gt (pow_pos hk_pos 2)
+  rw [show (k : ℝ) * (A / (k : ℝ) - 1 / (k : ℝ) ^ 2) = A - 1 / (k : ℝ)
+      from by field_simp]
+  linarith [div_le_one hk_pos |>.mpr hk1]
 
 -- ════════════════════════════════════════════════════════════════
 -- AUDIT
@@ -232,12 +259,13 @@ axiom hierarchy_ratio (k : ℕ) (hk : 2 ≤ k) :
 
 ### Last Updated: July 13, 2026 (gravity-decays branch)
 ### Sorry: 0
-### Custom Axioms: 2 (gravitational_universality, hierarchy_ratio)
-### Proved Theorems: 3 (diagonal_formula, diagonal_positive, diagonal_monotone_decay)
+### Custom Axioms: 1 (gravitational_universality)
+### Proved Theorems: 4 (diagonal_formula, diagonal_positive, diagonal_monotone_decay, hierarchy_ratio)
 
 ### Graduated (this session):
 - `diagonal_positive`: was axiom → now theorem via `vasyuninGramEntry_diag_pos`
 - `diagonal_monotone_decay`: was axiom (FALSE for k=1!) → now theorem for k ≥ 2
+- `hierarchy_ratio`: was axiom → now theorem (reduces to k ≥ 1 after algebra)
 
 ### Physics Dictionary (Gravity)
 
@@ -247,10 +275,10 @@ axiom hierarchy_ratio (k : ℕ) (hk : 2 ≤ k) :
 | Peak self-energy    | G(2,2) = (log(2π)-γ)/2-1/4 ≈ 0.380 | PROVED  |
 | Mass hierarchy      | G(k,k) ~ 1/k (decay for k ≥ 2)     | PROVED  |
 | Diagonal positivity | G(k,k) > 0 for all k ≥ 1            | PROVED  |
+| Hierarchy ratio     | G(1,1)/G(k,k) ≤ k for k ≥ 2        | PROVED  |
 | Graviton            | G(j,k) (symmetric bilinear form)     | —       |
 | Spin-2              | Two-index tensor g_{jk}              | —       |
 | Universality        | G(j,k) ≠ 0 for all j,k              | AXIOM   |
-| Hierarchy ratio     | G(1,1)/G(k,k) ≤ k                   | AXIOM   |
 | Gravity is weak     | G(k,k) → 0 as k → ∞                | PROVED  |
 -/
 
