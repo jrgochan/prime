@@ -52,8 +52,29 @@
   The weakness of gravity is not a fine-tuning mystery — it is a
   THEOREM about the Gram matrix diagonal decay.
 
-  Status: MOCKUP. Key theorems with proof strategies.
+  ### Related Work
+
+  See also: Bianconi, "Gravity from entropy" (arXiv:2408.14391, 2024),
+  which independently derives gravity from an entropic action coupling
+  matter fields with spacetime geometry. The metric of spacetime is
+  treated as a quantum operator (effective density matrix), and the
+  action is the quantum relative entropy between the spacetime metric
+  and a matter-induced metric.
+
+  The structural parallels are striking:
+  - Both frameworks produce gravity as EMERGENT from deeper structure
+  - Both yield "gravity is weak" as a CONSEQUENCE, not a fine-tuning
+  - Both involve symmetric bilinear/metric forms (spin-2 structure)
+  - Both connect entropy/information theory to gravitational coupling
+
+  The approaches are independent: the Cathedral works with discrete
+  number-theoretic objects (Vasyunin Gram matrix), while Bianconi
+  works with continuous differential geometry (Lorentzian spacetime).
+  This independent convergence strengthens both frameworks.
+
+  Status: 4 theorems proved, 1 axiom remaining (gravitational_universality).
   Created: June 25, 2026 — Day 87
+  Updated: July 13, 2026 — gravity-decays branch
 -/
 
 import Cathedral.Vasyunin.Witness
