@@ -410,6 +410,7 @@ lean_lib «Cathedral» where
     -- Physics: CKM Mixing + Neutrino Oscillations (Gram eigenvectors → flavor mixing, Day 87) 🌀
     `Cathedral.Physics.GaugeTheory.ArithmeticMixing,
     -- Physics: Graviton (G(k,k) ~ 1/k diagonal decay → mass hierarchy, Day 87) 🌌
+    `Cathedral.Physics.GaugeTheory.GravitationalUniversality,
     `Cathedral.Physics.GaugeTheory.ArithmeticGravity,
     -- Physics: Gauge Cancellation (vᵀGv SUSY decomposition, Exploration 36)
     `Cathedral.Physics.Cancellation.GaugeCancellation,
