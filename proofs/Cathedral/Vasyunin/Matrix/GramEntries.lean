@@ -419,7 +419,119 @@ theorem vasyuninGramEntry_two_five :
   ring
 
 -- ════════════════════════════════════════════════
--- OFF-DIAGONAL POSITIVITY
+-- COTANGENT AND LOGARITHM BOUNDS (for CKM hierarchy)
+-- ════════════════════════════════════════════════
+
+/-! ### Bounds for the far-field decay inequality
+
+To prove G(2,3) > G(2,5), we need bounds on cot(π/5), cot(2π/5),
+and ln(5/2). The cotangent bounds use cos(π/5) = (1+√5)/4 from
+Mathlib and the cos²+sin²=1 identity.
+-/
+
+/-- **5¹⁰ > 2²³**: hence ln(5) > 23·ln(2)/10. -/
+theorem log_five_gt_23_log_two_div_10 :
+    Real.log 5 > 23 * Real.log 2 / 10 := by
+  rw [gt_iff_lt, div_lt_iff₀ (by norm_num : (0:ℝ) < 10)]
+  rw [show 23 * Real.log 2 = Real.log (2 ^ 23) by rw [Real.log_pow]; ring]
+  rw [show Real.log 5 * 10 = Real.log (5 ^ 10) by rw [Real.log_pow]; ring]
+  exact Real.log_lt_log (by norm_num : (0:ℝ) < 2 ^ 23) (by norm_num)
+
+/-- **ln(5/2) > 13·ln(2)/10**: corollary of ln(5) > 23·ln(2)/10. -/
+theorem log_five_halves_gt :
+    Real.log (5 / 2) > 13 * Real.log 2 / 10 := by
+  rw [Real.log_div (by norm_num : (5:ℝ) ≠ 0) (by norm_num : (2:ℝ) ≠ 0)]
+  linarith [log_five_gt_23_log_two_div_10]
+
+/-- **sin(π/5) > 0**: since π/5 ∈ (0, π). -/
+theorem sin_pi_div_five_pos : Real.sin (Real.pi / 5) > 0 :=
+  Real.sin_pos_of_pos_of_lt_pi (by positivity) (by linarith [Real.pi_pos, pi_le_four])
+
+/-- **sin(2π/5) > 0**: since 2π/5 ∈ (0, π). -/
+theorem sin_two_pi_div_five_pos : Real.sin (2 * Real.pi / 5) > 0 :=
+  Real.sin_pos_of_pos_of_lt_pi (by positivity) (by linarith [Real.pi_pos, pi_le_four])
+
+/-- **cos(2π/5) = (√5 - 1)/4**: from the double angle formula and
+    cos(π/5) = (1 + √5)/4. -/
+theorem cos_two_pi_div_five :
+    Real.cos (2 * Real.pi / 5) = (Real.sqrt 5 - 1) / 4 := by
+  rw [show 2 * Real.pi / 5 = 2 * (Real.pi / 5) from by ring]
+  rw [Real.cos_two_mul]
+  rw [Real.cos_pi_div_five]
+  have h5 : Real.sqrt 5 ^ 2 = 5 := Real.sq_sqrt (by norm_num : (0:ℝ) ≤ 5)
+  nlinarith [h5]
+
+/-- **cot(π/5) > 0**: since cos(π/5) > 0 and sin(π/5) > 0. -/
+theorem cot_pi_div_five_pos : cot (Real.pi / 5) > 0 := by
+  unfold cot
+  apply div_pos
+  · rw [Real.cos_pi_div_five]; linarith [Real.sqrt_nonneg 5]
+  · exact sin_pi_div_five_pos
+
+/-- **cot(π/5) < 7/5**: The key bound for the CKM far-field inequality.
+
+    Proof: 5·cos(π/5) < 7·sin(π/5), equivalently
+    25·cos²(π/5) < 49·sin²(π/5), i.e., 74·cos²(π/5) < 49.
+    With cos(π/5) = (1+√5)/4: need 148√5 < 340, i.e., √5 < 85/37.
+    Since 5·37² = 6845 < 7225 = 85², done by norm_num. -/
+theorem cot_pi_div_five_lt : cot (Real.pi / 5) < 7 / 5 := by
+  unfold cot
+  have h_sin := sin_pi_div_five_pos
+  rw [div_lt_div_iff₀ h_sin (by norm_num : (0:ℝ) < 5)]
+  -- Goal: 5 * cos(π/5) < 7 * sin(π/5), i.e., 7·sin - 5·cos > 0
+  set s := Real.sin (Real.pi / 5)
+  set c := Real.cos (Real.pi / 5)
+  have h_cos_pos : c > 0 := by
+    rw [show c = Real.cos (Real.pi / 5) from rfl, Real.cos_pi_div_five]
+    linarith [Real.sqrt_nonneg 5]
+  have h5 : Real.sqrt 5 ^ 2 = 5 := Real.sq_sqrt (by norm_num : (0:ℝ) ≤ 5)
+  have h_cos_val : c = (1 + Real.sqrt 5) / 4 := Real.cos_pi_div_five
+  have h_sin_sq : s ^ 2 = 1 - c ^ 2 := by rw [Real.sin_sq]
+  -- Show (7s - 5c)(7s + 5c) = 49s² - 25c² > 0
+  have h_prod : (7 * s - 5 * c) * (7 * s + 5 * c) > 0 := by
+    have : (7 * s - 5 * c) * (7 * s + 5 * c) = 49 * s ^ 2 - 25 * c ^ 2 := by ring
+    rw [this, h_sin_sq, h_cos_val]
+    nlinarith [h5]
+  -- Since 7s + 5c > 0, conclude 7s - 5c > 0
+  have h_sum : 7 * s + 5 * c > 0 := by positivity
+  by_contra h_neg
+  push_neg at h_neg
+  linarith [mul_nonpos_of_nonpos_of_nonneg (by linarith : 7 * s - 5 * c ≤ 0) (le_of_lt h_sum)]
+
+/-- **cot(2π/5) > 3/10**: The complementary bound for CKM.
+
+    Proof: 10·cos(2π/5) > 3·sin(2π/5), equivalently
+    100·cos²(2π/5) > 9·sin²(2π/5), i.e., 109·cos²(2π/5) > 9.
+    With cos(2π/5) = (√5-1)/4: need 218√5 < 510, i.e., √5 < 255/109.
+    Since 5·109² = 59405 < 65025 = 255², done by norm_num. -/
+theorem cot_two_pi_div_five_gt : cot (2 * Real.pi / 5) > 3 / 10 := by
+  unfold cot
+  have h_sin := sin_two_pi_div_five_pos
+  rw [gt_iff_lt, div_lt_div_iff₀ (by norm_num : (0:ℝ) < 10) h_sin]
+  -- Goal: 3 * sin(2π/5) < 10 * cos(2π/5), i.e., 10·cos - 3·sin > 0
+  set s := Real.sin (2 * Real.pi / 5)
+  set c := Real.cos (2 * Real.pi / 5)
+  have h_cos_pos : c > 0 := by
+    rw [show c = Real.cos (2 * Real.pi / 5) from rfl, cos_two_pi_div_five]
+    have : Real.sqrt 5 > 1 := by
+      rw [show (1 : ℝ) = Real.sqrt 1 from by simp]
+      exact Real.sqrt_lt_sqrt (by norm_num) (by norm_num)
+    linarith
+  have h5 : Real.sqrt 5 ^ 2 = 5 := Real.sq_sqrt (by norm_num : (0:ℝ) ≤ 5)
+  have h_cos_val : c = (Real.sqrt 5 - 1) / 4 := cos_two_pi_div_five
+  have h_sin_sq : s ^ 2 = 1 - c ^ 2 := by rw [Real.sin_sq]
+  -- Show (10c - 3s)(10c + 3s) = 100c² - 9s² > 0
+  have h_prod : (10 * c - 3 * s) * (10 * c + 3 * s) > 0 := by
+    have : (10 * c - 3 * s) * (10 * c + 3 * s) = 100 * c ^ 2 - 9 * s ^ 2 := by ring
+    rw [this, h_sin_sq, h_cos_val]
+    nlinarith [h5]
+  -- Since 10c + 3s > 0, conclude 10c - 3s > 0
+  have h_sum : 10 * c + 3 * s > 0 := by positivity
+  by_contra h_neg
+  push_neg at h_neg
+  linarith [mul_nonpos_of_nonpos_of_nonneg (by linarith : 10 * c - 3 * s ≤ 0) (le_of_lt h_sum)]
+
+
 -- ════════════════════════════════════════════════
 
 /-- √3 < 2: since 3 < 4 = 2². -/
