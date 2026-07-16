@@ -1,212 +1,203 @@
 /-
   Cathedral/Physics/GaugeTheory/GravitationalUniversality.lean
 
-  ## THE GRAVITATIONAL UNIVERSALITY THEOREM
-
-  ════════════════════════════════════════════════════════════════
+  ## THE GRAVITATIONAL UNIVERSALITY THEOREM — FULLY PROVED
 
   Proves: Every Gram entry G(j,k) is strictly positive for j,k ≥ 1.
+  Graduates the axiom `gravitational_universality` from ArithmeticGravity.lean.
 
-  This graduates the axiom `gravitational_universality` from
-  `ArithmeticGravity.lean`, replacing a mysterious "G ≠ 0" assertion
-  with a transparent proof backed by the Vasyunin-Báez-Duarte formula.
-
-  ### Strategy
-
-  The Vasyunin-Báez-Duarte integral identity shows:
-
-    G(j,k) = ∫₀¹ {1/(jx)} · {1/(kx)} dx
-
-  where {·} denotes the fractional part. This identifies the Gram entry
-  as the L²(0,1) inner product of non-negative functions.
-
-  **Diagonal case** (j = k): Already proved in `Structural.lean`
-  via the bound ln(2π) - γ > 1. No axioms needed.
-
-  **Off-diagonal case** (j ≠ k): The integral representation gives
-  G(j,k) > 0 because:
-  (a) The integrand {1/(jx)} · {1/(kx)} ≥ 0 a.e. on (0,1)
-  (b) The integrand is strictly positive on a set of positive measure
-      (the fractional-part functions have overlapping support)
-
-  ### Axioms Used
-
-  Two transparent axioms, both standard published results:
-
-  1. **gramEntry_eq_integral** — The Vasyunin-Báez-Duarte formula:
-     G(j,k) = ∫₀¹ {1/(jx)}·{1/(kx)} dx.
-     Published: Vasyunin (2001), Báez-Duarte (2005, IMRN).
-     Numerical verification: 256-bit MPFR, exact to 15 digits.
-
-  2. **gramEntry_integral_pos** — The integral of a non-negative function
-     with overlapping support is strictly positive. This is a standard
-     result in measure theory (Lebesgue integral properties).
-
-  ### Formalization Roadmap (Bounty Board)
-
-  To eliminate these axioms entirely:
-  - Prove the Stirling-Euler identity: ∫₀¹ {1/u}² du = ln(2π) - γ - 1
-    (See scratch_vasyunin_diag.lean for partial progress)
-  - Extend to the off-diagonal via interval splitting and GCD structure
-  - Use Mathlib's MeasureTheory.Integral for the positivity argument
-
-  ### Experimental Support
-
-  Numerical experiments (gravity_experiment*.py) confirmed:
-  - G(j,k) > 0 for ALL pairs j,k ≤ 10,000
-  - G(j,k)·j·k ≥ 0.5444 (minimum at (1,2))
-  - V(k,1) = -[k·(log k - A) + 1]/π + o(1)  — the Stirling connection
-  - G(1,k) ~ (A - 1 + log k)/(2k) > 0 since A > 1
-
-  Status: 0 sorry. 2 axioms (both standard published results).
+  Status: 0 sorry. 0 axioms. FULLY PROVED.
   Created: July 16, 2026 — The Pie (Day 108)
 -/
 
 import Cathedral.Vasyunin.Defs
 import Cathedral.Vasyunin.Matrix.Structural
+import Cathedral.Vasyunin.Augmented.VasyuninIntegralProof
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 
 noncomputable section
 
-open Real MeasureTheory Cathedral.Vasyunin
+open Real MeasureTheory Cathedral.Vasyunin intervalIntegral
 
 namespace Cathedral.GravitationalUniversality
 
--- ════════════════════════════════════════════════════════════════
--- §1. THE VASYUNIN-BÁEZ-DUARTE INTEGRAL BRIDGE
--- ════════════════════════════════════════════════════════════════
+/-- When n < y < n + 1, the fractional part is y - n > 0. -/
+private lemma fract_pos_between_ints {y : ℝ} {n : ℤ} (h1 : (n : ℝ) < y) (h2 : y < n + 1) :
+    0 < Int.fract y := by
+  have : ⌊y⌋ = n := Int.floor_eq_iff.mpr ⟨by linarith, by linarith⟩
+  rw [Int.fract, this]; push_cast; linarith
 
-/-! ### The Integral Bridge
+/-- When 1 < y < 2, {y} = y - 1 > 0. -/
+private lemma fract_pos_in_unit {y : ℝ} (h1 : 1 < y) (h2 : y < 2) :
+    0 < Int.fract y :=
+  fract_pos_between_ints (n := 1) (by exact_mod_cast h1) (by exact_mod_cast h2)
 
-The central identity connecting the algebraic Gram formula to geometry.
-
-The Vasyunin-Báez-Duarte formula states that the discrete cotangent
-formula for G(j,k) equals the L²(0,1) inner product:
-
-  G(j,k) = ∫₀¹ {1/(jx)} · {1/(kx)} dx
-
-This was proved independently by Vasyunin (2001) and Báez-Duarte (2005).
-The proof goes through:
-  1. Splitting (0,1) into intervals where ⌊1/(jx)⌋ is constant
-  2. Computing piece integrals via the antiderivative of (1/u - n)²
-  3. Resumming the resulting series (involves Stirling's formula)
-  4. Identifying the sum with the cotangent formula
-
-A partial formalization of step 1-2 exists in
-`Archive/Scratch/scratch_vasyunin_diag.lean`.
-
-**References:**
-- V. I. Vasyunin, "On a biorthogonal system associated with the
-  Riemann hypothesis", Algebra i Analiz 7 (1995), no. 3, 118-135.
-- L. Báez-Duarte, "A strengthening of the Nyman-Beurling criterion
-  for the Riemann hypothesis", Atti Acad. Naz. Lincei 14 (2003), 5-11.
-- L. Báez-Duarte et al., "The Nyman-Beurling equivalent form for
-  the Riemann hypothesis", Expo. Math. 23 (2005), 235-252.
--/
-
-/-- **THE VASYUNIN-BÁEZ-DUARTE FORMULA**: The algebraic Gram entry
-    equals the L²(0,1) inner product of fractional-part functions.
-
-    G(j,k) = ∫₀¹ {1/(jx)} · {1/(kx)} dx
-
-    This is a standard result in analytic number theory, first proved
-    by Vasyunin and Báez-Duarte independently.
-
-    **Verification**: Exact numerical match to 15 digits at 256-bit MPFR
-    precision for all entries of the Gram matrix up to N = 20,000.
-
-    **Formalization path**: Requires Stirling's formula for the diagonal
-    case, and GCD-structured interval splitting for the off-diagonal.
-    See `scratch_vasyunin_diag.lean` for partial progress. -/
-axiom gramEntry_eq_integral (j k : ℕ) (hj : 1 ≤ j) (hk : 1 ≤ k) :
-    vasyuninGramEntry j k = ∫ x in Set.Ioo (0 : ℝ) 1,
-      Int.fract (1 / ((j : ℝ) * x)) * Int.fract (1 / ((k : ℝ) * x))
+-- Helper: product of fract parts is nonneg
+private lemma fract_prod_nn (j k : ℕ) (x : ℝ) :
+    0 ≤ Int.fract (1/((j:ℝ)*x)) * Int.fract (1/((k:ℝ)*x)) :=
+  mul_nonneg (Int.fract_nonneg _) (Int.fract_nonneg _)
 
 -- ════════════════════════════════════════════════════════════════
--- §2. INTEGRAL POSITIVITY
+-- THE OFF-DIAGONAL INTEGRAL POSITIVITY (j < k)
 -- ════════════════════════════════════════════════════════════════
 
-/-! ### Integral Positivity
-
-Once we know G(j,k) equals an integral of a non-negative function,
-positivity follows from measure theory:
-
-1. {1/(jx)} ≥ 0 and {1/(kx)} ≥ 0 for all x, so the integrand ≥ 0.
-
-2. On the interval (1/(2·max(j,k)), 1/max(j,k)):
-   - For the larger index (say k ≥ j): kx ∈ (1/2, 1),
-     so 1/(kx) ∈ (1, 2), so {1/(kx)} = 1/(kx) - 1 ∈ (0, 1).
-   - For the smaller index j: jx ∈ (j/(2k), j/k),
-     and 1/(jx) > 1, so {1/(jx)} > 0 on a subset.
-
-   This gives a measurable subset of (0,1) where the integrand
-   is strictly positive. Since this subset has positive Lebesgue
-   measure, the integral is strictly positive.
-
-The formal proof requires Mathlib's measure theory:
-- `MeasureTheory.integral_pos_of_pos_of_support_subset` or similar
-- Measurability of `Int.fract ∘ (1/(j·))` (piecewise continuous)
-- Support analysis on the interval described above
-
-This is standard real analysis but requires careful measure-theoretic
-bookkeeping in Lean. -/
-
-/-- **GRAM ENTRY INTEGRAL POSITIVITY**: The L²(0,1) inner product of
-    the fractional-part functions {1/(jx)} and {1/(kx)} is strictly positive.
-
-    This follows from the general principle: the integral of a non-negative
-    measurable function is strictly positive whenever the function is
-    strictly positive on a set of positive Lebesgue measure.
-
-    The functions {1/(jx)} and {1/(kx)} are both non-negative and
-    strictly positive on overlapping subsets of (0,1), so their
-    product is strictly positive on a subset of positive measure.
-
-    **Numerical evidence**: G(j,k) · j · k ≥ 0.5444 for all j,k ≤ 10,000,
-    with the minimum at (j,k) = (1,2). No entry is even close to zero.
-
-    **Formalization path**: Standard measure theory argument using
-    `MeasureTheory.set_integral_pos` and the overlapping support analysis. -/
-axiom gramEntry_integral_pos (j k : ℕ) (hj : 1 ≤ j) (hk : 1 ≤ k) :
-    0 < ∫ x in Set.Ioo (0 : ℝ) 1,
-      Int.fract (1 / ((j : ℝ) * x)) * Int.fract (1 / ((k : ℝ) * x))
+private theorem integral_pos_of_lt (j k : ℕ) (hj : 1 ≤ j) (hk : 1 ≤ k) (hjk : j < k) :
+    0 < ∫ x in (0:ℝ)..1,
+      Int.fract (1 / ((j : ℝ) * x)) * Int.fract (1 / ((k : ℝ) * x)) := by
+  have hj_pos : (0 : ℝ) < j := Nat.cast_pos.mpr (by omega)
+  have hk_pos : (0 : ℝ) < k := Nat.cast_pos.mpr (by omega)
+  have hf_int := IntegralProof.fract_prod_intervalIntegrable j k
+  -- Strategy: find (c, d) ⊆ (0,1) where the product > 0 pointwise
+  suffices h : ∃ c d : ℝ, 0 ≤ c ∧ c < d ∧ d ≤ 1 ∧
+      (∀ x ∈ Set.Ioo c d,
+        0 < Int.fract (1/((j:ℝ)*x)) * Int.fract (1/((k:ℝ)*x))) by
+    obtain ⟨c, d, hc, hcd, hd, hpos⟩ := h
+    have hp : 0 < ∫ x in c..d, Int.fract (1/((j:ℝ)*x)) * Int.fract (1/((k:ℝ)*x)) :=
+      intervalIntegral.intervalIntegral_pos_of_pos_on (hf_int c d) hpos hcd
+    have h1 : ∫ x in (0:ℝ)..1, Int.fract (1/((j:ℝ)*x)) * Int.fract (1/((k:ℝ)*x)) =
+      (∫ x in (0:ℝ)..c, Int.fract (1/((j:ℝ)*x)) * Int.fract (1/((k:ℝ)*x))) +
+      (∫ x in c..d, Int.fract (1/((j:ℝ)*x)) * Int.fract (1/((k:ℝ)*x))) +
+      (∫ x in d..(1:ℝ), Int.fract (1/((j:ℝ)*x)) * Int.fract (1/((k:ℝ)*x))) := by
+        linarith [integral_add_adjacent_intervals (hf_int 0 c) (hf_int c d),
+                  integral_add_adjacent_intervals (hf_int 0 d) (hf_int d 1)]
+    linarith [integral_nonneg_of_forall (μ := volume) hc (fun u => fract_prod_nn j k u),
+              integral_nonneg_of_forall (μ := volume) hd (fun u => fract_prod_nn j k u)]
+  -- Two cases
+  by_cases hdvd : j ∣ k
+  · -- Case j | k: k = j*q, q ≥ 2. Use (1/(j+k), 1/k).
+    obtain ⟨q, hq⟩ := hdvd
+    have hq_ge : q ≥ 2 := by nlinarith
+    refine ⟨1 / ((j:ℝ) + (k:ℝ)), 1 / (k:ℝ), by positivity,
+            one_div_lt_one_div_of_lt hk_pos (by linarith),
+            by rw [div_le_one hk_pos]; exact Nat.one_le_cast.mpr hk,
+            fun x ⟨hxa, hxb⟩ => ?_⟩
+    have hx_pos : (0:ℝ) < x := by linarith [show (0:ℝ) < 1/((j:ℝ)+(k:ℝ)) from by positivity]
+    apply mul_pos
+    · -- {1/(jx)} > 0: 1/(jx) ∈ (q, q+1)
+      apply fract_pos_between_ints (n := (q:ℤ))
+      · -- q < 1/(jx) ↔ q*j*x < 1 ↔ k*x < 1 ↔ x < 1/k
+        rw [Int.cast_natCast, lt_div_iff₀ (by positivity : (0:ℝ) < (j:ℝ)*x)]
+        have h1 : (k:ℝ) * (1/(k:ℝ)) = 1 := by field_simp
+        have h2 : (q:ℝ) * ((j:ℝ) * x) = (k:ℝ) * x := by rw [hq]; push_cast; ring
+        nlinarith
+      · -- 1/(jx) < q+1 ↔ (q+1)*j*x > 1 ↔ (k+j)*x > 1 ↔ x > 1/(k+j)
+        rw [Int.cast_natCast]; push_cast
+        rw [div_lt_iff₀ (by positivity : (0:ℝ) < (j:ℝ)*x)]
+        have h1 : ((j:ℝ)+(k:ℝ)) * (1/((j:ℝ)+(k:ℝ))) = 1 := by field_simp
+        have h2 : ((q:ℝ)+1) * ((j:ℝ)*x) = ((k:ℝ)+(j:ℝ)) * x := by rw [hq]; push_cast; ring
+        nlinarith
+    · -- {1/(kx)} > 0: 1/(kx) ∈ (1, 2)
+      apply fract_pos_in_unit
+      · rw [one_lt_div (by positivity : (0:ℝ) < (k:ℝ)*x)]
+        have : (k:ℝ) * (1/(k:ℝ)) = 1 := by field_simp
+        nlinarith
+      · rw [div_lt_iff₀ (by positivity : (0:ℝ) < (k:ℝ)*x)]
+        -- kx > k/(j+k) ≥ 1/2
+        have h1 : (k:ℝ) * (1/((j:ℝ)+(k:ℝ))) = (k:ℝ)/((j:ℝ)+(k:ℝ)) := by ring
+        have h2 : (k:ℝ)/((j:ℝ)+(k:ℝ)) ≥ 1/2 := by
+          rw [ge_iff_le, div_le_div_iff₀ (by norm_num : (0:ℝ)<2) (by positivity)]
+          have : (j:ℝ) < (k:ℝ) := Nat.cast_lt.mpr hjk
+          linarith
+        nlinarith
+  · -- Case j ∤ k: m = ⌈k/j⌉. Use (1/(j*m), 1/k).
+    have hmod : k % j ≠ 0 := by intro h; exact hdvd (Nat.dvd_of_mod_eq_zero h)
+    have hmod_pos : 0 < k % j := by omega
+    have hm_val : ∃ m : ℕ, k < j * m ∧ j * m ≤ j + k ∧ 2 ≤ m := by
+      use k / j + 1
+      have hd := Nat.div_add_mod k j
+      refine ⟨?_, ?_, ?_⟩
+      · -- k < j * (k/j + 1): since k = j*(k/j) + k%j and k%j > 0
+        have := Nat.mod_lt k (by omega : 0 < j)
+        nlinarith [hd]
+      · -- j * (k/j + 1) ≤ j + k: since j*(k/j) = k - k%j ≤ k
+        have := Nat.mod_lt k (by omega : 0 < j)
+        nlinarith [hd]
+      · -- 2 ≤ k/j + 1: since k/j ≥ 1 (because k ≥ j+1 > j)
+        have := Nat.div_pos (by omega : j ≤ k) (by omega : 0 < j)
+        omega
+    obtain ⟨m, hjm_gt, hjm_le, hm_ge⟩ := hm_val
+    have hm_pos : (0:ℝ) < (m:ℝ) := Nat.cast_pos.mpr (by omega)
+    have hjm_r_pos : (0:ℝ) < (j:ℝ)*(m:ℝ) := by positivity
+    have h_lt : 1/((j:ℝ)*(m:ℝ)) < 1/(k:ℝ) :=
+      one_div_lt_one_div_of_lt hk_pos (by push_cast; exact_mod_cast hjm_gt)
+    refine ⟨1/((j:ℝ)*(m:ℝ)), 1/(k:ℝ), by positivity, h_lt,
+            by rw [div_le_one hk_pos]; exact Nat.one_le_cast.mpr hk,
+            fun x ⟨hxa, hxb⟩ => ?_⟩
+    have hx_pos : (0:ℝ) < x := by linarith [show (0:ℝ) < 1/((j:ℝ)*(m:ℝ)) from by positivity]
+    apply mul_pos
+    · -- {1/(jx)} > 0: 1/(jx) ∈ (k/j, m) so floor = m-1
+      apply fract_pos_between_ints (n := (m:ℤ) - 1)
+      · -- (m-1) < 1/(jx) ↔ (m-1)*j*x < 1
+        push_cast
+        rw [lt_div_iff₀ (by positivity : (0:ℝ) < (j:ℝ)*x)]
+        -- (m-1)*j*x < (m-1)*j/k = (j*m - j)/k ≤ 1
+        have h1 : (j:ℝ) * (1/(k:ℝ)) = (j:ℝ)/(k:ℝ) := by ring
+        have h2 : ((j:ℝ)*(m:ℝ) - (j:ℝ))/(k:ℝ) ≤ 1 := by
+          rw [div_le_one hk_pos]
+          have : (j:ℝ) * (m:ℝ) ≤ (j:ℝ) + (k:ℝ) := by exact_mod_cast hjm_le
+          linarith
+        have h3 : (j:ℝ) * x < (j:ℝ) * (1/(k:ℝ)) := by nlinarith
+        have hm1 : (m:ℝ) - 1 > 0 := by
+          have : (m:ℝ) ≥ 2 := by exact_mod_cast hm_ge
+          linarith
+        have h4 : ((m:ℝ) - 1) * ((j:ℝ) * x) < ((m:ℝ) - 1) * ((j:ℝ) / (k:ℝ)) := by
+          apply mul_lt_mul_of_pos_left _ hm1
+          linarith [h1]
+        have h5 : ((m:ℝ) - 1) * ((j:ℝ) / (k:ℝ)) = ((j:ℝ)*(m:ℝ) - (j:ℝ)) / (k:ℝ) := by ring
+        linarith
+      · -- 1/(jx) < m ↔ m*j*x > 1
+        push_cast
+        rw [div_lt_iff₀ (by positivity : (0:ℝ) < (j:ℝ)*x)]
+        ring_nf
+        -- m*j*x > m*j*(1/(j*m)) = 1
+        have h3 : (j:ℝ) * x > (j:ℝ) * (1/((j:ℝ)*(m:ℝ))) := by nlinarith
+        have h4 : (m:ℝ) * ((j:ℝ) * (1/((j:ℝ)*(m:ℝ)))) = 1 := by field_simp
+        nlinarith
+    · -- {1/(kx)} > 0: x ∈ (1/(j*m), 1/k) ⊂ (1/(2k), 1/k) so 1/(kx) ∈ (1, 2)
+      -- 1/(j*m) > 1/(2k) since j*m ≤ j+k ≤ 2k
+      have h_x_lb : x > 1/(2*(k:ℝ)) := by
+        linarith [show 1/(2*(k:ℝ)) < 1/((j:ℝ)*(m:ℝ)) from
+          one_div_lt_one_div_of_lt hjm_r_pos (by
+            have : (j:ℝ)*(m:ℝ) ≤ (j:ℝ) + (k:ℝ) := by exact_mod_cast hjm_le
+            have : (j:ℝ) < (k:ℝ) := Nat.cast_lt.mpr hjk
+            linarith)]
+      apply fract_pos_in_unit
+      · rw [one_lt_div (by positivity : (0:ℝ) < (k:ℝ)*x)]
+        have : (k:ℝ) * (1/(k:ℝ)) = 1 := by field_simp
+        nlinarith
+      · rw [div_lt_iff₀ (by positivity : (0:ℝ) < (k:ℝ)*x)]
+        have : (k:ℝ) * (1/(2*(k:ℝ))) = 1/2 := by field_simp
+        nlinarith
 
 -- ════════════════════════════════════════════════════════════════
--- §3. THE POSITIVITY THEOREM
+-- THE INTEGRAL POSITIVITY (general case, by symmetry)
 -- ════════════════════════════════════════════════════════════════
 
-/-- **GRAM ENTRY POSITIVITY**: G(j,k) > 0 for all j,k ≥ 1.
+private theorem fract_integral_pos (j k : ℕ) (hj : 1 ≤ j) (hk : 1 ≤ k) (hjk : j ≠ k) :
+    0 < ∫ x in (0:ℝ)..1,
+      Int.fract (1 / ((j : ℝ) * x)) * Int.fract (1 / ((k : ℝ) * x)) := by
+  rcases Nat.lt_or_gt_of_ne hjk with h | h
+  · exact integral_pos_of_lt j k hj hk h
+  · -- j > k: swap using mul_comm
+    have hsym : (∫ x in (0:ℝ)..1, Int.fract (1/((j:ℝ)*x)) * Int.fract (1/((k:ℝ)*x))) =
+                (∫ x in (0:ℝ)..1, Int.fract (1/((k:ℝ)*x)) * Int.fract (1/((j:ℝ)*x))) := by
+      congr 1; ext x; exact mul_comm _ _
+    rw [hsym]
+    exact integral_pos_of_lt k j hk hj h
 
-    **Diagonal case** (j = k): Proved data-free in `Structural.lean`
-    from the bound ln(2π) - γ > 1. Zero axioms.
+-- ════════════════════════════════════════════════════════════════
+-- THE POSITIVITY THEOREM
+-- ════════════════════════════════════════════════════════════════
 
-    **Off-diagonal case** (j ≠ k): From the Vasyunin-Báez-Duarte
-    integral identity, G equals an integral of a non-negative function
-    that is strictly positive on a set of positive measure.
-
-    Combined: G(j,k) > 0 universally. -/
+/-- **GRAM ENTRY POSITIVITY**: G(j,k) > 0 for all j,k ≥ 1. -/
 theorem gramEntry_pos (j k : ℕ) (hj : 1 ≤ j) (hk : 1 ≤ k) :
     0 < vasyuninGramEntry j k := by
   by_cases hjk : j = k
-  · -- Diagonal: already proved in Structural.lean (0 axioms)
-    subst hjk
-    exact vasyuninGramEntry_diag_pos j (by omega)
-  · -- Off-diagonal: via integral bridge + positivity (2 axioms)
-    rw [gramEntry_eq_integral j k hj hk]
-    exact gramEntry_integral_pos j k hj hk
+  · subst hjk; exact vasyuninGramEntry_diag_pos j (by omega)
+  · rw [IntegralProof.vasyunin_eq_integral_proved j k (by omega) (by omega)]
+    exact fract_integral_pos j k hj hk hjk
 
--- ════════════════════════════════════════════════════════════════
--- §4. THE UNIVERSALITY THEOREM
--- ════════════════════════════════════════════════════════════════
-
-/-- **GRAVITATIONAL UNIVERSALITY**: G(j,k) ≠ 0 for all j,k ≥ 1.
-
-    Every pair of arithmetic particles has a nonzero gravitational
-    coupling. This is the defining property of gravity: universality.
-
-    This GRADUATES the axiom from `ArithmeticGravity.lean`.
-
-    Proof: G(j,k) > 0, hence ≠ 0. -/
+/-- **GRAVITATIONAL UNIVERSALITY**: G(j,k) ≠ 0 for all j,k ≥ 1. -/
 theorem gravitational_universality (j k : ℕ) (hj : 1 ≤ j) (hk : 1 ≤ k) :
     vasyuninGramEntry j k ≠ 0 :=
   ne_of_gt (gramEntry_pos j k hj hk)
@@ -216,60 +207,6 @@ theorem gramEntry_nonneg (j k : ℕ) (hj : 1 ≤ j) (hk : 1 ≤ k) :
     0 ≤ vasyuninGramEntry j k :=
   le_of_lt (gramEntry_pos j k hj hk)
 
--- ════════════════════════════════════════════════════════════════
--- AUDIT
--- ════════════════════════════════════════════════════════════════
-
-/-!
-## Audit — GravitationalUniversality.lean
-
-### Created: July 16, 2026 (The Pie — Day 108)
-### Updated: July 16, 2026 — Diagonal case split (axiom-free diagonal)
-### Sorry: 0
-### Custom Axioms: 2 (off-diagonal only; both standard published results)
-### Proved Theorems: 3
-
-### Axioms (off-diagonal only):
-  - `gramEntry_eq_integral` — Vasyunin-Báez-Duarte formula (1995/2005)
-    Status: Standard published theorem. Diagonal case proved in
-    `VasyuninIntegralProof.vasyunin_integral_diag` (via StirlingBridge +
-    PiecewiseFTC + SqueezeElimination). Off-diagonal requires GCD-structured
-    interval splitting (~600 lines estimated).
-  - `gramEntry_integral_pos` — Integral of non-neg fn with overlapping support
-    Status: Standard measure theory. Requires `MeasureTheory.set_integral_pos`
-    and support analysis.
-
-### Key Insight (Oven Door):
-  The diagonal case G(k,k) > 0 does NOT need either axiom! It is proved
-  directly in `Structural.vasyuninGramEntry_diag_pos` from `ln(2π) - γ > 1`.
-  The `gramEntry_pos` theorem now case-splits on `j = k`, using the
-  axiom-free path for diagonal and the integral axioms only for off-diagonal.
-
-### Theorems:
-  - `gramEntry_pos` — G(j,k) > 0 for all j,k ≥ 1 ✅
-    (diagonal: 0 axioms; off-diagonal: 2 axioms)
-  - `gravitational_universality` — G(j,k) ≠ 0 ✅ (graduates axiom)
-  - `gramEntry_nonneg` — G(j,k) ≥ 0 ✅
-
-### Graduation Chain:
-  ArithmeticGravity.lean axiom `gravitational_universality`
-    → GravitationalUniversality.lean theorem `gravitational_universality`
-      → gramEntry_pos
-        → j = k: vasyuninGramEntry_diag_pos (0 axioms, from Structural.lean)
-        → j ≠ k: gramEntry_eq_integral + gramEntry_integral_pos (2 axioms)
-
-### Existing Infrastructure (for future axiom elimination):
-  - `StirlingBridge.tendsto_partialSum` — P(K) → ln(2π) - γ - 1 ✅
-  - `PiecewiseFTC.integral_eq_partialSum` — ∫_{1/K}^1 {1/u}² = P(K) ✅
-  - `SqueezeElimination.fract_sq_integral_value` — ∫₀¹ {1/u}² = ln(2π)-γ-1 ✅
-  - `VasyuninIntegralProof.vasyunin_integral_diag` — G(k,k) = ∫₀¹ {1/(kx)}² ✅
-  All zero axioms! The diagonal integral bridge is COMPLETE.
-
-### Experimental Validation:
-  - gravity_experiment.py: G > 0 for all j,k ≤ 200 (all 20,100 entries)
-  - gravity_experiment2.py: G > 0 for j ≤ 15, k ≤ 5,000
-  - gravity_experiment3.py: G·j·k ≥ 0.5444, min at (1,2)
-  - gravity_experiment4.py: V(k,1) = -[k(lnk-A)+1]/π + o(1) — Stirling
--/
+/-! ## Audit — 0 sorry, 0 axioms, 3 theorems proved. -/
 
 end Cathedral.GravitationalUniversality
