@@ -169,42 +169,33 @@ This axiom is the BRIDGE between:
   - The Nyman-Beurling program (analysis: d²_N → 0)
   - The Weil program (geometry: intersection theory) -/
 
-/-- **AXIOM: Arakelov Intersection Interpretation**.
-
-    The Gram matrix G_{jk} = ∫₀¹ {1/(jx)}{1/(kx)} dx admits a
-    decomposition into finite and archimedean parts that matches
-    the structure of an Arakelov intersection pairing on Spec(ℤ).
-
-    Specifically: there exist functions G_fin and G_arch such that:
-    - G_{jk} = G_fin(j,k) + G_arch(j,k)
-    - G_fin(j,k) depends only on the prime factorizations of j,k
-    - G_arch(j,k) = -log-height contribution from the infinite place
-
-    This axiom asserts that the Vasyunin decomposition of the Gram
-    matrix IS the finite/archimedean decomposition of an Arakelov
-    intersection pairing.
-
-    ### Graduation Path
-
-    To graduate this axiom, one would need to:
-    1. Formalize arithmetic divisors on Spec(ℤ) in Lean
-    2. Define the Arakelov intersection pairing
-    3. Construct specific divisors D_j from the BD basis functions
-    4. Prove G_{jk} = ⟨D_j, D_k⟩_Ar
-
-    This requires Arakelov geometry infrastructure that does not
-    yet exist in Mathlib (or any other Lean library). -/
-axiom arakelov_gram_interpretation :
-    ∃ (G_fin G_arch : ℕ+ → ℕ+ → ℝ),
-      -- The Gram matrix decomposes
-      (∀ j k : ℕ+, ∫ x in (0:ℝ)..1,
-        (Int.fract (1 / ((j : ℝ) * x))) * (Int.fract (1 / ((k : ℝ) * x))) =
-        G_fin j k + G_arch j k) ∧
-      -- The finite part is multiplicative (GCD structure)
-      (∀ j k : ℕ+, ∀ p : ℕ, p.Prime →
-        Nat.Coprime j.val p → G_fin j k = G_fin j k) ∧
-      -- The archimedean part is the height contribution
-      (∀ j : ℕ+, G_arch j j ≥ 0)
+-- **AXIOM: Arakelov Intersection Interpretation** (DELETED — see note below).
+--
+-- The Gram matrix G_{jk} = ∫₀¹ {1/(jx)}{1/(kx)} dx admits a
+-- decomposition into finite and archimedean parts that matches
+-- the structure of an Arakelov intersection pairing on Spec(ℤ).
+--
+-- Specifically: there exist functions G_fin and G_arch such that:
+-- - G_{jk} = G_fin(j,k) + G_arch(j,k)
+-- - G_fin(j,k) depends only on the prime factorizations of j,k
+-- - G_arch(j,k) = -log-height contribution from the infinite place
+--
+-- The correct decomposition (conjuncts 1-2) is PROVED in
+-- Cathedral/Arakelov/ArakelovFusion.lean (gram_eq_fin_plus_arch).
+-- Conjunct 3 (G_arch diagonal non-negativity) was NUMERICALLY FALSE.
+-- **HISTORICAL NOTE**: `arakelov_gram_interpretation` was deleted
+-- July 16, 2026 (physics-finishing). The axiom had three conjuncts:
+--
+-- 1. G(j,k) = G_fin(j,k) + G_arch(j,k) — PROVED in ArakelovFusion.lean
+--    (gram_eq_fin_plus_arch using the B₁ skeleton decomposition)
+-- 2. G_fin j k = G_fin j k for coprime j,p — TAUTOLOGY (was rfl)
+-- 3. G_arch j j ≥ 0 for all j — NUMERICALLY FALSE for j ≥ 15
+--    G_arch(j,j) = G(j,j) - 1/12 = A/j - 1/j² - 1/12
+--    where A = log(2π) - γ ≈ 1.261. For j ≥ 15, A/j < 1/12 + 1/j².
+--
+-- The correct decomposition (without the false non-negativity claim)
+-- is proved in Cathedral/Arakelov/ArakelovFusion.lean.
+-- No downstream dependents.
 
 -- ════════════════════════════════════════════════════════════════
 -- §4. FINITE/ARCHIMEDEAN DECOMPOSITION (PROVED STRUCTURE)
