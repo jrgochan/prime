@@ -10,13 +10,18 @@ interface Props {
   globalMin: number;
   globalMax: number;
   scale: { x: number; y: number; z: number };
+  logScale?: boolean;
+}
+
+function applyLogScale(v: number, absMax: number): number {
+  const K = 1000;
+  return Math.log1p(Math.abs(v) * K) / Math.log1p(absMax * K);
 }
 
 /**
  * Extruded heatmap: 2D grid with height = |G(j,k)|, color = G(j,k).
- * Each cell is a thin box extruded upward.
  */
-export default function GramHeatmap({ points, colorMode, globalMin, globalMax, scale }: Props) {
+export default function GramHeatmap({ points, colorMode, globalMin, globalMax, scale, logScale }: Props) {
   const geometry = useMemo(() => {
     if (points.length === 0) return null;
 
@@ -41,7 +46,6 @@ export default function GramHeatmap({ points, colorMode, globalMin, globalMax, s
       ? ((js[1] - js[0]) / jMax) * 2 * scale.x * 0.9
       : 0.02;
 
-    // Create instanced boxes
     const positions: number[] = [];
     const colors: number[] = [];
     const indices: number[] = [];
@@ -50,19 +54,19 @@ export default function GramHeatmap({ points, colorMode, globalMin, globalMax, s
     fullPoints.forEach(pt => {
       const x = (pt.j / jMax - 0.5) * 2 * scale.x;
       const z = (pt.k / kMax - 0.5) * 2 * scale.y;
-      const height = Math.max(0.001, (Math.abs(pt.v) / absMax) * scale.z);
+      const rawH = Math.abs(pt.v) / absMax;
+      const height = Math.max(0.001,
+        (logScale ? applyLogScale(pt.v, absMax) : rawH) * scale.z
+      );
 
       const color = getPointColor(pt, colorMode, globalMin, globalMax, maxDist);
       const half = cellSize * 0.5;
 
-      // 8 vertices for a box
       const verts = [
-        // Bottom face (y=0)
         [x - half, 0, z - half],
         [x + half, 0, z - half],
         [x + half, 0, z + half],
         [x - half, 0, z + half],
-        // Top face (y=height)
         [x - half, height, z - half],
         [x + half, height, z - half],
         [x + half, height, z + half],
@@ -75,15 +79,10 @@ export default function GramHeatmap({ points, colorMode, globalMin, globalMax, s
       });
 
       const base = vertIdx;
-      // Top face
       indices.push(base + 4, base + 5, base + 6, base + 4, base + 6, base + 7);
-      // Front face
       indices.push(base + 0, base + 1, base + 5, base + 0, base + 5, base + 4);
-      // Right face
       indices.push(base + 1, base + 2, base + 6, base + 1, base + 6, base + 5);
-      // Back face
       indices.push(base + 2, base + 3, base + 7, base + 2, base + 7, base + 6);
-      // Left face
       indices.push(base + 3, base + 0, base + 4, base + 3, base + 4, base + 7);
 
       vertIdx += 8;
@@ -95,7 +94,7 @@ export default function GramHeatmap({ points, colorMode, globalMin, globalMax, s
     geo.setIndex(indices);
     geo.computeVertexNormals();
     return geo;
-  }, [points, colorMode, globalMin, globalMax, scale]);
+  }, [points, colorMode, globalMin, globalMax, scale, logScale]);
 
   if (!geometry) return null;
 

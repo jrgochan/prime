@@ -73,7 +73,7 @@ export default function AxisGrid({ scale, maxJ, maxK }: Props) {
           <bufferGeometry>
             <bufferAttribute
               attach="attributes-position"
-              array={new Float32Array([...line.start, ...line.end])}
+              args={[new Float32Array([...line.start, ...line.end]), 3]}
               count={2}
               itemSize={3}
             />

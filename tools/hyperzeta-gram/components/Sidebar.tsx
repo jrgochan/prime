@@ -14,6 +14,14 @@ interface Props {
   matrixN: number;
   setMatrixN: (n: number) => void;
   availableSizes: number[];
+  logScale: boolean;
+  setLogScale: (v: boolean) => void;
+  diagonalOnly: boolean;
+  setDiagonalOnly: (v: boolean) => void;
+  selectedJ: number | null;
+  setSelectedJ: (j: number | null) => void;
+  maxJ: number;
+  onScreenshot: () => void;
   metadata: {
     N: number;
     dim: number;
@@ -30,6 +38,10 @@ export default function Sidebar({
   colorMode, setColorMode,
   resolution, setResolution,
   matrixN, setMatrixN, availableSizes,
+  logScale, setLogScale,
+  diagonalOnly, setDiagonalOnly,
+  selectedJ, setSelectedJ, maxJ,
+  onScreenshot,
   metadata, loading,
 }: Props) {
   return (
@@ -125,6 +137,66 @@ export default function Sidebar({
         ))}
       </div>
 
+      {/* Enhancements */}
+      <div style={styles.section}>
+        <h3 style={styles.sectionTitle}>Enhancements</h3>
+
+        {/* Log Scale */}
+        <label style={styles.checkboxLabel}>
+          <input
+            type="checkbox"
+            checked={logScale}
+            onChange={e => setLogScale(e.target.checked)}
+            style={styles.checkbox}
+          />
+          <span style={logScale ? styles.radioTextActive : styles.radioText}>
+            ⟁ Log Scale
+          </span>
+        </label>
+
+        {/* Diagonal Only */}
+        <label style={styles.checkboxLabel}>
+          <input
+            type="checkbox"
+            checked={diagonalOnly}
+            onChange={e => setDiagonalOnly(e.target.checked)}
+            style={styles.checkbox}
+          />
+          <span style={diagonalOnly ? styles.radioTextActive : styles.radioText}>
+            ⟋ Diagonal Only
+          </span>
+        </label>
+      </div>
+
+      {/* Row Slice */}
+      <div style={styles.section}>
+        <h3 style={styles.sectionTitle}>Row Slice</h3>
+        <div style={styles.sliceRow}>
+          <span style={styles.sliceLabel}>j =</span>
+          <input
+            type="number"
+            min={1}
+            max={maxJ}
+            value={selectedJ ?? ''}
+            placeholder="—"
+            onChange={e => {
+              const v = parseInt(e.target.value);
+              setSelectedJ(isNaN(v) ? null : Math.max(1, Math.min(maxJ, v)));
+            }}
+            style={styles.sliceInput}
+          />
+          {selectedJ !== null && (
+            <button
+              onClick={() => setSelectedJ(null)}
+              style={styles.sliceClear}
+            >
+              ✕
+            </button>
+          )}
+        </div>
+        <p style={styles.sliceHint}>Enter j to view G(j, •) as a 2D plot</p>
+      </div>
+
       {/* Data Info */}
       {metadata && (
         <div style={styles.section}>
@@ -151,6 +223,13 @@ export default function Sidebar({
           </div>
         </div>
       )}
+
+      {/* Actions */}
+      <div style={styles.section}>
+        <button onClick={onScreenshot} style={styles.screenshotBtn}>
+          📷 Export PNG
+        </button>
+      </div>
 
       {/* Footer */}
       <div style={styles.footer}>
@@ -240,6 +319,18 @@ const styles: Record<string, React.CSSProperties> = {
     color: '#ffffff',
     fontWeight: 500,
   },
+  checkboxLabel: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    padding: '4px 0',
+    cursor: 'pointer',
+  },
+  checkbox: {
+    accentColor: '#ff8844',
+    width: '13px',
+    height: '13px',
+  },
   stat: {
     display: 'flex',
     justifyContent: 'space-between',
@@ -275,6 +366,55 @@ const styles: Record<string, React.CSSProperties> = {
     borderColor: '#ff8844',
     color: '#ff8844',
     fontWeight: 600,
+  } as React.CSSProperties,
+  sliceRow: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6px',
+  },
+  sliceLabel: {
+    fontSize: '12px',
+    color: 'rgba(255,255,255,0.5)',
+    fontFamily: "'JetBrains Mono', monospace",
+  },
+  sliceInput: {
+    flex: 1,
+    background: 'rgba(255,255,255,0.04)',
+    border: '1px solid rgba(255,255,255,0.1)',
+    borderRadius: '4px',
+    color: '#ffffff',
+    padding: '5px 8px',
+    fontSize: '12px',
+    fontFamily: "'JetBrains Mono', monospace",
+    outline: 'none',
+    width: '80px',
+  } as React.CSSProperties,
+  sliceClear: {
+    background: 'none',
+    border: 'none',
+    color: 'rgba(255,255,255,0.3)',
+    fontSize: '12px',
+    cursor: 'pointer',
+    padding: '4px',
+  } as React.CSSProperties,
+  sliceHint: {
+    fontSize: '9px',
+    color: 'rgba(255,255,255,0.2)',
+    margin: '4px 0 0',
+    fontStyle: 'italic',
+  },
+  screenshotBtn: {
+    width: '100%',
+    background: 'rgba(255,136,68,0.1)',
+    border: '1px solid rgba(255,136,68,0.25)',
+    borderRadius: '6px',
+    color: '#ff8844',
+    padding: '8px 0',
+    fontSize: '12px',
+    fontWeight: 500,
+    cursor: 'pointer',
+    transition: 'all 0.2s',
+    fontFamily: "Inter, sans-serif",
   } as React.CSSProperties,
   loading: {
     display: 'flex',
