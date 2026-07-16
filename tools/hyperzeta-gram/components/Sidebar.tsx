@@ -11,6 +11,9 @@ interface Props {
   setColorMode: (mode: ColorMode) => void;
   resolution: 'lo' | 'hi';
   setResolution: (res: 'lo' | 'hi') => void;
+  matrixN: number;
+  setMatrixN: (n: number) => void;
+  availableSizes: number[];
   metadata: {
     N: number;
     dim: number;
@@ -26,6 +29,7 @@ export default function Sidebar({
   vizMode, setVizMode,
   colorMode, setColorMode,
   resolution, setResolution,
+  matrixN, setMatrixN, availableSizes,
   metadata, loading,
 }: Props) {
   return (
@@ -81,6 +85,25 @@ export default function Sidebar({
             </span>
           </label>
         ))}
+      </div>
+
+      {/* Matrix Size */}
+      <div style={styles.section}>
+        <h3 style={styles.sectionTitle}>Matrix Size</h3>
+        <div style={styles.sizeGrid}>
+          {availableSizes.map(n => (
+            <button
+              key={n}
+              onClick={() => setMatrixN(n)}
+              style={{
+                ...styles.sizeButton,
+                ...(matrixN === n ? styles.sizeButtonActive : {}),
+              }}
+            >
+              {n >= 1000 ? `${(n/1000).toFixed(n % 1000 === 0 ? 0 : 1)}k` : n}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Resolution */}
@@ -231,6 +254,28 @@ const styles: Record<string, React.CSSProperties> = {
     color: 'rgba(255,255,255,0.75)',
     fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
   },
+  sizeGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(3, 1fr)',
+    gap: '4px',
+  },
+  sizeButton: {
+    background: 'rgba(255,255,255,0.04)',
+    border: '1px solid rgba(255,255,255,0.08)',
+    borderRadius: '4px',
+    color: 'rgba(255,255,255,0.5)',
+    padding: '6px 0',
+    fontSize: '11px',
+    fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
+    cursor: 'pointer',
+    transition: 'all 0.2s',
+  } as React.CSSProperties,
+  sizeButtonActive: {
+    background: 'rgba(255,136,68,0.15)',
+    borderColor: '#ff8844',
+    color: '#ff8844',
+    fontWeight: 600,
+  } as React.CSSProperties,
   loading: {
     display: 'flex',
     alignItems: 'center',

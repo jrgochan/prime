@@ -25,19 +25,21 @@ interface GramData {
 }
 
 const SCALE = { x: 2.5, y: 2.5, z: 1.5 };
+const AVAILABLE_SIZES = [360, 840, 1680, 2520, 5040];
 const DEFAULT_N = 2520;
 
 export default function Home() {
   const [vizMode, setVizMode] = useState<VizMode>('surface');
   const [colorMode, setColorMode] = useState<ColorMode>('magnitude');
   const [resolution, setResolution] = useState<'lo' | 'hi'>('lo');
+  const [matrixN, setMatrixN] = useState(DEFAULT_N);
   const [data, setData] = useState<GramData | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const loadData = useCallback(async (res: 'lo' | 'hi') => {
+  const loadData = useCallback(async (n: number, res: 'lo' | 'hi') => {
     setLoading(true);
     try {
-      const resp = await fetch(`/data/gram_N${DEFAULT_N}_${res}.json`);
+      const resp = await fetch(`/data/gram_N${n}_${res}.json`);
       if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
       const json: GramData = await resp.json();
       setData(json);
@@ -49,8 +51,8 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    loadData(resolution);
-  }, [resolution, loadData]);
+    loadData(matrixN, resolution);
+  }, [matrixN, resolution, loadData]);
 
   const metadata = data ? {
     N: data.metadata.N,
@@ -70,6 +72,9 @@ export default function Home() {
         setColorMode={setColorMode}
         resolution={resolution}
         setResolution={setResolution}
+        matrixN={matrixN}
+        setMatrixN={setMatrixN}
+        availableSizes={AVAILABLE_SIZES}
         metadata={metadata}
         loading={loading}
       />
