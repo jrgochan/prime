@@ -148,13 +148,82 @@ def primeFiberWeight (N p : ℕ) : ℝ :=
 /-- **NEUTRINO OSCILLATION**: The ratio of p=3 fiber to p=2 fiber
     oscillates as N grows, analogous to νμ/νₑ flavor oscillation.
 
-    Proof strategy: The 1/p Fourier component of Σ μ(n)/n creates
-    oscillatory behavior with period related to p. Direct computation
-    shows non-monotone ratio for N ∈ [10, 10000]. -/
-axiom fiber_ratio_oscillates :
+    GRADUATED ✅ — July 16, 2026 (physics-finishing)
+
+    Proof: Direct computation at N₁=10, N₂=11.
+    F3(10)/F2(10) = 27/34, F3(11)/F2(11) = 192/269.
+    27·269 = 7263 > 6528 = 192·34, so ratio(10) > ratio(11). -/
+
+-- Computable Möbius values for k = 0..11
+private def μc : ℕ → ℤ
+  | 0 => 0 | 1 => 1 | 2 => -1 | 3 => -1 | 4 => 0 | 5 => -1
+  | 6 => 1 | 7 => -1 | 8 => 0 | 9 => 0 | 10 => 1 | 11 => -1
+  | _ => 0
+
+-- Computable ℚ-valued fiber weight
+private def fwQ (N p : ℕ) : ℚ :=
+  (Finset.Icc 1 N).sum fun k =>
+    if Nat.Coprime k p then (μc k : ℚ) / (k : ℚ) else 0
+
+-- The oscillation is decidable over ℚ
+private lemma fw_oscillates_Q :
+    fwQ 10 3 / fwQ 10 2 > fwQ 11 3 / fwQ 11 2 := by native_decide
+
+-- Bridge: μc agrees with μ for k ≤ 11
+private lemma μc_eq (k : ℕ) (hk : k ≤ 11) : (μc k : ℤ) = (μ k : ℤ) := by
+  interval_cases k <;> simp [μc] <;> native_decide
+
+-- The proof converts sums over Icc to explicit rational arithmetic.
+
+/-- The fiber weight computed over ℚ using a computable Möbius table -/
+private def fiberWeightQ (N p : ℕ) : ℚ :=
+  ∑ k ∈ Finset.Icc 1 N,
+    if Nat.Coprime k p then (μc k : ℚ) / (k : ℚ) else 0
+
+/-- The oscillation inequality over ℚ (decidable!) -/
+private lemma oscillation_Q :
+    fiberWeightQ 10 3 * fiberWeightQ 11 2 >
+    fiberWeightQ 11 3 * fiberWeightQ 10 2 := by native_decide
+
+/-- Positivity of denominators -/
+private lemma fw10_2_pos : (0 : ℚ) < fiberWeightQ 10 2 := by native_decide
+private lemma fw11_2_pos : (0 : ℚ) < fiberWeightQ 11 2 := by native_decide
+
+/-- Bridge: fiberWeightQ cast to ℝ equals primeFiberWeight, for N ≤ 11 -/
+private lemma fwQ_eq_fw (N p : ℕ) (hN : N ≤ 11) :
+    (fiberWeightQ N p : ℝ) = primeFiberWeight N p := by
+  simp only [fiberWeightQ, primeFiberWeight]
+  rw [Rat.cast_sum]
+  apply Finset.sum_congr rfl
+  intro k hk
+  have hk_le : k ≤ 11 := le_trans (Finset.mem_Icc.mp hk).2 hN
+  split_ifs with h
+  · simp only [Rat.cast_div, Rat.cast_intCast, Rat.cast_natCast]
+    congr 1
+    exact_mod_cast μc_eq k hk_le
+  · simp
+
+-- The main theorem
+theorem fiber_ratio_oscillates :
     ∃ N₁ N₂ : ℕ, 10 ≤ N₁ ∧ N₁ < N₂ ∧ N₂ ≤ 1000 ∧
     primeFiberWeight N₁ 3 / primeFiberWeight N₁ 2 >
-    primeFiberWeight N₂ 3 / primeFiberWeight N₂ 2
+    primeFiberWeight N₂ 3 / primeFiberWeight N₂ 2 := by
+  refine ⟨10, 11, le_refl _, by norm_num, by norm_num, ?_⟩
+  rw [show primeFiberWeight 10 3 = ↑(fiberWeightQ 10 3) from
+        (fwQ_eq_fw 10 3 (by norm_num)).symm,
+      show primeFiberWeight 10 2 = ↑(fiberWeightQ 10 2) from
+        (fwQ_eq_fw 10 2 (by norm_num)).symm,
+      show primeFiberWeight 11 3 = ↑(fiberWeightQ 11 3) from
+        (fwQ_eq_fw 11 3 (by norm_num)).symm,
+      show primeFiberWeight 11 2 = ↑(fiberWeightQ 11 2) from
+        (fwQ_eq_fw 11 2 (by norm_num)).symm]
+  -- Goal: ↑(fwQ 10 3) / ↑(fwQ 10 2) > ↑(fwQ 11 3) / ↑(fwQ 11 2)
+  -- Cross-multiply using div_lt_div_iff (need positive denominators)
+  have h10 : (0 : ℝ) < ↑(fiberWeightQ 10 2) := by exact_mod_cast fw10_2_pos
+  have h11 : (0 : ℝ) < ↑(fiberWeightQ 11 2) := by exact_mod_cast fw11_2_pos
+  rw [gt_iff_lt, div_lt_div_iff₀ h11 h10]
+  -- Goal: ↑(fwQ 11 3) * ↑(fwQ 10 2) < ↑(fwQ 10 3) * ↑(fwQ 11 2)
+  exact_mod_cast oscillation_Q
 
 -- ════════════════════════════════════════════════════════════════
 -- §4. CKM HIERARCHY
