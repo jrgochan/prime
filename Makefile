@@ -10,7 +10,7 @@
 # ============================================
 
 .PHONY: help build tour papers papers-all verify axioms rh cascade crown-audit clock jukebox
-.PHONY: hyperzeta hyperzeta-origin hyperzeta-explorer particle-zoo visualizer
+.PHONY: hyperzeta hyperzeta-origin hyperzeta-explorer particle-zoo visualizer gram
 .PHONY: check setup setup-lean setup-rust setup-node setup-python setup-latex setup-gmp
 .PHONY: experiment-vasyunin experiment-covariance experiment-bd
 .PHONY: experiment-gram experiment-abel experiment-all
@@ -24,6 +24,7 @@ PORT_ORIGIN          ?= 3001
 PORT_EXPLORER        ?= 3002
 PORT_PARTICLE_ZOO    ?= 3003
 PORT_VISUALIZER      ?= 3004
+PORT_GRAM            ?= 3005
 
 ENV := scripts/env.sh
 
@@ -275,6 +276,20 @@ visualizer: ## Launch Cathedral Visualizer — proof architecture explorer (port
 	else \
 		echo "  Installing dependencies..." && \
 		cd visualizer && npm install && npm run dev -- -p $(PORT_VISUALIZER); \
+	fi
+
+gram: ## Launch HyperZeta Gram — 3D Gram matrix visualizer (port $(PORT_GRAM))
+	$(call check_port,$(PORT_GRAM),PORT_GRAM,gram)
+	@echo ""
+	@echo "  📐 Launching HyperZeta Gram — 3D Gram Matrix Visualizer..."
+	@echo "     Port: $(PORT_GRAM)"
+	@echo ""
+	@if [ -d tools/hyperzeta-gram/node_modules ]; then \
+		echo "  Starting Next.js dev server on http://localhost:$(PORT_GRAM) ..." && \
+		cd tools/hyperzeta-gram && PORT=$(PORT_GRAM) npm run dev; \
+	else \
+		echo "  Installing dependencies..." && \
+		cd tools/hyperzeta-gram && npm install && PORT=$(PORT_GRAM) npm run dev; \
 	fi
 
 
