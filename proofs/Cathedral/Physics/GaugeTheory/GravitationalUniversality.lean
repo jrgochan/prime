@@ -187,8 +187,13 @@ axiom gramEntry_integral_pos (j k : ℕ) (hj : 1 ≤ j) (hk : 1 ≤ k) :
     Combined: G(j,k) > 0 universally. -/
 theorem gramEntry_pos (j k : ℕ) (hj : 1 ≤ j) (hk : 1 ≤ k) :
     0 < vasyuninGramEntry j k := by
-  rw [gramEntry_eq_integral j k hj hk]
-  exact gramEntry_integral_pos j k hj hk
+  by_cases hjk : j = k
+  · -- Diagonal: already proved in Structural.lean (0 axioms)
+    subst hjk
+    exact vasyuninGramEntry_diag_pos j (by omega)
+  · -- Off-diagonal: via integral bridge + positivity (2 axioms)
+    rw [gramEntry_eq_integral j k hj hk]
+    exact gramEntry_integral_pos j k hj hk
 
 -- ════════════════════════════════════════════════════════════════
 -- §4. THE UNIVERSALITY THEOREM
@@ -219,20 +224,30 @@ theorem gramEntry_nonneg (j k : ℕ) (hj : 1 ≤ j) (hk : 1 ≤ k) :
 ## Audit — GravitationalUniversality.lean
 
 ### Created: July 16, 2026 (The Pie — Day 108)
+### Updated: July 16, 2026 — Diagonal case split (axiom-free diagonal)
 ### Sorry: 0
-### Custom Axioms: 2 (both standard published results)
+### Custom Axioms: 2 (off-diagonal only; both standard published results)
 ### Proved Theorems: 3
 
-### Axioms:
+### Axioms (off-diagonal only):
   - `gramEntry_eq_integral` — Vasyunin-Báez-Duarte formula (1995/2005)
-    Status: Standard published theorem. Partial formalization in
-    `scratch_vasyunin_diag.lean`. Full formalization requires Stirling.
+    Status: Standard published theorem. Diagonal case proved in
+    `VasyuninIntegralProof.vasyunin_integral_diag` (via StirlingBridge +
+    PiecewiseFTC + SqueezeElimination). Off-diagonal requires GCD-structured
+    interval splitting (~600 lines estimated).
   - `gramEntry_integral_pos` — Integral of non-neg fn with overlapping support
     Status: Standard measure theory. Requires `MeasureTheory.set_integral_pos`
     and support analysis.
 
+### Key Insight (Oven Door):
+  The diagonal case G(k,k) > 0 does NOT need either axiom! It is proved
+  directly in `Structural.vasyuninGramEntry_diag_pos` from `ln(2π) - γ > 1`.
+  The `gramEntry_pos` theorem now case-splits on `j = k`, using the
+  axiom-free path for diagonal and the integral axioms only for off-diagonal.
+
 ### Theorems:
   - `gramEntry_pos` — G(j,k) > 0 for all j,k ≥ 1 ✅
+    (diagonal: 0 axioms; off-diagonal: 2 axioms)
   - `gravitational_universality` — G(j,k) ≠ 0 ✅ (graduates axiom)
   - `gramEntry_nonneg` — G(j,k) ≥ 0 ✅
 
@@ -240,15 +255,15 @@ theorem gramEntry_nonneg (j k : ℕ) (hj : 1 ≤ j) (hk : 1 ≤ k) :
   ArithmeticGravity.lean axiom `gravitational_universality`
     → GravitationalUniversality.lean theorem `gravitational_universality`
       → gramEntry_pos
-        → gramEntry_eq_integral (axiom: published formula)
-        → gramEntry_integral_pos (axiom: standard measure theory)
+        → j = k: vasyuninGramEntry_diag_pos (0 axioms, from Structural.lean)
+        → j ≠ k: gramEntry_eq_integral + gramEntry_integral_pos (2 axioms)
 
-### Bounty Board Item:
-  "Formalize the Vasyunin-Báez-Duarte integral bridge"
-  Path: Stirling's formula → ∫₀¹ {1/u}² du = ln(2π)-γ-1
-        → diagonal bridge → off-diagonal extension → support analysis
-  Estimated effort: ~800 lines of Lean
-  Partial progress: scratch_vasyunin_diag.lean (piece integrals proved)
+### Existing Infrastructure (for future axiom elimination):
+  - `StirlingBridge.tendsto_partialSum` — P(K) → ln(2π) - γ - 1 ✅
+  - `PiecewiseFTC.integral_eq_partialSum` — ∫_{1/K}^1 {1/u}² = P(K) ✅
+  - `SqueezeElimination.fract_sq_integral_value` — ∫₀¹ {1/u}² = ln(2π)-γ-1 ✅
+  - `VasyuninIntegralProof.vasyunin_integral_diag` — G(k,k) = ∫₀¹ {1/(kx)}² ✅
+  All zero axioms! The diagonal integral bridge is COMPLETE.
 
 ### Experimental Validation:
   - gravity_experiment.py: G > 0 for all j,k ≤ 200 (all 20,100 entries)
