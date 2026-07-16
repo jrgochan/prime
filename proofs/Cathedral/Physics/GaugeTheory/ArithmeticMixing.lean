@@ -265,19 +265,144 @@ theorem ckm_diagonal_dominance :
   push_cast
   linarith
 
-/-- **CKM FAR-FIELD DECAY**: |G(2,3)| > |G(2,5)|.
+/-- **🎓 CKM FAR-FIELD DECAY**: |G(2,3)| > |G(2,5)|.
 
     The off-diagonal entry decays with increasing "gcd distance".
-    Proof requires V(5,2) computation involving cot(π/5) and cot(2π/5).
+    Graduated July 16, 2026 (physics-finishing) via golden ratio algebra.
 
-    Graduation path: ~200 lines of cotangent algebra with √5. -/
-axiom ckm_far_field_decay :
+    Proof: Both entries are positive (gravitational universality),
+    so this reduces to G(2,3) > G(2,5). Substituting exact forms
+    and bounding cot(π/5) < 7/5, cot(2π/5) > 3/10, ln(5/2) > 13·ln(2)/10,
+    the inequality follows from nlinarith. -/
+theorem ckm_far_field_decay :
     |Cathedral.Vasyunin.vasyuninGramEntry 2 3| >
-    |Cathedral.Vasyunin.vasyuninGramEntry 2 5|
+    |Cathedral.Vasyunin.vasyuninGramEntry 2 5| := by
+  -- Precompute key bounds
+  have hpi_pos : Real.pi > 0 := Real.pi_pos
+  have hpi_gt3 : Real.pi > 3 := pi_gt_three
+  have hpi_le4 : Real.pi ≤ 4 := pi_le_four
+  have hc₁_pos := Cathedral.Vasyunin.cot_pi_div_five_pos
+  have hc₁_lt := Cathedral.Vasyunin.cot_pi_div_five_lt
+  have hc₂_gt := Cathedral.Vasyunin.cot_two_pi_div_five_gt
+  -- cot(2π/5) < 1/2: from 5·cos²(2π/5) < 1, i.e., √5 > 7/5
+  have hc₂_lt_half : Cathedral.Vasyunin.cot (2 * Real.pi / 5) < 1 / 2 := by
+    unfold Cathedral.Vasyunin.cot
+    have h_sin := Cathedral.Vasyunin.sin_two_pi_div_five_pos
+    rw [div_lt_div_iff₀ h_sin (by norm_num : (0:ℝ) < 2)]
+    -- Goal: 2 * cos(2π/5) < 1 * sin(2π/5), i.e., sin - 2cos > 0
+    set s := Real.sin (2 * Real.pi / 5)
+    set c := Real.cos (2 * Real.pi / 5)
+    have h_cos_val : c = (Real.sqrt 5 - 1) / 4 :=
+      Cathedral.Vasyunin.cos_two_pi_div_five
+    have h_cos_pos : c > 0 := by
+      rw [h_cos_val]
+      have : Real.sqrt 5 > 1 := by
+        rw [show (1 : ℝ) = Real.sqrt 1 from by simp]
+        exact Real.sqrt_lt_sqrt (by norm_num) (by norm_num)
+      linarith
+    have h5 : Real.sqrt 5 ^ 2 = 5 := Real.sq_sqrt (by norm_num : (0:ℝ) ≤ 5)
+    have h_sin_sq : s ^ 2 = 1 - c ^ 2 := by rw [Real.sin_sq]
+    -- Show (1·s - 2c)(s + 2c) = s² - 4c² = 1-5c² > 0
+    have h_prod : (1 * s - 2 * c) * (1 * s + 2 * c) > 0 := by
+      have : (1 * s - 2 * c) * (1 * s + 2 * c) = s ^ 2 - 4 * c ^ 2 := by ring
+      rw [this, h_sin_sq, h_cos_val]
+      nlinarith [h5]
+    have h_sum : 1 * s + 2 * c > 0 := by positivity
+    by_contra h_neg
+    push_neg at h_neg
+    linarith [mul_nonpos_of_nonpos_of_nonneg
+      (by linarith : 1 * s - 2 * c ≤ 0) (le_of_lt h_sum)]
+  -- Product bounds: upper AND lower
+  have h_pic1 : Real.pi * Cathedral.Vasyunin.cot (Real.pi / 5) ≤ 4 * (7 / 5) :=
+    mul_le_mul hpi_le4 (le_of_lt hc₁_lt) (le_of_lt hc₁_pos) (by norm_num)
+  have h_pic2_lo : Real.pi * Cathedral.Vasyunin.cot (2 * Real.pi / 5) ≥ 3 * (3 / 10) :=
+    mul_le_mul (le_of_lt hpi_gt3) (le_of_lt hc₂_gt)
+              (by norm_num) (le_of_lt hpi_pos)
+  have hc₂_pos : Cathedral.Vasyunin.cot (2 * Real.pi / 5) > 0 :=
+    lt_trans (by norm_num : (0:ℝ) < 3/10) hc₂_gt
+  have h_pic2_hi : Real.pi * Cathedral.Vasyunin.cot (2 * Real.pi / 5) ≤ 4 * (1 / 2) :=
+    mul_le_mul hpi_le4 (le_of_lt hc₂_lt_half) (le_of_lt hc₂_pos) (by norm_num)
+  -- log bounds
+  have h_log52_lt : Real.log (5 / 2) < 1 := by
+    rw [show (1:ℝ) = Real.log (Real.exp 1) from (Real.log_exp 1).symm]
+    exact Real.log_lt_log (by norm_num : (0:ℝ) < 5/2)
+      (by linarith [Real.exp_one_gt_d9])
+  have h_log52_pos : Real.log (5 / 2) > 0 :=
+    Real.log_pos (by norm_num : (1:ℝ) < 5/2)
+  have hl : (0.6931471803 : ℝ) < Real.log 2 := Real.log_two_gt_d9
+  have h_log52_tight : Real.log (5 / 2) > 13 * Real.log 2 / 10 :=
+    Cathedral.Vasyunin.log_five_halves_gt
+  have h_log32_pos : Real.log (3 / 2) > 0 :=
+    Real.log_pos (by norm_num : (1:ℝ) < 3/2)
+  have h_log32_tight : 5 * Real.log (3 / 2) < 3 * Real.log 2 := by
+    rw [show 5 * Real.log (3 / 2) = Real.log ((3 / 2) ^ 5) from by
+      rw [Real.log_pow]; push_cast; ring]
+    rw [show 3 * Real.log 2 = Real.log (2 ^ 3) from by
+      rw [Real.log_pow]; push_cast; ring]
+    exact Real.log_lt_log (by norm_num : (0:ℝ) < (3/2)^5) (by norm_num)
+  have h_pi_sqrt3 := Cathedral.Vasyunin.pi_div_18sqrt3_lt
+  have hs_pos : Real.sqrt 3 > 0 := Real.sqrt_pos.mpr (by norm_num : (0:ℝ) < 3)
+  have hA : Real.log (2 * Real.pi) - Real.eulerMascheroniConstant > 1 :=
+    Cathedral.Vasyunin.log_two_pi_sub_euler_gt_one
+  have h23_pos := Cathedral.Vasyunin.vasyuninGramEntry_two_three_pos
+  -- Ring identity to expand π/20 * (c₁/5 - 3c₂/5)
+  have h_ring : Real.pi / 20 *
+      (1 / 5 * Cathedral.Vasyunin.cot (Real.pi / 5) -
+       3 / 5 * Cathedral.Vasyunin.cot (2 * Real.pi / 5)) =
+      Real.pi * Cathedral.Vasyunin.cot (Real.pi / 5) / 100 -
+      3 * (Real.pi * Cathedral.Vasyunin.cot (2 * Real.pi / 5)) / 100 := by ring
+  -- Step 1: G(2,5) > 0
+  have h25_pos : Cathedral.Vasyunin.vasyuninGramEntry 2 5 > 0 := by
+    rw [Cathedral.Vasyunin.vasyuninGramEntry_two_five]
+    -- Goal has π/20 * (c₁/5 - 3c₂/5); substitute expanded form
+    calc 7 * (Real.log (2 * Real.pi) - Real.eulerMascheroniConstant) / 20 -
+        3 * Real.log (5 / 2) / 20 +
+        Real.pi / 20 * ((1 / 5) * Cathedral.Vasyunin.cot (Real.pi / 5) -
+                         (3 / 5) * Cathedral.Vasyunin.cot (2 * Real.pi / 5)) -
+        1 / 10
+      = 7 * (Real.log (2 * Real.pi) - Real.eulerMascheroniConstant) / 20 -
+        3 * Real.log (5 / 2) / 20 +
+        Real.pi * Cathedral.Vasyunin.cot (Real.pi / 5) / 100 -
+        3 * (Real.pi * Cathedral.Vasyunin.cot (2 * Real.pi / 5)) / 100 -
+        1 / 10 := by ring
+      _ > 0 := by linarith [h_pic1, h_pic2_hi, h_log52_lt, h_log52_pos,
+                    mul_pos hpi_pos hc₁_pos, mul_pos hpi_pos hc₂_pos]
+  -- Step 2: strip absolute values
+  rw [abs_of_pos h23_pos, abs_of_pos h25_pos]
+  -- Step 3: G(2,3) > G(2,5)
+  rw [Cathedral.Vasyunin.vasyuninGramEntry_two_three,
+      Cathedral.Vasyunin.vasyuninGramEntry_two_five]
+  -- Derive π/(36√3) < 35/692 from π/(18√3) < 35/346
+  have h_pi_36_bound : Real.pi / (36 * Real.sqrt 3) < 35 / 692 := by
+    have h_pos : (0:ℝ) < 18 * Real.sqrt 3 := mul_pos (by norm_num) hs_pos
+    have h_pos2 : (0:ℝ) < 36 * Real.sqrt 3 := mul_pos (by norm_num) hs_pos
+    rw [div_lt_div_iff₀ h_pos2 (by norm_num : (0:ℝ) < 692)]
+    -- 346·π < 35·18·√3 from h_pi_sqrt3 → 692·π < 35·36·√3
+    have := h_pi_sqrt3
+    rw [div_lt_div_iff₀ h_pos (by norm_num : (0:ℝ) < 346)] at this
+    linarith
+  -- Expand compound term and close
+  have h_expand : 5 * (Real.log (2 * Real.pi) - Real.eulerMascheroniConstant) / 12 -
+      Real.log (3 / 2) / 12 - Real.pi / (36 * Real.sqrt 3) - 1 / 6 -
+      (7 * (Real.log (2 * Real.pi) - Real.eulerMascheroniConstant) / 20 -
+       3 * Real.log (5 / 2) / 20 +
+       Real.pi / 20 * ((1 / 5) * Cathedral.Vasyunin.cot (Real.pi / 5) -
+                        (3 / 5) * Cathedral.Vasyunin.cot (2 * Real.pi / 5)) -
+       1 / 10) =
+      (Real.log (2 * Real.pi) - Real.eulerMascheroniConstant) / 15 +
+      3 * Real.log (5 / 2) / 20 -
+      Real.log (3 / 2) / 12 -
+      Real.pi / (36 * Real.sqrt 3) -
+      Real.pi * Cathedral.Vasyunin.cot (Real.pi / 5) / 100 +
+      3 * (Real.pi * Cathedral.Vasyunin.cot (2 * Real.pi / 5)) / 100 -
+      1 / 15 := by ring
+  linarith [h_pic1, h_pic2_lo, h_pic2_hi, h_pi_36_bound,
+            h_log52_tight, h_log32_tight, h_log32_pos,
+            mul_pos hpi_pos hc₁_pos, mul_pos hpi_pos hc₂_pos]
 
-/-- **CKM HIERARCHY**: Full CKM-like ordering.
-    Part 1 (diagonal dominance) is proved.
-    Part 2 (far-field decay) remains as axiom. -/
+/-- **🎓 CKM HIERARCHY**: Full CKM-like ordering.
+    Both parts proved: diagonal dominance (June 25, 2026) and
+    far-field decay (July 16, 2026). Zero axioms remain! -/
 theorem ckm_hierarchy :
     Cathedral.Vasyunin.vasyuninGramEntry 2 2 >
     |Cathedral.Vasyunin.vasyuninGramEntry 2 3| ∧
