@@ -40,19 +40,11 @@ namespace Cathedral.Dissolution
 -- PART I: THE CLOSED-FORM VASYUNIN RECIPROCITY
 -- ════════════════════════════════════════════════
 
-/-- **AXIOM** (QUARANTINED — numerically falsified May 21, 2026).
-
-    The identity V(a,b) = −2·s(b,a) does NOT hold in general.
-    Verified by hand: V(3,1) = −√3/9 ≈ −0.1925 but −2s(1,3) = −1/9 ≈ −0.1111.
-    The Vasyunin sum involves cot (transcendental) while Dedekind uses
-    sawtooth (piecewise rational). These are fundamentally different objects.
-
-    This axiom is a placeholder (states True) and has NO downstream dependents.
-    Retained for historical reference only. -/
-axiom vasyunin_eq_neg2_dedekind (a b : ℕ) (ha : 2 ≤ a) (hcop : Nat.Coprime a b) :
-    -- vasyuninSum a b = -2 * dedekindSum b a
-    -- QUARANTINED: numerically falsified. See cotangent_bound_probe.rs
-    True  -- placeholder; the actual identity is WRONG
+-- **HISTORICAL NOTE** (May 21, 2026): The identity V(a,b) = −2·s(b,a)
+-- was numerically falsified. V(3,1) = −√3/9 ≈ −0.1925 but −2s(1,3) = −1/9.
+-- The Vasyunin sum uses cot (transcendental), Dedekind uses sawtooth (rational).
+-- The correct relationship is the RECIPROCITY SUM below, not pointwise equality.
+-- See cotangent_bound_probe.rs for verification.
 
 /-- **THEOREM**: The closed-form Vasyunin reciprocity.
 
