@@ -39,7 +39,9 @@
 -/
 
 import Cathedral.Physics.GaugeTheory.ArithmeticPauli
+import Cathedral.Physics.GaugeTheory.GravitationalUniversality
 import Cathedral.Vasyunin.Witness
+import Cathedral.Vasyunin.Matrix.GramEntries
 
 noncomputable section
 open Real Finset ArithmeticFunction Matrix
@@ -229,21 +231,59 @@ theorem fiber_ratio_oscillates :
 -- §4. CKM HIERARCHY
 -- ════════════════════════════════════════════════════════════════
 
-/-- **CKM HIERARCHY**: Off-diagonal Gram entries decay with
-    increasing gcd distance, giving the CKM-like hierarchy
-    |V_ud| > |V_us| > |V_ub|.
+/-- **CKM DIAGONAL DOMINANCE**: G(2,2) > |G(2,3)|.
 
-    The diagonal G(p,p) > off-diagonal G(p,q) > far-off G(p,r)
-    for distinct primes p,q,r, mirroring the CKM structure.
+    GRADUATED ✅ — July 16, 2026 (physics-finishing)
 
-    Proof strategy: The Vasyunin formula shows G(j,k) ~ 1/(j·k)
-    for coprime j,k, while G(j,j) ~ log(2π)-γ)/j. The diagonal
-    dominance is immediate from log(2π)-γ > 1. -/
-axiom ckm_hierarchy :
+    Proof: From the exact Vasyunin forms:
+      G(2,2) = A/2 - 1/4
+      G(2,3) = 5A/12 - ln(3/2)/12 - π/(36√3) - 1/6
+    where A = ln(2π) - γ.
+
+    G(2,2) - G(2,3) = (A-1)/12 + ln(3/2)/12 + π/(36√3) > 0
+    since A > 1 (proved), ln(3/2) > 0, and π/(36√3) > 0. -/
+theorem ckm_diagonal_dominance :
+    Cathedral.Vasyunin.vasyuninGramEntry 2 2 >
+    |Cathedral.Vasyunin.vasyuninGramEntry 2 3| := by
+  -- G(2,3) > 0 from gravitational universality, so |G(2,3)| = G(2,3)
+  have h23_pos := Cathedral.GravitationalUniversality.gramEntry_pos 2 3
+    (by norm_num) (by norm_num)
+  rw [abs_of_pos h23_pos]
+  -- Rewrite both entries to exact forms
+  rw [Cathedral.Vasyunin.vasyuninGramEntry_diag 2,
+      Cathedral.Vasyunin.vasyuninGramEntry_two_three]
+  -- Set up key bounds
+  set A := Real.log (2 * Real.pi) - Real.eulerMascheroniConstant with hA_def
+  have hA : A > 1 := Cathedral.Vasyunin.log_two_pi_sub_euler_gt_one
+  have hlog32 : 0 < Real.log (3 / 2) :=
+    Real.log_pos (by norm_num : (1 : ℝ) < 3 / 2)
+  have hpi_sqrt : 0 < Real.pi / (36 * Real.sqrt 3) :=
+    div_pos Real.pi_pos (mul_pos (by norm_num : (0:ℝ) < 36)
+      (Real.sqrt_pos.mpr (by norm_num : (0:ℝ) < 3)))
+  -- Goal: A/2 - 1/4 > 5A/12 - log(3/2)/12 - π/(36√3) - 1/6
+  -- Equivalent to: (A-1)/12 + log(3/2)/12 + π/(36√3) > 0
+  push_cast
+  linarith
+
+/-- **CKM FAR-FIELD DECAY**: |G(2,3)| > |G(2,5)|.
+
+    The off-diagonal entry decays with increasing "gcd distance".
+    Proof requires V(5,2) computation involving cot(π/5) and cot(2π/5).
+
+    Graduation path: ~200 lines of cotangent algebra with √5. -/
+axiom ckm_far_field_decay :
+    |Cathedral.Vasyunin.vasyuninGramEntry 2 3| >
+    |Cathedral.Vasyunin.vasyuninGramEntry 2 5|
+
+/-- **CKM HIERARCHY**: Full CKM-like ordering.
+    Part 1 (diagonal dominance) is proved.
+    Part 2 (far-field decay) remains as axiom. -/
+theorem ckm_hierarchy :
     Cathedral.Vasyunin.vasyuninGramEntry 2 2 >
     |Cathedral.Vasyunin.vasyuninGramEntry 2 3| ∧
     |Cathedral.Vasyunin.vasyuninGramEntry 2 3| >
-    |Cathedral.Vasyunin.vasyuninGramEntry 2 5|
+    |Cathedral.Vasyunin.vasyuninGramEntry 2 5| :=
+  ⟨ckm_diagonal_dominance, ckm_far_field_decay⟩
 
 -- ════════════════════════════════════════════════════════════════
 -- AUDIT
