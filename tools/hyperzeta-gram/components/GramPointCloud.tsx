@@ -18,15 +18,24 @@ interface Props {
  */
 export default function GramPointCloud({ points, colorMode, globalMin, globalMax, scale }: Props) {
   const { positions, colors } = useMemo(() => {
-    const pos = new Float32Array(points.length * 3);
-    const col = new Float32Array(points.length * 3);
+    // Expand to full symmetric set
+    const fullPoints: GramPoint[] = [];
+    points.forEach(pt => {
+      fullPoints.push(pt);
+      if (pt.j !== pt.k) {
+        fullPoints.push({ ...pt, j: pt.k, k: pt.j });
+      }
+    });
 
-    const jMax = Math.max(...points.map(p => p.j));
-    const kMax = Math.max(...points.map(p => p.k));
+    const pos = new Float32Array(fullPoints.length * 3);
+    const col = new Float32Array(fullPoints.length * 3);
+
+    const jMax = Math.max(...fullPoints.map(p => p.j));
+    const kMax = Math.max(...fullPoints.map(p => p.k));
     const absMax = Math.max(Math.abs(globalMin), Math.abs(globalMax));
-    const maxDist = Math.max(...points.map(p => Math.abs(p.j - p.k)));
+    const maxDist = Math.max(...fullPoints.map(p => Math.abs(p.j - p.k)));
 
-    points.forEach((pt, i) => {
+    fullPoints.forEach((pt, i) => {
       const x = (pt.j / jMax - 0.5) * 2 * scale.x;
       const y = (pt.k / kMax - 0.5) * 2 * scale.y;
       const z = (pt.v / absMax) * scale.z;

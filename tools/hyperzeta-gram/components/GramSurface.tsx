@@ -27,9 +27,14 @@ export default function GramSurface({ points, colorMode, globalMin, globalMax, s
     const js = Array.from(jSet).sort((a, b) => a - b);
     const ks = Array.from(kSet).sort((a, b) => a - b);
 
-    // Build lookup map
+    // Build lookup map — store both (j,k) and (k,j) since G is symmetric
     const lookup = new Map<string, GramPoint>();
-    points.forEach(p => lookup.set(`${p.j},${p.k}`, p));
+    points.forEach(p => {
+      lookup.set(`${p.j},${p.k}`, p);
+      if (p.j !== p.k) {
+        lookup.set(`${p.k},${p.j}`, { ...p, j: p.k, k: p.j });
+      }
+    });
 
     // Create grid vertices
     const positions: number[] = [];

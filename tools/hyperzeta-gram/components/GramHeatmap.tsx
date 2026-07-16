@@ -20,10 +20,19 @@ export default function GramHeatmap({ points, colorMode, globalMin, globalMax, s
   const geometry = useMemo(() => {
     if (points.length === 0) return null;
 
-    const jMax = Math.max(...points.map(p => p.j));
-    const kMax = Math.max(...points.map(p => p.k));
+    // Expand to full symmetric set
+    const fullPoints: GramPoint[] = [];
+    points.forEach(pt => {
+      fullPoints.push(pt);
+      if (pt.j !== pt.k) {
+        fullPoints.push({ ...pt, j: pt.k, k: pt.j });
+      }
+    });
+
+    const jMax = Math.max(...fullPoints.map(p => p.j));
+    const kMax = Math.max(...fullPoints.map(p => p.k));
     const absMax = Math.max(Math.abs(globalMin), Math.abs(globalMax));
-    const maxDist = Math.max(...points.map(p => Math.abs(p.j - p.k)));
+    const maxDist = Math.max(...fullPoints.map(p => Math.abs(p.j - p.k)));
 
     // Estimate cell size from spacing
     const jSet = new Set(points.map(p => p.j));
@@ -38,7 +47,7 @@ export default function GramHeatmap({ points, colorMode, globalMin, globalMax, s
     const indices: number[] = [];
     let vertIdx = 0;
 
-    points.forEach(pt => {
+    fullPoints.forEach(pt => {
       const x = (pt.j / jMax - 0.5) * 2 * scale.x;
       const z = (pt.k / kMax - 0.5) * 2 * scale.y;
       const height = Math.max(0.001, (Math.abs(pt.v) / absMax) * scale.z);
