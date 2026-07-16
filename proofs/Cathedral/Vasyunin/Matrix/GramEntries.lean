@@ -308,6 +308,117 @@ theorem vasyuninGramEntry_two_three :
   ring
 
 -- ════════════════════════════════════════════════
+-- V(5,2) AND G(2,5) EXACT FORMS
+-- ════════════════════════════════════════════════
+
+/-! ### The Golden Ratio Staircase
+
+V(5,2) involves cotangent values at π/5 and 2π/5, which live in
+the field ℚ(√5) — the golden ratio's playground.
+
+The computation proceeds:
+1. Expand V(5,2) = Σ_{m=1}^{4} {2m/5} · cot(πm/5)
+2. Use cot(π - x) = -cot(x) for m = 3,4
+3. Collect: V(5,2) = -(1/5)·cot(π/5) + (3/5)·cot(2π/5)
+-/
+
+-- FRACTIONAL PARTS at k/5
+
+theorem fract_two_fifths : Int.fract (2 / (5 : ℝ)) = 2 / 5 := by
+  rw [Int.fract_eq_self.mpr ⟨by norm_num, by norm_num⟩]
+
+theorem fract_four_fifths : Int.fract (4 / (5 : ℝ)) = 4 / 5 := by
+  rw [Int.fract_eq_self.mpr ⟨by norm_num, by norm_num⟩]
+
+theorem fract_six_fifths : Int.fract (6 / (5 : ℝ)) = 1 / 5 := by
+  rw [show (6 : ℝ) / 5 = 1 / 5 + 1 from by ring]
+  rw [Int.fract_add_one]
+  rw [Int.fract_eq_self.mpr ⟨by norm_num, by norm_num⟩]
+
+theorem fract_eight_fifths : Int.fract (8 / (5 : ℝ)) = 3 / 5 := by
+  rw [show (8 : ℝ) / 5 = 3 / 5 + 1 from by ring]
+  rw [Int.fract_add_one]
+  rw [Int.fract_eq_self.mpr ⟨by norm_num, by norm_num⟩]
+
+-- COTANGENT π-x SYMMETRY for m = 3, 4
+
+/-- cot(3π/5) = -cot(2π/5): since 3π/5 = π - 2π/5. -/
+theorem cot_three_pi_div_five :
+    cot (3 * Real.pi / 5) = -cot (2 * Real.pi / 5) := by
+  unfold cot
+  rw [show 3 * Real.pi / 5 = Real.pi - 2 * Real.pi / 5 by ring]
+  rw [Real.cos_pi_sub, Real.sin_pi_sub]
+  ring
+
+/-- cot(4π/5) = -cot(π/5): since 4π/5 = π - π/5. -/
+theorem cot_four_pi_div_five :
+    cot (4 * Real.pi / 5) = -cot (Real.pi / 5) := by
+  unfold cot
+  rw [show 4 * Real.pi / 5 = Real.pi - Real.pi / 5 by ring]
+  rw [Real.cos_pi_sub, Real.sin_pi_sub]
+  ring
+
+-- V(5,2) EXPANSION AND SIMPLIFICATION
+
+/-- **V(5,2)**: For a = 5, b = 2, the sum has four terms over Ico 1 5. -/
+theorem vasyuninSum_five_two :
+    vasyuninSum 5 2 =
+    Int.fract (2 / (5 : ℝ)) * cot (Real.pi * 1 / 5) +
+    (Int.fract (4 / (5 : ℝ)) * cot (Real.pi * 2 / 5) +
+    (Int.fract (6 / (5 : ℝ)) * cot (Real.pi * 3 / 5) +
+    Int.fract (8 / (5 : ℝ)) * cot (Real.pi * 4 / 5))) := by
+  unfold vasyuninSum
+  simp only [show ¬(5 ≤ 1) from by omega, ↓reduceIte]
+  have h_ico : Ico 1 5 = ({1, 2, 3, 4} : Finset ℕ) := by
+    ext x; simp; omega
+  rw [h_ico]
+  rw [Finset.sum_insert (show (1:ℕ) ∉ ({2, 3, 4} : Finset ℕ) from by decide),
+      Finset.sum_insert (show (2:ℕ) ∉ ({3, 4} : Finset ℕ) from by decide),
+      Finset.sum_pair (show (3:ℕ) ≠ 4 from by decide)]
+  push_cast
+  norm_num
+
+/-- **V(5,2) closed form**: After substituting fractional parts and
+    applying cot(π-x) = -cot(x), we get:
+    V(5,2) = -(1/5)·cot(π/5) + (3/5)·cot(2π/5) -/
+theorem vasyuninSum_five_two_val :
+    vasyuninSum 5 2 = -(1 / 5) * cot (Real.pi / 5) +
+                       (3 / 5) * cot (2 * Real.pi / 5) := by
+  rw [vasyuninSum_five_two]
+  rw [show Real.pi * 1 / 5 = Real.pi / 5 by ring]
+  rw [show Real.pi * 2 / 5 = 2 * Real.pi / 5 by ring]
+  rw [show Real.pi * 3 / 5 = 3 * Real.pi / 5 by ring]
+  rw [show Real.pi * 4 / 5 = 4 * Real.pi / 5 by ring]
+  rw [fract_two_fifths, fract_four_fifths, fract_six_fifths, fract_eight_fifths]
+  rw [cot_three_pi_div_five, cot_four_pi_div_five]
+  ring
+
+-- G(2,5) EXACT FORM
+
+/-- **G(2,5) exact form**: Since gcd(2,5)=1, j'=2, k'=5,
+    V(2,5) = 0, V(5,2) = -(1/5)·cot(π/5) + (3/5)·cot(2π/5), we get:
+    G(2,5) = 7A/20 - 3·ln(5/2)/20
+             + π/(20)·((1/5)·cot(π/5) - (3/5)·cot(2π/5))
+             - 1/10
+    where A = ln(2π) - γ. -/
+theorem vasyuninGramEntry_two_five :
+    vasyuninGramEntry 2 5 =
+    7 * (Real.log (2 * Real.pi) - γ) / 20 -
+    3 * Real.log (5 / 2) / 20 +
+    Real.pi / 20 * ((1 / 5) * cot (Real.pi / 5) -
+                     (3 / 5) * cot (2 * Real.pi / 5)) -
+    1 / 10 := by
+  unfold vasyuninGramEntry
+  simp only [show 2 ≠ 5 from by omega, ↓reduceIte]
+  simp only [show Nat.gcd 2 5 = 1 from by norm_num,
+             show 2 / 1 = 2 from by norm_num,
+             show 5 / 1 = 5 from by norm_num]
+  rw [vasyuninSum_two 5, vasyuninSum_five_two_val]
+  push_cast
+  rw [show (5 : ℝ) / (2 : ℝ) = 5 / 2 by norm_num]
+  ring
+
+-- ════════════════════════════════════════════════
 -- OFF-DIAGONAL POSITIVITY
 -- ════════════════════════════════════════════════
 
