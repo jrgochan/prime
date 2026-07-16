@@ -309,7 +309,7 @@ theorem ckm_far_field_decay :
       nlinarith [h5]
     have h_sum : 1 * s + 2 * c > 0 := by positivity
     by_contra h_neg
-    push_neg at h_neg
+    push Not at h_neg
     linarith [mul_nonpos_of_nonpos_of_nonneg
       (by linarith : 1 * s - 2 * c ≤ 0) (le_of_lt h_sum)]
   -- Product bounds: upper AND lower
