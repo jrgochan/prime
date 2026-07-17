@@ -415,6 +415,8 @@ lean_lib «Cathedral» where
     `Cathedral.Physics.GaugeTheory.ArithmeticEightfoldWay,
     -- Physics: Weinberg Angle (electroweak mixing in G_EW 2×2 block, Day 109) 🔀
     `Cathedral.Physics.GaugeTheory.WeinbergAngle,
+    -- Physics: CP Violation (Möbius sign asymmetry, Jarlskog invariant, Day 109) ⚡
+    `Cathedral.Physics.GaugeTheory.CPViolation,
     -- Physics: Graviton (G(k,k) ~ 1/k diagonal decay → mass hierarchy, Day 87) 🌌
     `Cathedral.Physics.GaugeTheory.GravitationalUniversality,
     `Cathedral.Physics.GaugeTheory.ArithmeticGravity,
