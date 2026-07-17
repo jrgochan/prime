@@ -417,6 +417,8 @@ lean_lib «Cathedral» where
     `Cathedral.Physics.GaugeTheory.WeinbergAngle,
     -- Physics: CP Violation (Möbius sign asymmetry, Jarlskog invariant, Day 109) ⚡
     `Cathedral.Physics.GaugeTheory.CPViolation,
+    -- Physics: Running Coupling (asymptotic freedom, β < 0 for k ≥ 2, Day 109) 🏃
+    `Cathedral.Physics.GaugeTheory.RunningCoupling,
     -- Physics: Graviton (G(k,k) ~ 1/k diagonal decay → mass hierarchy, Day 87) 🌌
     `Cathedral.Physics.GaugeTheory.GravitationalUniversality,
     `Cathedral.Physics.GaugeTheory.ArithmeticGravity,
