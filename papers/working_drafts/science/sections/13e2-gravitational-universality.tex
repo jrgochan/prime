@@ -1,0 +1,95 @@
+% ================================================================
+\subsection{Gravitational Universality: Every Coupling is Attractive}
+\label{sec:gravitational-universality}
+% ================================================================
+
+The Gravitational Universality Theorem
+(\lean{GravitationalUniversality.lean}, 3~theorems, zero sorry,
+zero custom axioms, proved July~16, 2026) establishes the strongest
+possible positivity result for the Gram correlator: not merely that the
+matrix $G$ is positive definite (a collective property), but that
+\emph{every individual entry} is strictly positive.
+
+\begin{theorem}[Gravitational Universality (Proved)]
+\label{thm:gravitational-universality}
+For all $j, k \geq 1$:
+\[
+  G(j,k) = \int_0^1 \fract{1/(jx)}\,\fract{1/(kx)}\,dx > 0.
+\]
+\end{theorem}
+
+In the physical dictionary, this says:
+\begin{quote}
+\emph{Every mode couples positively to every other mode.
+The prime number quantum field is universally attractive---there
+are no repulsive interactions.}
+\end{quote}
+
+This is the number-theoretic incarnation of the universality of
+gravitation: just as every mass attracts every other mass, every
+integer-indexed basis function $h_k(x) = \fract{1/(kx)}$ has
+strictly positive inner product with every other $h_j$.
+
+\subsubsection{Proof Architecture}
+
+The proof decomposes into three cases:
+
+\begin{enumerate}
+  \item \textbf{Diagonal ($j = k$):} $G(k,k) = k^{-2}(\ln 2\pi - \gamma - 1) > 0$.
+    Already proved in \lean{vasyuninGramEntry\_diag\_pos}
+    (Structural.lean).
+
+  \item \textbf{Off-diagonal, $j \mid k$:} The Vasyunin integral identity
+    (\lean{vasyunin\_eq\_integral\_proved}, zero axioms) rewrites
+    $G(j,k)$ as the integral $\int_0^1 \fract{1/(jx)} \cdot
+    \fract{1/(kx)}\,dx$. On the interval $(1/(j+k),\; 1/k)$:
+    \begin{itemize}
+      \item $1/(kx) \in (1,2)$, so $\fract{1/(kx)} = 1/(kx) - 1 > 0$.
+      \item Writing $k = jq$, we have $1/(jx) \in (q, q+1)$
+        with no integer inside the open interval, so
+        $\fract{1/(jx)} > 0$.
+    \end{itemize}
+    The integrand is pointwise positive on $(1/(j+k), 1/k)$.
+    Since the integrand is nonneg everywhere and strictly positive
+    on a subinterval, $\int_0^1 > 0$ by
+    \lean{intervalIntegral\_pos\_of\_pos\_on}.
+
+  \item \textbf{Off-diagonal, $j \nmid k$:} The integer
+    $m = \lceil k/j \rceil$ creates a single zero of
+    $\fract{1/(jx)}$ at $x_0 = 1/(jm)$. We avoid it by restricting
+    to $( 1/(jm),\; 1/k )$, where $1/(jx) \in (k/j,\; m)$ contains
+    no integer. The same $\fract{1/(kx)} > 0$ bound applies,
+    giving pointwise positivity.
+\end{enumerate}
+
+The case $j > k$ follows by the symmetry $G(j,k) = G(k,j)$
+(commutativity of multiplication in the integrand).
+
+\begin{correspondence}[Gravity vs.\ Electromagnetism]
+In the Standard Model of particle physics, the electromagnetic
+force can be attractive or repulsive (opposite charges attract,
+like charges repel), while gravity is \emph{universally attractive}.
+The Gram correlator exhibits gravitational behavior: $G(j,k) > 0$
+for \emph{all} pairs, with no sign changes. This is consistent with
+the spectral observation that $G$ follows GOE (Gaussian Orthogonal
+Ensemble) statistics rather than GUE---a real symmetric positive
+operator, not a complex Hermitian one with possible sign oscillations.
+
+In the lattice QFT language of \S\ref{sec:vasyunin}, gravitational
+universality says that the partition function of any pair of
+lattice sites is strictly positive: there are no frustration effects,
+no antiferromagnetic couplings, no sign problem. The prime number
+quantum field is a \emph{purely ferromagnetic} system.
+\end{correspondence}
+
+\begin{remark}[Subinterval Analysis as Microlocal Technique]
+The proof technique---constructing specific subintervals where both
+fractional parts are simultaneously bounded away from zero---is the
+number-theoretic analogue of \emph{microlocal analysis} in PDE theory.
+Rather than proving global positivity of the integrand (which is false:
+$\fract{1/(jx)} = 0$ at $x = 1/(jn)$ for every integer $n$), the proof
+identifies a ``microsupport''---a specific region of phase space where
+the wavefront set is controlled---and exploits the strict positivity
+there. The case split on $j \mid k$ vs.\ $j \nmid k$ is a partition
+of unity adapted to the arithmetic geometry of the fractional parts.
+\end{remark}
