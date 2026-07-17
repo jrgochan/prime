@@ -151,38 +151,15 @@ def bareMassSplitting : ℝ :=
 -- §4. CONFINEMENT MASS (THE 99% — AXIOMS)
 -- ════════════════════════════════════════════════════════════════
 
-/-- **AXIOM (Confinement Mass)**: The off-diagonal GCD couplings
-    contribute a "confinement energy" that dominates the diagonal.
-
-    Physics: In QCD, ~99% of the proton mass comes from the gluon
-    field, not from quark masses. The arithmetic analog: the
-    off-diagonal Gram entries G(j,k) with gcd(j,k) > 1 provide
-    a collective binding energy that dwarfs the 1/k diagonal.
-
-    The confinement mass of integer k at resolution N is:
-      m_conf(k, N) = Σ_{j=1, j≠k}^{N} G(j,k)² / |G(k,k) - G(j,j)|
-
-    This axiom states that for the (3,6) doublet, the confinement
-    masses are nearly equal because gcd(3,k) and gcd(6,k) share
-    the same dominant factor (3). -/
-axiom confinement_near_degeneracy (N : ℕ) (hN : 100 ≤ N) :
-    ∃ C : ℝ, C > 0 ∧
-    -- The confinement masses of 3 and 6 differ by at most C/ln(N)
-    -- (vanishing splitting in the thermodynamic limit)
-    True  -- placeholder: |m_conf(3,N) - m_conf(6,N)| ≤ C / ln(N)
-
-/-- **AXIOM (Confinement Dominance)**: The confinement energy is much
-    larger than the bare diagonal splitting.
-
-    Physics: m_QCD >> Δm_Higgs, explaining why proton ≈ neutron mass.
-
-    In the arithmetic model: the total off-diagonal GCD coupling
-    energy for k=3 is O(ln N), while the bare splitting is O(1).
-    The ratio Δm_bare / m_conf → 0 as N → ∞. -/
-axiom confinement_dominates_splitting (N : ℕ) (hN : 100 ≤ N) :
-    ∃ C : ℝ, C > 0 ∧
-    -- bareMassSplitting / confinement_mass(3, N) ≤ C / ln(N)
-    True  -- placeholder
+-- **HISTORICAL NOTE (Confinement Mass Axioms)**:
+-- The off-diagonal GCD couplings contribute a "confinement energy"
+-- analogous to QCD, where ~99% of proton mass comes from gluon field.
+-- Two placeholder axioms formerly lived here:
+-- confinement_near_degeneracy and confinement_dominates_splitting.
+-- Both stated True (placeholder) with no downstream dependents.
+-- The actual confinement mass computation m_conf(k,N) was never
+-- formalized. Deleted July 16, 2026 (physics-finishing).
+-- The key structural result (gcd_isospin_symmetry) is proved below.
 
 /-- **🎓 THEOREM (GCD Isospin Symmetry)**: For odd k, gcd(6,k) = gcd(3,k).
     Graduated from axiom to theorem, June 22, 2026 — Port 22 Day.

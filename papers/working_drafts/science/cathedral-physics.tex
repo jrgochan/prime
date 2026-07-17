@@ -45,7 +45,10 @@ physical witness wave, whose Ramanujan invariance is a hidden
 conformal symmetry.
 An Arithmetic Standard Model identifies the first three primes
 with the gauge groups $U(1) \times SU(2) \times SU(3)$,
-with 101 theorems proved from zero axioms.
+with 104 theorems proved from zero axioms.
+The Gravitational Universality Theorem proves $G(j,k) > 0$ for
+all $j,k \geq 1$---every integer mode couples positively to every
+other---via subinterval analysis of the fractional-part integrand.
 The Torus Projection decomposes the Gram energy onto the
 infinite-dimensional torus $T^\infty = \prod_p S^1_p$,
 with per-prime energy dominated by $p=2,3,5$ and
@@ -296,6 +299,16 @@ $\int_0^\infty g_N(u)^2\,du = \int_0^1 r_N(x)^2\,dx$
 using the diffeomorphism $x = e^{-u}$, which is precisely the
 Wick rotation $t \to -iu$ from Minkowski to Euclidean signature.
 \end{principle}
+
+\begin{observation}[Entry-Wise Positivity (Proved July~16, 2026)]
+A strictly stronger result holds: not only is $G$ positive definite
+(a quadratic-form statement), but every individual entry satisfies
+$G(j,k) > 0$ for all $j,k \geq 1$ (an entry-wise statement).
+In the physical dictionary, this is \emph{gravitational universality}:
+every mode couples attractively to every other mode. See
+\S\ref{sec:gravitational-universality} for the full proof and
+physical interpretation.
+\end{observation}
 
 % ================================================================
 \section{The Vasyunin Tower: A Lattice Field Theory of Correlations}
@@ -1756,6 +1769,8 @@ assertion that this flow is complete.
 
 \input{sections/13e-arithmetic-standard-model}
 
+\input{sections/13e2-gravitational-universality}
+
 \input{sections/13f-spectral-mirror}
 
 % ================================================================
@@ -2282,6 +2297,7 @@ Eigenvalue interlacing & Gluing axiom (TQFT) & \lean{Structural/Eigenvalue.lean}
 \midrule
 $G(j,k) = \langle h_j, h_k \rangle$ & Two-point correlator & \lean{Gram/*.lean} & proved & 3 \\
 $G > 0$ (positive definite) & Reflection positivity (OS) & \lean{Gram/Bounds.lean} & proved & 3 \\
+$G(j,k) > 0$ (entry-wise) & Gravitational universality & \lean{GravitationalUniversality.lean} & proved & \ref{sec:gravitational-universality} \\
 $G(k,k)$ diagonal & Self-energy & \lean{Gram/Diagonal.lean} & proved & 3 \\
 $G(j,k)$ off-diagonal & Interaction term & \lean{Vasyunin/*.lean} & 1 ax. & \ref{sec:vasyunin} \\
 Parseval bridge & Unitarity / optical theorem & \lean{White/Scattering.lean} & proved & \ref{sec:parseval} \\
@@ -2452,9 +2468,9 @@ Conservation of Difficulty & Gauss--Bonnet obstruction & (E15, conceptual) & ---
 \toprule
 \textbf{Metric} & \textbf{Count} \\
 \midrule
-Total physics phenomena mapped & 170+ \\
-Proved (zero sorry, zero axiom) & 130+ \\
-Axiom (off-crown) & $\sim$20 \\
+Total physics phenomena mapped & 173+ \\
+Proved (zero sorry, zero axiom) & 133+ \\
+Axiom (off-crown) & $\sim$19 \\
 Crown axiom (One-Pillar) & \textbf{1} \\
 Oracle axiom (\lean{oracle\_certificates}) & \textbf{1} \\
 Proof paths to RH & \textbf{6} \\
