@@ -147,19 +147,65 @@ def bareMassSplitting : ℝ :=
   Cathedral.Vasyunin.vasyuninGramEntry 3 3 -
   Cathedral.Vasyunin.vasyuninGramEntry 6 6
 
--- ════════════════════════════════════════════════════════════════
--- §4. CONFINEMENT MASS (THE 99% — AXIOMS)
--- ════════════════════════════════════════════════════════════════
+/-- **DEFINITION (Confinement Mass)**: m_conf(k, N) is the total
+    off-diagonal Gram coupling for integer k at cutoff N.
 
--- **HISTORICAL NOTE (Confinement Mass Axioms)**:
--- The off-diagonal GCD couplings contribute a "confinement energy"
--- analogous to QCD, where ~99% of proton mass comes from gluon field.
--- Two placeholder axioms formerly lived here:
--- confinement_near_degeneracy and confinement_dominates_splitting.
--- Both stated True (placeholder) with no downstream dependents.
--- The actual confinement mass computation m_conf(k,N) was never
--- formalized. Deleted July 16, 2026 (physics-finishing).
--- The key structural result (gcd_isospin_symmetry) is proved below.
+    In QCD, ~99% of hadron mass comes from the gluon field
+    (confinement energy), not from bare quark masses. The arithmetic
+    analog is: the off-diagonal Gram entries G(j,k) for j ≠ k
+    represent "gluon exchange" between integers j and k.
+
+    m_conf(k, N) = Σ_{j=1, j≠k}^{N} G(j, k)
+
+    This is the "dressed mass" minus the "bare mass" G(k,k). -/
+def confinementMass (k N : ℕ) : ℝ :=
+  ∑ j ∈ (Finset.Icc 1 N).erase k,
+    Cathedral.Vasyunin.vasyuninGramEntry j k
+
+/-- **DEFINITION (Dressed Mass)**: The full spectral mass of integer k
+    in the Gram vacuum, including both bare and confinement contributions.
+
+    m(k, N) = G(k,k) + m_conf(k, N) = Σ_{j=1}^{N} G(j, k)
+
+    This is the k-th column sum of the Gram matrix. -/
+def dressedMass (k N : ℕ) : ℝ :=
+  Cathedral.Vasyunin.vasyuninGramEntry k k + confinementMass k N
+
+/-- **DEFINITION (Confinement Splitting)**: The difference in confinement
+    mass between neutron (k=6) and proton (k=3).
+
+    Δm_conf = m_conf(6, N) - m_conf(3, N)
+
+    If this is small relative to m_conf(3, N), the proton and neutron
+    are nearly degenerate — exactly as in physical QCD. -/
+def confinementSplitting (N : ℕ) : ℝ :=
+  confinementMass 6 N - confinementMass 3 N
+
+/-- **DEFINITION (Total Mass Splitting)**: The full proton-neutron
+    mass difference, including both bare and confinement contributions.
+
+    Δm_total = m_dressed(6, N) - m_dressed(3, N)
+             = [G(6,6) - G(3,3)] + [m_conf(6,N) - m_conf(3,N)]
+             = -Δm_bare + Δm_conf
+
+    Near-degeneracy requires these two terms to nearly cancel. -/
+def totalMassSplitting (N : ℕ) : ℝ :=
+  dressedMass 6 N - dressedMass 3 N
+
+/-- **🎓 THEOREM (Splitting Decomposition)**: The total mass splitting
+    decomposes into bare splitting plus confinement splitting.
+
+    Δm_total = [G(6,6) - G(3,3)] + [m_conf(6,N) - m_conf(3,N)]
+
+    This is the arithmetic version of "the proton-neutron mass
+    difference comes from electromagnetic + QCD contributions." -/
+theorem splitting_decomposition (N : ℕ) :
+    totalMassSplitting N =
+    (Cathedral.Vasyunin.vasyuninGramEntry 6 6 -
+     Cathedral.Vasyunin.vasyuninGramEntry 3 3) +
+    confinementSplitting N := by
+  simp [totalMassSplitting, dressedMass, confinementSplitting]
+  ring
 
 /-- **🎓 THEOREM (GCD Isospin Symmetry)**: For odd k, gcd(6,k) = gcd(3,k).
     Graduated from axiom to theorem, June 22, 2026 — Port 22 Day.
@@ -201,12 +247,10 @@ theorem mass_ratio_documentation : True := trivial
 -- ════════════════════════════════════════════════════════════════
 
 /-!
-## Audit
+## Audit — IsospinMass.lean (July 17, 2026)
 
 ### Sorry: 0 ✅
-### Custom Axioms: 2 (exploration-grade, not on crown path)
-  - `confinement_near_degeneracy`: (3,6) confinement masses converge
-  - `confinement_dominates_splitting`: off-diagonal >> diagonal
+### Custom Axioms: 0 ✅ (cleaned July 16, 2026)
 
 ### PROVED (compiler-verified):
 | # | Result | Status |
@@ -216,7 +260,17 @@ theorem mass_ratio_documentation : True := trivial
 | 3 | `neutron_isospin_one` | **🎓 THEOREM** (v₂(6) = 1) |
 | 4 | `proton_bare_mass` | **🎓 THEOREM** (G(3,3) formula) |
 | 5 | `neutron_bare_mass` | **🎓 THEOREM** (G(6,6) formula) |
-| 6 | `gcd_isospin_symmetry` | **🎓 THEOREM** (gcd(6,k) = gcd(3,k) for odd k) |
+| 6 | `splitting_decomposition` | **🎓 THEOREM** (Δm = bare + conf) |
+| 7 | `gcd_isospin_symmetry` | **🎓 THEOREM** (gcd(6,k) = gcd(3,k) for odd k) |
+
+### DEFINITIONS:
+| # | Definition | Purpose |
+|---|-----------|---------|
+| 1 | `confinementMass k N` | Off-diagonal Gram sum (gluon field energy) |
+| 2 | `dressedMass k N` | Total spectral mass (bare + confinement) |
+| 3 | `confinementSplitting N` | Neutron-proton confinement difference |
+| 4 | `totalMassSplitting N` | Full neutron-proton mass difference |
+| 5 | `bareMassSplitting` | Diagonal Gram difference |
 
 ### The Isospin Mass Dictionary:
 ```
@@ -225,18 +279,21 @@ theorem mass_ratio_documentation : True := trivial
   Proton (938.3 MeV)              k = 3 (odd prime, isospin ↑)
   Neutron (939.6 MeV)             k = 6 = 2·3 (Higgs'd, isospin ↓)
   Bare quark mass                 G(k,k) = (ln2π-γ)/k - 1/k²
-  QCD confinement (~99% of mass)  Off-diagonal GCD couplings
+  QCD confinement (~99% of mass)  m_conf(k,N) = Σ_{j≠k} G(j,k)
+  Dressed hadron mass             m(k,N) = G(k,k) + m_conf(k,N)
   Gluon exchange                  G(j,k) with gcd(j,k) > 1
-  Isospin splitting (~0.14%)      G(3,3) - G(6,6) / confinement
-  Near-degeneracy                 gcd(3,k) ≈ gcd(6,k) for odd k
+  Isospin splitting (~0.14%)      Δm = Δm_bare + Δm_conf
+  Near-degeneracy                 gcd(3,k) = gcd(6,k) for odd k
   W± boson (isospin flip)         μ(2n) = -μ(n) for odd n
 ```
 
 ### Open Questions for Future Work:
-1. Can we compute the confinement mass numerically at N = 55,440?
-2. Does the spectral mass ratio converge to the physical mn/mp?
+1. Can we compute m_conf(3, N) and m_conf(6, N) numerically at N = 55,440?
+2. Does the total mass ratio m(6,N)/m(3,N) converge to the physical mn/mp ≈ 1.0014?
 3. ~~Can `gcd_isospin_symmetry` be graduated from axiom to theorem?~~
    **DONE!** Graduated June 22, 2026 (Port 22 Day). Proof by Gemini + Claude.
+4. ~~Formalize m_conf(k,N) definition.~~
+   **DONE!** July 17, 2026 (Day 109). Splitting decomposition proved.
 
 ### Connection to Existing Infrastructure:
 - `ArithmeticSU2.lean`: Defines the isospin structure
