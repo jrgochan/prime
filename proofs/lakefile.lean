@@ -413,6 +413,8 @@ lean_lib «Cathedral» where
     `Cathedral.Physics.GaugeTheory.ArithmeticFlavorSU3,
     -- Physics: Eightfold Way (hadron multiplets: octet, decuplet, Ω⁻, Day 109) ☸️
     `Cathedral.Physics.GaugeTheory.ArithmeticEightfoldWay,
+    -- Physics: Weinberg Angle (electroweak mixing in G_EW 2×2 block, Day 109) 🔀
+    `Cathedral.Physics.GaugeTheory.WeinbergAngle,
     -- Physics: Graviton (G(k,k) ~ 1/k diagonal decay → mass hierarchy, Day 87) 🌌
     `Cathedral.Physics.GaugeTheory.GravitationalUniversality,
     `Cathedral.Physics.GaugeTheory.ArithmeticGravity,
