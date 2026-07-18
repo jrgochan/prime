@@ -58,7 +58,7 @@ def chiralSign (n : ℕ) : Int :=
 
 /-- **🎓 THEOREM (Odd integers are left-handed)**: χ(n) = +1
     for odd n. -/
-theorem chiral_odd (n : ℕ) (hn : ¬ 2 ∣ n) (hn_pos : n ≥ 1) :
+theorem chiral_odd (n : ℕ) (hn : ¬ 2 ∣ n) (_hn_pos : n ≥ 1) :
     chiralSign n = 1 := by
   unfold chiralSign
   have : n.factorization 2 = 0 := Nat.factorization_eq_zero_of_not_dvd hn

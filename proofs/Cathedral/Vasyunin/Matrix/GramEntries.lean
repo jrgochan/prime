@@ -495,7 +495,7 @@ theorem cot_pi_div_five_lt : cot (Real.pi / 5) < 7 / 5 := by
   -- Since 7s + 5c > 0, conclude 7s - 5c > 0
   have h_sum : 7 * s + 5 * c > 0 := by positivity
   by_contra h_neg
-  push_neg at h_neg
+  push Not at h_neg
   linarith [mul_nonpos_of_nonpos_of_nonneg (by linarith : 7 * s - 5 * c ≤ 0) (le_of_lt h_sum)]
 
 /-- **cot(2π/5) > 3/10**: The complementary bound for CKM.
@@ -528,7 +528,7 @@ theorem cot_two_pi_div_five_gt : cot (2 * Real.pi / 5) > 3 / 10 := by
   -- Since 10c + 3s > 0, conclude 10c - 3s > 0
   have h_sum : 10 * c + 3 * s > 0 := by positivity
   by_contra h_neg
-  push_neg at h_neg
+  push Not at h_neg
   linarith [mul_nonpos_of_nonpos_of_nonneg (by linarith : 10 * c - 3 * s ≤ 0) (le_of_lt h_sum)]
 
 
