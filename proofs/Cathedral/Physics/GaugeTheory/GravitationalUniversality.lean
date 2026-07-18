@@ -25,7 +25,7 @@ namespace Cathedral.GravitationalUniversality
 private lemma fract_pos_between_ints {y : ℝ} {n : ℤ} (h1 : (n : ℝ) < y) (h2 : y < n + 1) :
     0 < Int.fract y := by
   have : ⌊y⌋ = n := Int.floor_eq_iff.mpr ⟨by linarith, by linarith⟩
-  rw [Int.fract, this]; push_cast; linarith
+  rw [Int.fract, this]; linarith
 
 /-- When 1 < y < 2, {y} = y - 1 > 0. -/
 private lemma fract_pos_in_unit {y : ℝ} (h1 : 1 < y) (h2 : y < 2) :
@@ -81,7 +81,7 @@ private theorem integral_pos_of_lt (j k : ℕ) (hj : 1 ≤ j) (hk : 1 ≤ k) (hj
         have h2 : (q:ℝ) * ((j:ℝ) * x) = (k:ℝ) * x := by rw [hq]; push_cast; ring
         nlinarith
       · -- 1/(jx) < q+1 ↔ (q+1)*j*x > 1 ↔ (k+j)*x > 1 ↔ x > 1/(k+j)
-        rw [Int.cast_natCast]; push_cast
+        rw [Int.cast_natCast]
         rw [div_lt_iff₀ (by positivity : (0:ℝ) < (j:ℝ)*x)]
         have h1 : ((j:ℝ)+(k:ℝ)) * (1/((j:ℝ)+(k:ℝ))) = 1 := by field_simp
         have h2 : ((q:ℝ)+1) * ((j:ℝ)*x) = ((k:ℝ)+(j:ℝ)) * x := by rw [hq]; push_cast; ring
@@ -119,7 +119,7 @@ private theorem integral_pos_of_lt (j k : ℕ) (hj : 1 ≤ j) (hk : 1 ≤ k) (hj
     have hm_pos : (0:ℝ) < (m:ℝ) := Nat.cast_pos.mpr (by omega)
     have hjm_r_pos : (0:ℝ) < (j:ℝ)*(m:ℝ) := by positivity
     have h_lt : 1/((j:ℝ)*(m:ℝ)) < 1/(k:ℝ) :=
-      one_div_lt_one_div_of_lt hk_pos (by push_cast; exact_mod_cast hjm_gt)
+      one_div_lt_one_div_of_lt hk_pos (by exact_mod_cast hjm_gt)
     refine ⟨1/((j:ℝ)*(m:ℝ)), 1/(k:ℝ), by positivity, h_lt,
             by rw [div_le_one hk_pos]; exact Nat.one_le_cast.mpr hk,
             fun x ⟨hxa, hxb⟩ => ?_⟩

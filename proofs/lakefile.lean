@@ -409,6 +409,26 @@ lean_lib «Cathedral» where
     `Cathedral.Physics.GaugeTheory.ArithmeticGenerations,
     -- Physics: CKM Mixing + Neutrino Oscillations (Gram eigenvectors → flavor mixing, Day 87) 🌀
     `Cathedral.Physics.GaugeTheory.ArithmeticMixing,
+    -- Physics: SU(3)_flavor (Eightfold Way foundation, {2,3,5} as quarks, Day 109) 🎱
+    `Cathedral.Physics.GaugeTheory.ArithmeticFlavorSU3,
+    -- Physics: Eightfold Way (hadron multiplets: octet, decuplet, Ω⁻, Day 109) ☸️
+    `Cathedral.Physics.GaugeTheory.ArithmeticEightfoldWay,
+    -- Physics: Weinberg Angle (electroweak mixing in G_EW 2×2 block, Day 109) 🔀
+    `Cathedral.Physics.GaugeTheory.WeinbergAngle,
+    -- Physics: CP Violation (Möbius sign asymmetry, Jarlskog invariant, Day 109) ⚡
+    `Cathedral.Physics.GaugeTheory.CPViolation,
+    -- Physics: Running Coupling (asymptotic freedom, β < 0 for k ≥ 2, Day 109) 🏃
+    `Cathedral.Physics.GaugeTheory.RunningCoupling,
+    -- Physics: Goldstone Pion (π⁰ as G(2,3), Goldstone theorem, Day 109) 🥧
+    `Cathedral.Physics.GaugeTheory.GoldstonePion,
+    -- Physics: Neutrino Mass (seesaw mechanism from Gram structure, Day 109) 🌊
+    `Cathedral.Physics.GaugeTheory.NeutrinoMass,
+    -- Physics: Chiral Symmetry (v₂ chirality, SSB from G(1,2) > 0, Day 109) ✋
+    `Cathedral.Physics.GaugeTheory.ChiralSymmetry,
+    -- Physics: Yukawa Couplings (G(2,p)/G(2,2) = fermion mass, Day 109) ⚛️
+    `Cathedral.Physics.GaugeTheory.YukawaCouplings,
+    -- Physics: Higgs Potential (Mexican hat from Gram diagonal, Day 109) 🎩
+    `Cathedral.Physics.GaugeTheory.HiggsPotential,
     -- Physics: Graviton (G(k,k) ~ 1/k diagonal decay → mass hierarchy, Day 87) 🌌
     `Cathedral.Physics.GaugeTheory.GravitationalUniversality,
     `Cathedral.Physics.GaugeTheory.ArithmeticGravity,
