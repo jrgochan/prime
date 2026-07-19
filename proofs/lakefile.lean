@@ -429,6 +429,8 @@ lean_lib «Cathedral» where
     `Cathedral.Physics.GaugeTheory.YukawaCouplings,
     -- Physics: Higgs Potential (Mexican hat from Gram diagonal, Day 109) 🎩
     `Cathedral.Physics.GaugeTheory.HiggsPotential,
+    -- Physics: Dark Matter (non-squarefree as dark sector, Day 111) 🌑
+    `Cathedral.Physics.GaugeTheory.DarkMatter,
     -- Physics: Graviton (G(k,k) ~ 1/k diagonal decay → mass hierarchy, Day 87) 🌌
     `Cathedral.Physics.GaugeTheory.GravitationalUniversality,
     `Cathedral.Physics.GaugeTheory.ArithmeticGravity,
