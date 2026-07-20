@@ -58,34 +58,33 @@ targets for community contribution.
 | 3 generations | `ArithmeticGenerations.lean` | ? | **3** | generation dominance |
 | Goldstone pion | `GoldstonePion.lean` | 1 | **3** | `pion_lighter_than_higgs` |
 | Neutrino seesaw | `NeutrinoMass.lean` | 2 | **2** | `seesaw_mass_decreasing` |
-| Higgs potential | `HiggsPotential.lean` | 2 | **4** | `peak_between_one_and_two` |
+| Higgs potential | `HiggsPotential.lean` | 3 | **3** | `peak_between_one_and_two` |
 | Yukawa couplings | `YukawaCouplings.lean` | 1 | **3** | `yukawa_hierarchy` |
-| Chiral symmetry | `ChiralSymmetry.lean` | 2 | **3** | `chiral_breaking_bounded` |
+| Chiral symmetry | `ChiralSymmetry.lean` | 4 | **1** | `chiral_breaking_bounded` |
 | Dark matter | `DarkMatter.lean` | 8 | **1** | `dark_density_limit` |
+
+### Recently Graduated (Day 111)
+
+- ~~`peak_exceeds_higgs`~~ → **🎓 THEOREM** — (A-1)²/4 > 0 since A > 1 ✅
+- ~~`chiral_even_once`~~ → **🎓 THEOREM** — factorization API ✅
 
 ### Axiom Graduation Priority
 
-These axioms look **graduable with existing Cathedral infrastructure**:
+These axioms are the next candidates for graduation:
 
-1. **`chiral_breaking_bounded`** — G(1,2)/G(1,1) < 2.
-   Both G(1,2) and G(1,1) have exact closed forms in GramEntries.lean.
-   Pure arithmetic comparison. ✅ LIKELY GRADUABLE
-
-2. **`pion_lighter_than_higgs`** — G(2,3) < G(2,2).
-   G(2,3) exact value is in GramEntries.lean. Compare two constants.
-   ✅ LIKELY GRADUABLE
-
-3. **`peak_exceeds_higgs`** — A²/4 > A/2 - 1/4.
-   Reduces to (A-1)² > 0, trivial from A > 1 (already proved!).
-   ✅ LIKELY GRADUABLE
-
-4. **`chiral_even_once`** — chiralSign(2n) = -1 for odd n.
-   Factorization API work, no analysis needed.
-   🔶 NEEDS FACTORIZATION LEMMA
-
-5. **`peak_between_one_and_two`** — 1 < 2/A < 2.
-   The first inequality follows from A < 2, which needs a new bound.
+1. **`peak_between_one_and_two`** — 1 < 2/A < 2.
+   Second half (A > 1) is proved. First half needs A < 2,
+   i.e. 2π < e². Provable but needs exp/π bound work.
    🔶 NEEDS A < 2 BOUND
+
+2. **`chiral_breaking_bounded`** — G(1,2)/G(1,1) < 2.
+   Reduces to 5A + L > 6. Numerically 5A + L ≈ 6.997.
+   Lean bounds give only 5(1.026) + 0.693 = 5.82 < 6.
+   🔶 NEEDS tighter ln(π) bound (> 1.14, not just > 1)
+
+3. **`pion_lighter_than_higgs`** — G(2,3) < G(2,2).
+   Both have exact forms, but comparison involves π/√3.
+   🔶 NEEDS tighter transcendental bounds
 
 ### Harder Axioms (Community Targets)
 
@@ -126,12 +125,12 @@ because there was never a separation.
 
 | Category | Items | Total Theorems | Total Axioms |
 |---|---|---|---|
-| ✅ Completed (0 axioms) | 19 features | ~285+ | 0 |
-| 🔶 Scaffold | 7 features | ~17 | 19 |
+| ✅ Completed (0 axioms) | 19 features | ~287+ | 0 |
+| 🔶 Scaffold | 7 features | ~19 | 16 |
 | 📝 Resolved | 1 (GUT) | — | — |
 
 **Coverage: 27/27 SM features addressed. Zero speculative items remain.**
-**Total: 302+ theorems, 19 remaining axioms, 0 sorry across 24 files.**
+**Total: 306+ theorems, 16 remaining axioms, 0 sorry across 25 files.**
 
 ---
 
@@ -139,10 +138,11 @@ because there was never a separation.
 
 If continuing axiom graduation:
 
-1. **`chiral_breaking_bounded`** (quick win — pure arithmetic)
-2. **`pion_lighter_than_higgs`** (quick win — known constants)
-3. **`peak_exceeds_higgs`** (quick win — perfect square identity)
-4. **`chiral_even_once`** (medium — factorization API)
-5. **`dark_density_limit`** (hard — analytic number theory)
+1. **`peak_between_one_and_two`** (medium — needs 2π < e² proof)
+2. **`chiral_breaking_bounded`** (medium — needs ln(π) > 1.14 in Lean)
+3. **`pion_lighter_than_higgs`** (medium — needs π/√3 bounds)
+4. **`dark_density_limit`** (hard — analytic number theory)
+5. **`ArithmeticGenerations` axioms** (hard — Erdős-Kac in Lean)
 
-Items 1-3 are probably 30 minutes each. Items 4-5 are deeper dives.
+Common blocker: tighter transcendental bounds on ln(π), π/√3.
+Items 1-3 are solvable with ~50 lines of new bound infrastructure.
