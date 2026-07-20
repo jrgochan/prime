@@ -64,14 +64,19 @@ theorem chiral_odd (n : ℕ) (hn : ¬ 2 ∣ n) (_hn_pos : n ≥ 1) :
   have : n.factorization 2 = 0 := Nat.factorization_eq_zero_of_not_dvd hn
   simp [this]
 
-/-- **AXIOM (Even integers are right-handed)**: χ(2n) = -1
+/-- **🎓 THEOREM (Even integers are right-handed)**: χ(2n) = -1
     for odd n (i.e., v₂ = 1).
 
-    Proof strategy: (2n).factorization 2 = 1 + n.factorization 2
-    = 1 (since n is odd). Then (-1)^1 = -1. Needs careful
-    Finsupp/factorization API handling. -/
-axiom chiral_even_once (n : ℕ) (hn : ¬ 2 ∣ n) (hn_pos : n ≥ 1) :
-    chiralSign (2 * n) = -1
+    Proof: (2n).factorization 2 = 1 when n is odd (¬ 2 ∣ n),
+    so chiralSign(2n) = (-1)^1 = -1. -/
+theorem chiral_even_once (n : ℕ) (hn : ¬ 2 ∣ n) (_hn_pos : n ≥ 1) :
+    chiralSign (2 * n) = -1 := by
+  unfold chiralSign
+  have hn0 : n ≠ 0 := by omega
+  have h2n : 2 * n ≠ 0 := by omega
+  rw [Nat.factorization_mul (by norm_num : (2 : ℕ) ≠ 0) hn0]
+  simp [Nat.Prime.factorization_self (by norm_num : Nat.Prime 2),
+        Nat.factorization_eq_zero_of_not_dvd hn]
 
 -- ════════════════════════════════════════════════════════════════
 -- §2. CHIRAL SYMMETRY BREAKING
@@ -122,10 +127,10 @@ theorem chiral_symmetry_broken : chiralBreaking > 0 := by
     The breaking is bounded — the off-diagonal coupling never
     exceeds twice the diagonal. In fact ε_χ ≈ 1.04.
 
-    Proof strategy: Compute G(1,2)/G(1,1) from exact formulas.
-    G(1,2) = 3A/4 - ln(2)/4 - 1/2 ≈ 0.272
-    G(1,1) = A - 1 ≈ 0.261
-    So ε_χ ≈ 1.04. -/
+    Proof strategy: Reduces to 5A + L > 6 where A = ln(2π) - γ, L = ln 2.
+    Numerically 5A + L ≈ 6.997, but our Lean bounds give only
+    5(1.026) + 0.693 = 5.82 < 6.
+    Needs tighter ln(π) bound (> 1.14, not just > 1). -/
 axiom chiral_breaking_bounded : chiralBreaking < 2
 
 /-- **AXIOM (Three Goldstone bosons)**: The number of broken
