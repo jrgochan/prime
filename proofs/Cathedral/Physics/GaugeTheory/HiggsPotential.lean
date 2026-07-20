@@ -176,14 +176,20 @@ Since A > 1, this is also trivially true! -/
 axiom peak_exceeds_vacuum :
     mexicanHatHeight > higgsField 1
 
-/-- **AXIOM (Peak exceeds Higgs)**: f(x*) > f(2).
+/-- **🎓 THEOREM (Peak exceeds Higgs)**: f(x*) > f(2).
     The peak is above even the Higgs mass.
 
     Proof: A²/4 - (A/2 - 1/4) = (A² - 2A + 1)/4 = (A-1)²/4 > 0
-    since A > 1. This SHOULD be provable once the division
-    forms are cleaned up. -/
-axiom peak_exceeds_higgs :
-    mexicanHatHeight > higgsField 2
+    since A > 1 (proved in GramEntries). -/
+theorem peak_exceeds_higgs :
+    mexicanHatHeight > higgsField 2 := by
+  unfold mexicanHatHeight higgsField
+  set A := Real.log (2 * Real.pi) - Real.eulerMascheroniConstant
+  have hA : A > 1 := Cathedral.Vasyunin.log_two_pi_sub_euler_gt_one
+  -- Goal: A²/4 > A/2 - 1/4
+  -- ⟺ A² - 2A + 1 > 0 ⟺ (A-1)² > 0
+  have h : (A - 1) ^ 2 > 0 := sq_pos_of_pos (by linarith)
+  nlinarith [h]
 
 /-- **AXIOM (Higgs potential is the Mexican hat)**: The continuous
     function f(x) = A/x - 1/x² has exactly one critical point
