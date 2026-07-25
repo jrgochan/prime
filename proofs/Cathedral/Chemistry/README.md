@@ -49,17 +49,31 @@ The mathematical structure is identical. The only difference is the alphabet.
 
 ## Coverage Target
 
-| Chemistry Feature | Status | Strategy |
+| Chemistry Feature | Status | File |
 |---|---|---|
-| Quantum numbers (n, l, m_l, m_s) | ✅ Defined | Product type with constraints |
-| Shell capacity = 2n² | ✅ Proved | Sum of odd numbers identity |
-| Subshell capacity = 2(2l+1) | ✅ Proved | Direct counting |
-| Pauli exclusion | ✅ Proved | (in Physics/ArithmeticPauli.lean) |
-| Period lengths | 🔶 Planned | Aufbau (n+l) ordering |
-| Electron configurations | 🔶 Planned | Finset of quantum states |
-| Molecular formulas | 🔶 Planned | Free commutative monoid |
-| Stoichiometry | 🔶 Planned | Linear algebra over ℤ |
-| Point groups | 🔶 Planned | Finite group theory |
+| Quantum numbers (n, l, m_l, m_s) | ✅ Proved | `QuantumNumbers.lean` |
+| Shell capacity = 2n² | ✅ Proved | `QuantumNumbers.lean` |
+| Subshell capacity = 2(2l+1) | ✅ Proved | `QuantumNumbers.lean` |
+| Pauli exclusion | ✅ Proved | `Physics/ArithmeticPauli.lean` |
+| Molecular formulas = factorizations | ✅ Proved | `MolecularFormula.lean` |
+| Periodic table (118 elements) | ✅ Proved | `PeriodicTable.lean` |
+| Aufbau ordering | ✅ Proved | `PeriodicTable.lean` |
+| Period lengths [2,8,8,18,18,32,32] | ✅ Proved | `PeriodicTable.lean` |
+| Ideal Gas Law (PV = nRT) | ✅ Proved | `IdealGas.lean` |
+| Boyle, Charles, Gay-Lussac laws | ✅ Proved | `IdealGas.lean` |
+| Stoichiometry (5 reactions) | ✅ Proved | `Stoichiometry.lean` |
+| Conservation of mass (Lavoisier) | ✅ Proved | `Stoichiometry.lean` |
+| Electron configurations (11 elements) | ✅ Proved | `ElectronConfiguration.lean` |
+| Valence & octet rule | ✅ Proved | `Valence.lean` |
+| Ion charges & charge neutrality | ✅ Proved | `Valence.lean` |
+| Bond classification (ionic/polar/covalent) | ✅ Proved | `BondTheory.lean` |
+| Electronegativity ordering | ✅ Proved | `BondTheory.lean` |
+| Thermodynamics (ΔG = ΔH − TΔS) | 🔶 Planned | See `ROADMAP.md` |
+| Equilibrium (Keq) | 🔶 Planned | See `ROADMAP.md` |
+| Acids & Bases (pH) | 🔶 Planned | See `ROADMAP.md` |
+| Kinetics (rate laws) | 🔶 Planned | See `ROADMAP.md` |
+| Redox & Electrochemistry | 🔶 Planned | See `ROADMAP.md` |
+| Nuclear Chemistry | 🔶 Planned | See `ROADMAP.md` |
 
 ---
 
@@ -68,4 +82,4 @@ The mathematical structure is identical. The only difference is the alphabet.
 
 ## Author's Note
 
-I generally consider myself an armchair physicist, you know, one who studies the phsyics of comfy chairs. Anyway. Just exploring Chemistry. If you're a Chemist and want to join in, let me know!
+I generally consider myself an armchair physicist, you know, one who studies the physics of comfy chairs. Anyway. Just exploring Chemistry. If you're a Chemist and want to join in, let me know!
