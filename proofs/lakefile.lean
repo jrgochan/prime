@@ -444,6 +444,12 @@ lean_lib «Cathedral» where
     `Cathedral.Chemistry.IdealGas,
     -- Chemistry: Stoichiometry (show your work or it's a sorry! Day 115) ⚖️
     `Cathedral.Chemistry.Stoichiometry,
+    -- Chemistry: Electron Configuration (1s² 2s² 2p⁶..., Day 115) ⚡
+    `Cathedral.Chemistry.ElectronConfiguration,
+    -- Chemistry: Valence (octet rule, ion charges, Day 115) 🔋
+    `Cathedral.Chemistry.Valence,
+    -- Chemistry: Bond Theory (ionic/polar/covalent, Day 115) 🔗
+    `Cathedral.Chemistry.BondTheory,
     -- Physics: Gauge Cancellation (vᵀGv SUSY decomposition, Exploration 36)
     `Cathedral.Physics.Cancellation.GaugeCancellation,
     -- Physics: Diagonal Bound (D(N) = O(ln N) unconditional, Exploration 36)
