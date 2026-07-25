@@ -64,3 +64,8 @@ The mathematical structure is identical. The only difference is the alphabet.
 ---
 
 *"The hoof goes ever on."*
+
+
+## Author's Note
+
+I generally consider myself an armchair physicist, you know, one who studies the phsyics of comfy chairs. Anyway. Just exploring Chemistry. If you're a Chemist and want to join in, let me know!
