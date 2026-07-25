@@ -434,6 +434,8 @@ lean_lib «Cathedral» where
     -- Physics: Graviton (G(k,k) ~ 1/k diagonal decay → mass hierarchy, Day 87) 🌌
     `Cathedral.Physics.GaugeTheory.GravitationalUniversality,
     `Cathedral.Physics.GaugeTheory.ArithmeticGravity,
+    -- Chemistry: Quantum Numbers & Periodic Table (shell capacity = 2n², Day 115) ⚗️
+    `Cathedral.Chemistry.QuantumNumbers,
     -- Physics: Gauge Cancellation (vᵀGv SUSY decomposition, Exploration 36)
     `Cathedral.Physics.Cancellation.GaugeCancellation,
     -- Physics: Diagonal Bound (D(N) = O(ln N) unconditional, Exploration 36)
