@@ -438,6 +438,8 @@ lean_lib «Cathedral» where
     `Cathedral.Chemistry.QuantumNumbers,
     -- Chemistry: Molecular Formulas (Finsupp = factorization, Day 115) 🧪
     `Cathedral.Chemistry.MolecularFormula,
+    -- Chemistry: Periodic Table (Aufbau, noble gases, 118 elements, Day 115) ⚗️
+    `Cathedral.Chemistry.PeriodicTable,
     -- Physics: Gauge Cancellation (vᵀGv SUSY decomposition, Exploration 36)
     `Cathedral.Physics.Cancellation.GaugeCancellation,
     -- Physics: Diagonal Bound (D(N) = O(ln N) unconditional, Exploration 36)
