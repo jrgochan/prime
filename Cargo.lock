@@ -458,6 +458,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "cramer-bridge"
+version = "0.1.0"
+dependencies = [
+ "cathedral-utils",
+]
+
+[[package]]
 name = "cross-class-verifier"
 version = "0.1.0"
 

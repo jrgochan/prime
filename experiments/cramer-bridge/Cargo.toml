@@ -1,0 +1,11 @@
+[package]
+name = "cramer-bridge"
+version = "0.1.0"
+edition = "2024"
+description = "Cramér Bridge — time-domain Báez-Duarte distance d²(N) for the log-cutoff witness, via the identity F(u) = (u − ψ(u))/log N − εu (no Gram matrix)"
+
+[dependencies]
+cathedral-utils = { path = "../cathedral-utils" }
+
+[lints]
+workspace = true

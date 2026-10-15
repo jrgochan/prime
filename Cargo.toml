@@ -52,6 +52,7 @@ members = [
     "experiments/dark-gram-spectroscopy-gpu",
     "experiments/prime-harmonics",
     "experiments/cotangent-positivity",
+    "experiments/cramer-bridge",
 
     # ═══════════════════════════════════════════════
     # Archive (preserved for reproducibility)
