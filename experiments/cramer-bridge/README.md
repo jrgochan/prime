@@ -54,9 +54,44 @@ A classical fact says this integral is O(log N) **if and only if** RH holds.
 So the Wall is RH in Cramér's form with an explicit constant: allowed about 3.15, true value about 0.046.
 This is a reformulation, not a proof route by itself.
 
+## Listening: the zeros in the wiggles
+
+`src/bin/listen.rs` computes Cramér's mean square exactly (piecewise on unit intervals):
+
+```text
+J(X) = ∫₁^X ((ψ(u) − u)/u)² du
+```
+
+By the bridge, d²(N)·log²N ≈ J(N), so the wiggles of J are the wiggles of the Báez-Duarte distance.
+Under RH the explicit formula predicts:
+
+```text
+J(X) = C₀·log X + C₁ + Σ_{ρ≠ρ'} X^{i(γ−γ')} / (i(γ−γ')·ρ·ρ̄') + o(1)
+```
+
+The oscillations sit at the zero **differences** γⱼ − γₖ.
+`listen_analysis.py` fits C₀ and C₁, then compares the residual with that sum.
+
+| X_max | zeros | C₀ fit | C₁ fit | corr(resid, prediction) | rms after subtraction |
+|---|---|---|---|---|---|
+| 10⁸ | 30 | 0.046211 | 2.512 | 0.977 | n/a |
+| 10⁸ | 300 | 0.046211 | 2.512 | 0.9986 | 1.96e-4 |
+| 10¹⁰ | 300 | 0.046220 | 2.5120 | **0.9980** | 2.17e-4 |
+
+- Theory: C₀ = 2 + γ − ln 4π = 0.046191.
+- Null test: replacing the zeros with fake ones gives |corr| ≤ 0.077.
+- The X = 10¹⁰ run takes about 150 s on a laptop.
+- Zeros: `results/zeta_zeros_300.txt` (mpmath, 15 digits).
+
+![J(X) residual vs 300-zero prediction](results/listen_1e10.png)
+
 ## Usage
 
 ```bash
 cargo run --release -p cramer-bridge -- [U_FACTOR] [N ...]
 CHECKPOINTS=1 cargo run --release -p cramer-bridge -- 64 55440   # U-convergence
+
+# listening
+cargo run --release -p cramer-bridge --bin listen -- 1e10 0.002 > results/listen_1e10.tsv
+python3 listen_analysis.py results/listen_1e10.tsv 9.0 results/zeta_zeros_300.txt
 ```
